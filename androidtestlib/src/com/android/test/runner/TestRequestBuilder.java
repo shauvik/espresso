@@ -15,6 +15,7 @@
  */
 package com.android.test.runner;
 
+import android.app.Instrumentation;
 import android.util.Log;
 
 import com.android.test.runner.ClassPathScanner.ChainedClassNameFilter;
@@ -22,8 +23,11 @@ import com.android.test.runner.ClassPathScanner.ExcludePackageNameFilter;
 import com.android.test.runner.ClassPathScanner.ExternalClassNameFilter;
 import com.android.test.runner.TestLoader.LoadResults;
 
+import org.junit.runner.Computer;
 import org.junit.runner.Request;
+import org.junit.runner.Runner;
 import org.junit.runner.manipulation.Filter;
+import org.junit.runners.model.InitializationError;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -59,15 +63,36 @@ public class TestRequestBuilder {
         mTestClasses.add(className);
     }
 
-    TestRequest build(PrintStream writer) {
+    TestRequest build(PrintStream writer, Instrumentation instr) {
         if (mTestClasses.isEmpty()) {
             mTestClasses = getClassNames(writer);
         }
         TestLoader loader = new TestLoader();
         LoadResults loadedTests = loader.loadTests(mTestClasses, writer);
 
-        Request request = Request.classes(loadedTests.getLoadedClasses().toArray(new Class[0]));
+        Request request = classes(instr, new Computer(), loadedTests.getLoadedClasses().toArray(
+                new Class[0]));
         return new TestRequest(loadedTests.getLoadFailures(), request);
+    }
+
+    /**
+     * Create a <code>Request</code> that, when processed, will run all the tests
+     * in a set of classes.
+     *
+     * @param instr the {@link Instrumentation} to inject into any tests that require it
+     * @param computer Helps construct Runners from classes
+     * @param classes the classes containing the tests
+     * @return a <code>Request</code> that will cause all tests in the classes to be run
+     */
+    public static Request classes(Instrumentation instr, Computer computer, Class<?>... classes) {
+        try {
+            AndroidRunnerBuilder builder = new AndroidRunnerBuilder(true, instr);
+            Runner suite = computer.getSuite(builder, classes);
+            return Request.runner(suite);
+        } catch (InitializationError e) {
+            throw new RuntimeException(
+                    "Suite constructor, called as above, should always complete");
+        }
     }
 
     private Collection<String> getClassNames(PrintStream writer) {
@@ -75,7 +100,7 @@ public class TestRequestBuilder {
                 Arrays.toString(mApkPaths)));
         ClassPathScanner scanner = new ClassPathScanner(mApkPaths);
         try {
-            // exclude inner classes, and classes from junit namespace
+            // exclude inner classes, and classes from junit and this lib namespace
             return scanner.getClassPathEntries(new ChainedClassNameFilter(
                     new ExcludePackageNameFilter("junit"),
                     new ExcludePackageNameFilter("org.junit"),

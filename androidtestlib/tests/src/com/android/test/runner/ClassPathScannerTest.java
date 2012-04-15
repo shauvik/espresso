@@ -17,6 +17,7 @@ package com.android.test.runner;
 
 import android.content.Context;
 
+import com.android.test.InjectContext;
 import com.android.test.runner.ClassPathScanner.ExcludePackageNameFilter;
 import com.android.test.runner.ClassPathScanner.ExternalClassNameFilter;
 import com.android.test.runner.ClassPathScanner.InclusivePackageNameFilter;
@@ -41,9 +42,8 @@ public class ClassPathScannerTest {
     private ClassPathScanner mClassPathScanner;
     private Enumeration<String> mDexEntries;
 
-    // TODO: uncomment this when supported
-    //@InjectContext
-    private Context mContext;
+    @InjectContext
+    public Context mContext;
 
     @Before
     public void setUp() throws Exception {

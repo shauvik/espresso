@@ -18,8 +18,6 @@ package com.android.test.runner;
 
 import android.util.Log;
 
-import junit.framework.Test;
-
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 
@@ -90,7 +88,7 @@ public class TestLoader {
      */
     private boolean isTestClass(Class<?> loadedClass) {
         // TODO: try to find upstream junit calls to replace these checks
-        if (Test.class.isAssignableFrom(loadedClass)) {
+        if (junit.framework.Test.class.isAssignableFrom(loadedClass)) {
             return true;
         }
         // TODO: look for a 'suite' method?

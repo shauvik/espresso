@@ -37,11 +37,10 @@ import java.io.PrintStream;
  * An {@link Instrumentation} that runs JUnit3 and JUnit4 tests against
  * an Android package (application).
  * <p/>
- * Currently experimental. Doesn't support any of the Android-derived
- * {@link junit.framework.TestCase} such as {@link android.test.AndroidTestCase} and
- * {@link android.test.InstrumentationTestCase}.
+ * Currently experimental. Based on {@link android.test.InstrumentationTestRunner}.
  * <p/>
- * Based on {@link android.test.InstrumentationTestRunner}.
+ * Will eventually support a superset of {@link android.test.InstrumentationTestRunner} features,
+ * while maintaining command/output format compatibility with that class.
  */
 public class AndroidJUnitRunner extends Instrumentation {
 
@@ -197,7 +196,7 @@ public class AndroidJUnitRunner extends Instrumentation {
                 builder.addTestClass(className);
             }
         }
-        return builder.build(writer);
+        return builder.build(writer, this);
     }
 
     /**
