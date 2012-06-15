@@ -1,0 +1,62 @@
+#
+# Copyright (C) 2012 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+
+# Script to start "uiautomator" on the device
+export run_base=/data/local/tmp
+export base=/system
+
+# if not running as root, trick dalvik into using an alternative dex cache
+if [ $USER_ID -ne 0 ]; then
+  tmp_cache=${run_base}/dalvik-cache
+
+  if [ ! -d $tmp_cache ]; then
+    mkdir -p $tmp_cache
+  fi
+
+  export ANDROID_DATA=${run_base}
+fi
+
+if [ "$1" = "--nohup" ]; then
+  trap "" HUP
+  shift
+fi
+
+if [ -z "$1" ]; then
+  echo "Need path to tests jar file"
+  exit 1
+fi
+
+# check if the supplied jar path is an absolute path
+if [ "${1:0:1}" = "/" ]; then
+  jarpath=$1
+else
+  jarpath=${run_base}/$1
+fi
+
+if [ ! -f ${jarpth} ]; then
+  echo "$1 must be an existing file in ${run_base}"
+  exit 1
+fi
+
+CLASSPATH=/system/framework/android.test.runner.jar:${base}/framework/uiautomator.cmd.jar
+CLASSPATH=${CLASSPATH}:${jarpath}
+
+# strip the first parameter
+shift
+
+export CLASSPATH
+exec app_process ${base}/bin com.android.commands.uiautomator.UiAutomator "$@"
