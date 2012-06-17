@@ -52,7 +52,7 @@ if [ ! -f ${jarpth} ]; then
   exit 1
 fi
 
-CLASSPATH=/system/framework/android.test.runner.jar:${base}/framework/uiautomator.cmd.jar
+CLASSPATH=/system/framework/android.test.runner.jar:${base}/framework/uiautomator.jar
 CLASSPATH=${CLASSPATH}:${jarpath}
 
 # strip the first parameter
