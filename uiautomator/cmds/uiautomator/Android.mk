@@ -20,13 +20,12 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_STATIC_JAVA_LIBRARIES := uiautomator.core
-LOCAL_MODULE := uiautomator.cmd
+LOCAL_MODULE := uiautomator
 
 include $(BUILD_JAVA_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := uiautomator_shell_exe
-LOCAL_MODULE_STEM := uiautomator
+LOCAL_MODULE := uiautomator
 LOCAL_SRC_FILES := uiautomator
 LOCAL_MODULE_CLASS := EXECUTABLES
 LOCAL_MODULE_TAGS := optional
