@@ -17,14 +17,18 @@
 package com.android.commands.uiautomator;
 
 import android.os.Bundle;
-import android.os.Process;
 
+import com.android.commands.uiautomator.Launcher.Command;
 import com.android.uiautomator.testrunner.UiAutomatorTestRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class UiAutomator {
+/**
+ * Implementation of the runtest sub command
+ *
+ */
+public class RunTestCommand extends Command {
 
     private static final String CLASS_PARAM = "class";
     private static final String DEBUG_PARAM = "debug";
@@ -42,13 +46,12 @@ public class UiAutomator {
     private boolean mDebug;
     private String mRunner;
 
-    public static void main(String[] args) {
-        // set the name as it appears in ps/top etc
-        Process.setArgV0("uiautomator");
-        new UiAutomator().run(args);
+    public RunTestCommand() {
+        super("runtest");
     }
 
-    private void run(String[] args) {
+    @Override
+    public void run(String[] args) {
         int ret = parseArgs(args);
         switch (ret) {
             case ARG_FAIL_INCOMPLETE_C:
@@ -60,7 +63,7 @@ public class UiAutomator {
                 System.exit(ARG_FAIL_INCOMPLETE_E);
                 break;
             case ARG_FAIL_UNSUPPORTED:
-                System.err.println("Unsupported standaline parameter.");
+                System.err.println("Unsupported standalone parameter.");
                 System.exit(ARG_FAIL_UNSUPPORTED);
                 break;
             default:
@@ -154,4 +157,31 @@ public class UiAutomator {
             mTestClasses.add(clazz);
         }
     }
+
+    @Override
+    public String detailedOptions() {
+        return "    runtest <class spec> [options]\n"
+            + "    <class spec>: <JARS> [-c <CLASSES> | -e class <CLASSES>]\n"
+            + "      <JARS>: a list of jar file containing test classes and dependencies. If\n"
+            + "        the path is relative, it's assumed to be under /data/local/tmp. Use\n"
+            + "        absolute path if the file is elsewhere. Multiple files can be\n"
+            + "        specified, separated by space.\n"
+            + "      <CLASSES>: a list of test class names to run, separated by comma. To\n"
+            + "        a single method, use TestClass#testMethod format. The -e or -c option\n"
+            + "        may be repeated.\n"
+            + "    options:\n"
+            + "      --nohup: trap SIG_HUP, so test won't terminate even if parent process\n"
+            + "               is terminated, e.g. USB is disconnected.\n"
+            + "      -e debug [true|false]: wait for debugger to connect before starting.\n"
+            + "      -e runner [CLASS]: use specified test runner class instead. If\n"
+            + "        unspecified, framework default runner will be used.\n"
+            + "      -e <NAME> <VALUE>: other name-value pairs to be passed to test classes.\n"
+            + "        May be repeated.\n";
+    }
+
+    @Override
+    public String shortHelp() {
+        return "executes UI automation tests";
+    }
+
 }
