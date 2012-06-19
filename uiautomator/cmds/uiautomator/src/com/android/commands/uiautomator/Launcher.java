@@ -129,5 +129,7 @@ public class Launcher {
     private static Command[] COMMANDS = new Command[] {
         HELP_COMMAND,
         new RunTestCommand(),
+        new DumpCommand(),
+        new EventsCommand(),
     };
 }
