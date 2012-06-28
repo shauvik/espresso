@@ -17,7 +17,7 @@
 package com.android.uiautomator.core;
 
 /**
- * Generated in test runs when a {@link By} selector could not be matched
+ * Generated in test runs when a {@link UiSelector} selector could not be matched
  * to any UI element displayed.
  */
 public class UiObjectNotFoundException extends Exception {
