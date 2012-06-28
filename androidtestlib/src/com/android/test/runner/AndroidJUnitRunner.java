@@ -41,6 +41,36 @@ import java.io.PrintStream;
  * <p/>
  * Will eventually support a superset of {@link android.test.InstrumentationTestRunner} features,
  * while maintaining command/output format compatibility with that class.
+ *
+ * <h3>Typical Usage</h3>
+ * <p/>
+ * Write JUnit3 style {@link junit.framework.TestCase}s and/or JUnit4 style
+ * {@link org.junit.Test}s that perform tests against the classes in your package.
+ * Make use of the {@link com.android.test.InjectContext} and
+ * {@link com.android.test.InjectInstrumentation} annotations if needed.
+ * <p/>
+ * In an appropriate AndroidManifest.xml, define an instrumentation with android:name set to
+ * {@link com.android.test.runner.AndroidJUnitRunner} and the appropriate android:targetPackage set.
+ * <p/>
+ * Execution options:
+ * <p/>
+ * <b>Running all tests:</b> adb shell am instrument -w
+ * com.android.foo/com.android.test.runner.AndroidJUnitRunner
+ * <p/>
+ * <b>Running all tests in a class:</b> adb shell am instrument -w
+ * -e class com.android.foo.FooTest
+ * com.android.foo/com.android.test.runner.AndroidJUnitRunner
+ * <p/>
+ * <b>Running a single test:</b> adb shell am instrument -w
+ * -e class com.android.foo.FooTest#testFoo
+ * com.android.foo/com.android.test.runner.AndroidJUnitRunner
+ * <p/>
+ * <b>Running all tests in multiple classes:</b> adb shell am instrument -w
+ * -e class com.android.foo.FooTest,com.android.foo.TooTest
+ * com.android.foo/com.android.test.runner.AndroidJUnitRunner
+ * <p/>
+ * <b>To debug your tests, set a break point in your code and pass:</b>
+ * -e debug true
  */
 public class AndroidJUnitRunner extends Instrumentation {
 
@@ -184,19 +214,53 @@ public class AndroidJUnitRunner extends Instrumentation {
 
     }
 
-    private TestRequest buildRequest(Bundle arguments, PrintStream writer) {
+    /**
+     * Builds a {@link TestRequest} based on given input arguments.
+     * <p/>
+     * Exposed for unit testing.
+     */
+    TestRequest buildRequest(Bundle arguments, PrintStream writer) {
         // only load tests for current aka testContext
         // Note that this represents a change from InstrumentationTestRunner where
         // getTargetContext().getPackageCodePath() was also scanned
-        TestRequestBuilder builder = new TestRequestBuilder(getContext().getPackageCodePath());
+        TestRequestBuilder builder = createTestRequestBuilder(writer,
+                getContext().getPackageCodePath());
 
         String testClassName = arguments.getString(ARGUMENT_TEST_CLASS);
         if (testClassName != null) {
             for (String className : testClassName.split(",")) {
-                builder.addTestClass(className);
+                parseTestClass(className, builder);
             }
         }
-        return builder.build(writer, this);
+        return builder.build(this);
+    }
+
+    /**
+     * Factory method for {@link TestRequestBuilder}.
+     * <p/>
+     * Exposed for unit testing.
+     */
+    TestRequestBuilder createTestRequestBuilder(PrintStream writer, String... packageCodePaths) {
+        return new TestRequestBuilder(writer, packageCodePaths);
+    }
+
+    /**
+     * Parse and load the given test class and, optionally, method
+     *
+     * @param testClassName - full package name of test class and optionally method to add.
+     *        Expected format: com.android.TestClass#testMethod
+     * @param testSuiteBuilder - builder to add tests to
+     */
+    private void parseTestClass(String testClassName, TestRequestBuilder testRequestBuilder) {
+        int methodSeparatorIndex = testClassName.indexOf('#');
+
+        if (methodSeparatorIndex > 0) {
+            String testMethodName = testClassName.substring(methodSeparatorIndex + 1);
+            testClassName = testClassName.substring(0, methodSeparatorIndex);
+            testRequestBuilder.addTestMethod(testClassName, testMethodName);
+        } else {
+            testRequestBuilder.addTestClass(testClassName);
+        }
     }
 
     /**
@@ -280,7 +344,9 @@ public class AndroidJUnitRunner extends Instrumentation {
 
         @Override
         public void testIgnored(Description description) throws Exception {
+            testStarted(description);
             mTestResultCode = REPORT_VALUE_RESULT_IGNORED;
+            testFinished(description);
         }
     }
 }

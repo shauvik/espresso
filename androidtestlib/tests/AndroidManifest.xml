@@ -23,5 +23,6 @@
     <instrumentation android:name="com.android.test.runner.AndroidJUnitRunner"
                      android:targetPackage="com.android.testlib.tests"
                      android:label="Unit Tests for testlib."/>
+    <uses-sdk android:minSdkVersion="8"/>
 
 </manifest>

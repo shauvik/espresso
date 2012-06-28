@@ -23,11 +23,11 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_PACKAGE_NAME := AndroidTestLibTests
 
-LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_TAGS := tests
 
 LOCAL_SDK_VERSION := 8
 
-LOCAL_STATIC_JAVA_LIBRARIES := android-test-lib
+LOCAL_STATIC_JAVA_LIBRARIES := android-test-lib dexmaker littlemock
 
 LOCAL_PROGUARD_ENABLED := disabled
 

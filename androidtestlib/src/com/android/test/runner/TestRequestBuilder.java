@@ -21,9 +21,9 @@ import android.util.Log;
 import com.android.test.runner.ClassPathScanner.ChainedClassNameFilter;
 import com.android.test.runner.ClassPathScanner.ExcludePackageNameFilter;
 import com.android.test.runner.ClassPathScanner.ExternalClassNameFilter;
-import com.android.test.runner.TestLoader.LoadResults;
 
 import org.junit.runner.Computer;
+import org.junit.runner.Description;
 import org.junit.runner.Request;
 import org.junit.runner.Runner;
 import org.junit.runner.manipulation.Filter;
@@ -31,7 +31,6 @@ import org.junit.runners.model.InitializationError;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,34 +44,53 @@ public class TestRequestBuilder {
     private static final String LOG_TAG = "TestRequestBuilder";
 
     private String[] mApkPaths;
-    private Collection<String> mTestClasses = new ArrayList<String>();
-    @SuppressWarnings("unused")
+    private TestLoader mTestLoader;
     private Filter mFilter = Filter.ALL;
 
-    public TestRequestBuilder(String... apkPaths) {
+    private PrintStream mWriter;
+
+    public TestRequestBuilder(PrintStream writer, String... apkPaths) {
         mApkPaths = apkPaths;
+        mTestLoader = new TestLoader(writer);
     }
 
     /**
-     * Add a test class to be executed
-     * @param className
+     * Add a test class to be executed. All test methods in this class will be executed.
      *
-     * TODO: add method support
+     * @param className
      */
     public void addTestClass(String className) {
-        mTestClasses.add(className);
+        mTestLoader.loadClass(className);
     }
 
-    TestRequest build(PrintStream writer, Instrumentation instr) {
-        if (mTestClasses.isEmpty()) {
-            mTestClasses = getClassNames(writer);
+    /**
+     * Adds a test method to run.
+     * <p/>
+     * Currently only supports one test method to be run.
+     */
+    public void addTestMethod(String testClassName, String testMethodName) {
+        Class<?> clazz = mTestLoader.loadClass(testClassName);
+        if (clazz != null) {
+            mFilter = mFilter.intersect(Filter.matchMethodDescription(
+                    Description.createTestDescription(clazz, testMethodName)));
         }
-        TestLoader loader = new TestLoader();
-        LoadResults loadedTests = loader.loadTests(mTestClasses, writer);
+    }
 
-        Request request = classes(instr, new Computer(), loadedTests.getLoadedClasses().toArray(
+    /**
+     * Builds the {@link TestRequest} based on current contents of added classes and methods.
+     * <p/>
+     * If no classes have been explicitly added, will scan the classpath for all tests.
+     *
+     */
+    TestRequest build(Instrumentation instr) {
+        if (mTestLoader.isEmpty()) {
+            // no class restrictions have been specified. Load all classes
+            loadClassesFromClassPath();
+        }
+
+        Request request = classes(instr, new Computer(), mTestLoader.getLoadedClasses().toArray(
                 new Class[0]));
-        return new TestRequest(loadedTests.getLoadFailures(), request);
+        return new TestRequest(mTestLoader.getLoadFailures(), request.filterWith(mFilter));
     }
 
     /**
@@ -84,7 +102,7 @@ public class TestRequestBuilder {
      * @param classes the classes containing the tests
      * @return a <code>Request</code> that will cause all tests in the classes to be run
      */
-    public static Request classes(Instrumentation instr, Computer computer, Class<?>... classes) {
+    private static Request classes(Instrumentation instr, Computer computer, Class<?>... classes) {
         try {
             AndroidRunnerBuilder builder = new AndroidRunnerBuilder(true, instr);
             Runner suite = computer.getSuite(builder, classes);
@@ -95,7 +113,14 @@ public class TestRequestBuilder {
         }
     }
 
-    private Collection<String> getClassNames(PrintStream writer) {
+    private void loadClassesFromClassPath() {
+        Collection<String> classNames = getClassNamesFromClassPath();
+        for (String className : classNames) {
+            mTestLoader.loadIfTest(className);
+        }
+    }
+
+    private Collection<String> getClassNamesFromClassPath() {
         Log.i(LOG_TAG, String.format("Scanning classpath to find tests in apks %s",
                 Arrays.toString(mApkPaths)));
         ClassPathScanner scanner = new ClassPathScanner(mApkPaths);
@@ -107,9 +132,18 @@ public class TestRequestBuilder {
                     new ExcludePackageNameFilter("org.hamcrest"),
                     new ExternalClassNameFilter()));
         } catch (IOException e) {
-            writer.println("failed to scan classes");
+            mWriter.println("failed to scan classes");
             Log.e(LOG_TAG, "Failed to scan classes", e);
         }
         return Collections.emptyList();
+    }
+
+    /**
+     * Factory method for {@link ClassPathScanner}.
+     * <p/>
+     * Exposed so unit tests can mock.
+     */
+    ClassPathScanner createClassPathScanner(String... apkPaths) {
+        return new ClassPathScanner(apkPaths);
     }
 }

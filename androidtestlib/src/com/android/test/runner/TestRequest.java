@@ -24,7 +24,7 @@ import java.util.List;
  * A data structure for holding a {@link Request} and the {@link Failure}s that occurred during its
  * creation.
  */
-class TestRequest {
+public class TestRequest {
      private final List<Failure> mFailures;
      private final Request mRequest;
 

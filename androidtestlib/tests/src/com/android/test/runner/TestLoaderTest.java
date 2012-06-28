@@ -15,8 +15,6 @@
  */
 package com.android.test.runner;
 
-import com.android.test.runner.TestLoader.LoadResults;
-
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
@@ -27,16 +25,11 @@ import org.junit.runners.Parameterized;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.Arrays;
 
 /**
  * Unit tests for {@link TestLoader}.
  */
 public class TestLoaderTest {
-
-    @Before
-    public void setUp() throws Exception {
-    }
 
     public static class JUnit3Test extends TestCase {
     }
@@ -58,6 +51,13 @@ public class TestLoaderTest {
         }
     }
 
+    private TestLoader mLoader;
+
+    @Before
+    public void setUp() throws Exception {
+        mLoader = new TestLoader(new PrintStream(new ByteArrayOutputStream()));
+    }
+
     @Test
     public void testLoadTests_junit3() {
         assertLoadTestSuccess(JUnit3Test.class);
@@ -75,28 +75,22 @@ public class TestLoaderTest {
 
     @Test
     public void testLoadTests_notATest() {
-        TestLoader loader = new TestLoader();
-        LoadResults r = loader.loadTests(Arrays.asList(NotATest.class.getName()), new PrintStream(
-                new ByteArrayOutputStream()));
-        Assert.assertEquals(0, r.getLoadedClasses().size());
-        Assert.assertEquals(0, r.getLoadFailures().size());
+        Assert.assertNull(mLoader.loadIfTest(NotATest.class.getName()));
+        Assert.assertEquals(0, mLoader.getLoadedClasses().size());
+        Assert.assertEquals(0, mLoader.getLoadFailures().size());
     }
 
     @Test
     public void testLoadTests_notExist() {
-        TestLoader loader = new TestLoader();
-        LoadResults r = loader.loadTests(Arrays.asList("notexist"), new PrintStream(
-                new ByteArrayOutputStream()));
-        Assert.assertEquals(0, r.getLoadedClasses().size());
-        Assert.assertEquals(1, r.getLoadFailures().size());
+        Assert.assertNull(mLoader.loadIfTest("notexist"));
+        Assert.assertEquals(0, mLoader.getLoadedClasses().size());
+        Assert.assertEquals(1, mLoader.getLoadFailures().size());
     }
 
     private void assertLoadTestSuccess(Class<?> clazz) {
-        TestLoader loader = new TestLoader();
-        LoadResults r = loader.loadTests(Arrays.asList(clazz.getName()), new PrintStream(
-                new ByteArrayOutputStream()));
-        Assert.assertEquals(1, r.getLoadedClasses().size());
-        Assert.assertEquals(0, r.getLoadFailures().size());
-        Assert.assertTrue(r.getLoadedClasses().contains(clazz));
+        Assert.assertNotNull(mLoader.loadIfTest(clazz.getName()));
+        Assert.assertEquals(1, mLoader.getLoadedClasses().size());
+        Assert.assertEquals(0, mLoader.getLoadFailures().size());
+        Assert.assertTrue(mLoader.getLoadedClasses().contains(clazz));
     }
 }

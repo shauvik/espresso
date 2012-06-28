@@ -23,8 +23,7 @@ import org.junit.runner.notification.Failure;
 
 import java.io.PrintStream;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -34,50 +33,90 @@ public class TestLoader {
 
     private static final String LOG_TAG = "TestLoader";
 
-    public static class LoadResults {
-        private final List<Class<?>> mLoadedClasses;
-        private final List<Failure> mMissingClasses;
+    private  List<Class<?>> mLoadedClasses = new LinkedList<Class<?>>();
+    private  List<Failure> mLoadFailures = new LinkedList<Failure>();
 
-        LoadResults(List<Class<?>> loadedClasses, List<Failure> missingClasses) {
-            mMissingClasses = missingClasses;
-            mLoadedClasses = loadedClasses;
-        }
+    private PrintStream mWriter;
 
-        public List<Class<?>> getLoadedClasses() {
-            return mLoadedClasses;
-        }
-
-        public List<Failure> getLoadFailures() {
-            return mMissingClasses;
-        }
+    /**
+     * Create a {@link TestLoader}.
+     *
+     * @param writer a {@link PrintStream} used for reporting errors.
+     */
+    public TestLoader(PrintStream writer) {
+        mWriter = writer;
     }
 
     /**
-     * Loads the test classes from the given list of test names.
+     * Loads the test class from the given class name.
+     * <p/>
+     * Will store the result internally. Successfully loaded classes can be retrieved via
+     * {@link #getLoadedClasses()}, failures via {@link #getLoadFailures()}.
      *
-     * @param classNames the {@link Collection} of class names to attempt to load
-     * @param writer the {@link PrintStream} to use to output error messages
-     * @return the {@link LoadResults} containing the test classes
+     * @param className the class name to attempt to load
+     * @return the loaded class or null.
      */
-    public LoadResults loadTests(Collection<String> classNames, PrintStream writer) {
-        List<Class<?>> classes = new ArrayList<Class<?>>();
-        List<Failure> missingClasses = new ArrayList<Failure>();
-        for (String className : classNames) {
-            try {
-                Class<?> loadedClass = Class.forName(className);
-                if (isTestClass(loadedClass)) {
-                    classes.add(loadedClass);
-                }
-            } catch (ClassNotFoundException e) {
-                String errMsg = String.format("Could not find class: %s", className);
-                Log.e(LOG_TAG, errMsg);
-                writer.println(errMsg);
-                Description description = Description.createSuiteDescription(className);
-                Failure failure = new Failure(description, e);
-                missingClasses.add(failure);
-            }
+    public Class<?> loadClass(String className) {
+        Class<?> loadedClass = doLoadClass(className);
+        if (loadedClass != null) {
+            mLoadedClasses.add(loadedClass);
         }
-        return new LoadResults(classes, missingClasses);
+        return loadedClass;
+    }
+
+    private Class<?> doLoadClass(String className) {
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            String errMsg = String.format("Could not find class: %s", className);
+            Log.e(LOG_TAG, errMsg);
+            mWriter.println(errMsg);
+            Description description = Description.createSuiteDescription(className);
+            Failure failure = new Failure(description, e);
+            mLoadFailures.add(failure);
+        }
+        return null;
+    }
+
+    /**
+     * Loads the test class from the given class name.
+     * <p/>
+     * Similar to {@link #loadClass(String, PrintStream))}, but will ignore classes that are
+     * not tests.
+     *
+     * @param className the class name to attempt to load
+     * @return the loaded class or null.
+     */
+    public Class<?> loadIfTest(String className) {
+        Class<?> loadedClass = doLoadClass(className);
+        if (loadedClass != null && isTestClass(loadedClass)) {
+            mLoadedClasses.add(loadedClass);
+            return loadedClass;
+        }
+        return null;
+    }
+
+    /**
+     * @return whether this {@link TestLoader} contains any loaded classes or load failures.
+     */
+    public boolean isEmpty() {
+        return mLoadedClasses.isEmpty() && mLoadFailures.isEmpty();
+    }
+
+    /**
+     * Get the {@link List) of classes successfully loaded via
+     * {@link #loadTest(String, PrintStream)} calls.
+     */
+    public List<Class<?>> getLoadedClasses() {
+        return mLoadedClasses;
+    }
+
+    /**
+     * Get the {@link List) of {@link Failure} that occurred during
+     * {@link #loadTest(String, PrintStream)} calls.
+     */
+    public List<Failure> getLoadFailures() {
+        return mLoadFailures;
     }
 
     /**
