@@ -19,6 +19,7 @@ package com.android.uiautomator;
 import com.android.uiautomator.actions.ExpandAllAction;
 import com.android.uiautomator.actions.OpenFilesAction;
 import com.android.uiautomator.actions.ScreenshotAction;
+import com.android.uiautomator.actions.ToggleNafAction;
 import com.android.uiautomator.tree.AttributePair;
 import com.android.uiautomator.tree.BasicTreeNode;
 import com.android.uiautomator.tree.BasicTreeNodeContentProvider;
@@ -76,7 +77,8 @@ public class UiAutomatorViewer extends ApplicationWindow {
 
     private Action mOpenFilesAction;
     private Action mExpandAllAction;
-    private ScreenshotAction mScreenshotAction;
+    private Action mScreenshotAction;
+    private Action mToggleNafAction;
     private TableViewer mTableViewer;
 
     private float mScale = 1.0f;
@@ -88,6 +90,7 @@ public class UiAutomatorViewer extends ApplicationWindow {
     public UiAutomatorViewer() {
         super(null);
         setShellStyle(SWT.DIALOG_TRIM);
+        UiAutomatorModel.createInstance(this);
         createActions();
     }
 
@@ -98,8 +101,6 @@ public class UiAutomatorViewer extends ApplicationWindow {
      */
     @Override
     protected Control createContents(Composite parent) {
-        UiAutomatorModel.createInstance(this);
-
         Composite basePane = new Composite(parent, SWT.NONE);
         basePane.setLayout(new GridLayout(2, false));
         mScreenshotCanvas = new Canvas(basePane, SWT.NONE);
@@ -118,6 +119,24 @@ public class UiAutomatorViewer extends ApplicationWindow {
                     // shifting the image here, so that there's a border around screen shot
                     // this makes highlighting red rectangles on the screen shot edges more visible
                     e.gc.drawImage(mCachedScaleImage, IMG_BORDER, IMG_BORDER);
+                    if (UiAutomatorModel.getModel().shouldShowNafNodes()) {
+                        // highlight the "Not Accessibility Friendly" nodes
+                        e.gc.setForeground(e.gc.getDevice().getSystemColor(SWT.COLOR_YELLOW));
+                        e.gc.setBackground(e.gc.getDevice().getSystemColor(SWT.COLOR_YELLOW));
+                        for (Rectangle r : UiAutomatorModel.getModel().getNafNodes()) {
+                            e.gc.setAlpha(50);
+                            e.gc.fillRectangle(IMG_BORDER + getScaledSize(r.x), IMG_BORDER
+                                    + getScaledSize(r.y), getScaledSize(r.width),
+                                    getScaledSize(r.height));
+                            e.gc.setAlpha(255);
+                            e.gc.setLineStyle(SWT.LINE_SOLID);
+                            e.gc.setLineWidth(2);
+                            e.gc.drawRectangle(IMG_BORDER + getScaledSize(r.x), IMG_BORDER
+                                    + getScaledSize(r.y), getScaledSize(r.width),
+                                    getScaledSize(r.height));
+                        }
+                    }
+                    // draw the mouseover rects
                     Rectangle rect = UiAutomatorModel.getModel().getCurrentDrawingRect();
                     if (rect != null) {
                         e.gc.setForeground(e.gc.getDevice().getSystemColor(SWT.COLOR_RED));
@@ -156,6 +175,7 @@ public class UiAutomatorViewer extends ApplicationWindow {
         toolBarManager.add(mOpenFilesAction);
         toolBarManager.add(mExpandAllAction);
         toolBarManager.add(mScreenshotAction);
+        toolBarManager.add(mToggleNafAction);
         toolBarManager.createControl(basePane);
 
         mTreeViewer = new TreeViewer(basePane, SWT.BORDER);
@@ -246,6 +266,7 @@ public class UiAutomatorViewer extends ApplicationWindow {
         mOpenFilesAction = new OpenFilesAction(this);
         mExpandAllAction = new ExpandAllAction(this);
         mScreenshotAction = new ScreenshotAction(this);
+        mToggleNafAction = new ToggleNafAction();
     }
 
     /**

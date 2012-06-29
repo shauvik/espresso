@@ -41,8 +41,8 @@ public class ScreenshotAction extends Action {
     UiAutomatorViewer mViewer;
 
     public ScreenshotAction(UiAutomatorViewer viewer) {
+        super("&Device Screenshot");
         mViewer = viewer;
-        setText("&Device Screenshot");
     }
 
     @Override
