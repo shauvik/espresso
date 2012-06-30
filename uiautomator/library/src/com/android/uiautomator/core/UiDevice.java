@@ -330,16 +330,16 @@ public class UiDevice {
     }
 
     /**
-     * Perform a touch at arbitrary coordinates specified by the user
+     * Perform a click at arbitrary coordinates specified by the user
      * @param x coordinate
      * @param y coordinate
-     * @return true if the touch succeeded else false
+     * @return true if the click succeeded else false
      */
-    public boolean touch(int x, int y) {
+    public boolean click(int x, int y) {
         if (x >= getDisplayWidth() || y >= getDisplayHeight()) {
             return (false);
         }
-        return getAutomatorBridge().getInteractionController().tap(x, y);
+        return getAutomatorBridge().getInteractionController().click(x, y);
     }
 
     /**
