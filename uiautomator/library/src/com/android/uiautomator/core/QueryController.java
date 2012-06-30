@@ -23,7 +23,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import com.android.uiautomator.core.UiAutomatorBridge.AccessibilityEventListener;
 
 /**
- * The QuertController main purpose is to translate a {@link By} selectors to
+ * The QuertController main purpose is to translate a {@link UiSelector} selectors to
  * {@link AccessibilityNodeInfo}. This is all this controller does. It is typically
  * created in conjunction with a {@link InteractionController} by {@link UiAutomationContext}
  * which owns both. {@link UiAutomationContext} is used by {@link UiBase} classes.
@@ -126,7 +126,7 @@ class QueryController {
      * @param selector
      * @return number of pattern matches. Returns 0 for all other cases.
      */
-    public int getPatternCount(By selector) {
+    public int getPatternCount(UiSelector selector) {
         findAccessibilityNodeInfo(selector, true /*counting*/);
         return mPatternCounter;
     }
@@ -136,11 +136,12 @@ class QueryController {
      * @param selector
      * @return
      */
-    public AccessibilityNodeInfo findAccessibilityNodeInfo(By selector) {
+    public AccessibilityNodeInfo findAccessibilityNodeInfo(UiSelector selector) {
         return findAccessibilityNodeInfo(selector, false);
     }
 
-    protected AccessibilityNodeInfo findAccessibilityNodeInfo(By selector, boolean isCounting) {
+    protected AccessibilityNodeInfo findAccessibilityNodeInfo(UiSelector selector,
+            boolean isCounting) {
         mUiAutomatorBridge.waitForIdle();
         initializeNewSearch();
 
@@ -155,8 +156,8 @@ class QueryController {
             }
 
             // Copy so that we don't modify the original's sub selectors
-            By bySelector = By.selector(selector);
-            return translateCompoundSelector(bySelector, rootNode, isCounting);
+            UiSelector uiSelector = new UiSelector(selector);
+            return translateCompoundSelector(uiSelector, rootNode, isCounting);
         }
     }
 
@@ -208,47 +209,47 @@ class QueryController {
      * directly treated as regular_selector. So the presence of a CONTAINER and PATTERN within
      * a selector simply dictates that the selector matching will be constraint to the sub tree
      * node where the CONTAINER and its child PATTERN have identified.
-     * @param bySelector
+     * @param selector
      * @param fromNode
      * @param isCounting
      * @return
      */
-    private AccessibilityNodeInfo translateCompoundSelector(By bySelector,
+    private AccessibilityNodeInfo translateCompoundSelector(UiSelector selector,
             AccessibilityNodeInfo fromNode, boolean isCounting) {
 
         // Start translating compound selectors by translating the regular_selector first
         // The regular_selector is then used as a container for any optional pattern_selectors
         // that may or may not be specified.
-        if(bySelector.hasContainerSelector())
+        if(selector.hasContainerSelector())
             // nested pattern selectors
-            if(bySelector.getContainerSelector().hasContainerSelector()) {
+            if(selector.getContainerSelector().hasContainerSelector()) {
                 fromNode = translateCompoundSelector(
-                        bySelector.getContainerSelector(), fromNode, false);
+                        selector.getContainerSelector(), fromNode, false);
                 initializeNewSearch();
             } else
-                fromNode = translateReqularSelector(bySelector.getContainerSelector(), fromNode);
+                fromNode = translateReqularSelector(selector.getContainerSelector(), fromNode);
         else
-            fromNode = translateReqularSelector(bySelector, fromNode);
+            fromNode = translateReqularSelector(selector, fromNode);
 
         if(fromNode == null) {
             if(DEBUG)
-                Log.i(LOG_TAG, "Container selector not found: " + bySelector.dumpToString(false));
+                Log.i(LOG_TAG, "Container selector not found: " + selector.dumpToString(false));
             return null;
         }
 
-        if(bySelector.hasPatternSelector()) {
-            fromNode = translatePatternSelector(bySelector.getPatternSelector(),
+        if(selector.hasPatternSelector()) {
+            fromNode = translatePatternSelector(selector.getPatternSelector(),
                     fromNode, isCounting);
 
             if (isCounting) {
                 Log.i(LOG_TAG, String.format(
-                        "Counted %d instances of: %s", mPatternCounter, bySelector));
+                        "Counted %d instances of: %s", mPatternCounter, selector));
                 return null;
             } else {
                 if(fromNode == null) {
                     if(DEBUG)
                         Log.i(LOG_TAG, "Pattern selector not found: " +
-                                bySelector.dumpToString(false));
+                                selector.dumpToString(false));
                     return null;
                 }
             }
@@ -256,22 +257,22 @@ class QueryController {
 
         // translate any additions to the selector that may have been added by tests
         // with getChild(By selector) after a container and pattern selectors
-        if(bySelector.hasContainerSelector() || bySelector.hasPatternSelector()) {
-            if(bySelector.hasChildSelector() || bySelector.hasParentSelector())
-                fromNode = translateReqularSelector(bySelector, fromNode);
+        if(selector.hasContainerSelector() || selector.hasPatternSelector()) {
+            if(selector.hasChildSelector() || selector.hasParentSelector())
+                fromNode = translateReqularSelector(selector, fromNode);
         }
 
         if(fromNode == null) {
             if(DEBUG)
-                Log.i(LOG_TAG, "Object Not Found for selector " + bySelector);
+                Log.i(LOG_TAG, "Object Not Found for selector " + selector);
             return null;
         }
-        Log.i(LOG_TAG, String.format("Matched selector: %s <<==>> [%s]", bySelector, fromNode));
+        Log.i(LOG_TAG, String.format("Matched selector: %s <<==>> [%s]", selector, fromNode));
         return fromNode;
     }
 
     /**
-     * Used by the {@link #translateCompoundSelector(By, AccessibilityNodeInfo, boolean)}
+     * Used by the {@link #translateCompoundSelector(UiSelector, AccessibilityNodeInfo, boolean)}
      * to translate the regular_selector portion. It has the following format:
      * <p/>
      * regular_selector = By[attributes... CHILD=By[attributes... CHILD=By[....]]]<br/>
@@ -284,13 +285,13 @@ class QueryController {
      * @param index
      * @return AccessibilityNodeInfo if found else null
      */
-    private AccessibilityNodeInfo translateReqularSelector(By selector,
+    private AccessibilityNodeInfo translateReqularSelector(UiSelector selector,
             AccessibilityNodeInfo fromNode) {
 
         return findNodeRegularRecursive(selector, fromNode, 0);
     }
 
-    private AccessibilityNodeInfo findNodeRegularRecursive(By subSelector,
+    private AccessibilityNodeInfo findNodeRegularRecursive(UiSelector subSelector,
             AccessibilityNodeInfo fromNode, int index) {
 
         if (subSelector.isMatchFor(fromNode, index)) {
@@ -350,7 +351,7 @@ class QueryController {
     }
 
     /**
-     * Used by the {@link #translateCompoundSelector(By, AccessibilityNodeInfo, boolean)}
+     * Used by the {@link #translateCompoundSelector(UiSelector, AccessibilityNodeInfo, boolean)}
      * to translate the pattern_selector portion. It has the following format:
      * <p/>
      * pattern_selector = ... PATTERN=By[instance=x PATTERN=[regular_selector]]<br/>
@@ -368,9 +369,9 @@ class QueryController {
      * @param fromNode
      * @param originalPattern
      * @return null of node is not found or if counting mode is true.
-     * See {@link #translateCompoundSelector(By, AccessibilityNodeInfo, boolean)}
+     * See {@link #translateCompoundSelector(UiSelector, AccessibilityNodeInfo, boolean)}
      */
-    private AccessibilityNodeInfo translatePatternSelector(By subSelector,
+    private AccessibilityNodeInfo translatePatternSelector(UiSelector subSelector,
             AccessibilityNodeInfo fromNode, boolean isCounting) {
 
         if(subSelector.hasPatternSelector()) {
@@ -401,7 +402,8 @@ class QueryController {
     }
 
     private AccessibilityNodeInfo findNodePatternRecursive(
-            By subSelector, AccessibilityNodeInfo fromNode, int index, By originalPattern) {
+            UiSelector subSelector, AccessibilityNodeInfo fromNode, int index,
+            UiSelector originalPattern) {
 
         if (subSelector.isMatchFor(fromNode, index)) {
             if(subSelector.isLeaf()) {
@@ -466,7 +468,8 @@ class QueryController {
             }
             if (!childNode.isVisibleToUser()) {
                 // TODO: need to remove this or move it under if (DEBUG)
-                Log.d(LOG_TAG, String.format("Skipping invisible child: %s", childNode.toString()));
+                Log.d(LOG_TAG,
+                        String.format("Skipping invisible child: %s", childNode.toString()));
                 continue;
             }
             AccessibilityNodeInfo retNode = findNodePatternRecursive(

@@ -37,24 +37,24 @@ public class UiObject {
     protected static final long WAIT_FOR_WINDOW_TMEOUT = 5500;
     protected static final int SWIPE_MARGIN_LIMIT = 5;
 
-    protected By mSelector;
+    protected UiSelector mSelector;
     protected final UiDevice mDevice;
     protected final UiAutomatorBridge mUiAutomationBridge;
 
     /**
      * Constructs a UiObject that references any UI element that may match the specified
-     * {@link By} selector. UiObject can be pre-constructed and reused across an application
-     * where applicable. A good example is a tool bar and its buttons. A tool bar may remain
-     * visible on the various views the application is displaying but may have different
-     * contextual buttons displayed for each. The same UiObject that describes the tool bar
-     * can be reused.<p/>
+     * {@link UiSelector} selector. UiObject can be pre-constructed and reused across an
+     * application where applicable. A good example is a tool bar and its buttons.
+     * A toolbar may remain visible on the various views the application is displaying but
+     * may have different contextual buttons displayed for each. The same UiObject that
+     * describes the toolbar can be reused.<p/>
      * It is a good idea in certain cases before using any operations of this UiObject is to
      * call {@link #exists()} to verify if the UI element matching this object is actually
      * visible on the screen. This way the test can gracefully handle this situation else
      * a {@link UiObjectNotFoundException} will be thrown when using this object.
      * @param selector
      */
-    public UiObject(By selector) {
+    public UiObject(UiSelector selector) {
         mUiAutomationBridge = UiDevice.getInstance().getAutomatorBridge();
         mDevice = UiDevice.getInstance();
         mSelector = selector;
@@ -63,15 +63,15 @@ public class UiObject {
     /**
      * Helper for debugging. During testing a test can dump the selector of the object into
      * its logs of needed. <code>getSelector().toString();</code>
-     * @return {@link By}
+     * @return {@link UiSelector}
      */
-    public final By getSelector() {
-        return By.selector(mSelector);
+    public final UiSelector getSelector() {
+        return new UiSelector(mSelector);
     }
 
     /**
      * Used in test operations to retrieve the {@link QueryController} to translate
-     * a {@link By} selector into an {@link AccessibilityNodeInfo}.
+     * a {@link UiSelector} selector into an {@link AccessibilityNodeInfo}.
      * @return {@link QueryController}
      */
     protected QueryController getQueryController() {
@@ -94,8 +94,8 @@ public class UiObject {
      * @param selector
      * @return a new UiObject with a new selector. It doesn't test if the object exists.
      */
-    public UiObject getChild(By selector) throws UiObjectNotFoundException {
-        return new UiObject(By.selector(getSelector().childSelector(selector)));
+    public UiObject getChild(UiSelector selector) throws UiObjectNotFoundException {
+        return new UiObject(getSelector().childSelector(selector));
     }
 
     /**
@@ -106,8 +106,8 @@ public class UiObject {
      * @return
      * @throws UiObjectNotFoundException
      */
-    public UiObject getFromParent(By selector) throws UiObjectNotFoundException {
-        return new UiObject(By.selector(getSelector().fromParent(selector)));
+    public UiObject getFromParent(UiSelector selector) throws UiObjectNotFoundException {
+        return new UiObject(getSelector().fromParent(selector));
     }
 
     /**
@@ -127,7 +127,7 @@ public class UiObject {
     /**
      * Helper method to allow for a specific content to become present on the
      * screen before moving on to do other operations.
-     * @param selector {@link By}
+     * @param selector {@link UiSelector}
      * @param timeout in milliseconds
      * @return AccessibilityNodeInfo if found else null
      */
@@ -288,7 +288,7 @@ public class UiObject {
     }
 
     /**
-     * Performs a tap over the UI element this object represents. </p>
+     * Performs a click over the UI element this object represents. </p>
      * Take note that the UI element directly represented by this UiObject may not have
      * its attribute <code>clickable</code> set to <code>true</code> and yet still perform
      * the click successfully. This is because all clicks are performed in the center of the
@@ -304,12 +304,13 @@ public class UiObject {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = getVisibleBounds(node);
-        return getInteractionController().tap(rect.centerX(), rect.centerY());
+        return getInteractionController().click(rect.centerX(), rect.centerY());
     }
 
     /**
     *
-    * Performs a tap over the represented UI element, and expect window transition as a result.</p>
+    * Performs a click over the represented UI element, and expect window transition as
+    * a result.</p>
     *
     * This method is similar to the plain {@link UiObject#click()}, with an important difference
     * that the method goes further to expect a window transition as a result of the tap. Some
@@ -329,7 +330,8 @@ public class UiObject {
 
     /**
      *
-     * Performs a tap over the represented UI element, and expect window transition as a result.</p>
+     * Performs a click over the represented UI element, and expect window transition as
+     * a result.</p>
      *
      * This method is similar to the plain {@link UiObject#click()}, with an important difference
      * that the method goes further to expect a window transition as a result of the tap. Some
@@ -350,12 +352,12 @@ public class UiObject {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = getVisibleBounds(node);
-        return getInteractionController().tapAndWaitForNewWindow(
+        return getInteractionController().clickAndWaitForNewWindow(
                 rect.centerX(), rect.centerY(), timeout);
     }
 
     /**
-     * Click the top and left corner of the UI element.
+     * Clicks the top and left corner of the UI element.
      * @return true on success
      * @throws Exception
      */
@@ -365,11 +367,11 @@ public class UiObject {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = getVisibleBounds(node);
-        return getInteractionController().tap(rect.left + 5, rect.top + 5);
+        return getInteractionController().click(rect.left + 5, rect.top + 5);
     }
 
     /**
-     * Long clicks a UI element pointed to by the {@link By} selector of this object at the
+     * Long clicks a UI element pointed to by the {@link UiSelector} selector of this object at the
      * bottom right corner. The duration of what will be considered as a long click is dynamically
      * retrieved from the system and used in the operation.
      * @return true if operation was successful
@@ -385,7 +387,7 @@ public class UiObject {
     }
 
     /**
-     * Click the bottom and right corner of the UI element.
+     * Clicks the bottom and right corner of the UI element.
      * @return true on success
      * @throws Exception
      */
@@ -395,11 +397,11 @@ public class UiObject {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = getVisibleBounds(node);
-        return getInteractionController().tap(rect.right - 5, rect.bottom - 5);
+        return getInteractionController().click(rect.right - 5, rect.bottom - 5);
     }
 
     /**
-     * Long clicks a UI element pointed to by the {@link By} selector of this object. The
+     * Long clicks a UI element pointed to by the {@link UiSelector} selector of this object. The
      * duration of what will be considered as a long click is dynamically retrieved from the
      * system and used in the operation.
      * @return true if operation was successful
@@ -415,7 +417,7 @@ public class UiObject {
     }
 
     /**
-     * Long clicks a UI element pointed to by the {@link By} selector of this object at the
+     * Long clicks a UI element pointed to by the {@link UiSelector} selector of this object at the
      * top left corner. The duration of what will be considered as a long click is dynamically
      * retrieved from the system and used in the operation.
      * @return true if operation was successful
@@ -467,8 +469,8 @@ public class UiObject {
     /**
      * First this function clears the existing text from the field. If this is not the intended
      * behavior, do a {@link #getText()} first, modify the text and then use this function.
-     * The {@link By} selector of this object MUST be pointing directly at a UI element that
-     * can accept edits. The way this method works is by first performing a {@link #click()}
+     * The {@link UiSelector} selector of this object MUST be pointing directly at a UI element
+     * that can accept edits. The way this method works is by first performing a {@link #click()}
      * on the edit field to set focus then it begins injecting the content of the text param
      * into the system. Since the targeted field is in focus, the text contents should be
      * inserted into the field.<p/>
@@ -499,7 +501,7 @@ public class UiObject {
         Rect rect = getVisibleBounds(node);
         getInteractionController().longTap(rect.left + 20, rect.centerY());
         // check if the edit menu is open
-        UiObject selectAll = new UiObject(By.selector().descriptionContains("Select all"));
+        UiObject selectAll = new UiObject(new UiSelector().descriptionContains("Select all"));
         if(selectAll.waitForExists(50))
             selectAll.click();
         // wait for the selection
@@ -510,11 +512,8 @@ public class UiObject {
 
     /**
      * Check if item pointed to by this object's selector is currently checked. <p/>
-     * Take note that the {@link By} selector specified for this UiObjecy must be pointing
-     * directly at the element you wish to query for this attribute as this UiObject may be
-     * using {@link By} selectors that may be pointing at a parent element of the element
-     * you're querying while still providing the desired functionality in terms of coordinates
-     * for taps and swipes.
+     * Take note that the {@link UiSelector} specified for this UiObjecy must be pointing
+     * directly at the element you wish to query for this attribute.
      * @return true if it is else false
      */
     public boolean isChecked() throws UiObjectNotFoundException {
@@ -527,11 +526,8 @@ public class UiObject {
 
     /**
      * Check if item pointed to by this object's selector is currently selected.<p/>
-     * Take note that the {@link By} selector specified for this UiObjecy must be pointing
-     * directly at the element you wish to query for this attribute as this UiObject may be
-     * using {@link By} selectors that may be pointing at a parent element of the element
-     * you're querying while still providing the desired functionality in terms of coordinates
-     * for taps and swipes.
+     * Take note that the {@link UiSelector} specified for this UiObjecy must be pointing
+     * directly at the element you wish to query for this attribute.
      * @return true if it is else false
      * @throws UiObjectNotFoundException
      */
@@ -545,11 +541,8 @@ public class UiObject {
 
     /**
      * Check if item pointed to by this object's selector can be checked and unchecked. <p/>
-     * Take note that the {@link By} selector specified for this UiObjecy must be pointing
-     * directly at the element you wish to query for this attribute as this UiObject may be
-     * using {@link By} selectors that may be pointing at a parent element of the element
-     * you're querying while still providing the desired functionality in terms of coordinates
-     * for taps and swipes.
+     * Take note that the {@link UiSelector} specified for this UiObjecy must be pointing
+     * directly at the element you wish to query for this attribute.
      * @return true if it is else false
      * @throws UiObjectNotFoundException
      */
@@ -562,13 +555,9 @@ public class UiObject {
     }
 
     /**
-     * Check if item pointed to by this object's selector with text is currently
-     * not grayed out. <p/>
-     * Take note that the {@link By} selector specified for this UiObjecy must be pointing
-     * directly at the element you wish to query for this attribute as this UiObject may be
-     * using {@link By} selectors that may be pointing at a parent element of the element
-     * you're querying while still providing the desired functionality in terms of coordinates
-     * for taps and swipes.
+     * Check if item pointed to by this object's selector is currently not grayed out. <p/>
+     * Take note that the {@link UiSelector} specified for this UiObjecy must be pointing
+     * directly at the element you wish to query for this attribute.
      * @return true if it is else false
      * @throws UiObjectNotFoundException
      */
@@ -581,13 +570,9 @@ public class UiObject {
     }
 
     /**
-     * Check if item pointed to by this object's selector with text responds to
-     * clicks <p/>
-     * Take note that the {@link By} selector specified for this UiObjecy must be pointing
-     * directly at the element you wish to query for this attribute as this UiObject may be
-     * using {@link By} selectors that may be pointing at a parent element of the element
-     * you're querying while still providing the desired functionality in terms of coordinates
-     * for taps and swipes.
+     * Check if item pointed to by this object's selector responds to clicks <p/>
+     * Take note that the {@link UiSelector} specified for this UiObjecy must be pointing
+     * directly at the element you wish to query for this attribute.
      * @return true if it is else false
      * @throws UiObjectNotFoundException
      */
@@ -600,8 +585,8 @@ public class UiObject {
     }
 
     /**
-     * Check if item pointed to by this object's selector with text is currently
-     * focused. Focused objects will receive key stroke events when key events
+     * Check if item pointed to by this object's selector is currently focused.
+     * Objects with focus will receive key stroke events when key events
      * are fired
      * @return true if it is else false
      * @throws UiObjectNotFoundException
@@ -615,13 +600,9 @@ public class UiObject {
     }
 
     /**
-     * Check if item pointed to by this object's selector with text is capable of receiving
-     * focus. <p/>
-     * Take note that the {@link By} selector specified for this UiObjecy must be pointing
-     * directly at the element you wish to query for this attribute as this UiObject may be
-     * using {@link By} selectors that may be pointing at a parent element of the element
-     * you're querying while still providing the desired functionality in terms of coordinates
-     * for taps and swipes.
+     * Check if item pointed to by this object's selector is capable of receiving focus. <p/>
+     * Take note that the {@link UiSelector} selector specified for this UiObjecy must be pointing
+     * directly at the element you wish to query for this attribute.
      * @return true if it is else false
      * @throws UiObjectNotFoundException
      */
@@ -634,12 +615,9 @@ public class UiObject {
     }
 
     /**
-     * Check if item pointed to by this object's selector with text can be scrolled.<p/>
-     * Take note that the {@link By} selector specified for this UiObjecy must be pointing
-     * directly at the element you wish to query for this attribute as this UiObject may be
-     * using {@link By} selectors that may be pointing at a parent element of the element
-     * you're querying while still providing the desired functionality in terms of coordinates
-     * for taps and swipes.
+     * Check if item pointed to by this object's selector can be scrolled.<p/>
+     * Take note that the {@link UiSelector} selector specified for this UiObjecy must be pointing
+     * directly at the element you wish to query for this attribute.
      * @return true if it is else false
      * @throws UiObjectNotFoundException
      */
@@ -653,11 +631,8 @@ public class UiObject {
 
     /**
      * Check if item pointed to by this object's selector responds to long clicks.<p/>
-     * Take note that the {@link By} selector specified for this UiObjecy must be pointing
-     * directly at the element you wish to query for this attribute as this UiObject may be
-     * using {@link By} selectors that may be pointing at a parent element of the element
-     * you're querying while still providing the desired functionality in terms of coordinates
-     * for taps and swipes.
+     * Take note that the {@link UiSelector} selector specified for this UiObjecy must be pointing
+     * directly at the element you wish to query for this attribute.
      * @return true if it is else false
      * @throws UiObjectNotFoundException
      */

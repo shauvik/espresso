@@ -132,7 +132,7 @@ class InteractionController {
         return longPressTimeout;
     }
 
-    public boolean tap(int x, int y) {
+    public boolean click(int x, int y) {
         if (DEBUG) {
             Log.d(LOG_TAG, "tap (" + x + ", " + y + ")");
         }
@@ -146,7 +146,7 @@ class InteractionController {
         return false;
     }
 
-    public boolean tapAndWaitForNewWindow(final int x, final int y, long timeout) {
+    public boolean clickAndWaitForNewWindow(final int x, final int y, long timeout) {
         if (DEBUG) {
             Log.d(LOG_TAG, "tap (" + x + ", " + y + ")");
         }
