@@ -26,8 +26,8 @@ public class ExpandAllAction extends Action {
     UiAutomatorViewer mWindow;
 
     public ExpandAllAction(UiAutomatorViewer window) {
+        super("&Expand All");
         mWindow = window;
-        setText("&Expand All");
     }
 
     @Override

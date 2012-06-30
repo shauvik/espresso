@@ -16,12 +16,16 @@
 
 package com.android.uiautomator.tree;
 
+import org.eclipse.swt.graphics.Rectangle;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -30,6 +34,7 @@ import javax.xml.parsers.SAXParserFactory;
 public class UiHierarchyXmlLoader {
 
     private BasicTreeNode mRootNode;
+    private List<Rectangle> mNafNodes;
 
     public UiHierarchyXmlLoader() {
     }
@@ -41,6 +46,7 @@ public class UiHierarchyXmlLoader {
      */
     public BasicTreeNode parseXml(String xmlPath) {
         mRootNode = null;
+        mNafNodes = new ArrayList<Rectangle>();
         // standard boilerplate to get a SAX parser
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = null;
@@ -76,6 +82,12 @@ public class UiHierarchyXmlLoader {
                     }
                     mWorkingNode = tmpNode;
                     nodeCreated = true;
+                    // check if current node is NAF
+                    String naf = tmpNode.getAttribute("NAF");
+                    if ("true".equals(naf)) {
+                        mNafNodes.add(new Rectangle(tmpNode.x, tmpNode.y,
+                                tmpNode.width, tmpNode.height));
+                    }
                 }
                 // nodeCreated will be false if the element started is neither
                 // "hierarchy" nor "node"
@@ -112,5 +124,16 @@ public class UiHierarchyXmlLoader {
             return null;
         }
         return mRootNode;
+    }
+
+    /**
+     * Returns the list of "Not Accessibility Friendly" nodes found during parsing.
+     *
+     * Call this function after parsing
+     *
+     * @return
+     */
+    public List<Rectangle> getNafNodes() {
+        return Collections.unmodifiableList(mNafNodes);
     }
 }

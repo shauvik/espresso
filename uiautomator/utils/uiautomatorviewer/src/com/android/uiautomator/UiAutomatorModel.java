@@ -17,9 +17,9 @@
 package com.android.uiautomator;
 
 import com.android.uiautomator.tree.BasicTreeNode;
+import com.android.uiautomator.tree.BasicTreeNode.IFindNodeListener;
 import com.android.uiautomator.tree.UiHierarchyXmlLoader;
 import com.android.uiautomator.tree.UiNode;
-import com.android.uiautomator.tree.BasicTreeNode.IFindNodeListener;
 
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Image;
@@ -28,6 +28,7 @@ import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.Rectangle;
 
 import java.io.File;
+import java.util.List;
 
 public class UiAutomatorModel {
 
@@ -39,9 +40,12 @@ public class UiAutomatorModel {
     private BasicTreeNode mRootNode;
     private BasicTreeNode mSelectedNode;
     private Rectangle mCurrentDrawingRect;
+    private List<Rectangle> mNafNodes;
 
     // determines whether we lookup the leaf UI node on mouse move of screenshot image
     private boolean mExploreMode = true;
+
+    private boolean mShowNafNodes = false;
 
     private UiAutomatorModel(UiAutomatorViewer view) {
         mView = view;
@@ -85,12 +89,14 @@ public class UiAutomatorModel {
             // "data" is an array, probably used to handle images that has multiple frames
             // i.e. gifs or icons, we just care if it has at least one here
             if (data.length < 1) return false;
-            BasicTreeNode rootNode = new UiHierarchyXmlLoader().parseXml(xmlDumpFile
+            UiHierarchyXmlLoader loader = new UiHierarchyXmlLoader();
+            BasicTreeNode rootNode = loader.parseXml(xmlDumpFile
                     .getAbsolutePath());
             if (rootNode == null) {
                 System.err.println("null rootnode after parsing.");
                 return false;
             }
+            mNafNodes = loader.getNafNodes();
             try {
                 // Image is tied to ImageData and a Display, so we only need to create once
                 // per new image
@@ -196,5 +202,18 @@ public class UiAutomatorModel {
                 }
             }
         }
+    }
+
+    public List<Rectangle> getNafNodes() {
+        return mNafNodes;
+    }
+
+    public void toggleShowNaf() {
+        mShowNafNodes = !mShowNafNodes;
+        mView.updateScreenshot();
+    }
+
+    public boolean shouldShowNafNodes() {
+        return mShowNafNodes;
     }
 }
