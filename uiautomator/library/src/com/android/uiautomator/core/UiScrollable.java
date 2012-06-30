@@ -46,13 +46,13 @@ public class UiScrollable extends UiCollection {
     private double mSwipeDeadZonePercentage = DEFAULT_SWIPE_DEADZONE_PCT;
 
     /**
-     * UiScrollable is a {@link UiCollection} and as such requires a {@link By} selector to identify
+     * UiScrollable is a {@link UiCollection} and as such requires a {@link UiSelector} to identify
      * the UI element it represents. In the case of UiScrollable, the selector specified is
      * considered a container where further calls to enumerate or find children will be performed
      * in.
-     * @param container a {@link By} selector
+     * @param container a {@link UiSelector} selector
      */
-    public UiScrollable(By container) {
+    public UiScrollable(UiSelector container) {
         // wrap the container selector with container so that QueryController can handle
         // this type of enumeration search accordingly
         super(container);
@@ -78,7 +78,7 @@ public class UiScrollable extends UiCollection {
      * @param selector
      * @return true if found else false
      */
-    protected boolean exists(By selector) {
+    protected boolean exists(UiSelector selector) {
         if(getQueryController().findAccessibilityNodeInfo(selector) != null) {
             return true;
         }
@@ -86,42 +86,42 @@ public class UiScrollable extends UiCollection {
     }
 
     /**
-     * Searches for child UI element within the constraints of this UiScrollable {@link By}
+     * Searches for child UI element within the constraints of this UiScrollable {@link UiSelector}
      * selector. It looks for any child matching the <code>childPattern</code> argument that has
      * a child UI element anywhere within its sub hierarchy that has content-description text.
      * The returned UiObject will point at the <code>childPattern</code> instance that matched the
      * search and not at the identifying child element that matched the content description.</p>
      * By default this operation will perform scroll search while attempting to find the
      * UI element.
-     * See {@link #getChildByDescription(By, String, boolean)}
-     * @param childPattern {@link By} selector of the child pattern to match and return
+     * See {@link #getChildByDescription(UiSelector, String, boolean)}
+     * @param childPattern {@link UiSelector} selector of the child pattern to match and return
      * @param text String of the identifying child contents of of the <code>childPattern</code>
      * @return {@link UiObject} pointing at and instance of <code>childPattern</code>
      * @throws UiObjectNotFoundException
      */
     @Override
-    public UiObject getChildByDescription(By childPattern, String text)
+    public UiObject getChildByDescription(UiSelector childPattern, String text)
             throws UiObjectNotFoundException {
         return getChildByDescription(childPattern, text, true);
     }
 
     /**
-     * Searches for child UI element within the constraints of this UiScrollable {@link By}
+     * Searches for child UI element within the constraints of this UiScrollable {@link UiSelector}
      * selector. It looks for any child matching the <code>childPattern</code> argument that has
      * a child UI element anywhere within its sub hierarchy that has content-description text.
      * The returned UiObject will point at the <code>childPattern</code> instance that matched the
      * search and not at the identifying child element that matched the content description.
-     * @param childPattern {@link By} selector of the child pattern to match and return
+     * @param childPattern {@link UiSelector} selector of the child pattern to match and return
      * @param text String may be a partial match for the content-description of a child element.
      * @param allowScrollSearch set to true if scrolling is allowed
      * @return {@link UiObject} pointing at and instance of <code>childPattern</code>
      * @throws UiObjectNotFoundException
      */
-    public UiObject getChildByDescription(By childPattern, String text, boolean allowScrollSearch)
-            throws UiObjectNotFoundException {
+    public UiObject getChildByDescription(UiSelector childPattern, String text,
+            boolean allowScrollSearch) throws UiObjectNotFoundException {
         if (text != null) {
             if (allowScrollSearch) {
-                scrollIntoView(By.selector().descriptionContains(text));
+                scrollIntoView(new UiSelector().descriptionContains(text));
             }
             return super.getChildByDescription(childPattern, text);
         }
@@ -129,24 +129,24 @@ public class UiScrollable extends UiCollection {
     }
 
     /**
-     * Searches for child UI element within the constraints of this UiScrollable {@link By}
+     * Searches for child UI element within the constraints of this UiScrollable {@link UiSelector}
      * selector. It looks for any child matching the <code>childPattern</code> argument and
      * return the <code>instance</code> specified. The operation is performed only on the visible
      * items and no scrolling is performed in this case.
-     * @param childPattern {@link By} selector of the child pattern to match and return
+     * @param childPattern {@link UiSelector} selector of the child pattern to match and return
      * @param instance int the desired matched instance of this <code>childPattern</code>
      * @return {@link UiObject} pointing at and instance of <code>childPattern</code>
      */
     @Override
-    public UiObject getChildByInstance(By childPattern, int instance)
+    public UiObject getChildByInstance(UiSelector childPattern, int instance)
             throws UiObjectNotFoundException {
-        By patternSelector = By.patternBuilder(getSelector(),
-                By.patternBuilder(childPattern).instance(instance));
+        UiSelector patternSelector = UiSelector.patternBuilder(getSelector(),
+                UiSelector.patternBuilder(childPattern).instance(instance));
         return new UiObject(patternSelector);
     }
 
     /**
-     * Searches for child UI element within the constraints of this UiScrollable {@link By}
+     * Searches for child UI element within the constraints of this UiScrollable {@link UiSelector}
      * selector. It looks for any child matching the <code>childPattern</code> argument that has
      * a child UI element anywhere within its sub hierarchy that has text attribute =
      * <code>text</code>. The returned UiObject will point at the <code>childPattern</code>
@@ -154,37 +154,37 @@ public class UiScrollable extends UiCollection {
      * text attribute.</p>
      * By default this operation will perform scroll search while attempting to find the UI
      * element.
-     * See {@link #getChildByText(By, String, boolean)}
-     * @param childPattern {@link By} selector of the child pattern to match and return
+     * See {@link #getChildByText(UiSelector, String, boolean)}
+     * @param childPattern {@link UiSelector} selector of the child pattern to match and return
      * @param text String of the identifying child contents of of the <code>childPattern</code>
      * @return {@link UiObject} pointing at and instance of <code>childPattern</code>
      * @throws UiObjectNotFoundException
      */
     @Override
-    public UiObject getChildByText(By childPattern, String text)
+    public UiObject getChildByText(UiSelector childPattern, String text)
             throws UiObjectNotFoundException {
         return getChildByText(childPattern, text, true);
     }
 
     /**
-     * Searches for child UI element within the constraints of this UiScrollable {@link By}
+     * Searches for child UI element within the constraints of this UiScrollable {@link UiSelector}
      * selector. It looks for any child matching the <code>childPattern</code> argument that has
      * a child UI element anywhere within its sub hierarchy that has the text attribute =
      * <code>text</code>.
      * The returned UiObject will point at the <code>childPattern</code> instance that matched the
      * search and not at the identifying child element that matched the text attribute.
-     * @param childPattern {@link By} selector of the child pattern to match and return
+     * @param childPattern {@link UiSelector} selector of the child pattern to match and return
      * @param text String of the identifying child contents of of the <code>childPattern</code>
      * @param allowScrollSearch set to true if scrolling is allowed
      * @return {@link UiObject} pointing at and instance of <code>childPattern</code>
      * @throws UiObjectNotFoundException
      */
-    public UiObject getChildByText(By childPattern, String text, boolean allowScrollSearch)
+    public UiObject getChildByText(UiSelector childPattern, String text, boolean allowScrollSearch)
             throws UiObjectNotFoundException {
 
         if (text != null) {
             if (allowScrollSearch) {
-                scrollIntoView(By.selector().text(text));
+                scrollIntoView(new UiSelector().text(text));
             }
             return super.getChildByText(childPattern, text);
         }
@@ -198,16 +198,16 @@ public class UiScrollable extends UiCollection {
      * @return true if item us found else false
      */
     public boolean scrollDescriptionIntoView(String text) {
-        return scrollIntoView(By.selector().description(text));
+        return scrollIntoView(new UiSelector().description(text));
     }
 
     /**
-     * Perform a scroll search for a UI element matching the {@link By} selector argument. Also
-     * see {@link #scrollDescriptionIntoView(String)} and {@link #scrollTextIntoView(String)}.
-     * @param selector {@link By} selector
+     * Perform a scroll search for a UI element matching the {@link UiSelector} selector argument.
+     * Also see {@link #scrollDescriptionIntoView(String)} and {@link #scrollTextIntoView(String)}.
+     * @param selector {@link UiSelector} selector
      * @return true if the item was found and now is in view else false
      */
-    public boolean scrollIntoView(By selector) {
+    public boolean scrollIntoView(UiSelector selector) {
         // if we happen to be on top of the text we want then return here
         if (exists(getSelector().childSelector(selector))) {
             return (true);
@@ -237,7 +237,7 @@ public class UiScrollable extends UiCollection {
      * @return true if item us found else false
      */
     public boolean scrollTextIntoView(String text) {
-        return scrollIntoView(By.selector().text(text));
+        return scrollIntoView(new UiSelector().text(text));
     }
 
     /**
