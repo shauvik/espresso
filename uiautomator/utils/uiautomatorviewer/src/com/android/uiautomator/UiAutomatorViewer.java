@@ -48,19 +48,17 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -82,14 +80,13 @@ public class UiAutomatorViewer extends ApplicationWindow {
     private TableViewer mTableViewer;
 
     private float mScale = 1.0f;
-    private Image mCachedScaleImage = null;
+    private int mDx, mDy;
 
     /**
      * Create the application window.
      */
     public UiAutomatorViewer() {
         super(null);
-        setShellStyle(SWT.DIALOG_TRIM);
         UiAutomatorModel.createInstance(this);
         createActions();
     }
@@ -103,37 +100,46 @@ public class UiAutomatorViewer extends ApplicationWindow {
     protected Control createContents(Composite parent) {
         Composite basePane = new Composite(parent, SWT.NONE);
         basePane.setLayout(new GridLayout(2, false));
-        mScreenshotCanvas = new Canvas(basePane, SWT.NONE);
+        mScreenshotCanvas = new Canvas(basePane, SWT.NONE | SWT.NO_REDRAW_RESIZE);
         mScreenshotCanvas.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseUp(MouseEvent e) {
                 UiAutomatorModel.getModel().toggleExploreMode();
             }
         });
-        mScreenshotCanvas.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_BLACK));
+        mScreenshotCanvas.setBackground(
+                getShell().getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
         mScreenshotCanvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 3));
         mScreenshotCanvas.addPaintListener(new PaintListener() {
             @Override
             public void paintControl(PaintEvent e) {
-                if (mCachedScaleImage != null) {
+                Image image = UiAutomatorModel.getModel().getScreenshot();
+                if (image != null) {
+                    updateScreenshotTransformation();
                     // shifting the image here, so that there's a border around screen shot
                     // this makes highlighting red rectangles on the screen shot edges more visible
-                    e.gc.drawImage(mCachedScaleImage, IMG_BORDER, IMG_BORDER);
+                    Transform t = new Transform(e.gc.getDevice());
+                    t.translate(mDx, mDy);
+                    t.scale(mScale, mScale);
+                    e.gc.setTransform(t);
+                    e.gc.drawImage(image, 0, 0);
+                    // this resets the transformation to identity transform, i.e. no change
+                    // we don't use transformation here because it will cause the line pattern
+                    // and line width of highlight rect to be scaled, causing to appear to be blurry
+                    e.gc.setTransform(null);
                     if (UiAutomatorModel.getModel().shouldShowNafNodes()) {
                         // highlight the "Not Accessibility Friendly" nodes
                         e.gc.setForeground(e.gc.getDevice().getSystemColor(SWT.COLOR_YELLOW));
                         e.gc.setBackground(e.gc.getDevice().getSystemColor(SWT.COLOR_YELLOW));
                         for (Rectangle r : UiAutomatorModel.getModel().getNafNodes()) {
                             e.gc.setAlpha(50);
-                            e.gc.fillRectangle(IMG_BORDER + getScaledSize(r.x), IMG_BORDER
-                                    + getScaledSize(r.y), getScaledSize(r.width),
-                                    getScaledSize(r.height));
+                            e.gc.fillRectangle(mDx + getScaledSize(r.x), mDy + getScaledSize(r.y),
+                                    getScaledSize(r.width), getScaledSize(r.height));
                             e.gc.setAlpha(255);
                             e.gc.setLineStyle(SWT.LINE_SOLID);
                             e.gc.setLineWidth(2);
-                            e.gc.drawRectangle(IMG_BORDER + getScaledSize(r.x), IMG_BORDER
-                                    + getScaledSize(r.y), getScaledSize(r.width),
-                                    getScaledSize(r.height));
+                            e.gc.drawRectangle(mDx + getScaledSize(r.x), mDx + getScaledSize(r.y),
+                                    getScaledSize(r.width), getScaledSize(r.height));
                         }
                     }
                     // draw the mouseover rects
@@ -151,11 +157,8 @@ public class UiAutomatorViewer extends ApplicationWindow {
                             e.gc.setLineStyle(SWT.LINE_SOLID);
                             e.gc.setLineWidth(2);
                         }
-                        e.gc.drawRectangle(
-                                IMG_BORDER + getScaledSize(rect.x),
-                                IMG_BORDER + getScaledSize(rect.y),
-                                getScaledSize(rect.width),
-                                getScaledSize(rect.height));
+                        e.gc.drawRectangle(mDx + getScaledSize(rect.x), mDy + getScaledSize(rect.y),
+                                getScaledSize(rect.width), getScaledSize(rect.height));
                     }
                 }
             }
@@ -165,8 +168,8 @@ public class UiAutomatorViewer extends ApplicationWindow {
             public void mouseMove(MouseEvent e) {
                 if (UiAutomatorModel.getModel().isExploreMode()) {
                     UiAutomatorModel.getModel().updateSelectionForCoordinates(
-                            getInverseScaledSize(e.x - IMG_BORDER),
-                            getInverseScaledSize(e.y - IMG_BORDER));
+                            getInverseScaledSize(e.x - mDx),
+                            getInverseScaledSize(e.y - mDy));
                 }
             }
         });
@@ -279,7 +282,6 @@ public class UiAutomatorViewer extends ApplicationWindow {
             UiAutomatorViewer window = new UiAutomatorViewer();
             window.setBlockOnOpen(true);
             window.open();
-            Display.getCurrent().dispose();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -302,15 +304,7 @@ public class UiAutomatorViewer extends ApplicationWindow {
      * area and tree view accordingly
      */
     public void loadScreenshotAndXml() {
-        // re-layout screenshot canvas
-        GridData gd = new GridData(SWT.CENTER, SWT.CENTER, true, true, 1, 3);
-        Rectangle r = UiAutomatorModel.getModel().getScreenshot().getBounds();
-        mScale = calcScreenshotScale(r.width, r.height);
-        updateScaledImage(UiAutomatorModel.getModel().getScreenshot());
-        gd.minimumHeight = getScaledSize(r.height) + 2 * IMG_BORDER;
-        gd.minimumWidth = getScaledSize(r.width) + 2 * IMG_BORDER;
-        mScreenshotCanvas.setLayoutData(gd);
-
+        mScreenshotCanvas.redraw();
         // load xml into tree
         BasicTreeNode wrapper = new BasicTreeNode();
         // putting another root node on top of existing root node
@@ -318,10 +312,6 @@ public class UiAutomatorViewer extends ApplicationWindow {
         wrapper.addChild(UiAutomatorModel.getModel().getXmlRootNode());
         mTreeViewer.setInput(wrapper);
         mTreeViewer.getTree().setFocus();
-
-        // resize & reposition window
-        getShell().pack();
-        adjustShellLocation();
     }
 
     /*
@@ -353,19 +343,16 @@ public class UiAutomatorViewer extends ApplicationWindow {
         return new Point(800, 600);
     }
 
-
-    private float calcScreenshotScale(int width, int height) {
-        Rectangle r = findCurrentMonitor().getClientArea();
-        // add some room
-        width += 300;
-        height += 100;
-        float scale = Math.min(1.0f,Math.min(r.width / (float)width,
-                r.height / (float)height));
-        // if we are not showing the original size, scale down a bit more
-        if (scale < 1.0f) {
-            scale *= 0.7f;
-        }
-        return scale;
+    private void updateScreenshotTransformation() {
+        Rectangle canvas = mScreenshotCanvas.getBounds();
+        Rectangle image = UiAutomatorModel.getModel().getScreenshot().getBounds();
+        float scaleX = (canvas.width - 2 * IMG_BORDER - 1) / (float)image.width;
+        float scaleY = (canvas.height - 2 * IMG_BORDER - 1) / (float)image.height;
+        // use the smaller scale here so that we can fit the entire screenshot
+        mScale = Math.min(scaleX, scaleY);
+        // calculate translation values to center the image on the canvas
+        mDx = (canvas.width - getScaledSize(image.width) - IMG_BORDER * 2) / 2 + IMG_BORDER;
+        mDy = (canvas.height - getScaledSize(image.height) - IMG_BORDER * 2) / 2 + IMG_BORDER;
     }
 
     private int getScaledSize(int size) {
@@ -381,72 +368,6 @@ public class UiAutomatorViewer extends ApplicationWindow {
             return size;
         } else {
             return new Double(Math.floor((size / mScale))).intValue();
-        }
-    }
-
-    private void updateScaledImage(Image image) {
-        Image scaled = image;
-        if (mScale != 1.0f) {
-            // some voodoo to get a smooth scaled image ,otherwise it looks like crap
-            // but the actual outcome could still be platform dependent
-            int w = image.getBounds().width;
-            int h = image.getBounds().height;
-            int ws = getScaledSize(w);
-            int hs = getScaledSize(h);
-            scaled = new Image(getShell().getDisplay(), ws, hs);
-            GC gc = new GC(scaled);
-            gc.setAntialias(SWT.ON);
-            gc.setInterpolation(SWT.HIGH);
-            gc.drawImage(image, 0, 0, w, h, 0, 0, ws, hs);
-            gc.dispose();
-        }
-        if (mCachedScaleImage != null) {
-            mCachedScaleImage.dispose();
-        }
-        mCachedScaleImage = scaled;
-    }
-
-    /**
-     * Find out which monitor the current window's top left corner is in
-     *
-     * @return
-     */
-    private Monitor findCurrentMonitor() {
-        Rectangle b = getShell().getBounds();
-        for (Monitor m : getShell().getDisplay().getMonitors()) {
-            Rectangle r = m.getBounds();
-            if (r.x <= b.x && b.x < r.x + r.width
-                    && r.y <= b.y && b.y < r.y + r.height) {
-                return m;
-            }
-        }
-        return null;
-    }
-
-    private void adjustShellLocation() {
-        Monitor m = findCurrentMonitor();
-        if (m == null) {
-            System.err.println("Cannot find current monitor!");
-            return;
-        }
-        Rectangle r = m.getBounds();
-        Rectangle b = getShell().getBounds();
-        int x = b.x, y = b.y;
-        boolean shouldChangePosition = false;
-        if (!(r.x <= b.x && b.x + b.width < r.x + r.width)) {
-            // out of bounds horizontally, need adjustment
-            shouldChangePosition = true;
-            // since we are scaling down, the window really shouldn't be larger than monitor
-            // i.e. should not have negative here, just a safety measure
-            x = Math.max(0, (r.width - b.width) / 2) + r.x;
-        }
-        if (!(r.y <= b.y && b.y + b.height < r.y + r.height)) {
-            // out of bounds vertically, need adjustment
-            shouldChangePosition = true;
-            y = Math.max(0, (r.height - b.height) / 2) + r.y;
-        }
-        if (shouldChangePosition) {
-            getShell().setLocation(x, y);
         }
     }
 
