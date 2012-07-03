@@ -43,6 +43,7 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseMoveListener;
@@ -66,8 +67,6 @@ import org.eclipse.swt.widgets.Tree;
 
 public class UiAutomatorViewer extends ApplicationWindow {
 
-    private static final int FIXED_RHS_WIDTH = 350;
-    private static final int FIXED_DETAIL_VIEW_HEIGHT = 200;
     private static final int IMG_BORDER = 2;
 
     private Canvas mScreenshotCanvas;
@@ -98,9 +97,10 @@ public class UiAutomatorViewer extends ApplicationWindow {
      */
     @Override
     protected Control createContents(Composite parent) {
-        Composite basePane = new Composite(parent, SWT.NONE);
-        basePane.setLayout(new GridLayout(2, false));
-        mScreenshotCanvas = new Canvas(basePane, SWT.NONE | SWT.NO_REDRAW_RESIZE);
+        parent.setLayout(new FillLayout());
+        SashForm baseSash = new SashForm(parent, SWT.HORIZONTAL | SWT.NONE);
+        // draw the canvas with border, so the divider area for sash form can be highlighted
+        mScreenshotCanvas = new Canvas(baseSash, SWT.BORDER | SWT.NO_REDRAW_RESIZE);
         mScreenshotCanvas.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseUp(MouseEvent e) {
@@ -109,7 +109,6 @@ public class UiAutomatorViewer extends ApplicationWindow {
         });
         mScreenshotCanvas.setBackground(
                 getShell().getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-        mScreenshotCanvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 3));
         mScreenshotCanvas.addPaintListener(new PaintListener() {
             @Override
             public void paintControl(PaintEvent e) {
@@ -138,7 +137,7 @@ public class UiAutomatorViewer extends ApplicationWindow {
                             e.gc.setAlpha(255);
                             e.gc.setLineStyle(SWT.LINE_SOLID);
                             e.gc.setLineWidth(2);
-                            e.gc.drawRectangle(mDx + getScaledSize(r.x), mDx + getScaledSize(r.y),
+                            e.gc.drawRectangle(mDx + getScaledSize(r.x), mDy + getScaledSize(r.y),
                                     getScaledSize(r.width), getScaledSize(r.height));
                         }
                     }
@@ -174,18 +173,22 @@ public class UiAutomatorViewer extends ApplicationWindow {
             }
         });
 
+        // right sash is split into 2 parts: upper-right and lower-right
+        // both are composites with borders, so that the horizontal divider can be highlighted by
+        // the borders
+        SashForm rightSash = new SashForm(baseSash, SWT.VERTICAL);
+
+        // upper-right base contains the toolbar and the tree
+        Composite upperRightBase = new Composite(rightSash, SWT.BORDER);
+        upperRightBase.setLayout(new GridLayout(1, false));
         ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
         toolBarManager.add(mOpenFilesAction);
         toolBarManager.add(mExpandAllAction);
         toolBarManager.add(mScreenshotAction);
         toolBarManager.add(mToggleNafAction);
-        toolBarManager.createControl(basePane);
+        toolBarManager.createControl(upperRightBase);
 
-        mTreeViewer = new TreeViewer(basePane, SWT.BORDER);
-        Tree tree = mTreeViewer.getTree();
-        GridData gd_Tree = new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1);
-        gd_Tree.widthHint = 350;
-        tree.setLayoutData(gd_Tree);
+        mTreeViewer = new TreeViewer(upperRightBase, SWT.NONE);
         mTreeViewer.setContentProvider(new BasicTreeNodeContentProvider());
         // default LabelProvider uses toString() to generate text to display
         mTreeViewer.setLabelProvider(new LabelProvider());
@@ -203,26 +206,24 @@ public class UiAutomatorViewer extends ApplicationWindow {
                 }
             }
         });
+        Tree tree = mTreeViewer.getTree();
+        tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
         // move focus so that it's not on tool bar (looks weird)
         tree.setFocus();
 
-        Group grpNodeDetail = new Group(basePane, SWT.NONE);
+        // lower-right base contains the detail group
+        Composite lowerRightBase = new Composite(rightSash, SWT.BORDER);
+        lowerRightBase.setLayout(new FillLayout());
+        Group grpNodeDetail = new Group(lowerRightBase, SWT.NONE);
         grpNodeDetail.setLayout(new FillLayout(SWT.HORIZONTAL));
-        GridData gd_grpNodeDetail = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-        gd_grpNodeDetail.heightHint = FIXED_DETAIL_VIEW_HEIGHT;
-        gd_grpNodeDetail.minimumHeight = FIXED_DETAIL_VIEW_HEIGHT;
-        gd_grpNodeDetail.widthHint = FIXED_RHS_WIDTH;
-        gd_grpNodeDetail.minimumWidth = FIXED_RHS_WIDTH;
-        grpNodeDetail.setLayoutData(gd_grpNodeDetail);
         grpNodeDetail.setText("Node Detail");
 
         Composite tableContainer = new Composite(grpNodeDetail, SWT.NONE);
-        tableContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
         TableColumnLayout columnLayout = new TableColumnLayout();
         tableContainer.setLayout(columnLayout);
 
-        mTableViewer = new TableViewer(tableContainer, SWT.BORDER | SWT.FULL_SELECTION);
+        mTableViewer = new TableViewer(tableContainer, SWT.NONE | SWT.FULL_SELECTION);
         Table table = mTableViewer.getTable();
         table.setLinesVisible(true);
         // use ArrayContentProvider here, it assumes the input to the TableViewer
@@ -259,7 +260,9 @@ public class UiAutomatorViewer extends ApplicationWindow {
                 return super.getText(element);
             }
         });
-        return basePane;
+        // sets the ratio of the vertical split: left 5 vs right 3
+        baseSash.setWeights(new int[]{5, 3});
+        return baseSash;
     }
 
     /**
