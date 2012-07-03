@@ -28,6 +28,7 @@ import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.Rectangle;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UiAutomatorModel {
@@ -41,6 +42,7 @@ public class UiAutomatorModel {
     private BasicTreeNode mSelectedNode;
     private Rectangle mCurrentDrawingRect;
     private List<Rectangle> mNafNodes;
+    private List<File> mTmpDirs;
 
     // determines whether we lookup the leaf UI node on mouse move of screenshot image
     private boolean mExploreMode = true;
@@ -49,6 +51,7 @@ public class UiAutomatorModel {
 
     private UiAutomatorModel(UiAutomatorViewer view) {
         mView = view;
+        mTmpDirs = new ArrayList<File>();
     }
 
     public static UiAutomatorModel createInstance(UiAutomatorViewer view) {
@@ -215,5 +218,23 @@ public class UiAutomatorModel {
 
     public boolean shouldShowNafNodes() {
         return mShowNafNodes;
+    }
+
+    /**
+     * Registers a temporary directory for deletion when app exists
+     *
+     * @param tmpDir
+     */
+    public void registerTempDirectory(File tmpDir) {
+        mTmpDirs.add(tmpDir);
+    }
+
+    /**
+     * Performs cleanup tasks when the app is exiting
+     */
+    public void cleanUp() {
+        for (File dir : mTmpDirs) {
+            Utils.deleteRecursive(dir);
+        }
     }
 }

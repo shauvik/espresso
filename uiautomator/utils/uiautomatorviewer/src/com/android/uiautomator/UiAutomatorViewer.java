@@ -285,6 +285,7 @@ public class UiAutomatorViewer extends ApplicationWindow {
             UiAutomatorViewer window = new UiAutomatorViewer();
             window.setBlockOnOpen(true);
             window.open();
+            UiAutomatorModel.getModel().cleanUp();
         } catch (Exception e) {
             e.printStackTrace();
         }
