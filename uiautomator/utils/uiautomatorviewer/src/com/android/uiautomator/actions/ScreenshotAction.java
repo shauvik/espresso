@@ -89,6 +89,7 @@ public class ScreenshotAction extends Action {
                         showError("Cannot get temp directory", e, monitor);
                         return;
                     }
+                    UiAutomatorModel.getModel().registerTempDirectory(tmpDir);
 
                     // boiler plates to do a bunch of adb stuff to take XML snapshot and screenshot
                     monitor.beginTask("Getting UI status dump from device...",
