@@ -97,10 +97,9 @@ public class UiAutomatorViewer extends ApplicationWindow {
      */
     @Override
     protected Control createContents(Composite parent) {
-        parent.setLayout(new FillLayout());
         SashForm baseSash = new SashForm(parent, SWT.HORIZONTAL | SWT.NONE);
         // draw the canvas with border, so the divider area for sash form can be highlighted
-        mScreenshotCanvas = new Canvas(baseSash, SWT.BORDER | SWT.NO_REDRAW_RESIZE);
+        mScreenshotCanvas = new Canvas(baseSash, SWT.BORDER);
         mScreenshotCanvas.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseUp(MouseEvent e) {
