@@ -22,11 +22,10 @@ import android.view.accessibility.AccessibilityNodeInfo;
 /**
  * This class provides the mechanism for tests to describe the UI elements they
  * intend to target. A UI element has many properties associated with it such as
- * text values, a content-description field, class name and multiple state
- * information like isSelected, isEnabled or isChecked. Additionally a UI element
- * may also be associated with a specific layout hierarchy that the test wishes
- * to use to unambiguously target one UI element distinguishing it from other
- * similar elements.
+ * text value, content-description, class name and multiple state information like
+ * selected, enabled, checked etc. Additionally UiSelector allows targeting of UI
+ * elements within a specific display hierarchies to distinguish similar elements
+ * based in the hierarchies they're in.
  */
 public class UiSelector {
     static final int SELECTOR_NIL = 0;
@@ -55,18 +54,24 @@ public class UiSelector {
     static final int SELECTOR_COUNT = 23;
 
     private SparseArray<Object> mSelectorAttributes = new SparseArray<Object>();
-    public static final String LOG_TAG = "ByClass";
+    public static final String LOG_TAG = UiSelector.class.getSimpleName();
 
     public UiSelector() {
     }
 
-    protected UiSelector(UiSelector by) {
-        mSelectorAttributes = by.cloneSelectors().mSelectorAttributes;
+    UiSelector(UiSelector selector) {
+        mSelectorAttributes = selector.cloneSelector().mSelectorAttributes;
     }
 
-    protected UiSelector cloneSelectors() {
+    protected UiSelector cloneSelector() {
         UiSelector ret = new UiSelector();
         ret.mSelectorAttributes = mSelectorAttributes.clone();
+        if(hasChildSelector())
+            ret.mSelectorAttributes.put(SELECTOR_CHILD, new UiSelector(getChildSelector()));
+        if(hasParentSelector())
+            ret.mSelectorAttributes.put(SELECTOR_PARENT, new UiSelector(getParentSelector()));
+        if(hasPatternSelector())
+            ret.mSelectorAttributes.put(SELECTOR_PATTERN, new UiSelector(getPatternSelector()));
         return ret;
     }
 
@@ -146,20 +151,20 @@ public class UiSelector {
         return buildSelector(SELECTOR_CLICKABLE, val);
     }
 
-    public UiSelector childSelector(UiSelector by) {
-        return buildSelector(SELECTOR_CHILD, by);
+    public UiSelector childSelector(UiSelector selector) {
+        return buildSelector(SELECTOR_CHILD, selector);
     }
 
-    private UiSelector patternSelector(UiSelector by) {
-        return buildSelector(SELECTOR_PATTERN, by);
+    private UiSelector patternSelector(UiSelector selector) {
+        return buildSelector(SELECTOR_PATTERN, selector);
     }
 
-    private UiSelector containerSelector(UiSelector by) {
-        return buildSelector(SELECTOR_CONTAINER, by);
+    private UiSelector containerSelector(UiSelector selector) {
+        return buildSelector(SELECTOR_CONTAINER, selector);
     }
 
-    public UiSelector fromParent(UiSelector by) {
-        return buildSelector(SELECTOR_PARENT, by);
+    public UiSelector fromParent(UiSelector selector) {
+        return buildSelector(SELECTOR_PARENT, selector);
     }
 
     public UiSelector packageName(String name) {
@@ -167,20 +172,16 @@ public class UiSelector {
     }
 
     /**
-     * Building a By selector always returns a new By selector and never modifies the
-     * existing By selector being used. For example a test library have predefined
-     * By selectors SA, SB, SC etc. The test may decide that it needs a By selector SX in the
-     * context of SB. It can use SX = SB.critereon(x) to generate SX without modifying the
-     * state of SB which is expected to be something else. For this we will return a new
-     * By selector every time.
+     * Building a UiSelector always returns a new UiSelector and never modifies the
+     * existing UiSelector being used.
      */
     private UiSelector buildSelector(int selectorId, Object selectorValue) {
-        UiSelector by = new UiSelector(this);
+        UiSelector selector = new UiSelector(this);
         if(selectorId == SELECTOR_CHILD || selectorId == SELECTOR_PARENT)
-            by.getLastSubSelector().mSelectorAttributes.put(selectorId, selectorValue);
+            selector.getLastSubSelector().mSelectorAttributes.put(selectorId, selectorValue);
         else
-            by.mSelectorAttributes.put(selectorId, selectorValue);
-        return by;
+            selector.mSelectorAttributes.put(selectorId, selectorValue);
+        return selector;
     }
 
     /**
@@ -193,30 +194,33 @@ public class UiSelector {
      */
 
     UiSelector getChildSelector() {
-        UiSelector by = (UiSelector)mSelectorAttributes.get(UiSelector.SELECTOR_CHILD, null);
-        if(by != null)
-            return new UiSelector(by);
+        UiSelector selector = (UiSelector)mSelectorAttributes.get(UiSelector.SELECTOR_CHILD, null);
+        if(selector != null)
+            return new UiSelector(selector);
         return null;
     }
 
     UiSelector getPatternSelector() {
-        UiSelector by = (UiSelector)mSelectorAttributes.get(UiSelector.SELECTOR_PATTERN, null);
-        if(by != null)
-            return new UiSelector(by);
+        UiSelector selector =
+                (UiSelector)mSelectorAttributes.get(UiSelector.SELECTOR_PATTERN, null);
+        if(selector != null)
+            return new UiSelector(selector);
         return null;
     }
 
     UiSelector getContainerSelector() {
-        UiSelector by = (UiSelector)mSelectorAttributes.get(UiSelector.SELECTOR_CONTAINER, null);
-        if(by != null)
-            return new UiSelector(by);
+        UiSelector selector =
+                (UiSelector)mSelectorAttributes.get(UiSelector.SELECTOR_CONTAINER, null);
+        if(selector != null)
+            return new UiSelector(selector);
         return null;
     }
 
     UiSelector getParentSelector() {
-        UiSelector by = (UiSelector) mSelectorAttributes.get(UiSelector.SELECTOR_PARENT, null);
-        if(by != null)
-            return new UiSelector(by);
+        UiSelector selector =
+                (UiSelector) mSelectorAttributes.get(UiSelector.SELECTOR_PARENT, null);
+        if(selector != null)
+            return new UiSelector(selector);
         return null;
     }
 
@@ -412,7 +416,7 @@ public class UiSelector {
      * A chain of selector is created when either of {@link UiSelector#childSelector(UiSelector)}
      * or {@link UiSelector#fromParent(UiSelector)} are used once or more in the construction of
      * a selector.
-     * @return last By selector in chain
+     * @return last UiSelector in chain
      */
     private UiSelector getLastSubSelector() {
         if(mSelectorAttributes.indexOfKey(UiSelector.SELECTOR_CHILD) >= 0) {
@@ -438,7 +442,7 @@ public class UiSelector {
 
     String dumpToString(boolean all) {
         StringBuilder builder = new StringBuilder();
-        builder.append("By[");
+        builder.append(UiSelector.class.getSimpleName() + "[");
         final int criterionCount = mSelectorAttributes.size();
         for (int i = 0; i < criterionCount; i++) {
             if (i > 0) {
