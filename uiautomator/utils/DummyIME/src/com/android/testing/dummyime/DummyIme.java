@@ -22,4 +22,14 @@ import android.inputmethodservice.InputMethodService;
  * Dummy IME implementation that basically does nothing
  */
 public class DummyIme extends InputMethodService {
+
+    @Override
+    public boolean onEvaluateFullscreenMode() {
+        return false;
+    }
+
+    @Override
+    public boolean onEvaluateInputViewShown() {
+        return false;
+    }
 }
