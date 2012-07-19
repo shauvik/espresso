@@ -339,7 +339,9 @@ class QueryController {
             }
             if (!childNode.isVisibleToUser()) {
                 // TODO: need to remove this or move it under if (DEBUG)
-                Log.d(LOG_TAG, String.format("Skipping invisible child: %s", childNode.toString()));
+                if(DEBUG)
+                    Log.d(LOG_TAG,
+                            String.format("Skipping invisible child: %s", childNode.toString()));
                 continue;
             }
             AccessibilityNodeInfo retNode = findNodeRegularRecursive(subSelector, childNode, i);
@@ -467,8 +469,8 @@ class QueryController {
                 continue;
             }
             if (!childNode.isVisibleToUser()) {
-                // TODO: need to remove this or move it under if (DEBUG)
-                Log.d(LOG_TAG,
+                if(DEBUG)
+                    Log.d(LOG_TAG,
                         String.format("Skipping invisible child: %s", childNode.toString()));
                 continue;
             }

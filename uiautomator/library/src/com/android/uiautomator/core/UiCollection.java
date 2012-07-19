@@ -38,6 +38,7 @@ public class UiCollection extends UiObject {
      * a child UI element anywhere within its sub hierarchy that has content-description text.
      * The returned UiObject will point at the <code>childPattern</code> instance that matched the
      * search and not at the identifying child element that matched the content description.</p>
+     *
      * @param childPattern {@link UiSelector} selector of the child pattern to match and return
      * @param text String of the identifying child contents of of the <code>childPattern</code>
      * @return {@link UiObject} pointing at and instance of <code>childPattern</code>
@@ -68,6 +69,7 @@ public class UiCollection extends UiObject {
      * a child UI element anywhere within its sub hierarchy that is at the <code>instance</code>
      * specified. The operation is performed only on the visible items and no scrolling is performed
      * in this case.
+     *
      * @param childPattern {@link UiSelector} selector of the child pattern to match and return
      * @param instance int the desired matched instance of this <code>childPattern</code>
      * @return {@link UiObject} pointing at and instance of <code>childPattern</code>
@@ -86,6 +88,7 @@ public class UiCollection extends UiObject {
      * <code>text</code>. The returned UiObject will point at the <code>childPattern</code>
      * instance that matched the search and not at the identifying child element that matched the
      * text attribute.</p>
+     *
      * @param childPattern {@link UiSelector} selector of the child pattern to match and return
      * @param text String of the identifying child contents of of the <code>childPattern</code>
      * @return {@link UiObject} pointing at and instance of <code>childPattern</code>
@@ -117,6 +120,7 @@ public class UiCollection extends UiObject {
      * currently visible on the display within the sub hierarchy of this UiCollection
      * {@link UiSelector} selector. Take note that more elements may be present but
      * invisible and are not counted.
+     *
      * @param childPattern is a {@link UiSelector} selector that is a pattern to count
      * @return the number of matched childPattern under the current {@link UiCollection}
      */
