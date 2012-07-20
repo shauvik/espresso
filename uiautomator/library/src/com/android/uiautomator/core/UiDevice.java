@@ -18,10 +18,12 @@ package com.android.uiautomator.core;
 
 import android.content.Context;
 import android.graphics.Point;
+import android.os.Build;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.IWindowManager;
@@ -90,6 +92,38 @@ public class UiDevice {
             mDevice = new UiDevice();
         }
         return mDevice;
+    }
+
+    /**
+     * Returns the display size in dp (device-independent pixel)
+     *
+     * The returned display size is adjusted per screen rotation
+     *
+     * @return
+     */
+    public Point getDisplaySizeDp() {
+        Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
+        Point p = new Point();
+        display.getSize(p);
+        DisplayMetrics metrics = new DisplayMetrics();
+        display.getMetrics(metrics);
+        float dpx = p.x / metrics.density;
+        float dpy = p.y / metrics.density;
+        p.x = Math.round(dpx);
+        p.y = Math.round(dpy);
+        return p;
+    }
+
+    /**
+     * Returns the product name of the device
+     *
+     * This provides info on what type of device that the test is running on. However, for the
+     * purpose of adapting to different styles of UI, test should favor
+     * {@link UiDevice#getDisplaySizeDp()} over this method, and only use product name as a fallback
+     * mechanism
+     */
+    public String getProductName() {
+        return Build.PRODUCT;
     }
 
     /**
