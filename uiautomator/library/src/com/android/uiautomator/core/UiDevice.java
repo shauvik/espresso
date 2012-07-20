@@ -22,7 +22,6 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.IWindowManager;
@@ -63,8 +62,6 @@ public class UiDevice {
     // reference to self
     private static UiDevice mDevice;
 
-    private Boolean mIsPhone = null;
-
     private UiDevice() {
         mUiAutomationBridge = new UiAutomatorBridge();
         mDevice = this;
@@ -96,66 +93,13 @@ public class UiDevice {
     }
 
     /**
-     * This forces the return value of {@link #isPhone()} to be a specific device type.
-     * For example, on certain devices the {@link #isPhone} may return true when an application
-     * is actually behaving as if it is on a tablet. For these types of devices, it would be
-     * best if the test forces the issue by invoking this method accordingly.
-     * @param val true for phone behavior else false for all other
-     */
-    public void setTypeAsPhone(boolean val) {
-        mIsPhone = val;
-    }
-
-    /**
-     * Check if the tests are running on a phone screen. This method assumes a
-     * phone is a device that its natural rotation has a height > width or when
-     * rotated it has a width > height. This API is deprecated. Use the UI to
-     * determine the layout. For example if on larger screen devices your app displays
-     * two ListViews but on a small screen one, then count the ListViews to decide. see
-     * {@link UiObject#getMatchesCount()}
-     * @return true if the device has a phone else false
-     */
-    @Deprecated
-    public boolean isPhone() {
-        if(mIsPhone == null) {
-            DisplayMetrics metrics = new DisplayMetrics();
-            Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
-            display.getMetrics(metrics);
-
-            if(isOrientationNatural()) {
-                // we assume a phone has a natural orientation that has height > width
-                if(metrics.heightPixels > metrics.widthPixels)
-                    return true;
-            } else {
-                // we assume a phone has a rotated orientation that has height < width
-                if(metrics.heightPixels < metrics.widthPixels)
-                    return true;
-            }
-
-            // not a phone
-            return false;
-        }
-
-        return mIsPhone;
-    }
-
-    /**
-     * Check the current device orientation
-     * @return true if in natural orientation
-     */
-    public boolean isOrientationNatural() {
-        Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
-        return display.getRotation() == Surface.ROTATION_0 ||
-                display.getRotation() == Surface.ROTATION_180;
-    }
-
-    /**
-     * Every event received from accessibility may or may not contain text. This
-     * method returns the text from the last UI traversal event received that had text.
-     * This is helpful in web views when the test performs down arrow presses to focus
-     * on different elements inside the web view, the accessibility will fire events
-     * with the text just highlighted. In effect once can read the contents of a
-     * web view this way.
+     * This method returns the text from the last UI traversal event received.
+     * This is helpful in WebView when the test performs directional arrow presses to focus
+     * on different elements inside the WebView. The accessibility fires events
+     * with every text highlighted. One can read the contents of a WebView control this way
+     * however slow slow and unreliable it is. When the view control used can return a
+     * reference to is Document Object Model, it is recommended then to use the view's
+     * DOM instead.
      * @return text of the last traversal event else an empty string
      */
     public String getLastTraversedText() {
@@ -163,8 +107,8 @@ public class UiDevice {
     }
 
     /**
-     * Helper to clear the text saved of the last accessibility UI traversal event that had
-     * any text in it. See {@link #getLastTraversedText()}.
+     * Helper to clear the text saved from the last accessibility UI traversal event.
+     * See {@link #getLastTraversedText()}.
      */
     public void clearLastTraversedText() {
         mUiAutomationBridge.getQueryController().clearLastTraversedText();
@@ -279,8 +223,8 @@ public class UiDevice {
     }
 
     /**
-     * Gets the raw width of the display, in pixels. The size is adjusted based
-     * on the current rotation of the display.
+     * Gets the width of the display, in pixels. The width and height details
+     * are reported based on the current orientation of the display.
      * @return width in pixels or zero on failure
      */
     public int getDisplayWidth() {
@@ -313,8 +257,8 @@ public class UiDevice {
     }
 
     /**
-     * Gets the raw height of the display, in pixels. The size is adjusted based
-     * on the current rotation of the display.
+     * Gets the height of the display, in pixels. The size is adjusted based
+     * on the current orientation of the display.
      * @return height in pixels or zero on failure
      */
     public int getDisplayHeight() {
@@ -331,6 +275,7 @@ public class UiDevice {
 
     /**
      * Perform a click at arbitrary coordinates specified by the user
+     *
      * @param x coordinate
      * @param y coordinate
      * @return true if the click succeeded else false
@@ -344,8 +289,9 @@ public class UiDevice {
 
     /**
      * Performs a swipe from one coordinate to another using the number of steps
-     * to determine smoothness and speed. The more steps the slower and smoother
-     * the swipe will be.
+     * to determine smoothness and speed. Each step execution is throttled to 10ms
+     * per step. So for a 100 steps, the swipe will take about 1 second to complete.
+     *
      * @param startX
      * @param startY
      * @param endX
@@ -359,7 +305,9 @@ public class UiDevice {
     }
 
     /**
-     * Performs a swipe between points in the Point array.
+     * Performs a swipe between points in the Point array. Each step execution is throttled
+     * to 10ms per step. So for a 100 steps, the swipe will take about 1 second to complete
+     *
      * @param segments is Point array containing at least one Point object
      * @param segmentSteps steps to inject between two Points
      * @return true on success
@@ -392,15 +340,14 @@ public class UiDevice {
         return mUiAutomationBridge.getQueryController().getCurrentPackageName();
     }
 
-
     /**
-     * Enables the test script to register a condition watcher to be called by
-     * the automation library. The automation library will invoke
-     * {@link UiWatcher#checkForCondition} only when a regular API call is in
-     * retry mode when it is unable to locate its selector yet. Only during this
-     * time, the watchers are invoked to check if there is something else
-     * unexpected on the screen that may be causing the delay in detecting the
-     * required UI object.
+     * Registers a condition watcher to be called by the automation library only when a
+     * {@link UiObject} method call is in progress and is in retry waiting to match
+     * its UI element. Only during these conditions the watchers are invoked to check if
+     * there is something else unexpected on the screen that may be causing the match failure
+     * and retries. Under normal conditions when UiObject methods are immediately matching
+     * their UI element, watchers may never get to run. See {@link UiDevice#runWatchers()}
+     *
      * @param name of watcher
      * @param watcher {@link UiWatcher}
      */
@@ -413,6 +360,7 @@ public class UiDevice {
 
     /**
      * Removes a previously registered {@link #registerWatcher(String, UiWatcher)}.
+     *
      * @param name of watcher used when <code>registerWatcher</code> was called.
      * @throws UiAutomationException
      */
@@ -424,11 +372,8 @@ public class UiDevice {
     }
 
     /**
-     * Watchers are generally not run unless a certain UI object is not being
-     * found. This will help improve performance of tests until there is a good
-     * reason to check for possible exceptions on the display.<b/><b/> However,
-     * in some cases it may be desirable to force run the watchers. Calling this
-     * method will execute all registered watchers.
+     * See {@link #registerWatcher(String, UiWatcher)}. This forces all registered watchers
+     * to run.
      */
     public void runWatchers() {
         if (mInWatcherContext) {
@@ -453,30 +398,27 @@ public class UiDevice {
     }
 
     /**
-     * If you have used {@link #registerWatcher(String, UiWatcher)} then this
-     * method can be used to reset reported UiWatcher triggers.
-     * A {@link UiWatcher} reports it is triggered by returning true
-     * from its implementation of {@link UiWatcher#checkForCondition()}
+     * See {@link #registerWatcher(String, UiWatcher)}. If a watcher is run and
+     * returns true from its implementation of {@link UiWatcher#checkForCondition()} then
+     * it is considered triggered.
      */
     public void resetWatcherTriggers() {
         mWatchersTriggers.clear();
     }
 
     /**
-     * If you have used {@link #registerWatcher(String, UiWatcher)} then this
-     * method can be used to check if a specific UiWatcher has ever triggered during the
-     * test. For a {@link UiWatcher} to report it is triggered it needs to return true
-     * from its implementation of {@link UiWatcher#checkForCondition()}
+     * See {@link #registerWatcher(String, UiWatcher)}. If a watcher is run and
+     * returns true from its implementation of {@link UiWatcher#checkForCondition()} then
+     * it is considered triggered. This method can be used to check if a specific UiWatcher
+     * has been triggered during the test. This is helpful if a watcher is detecting errors
+     * from ANR or crash dialogs and the test needs to know if a UiWatcher has been triggered.
      */
     public boolean hasWatcherTriggered(String watcherName) {
         return mWatchersTriggers.contains(watcherName);
     }
 
     /**
-     * If you have used {@link #registerWatcher(String, UiWatcher)} then this
-     * method can be used to check if any of those have ever triggered during the
-     * test. For a {@link UiWatcher} to report it is triggered it needs to return true
-     * from its implementation of {@link UiWatcher#checkForCondition()}
+     * See {@link #registerWatcher(String, UiWatcher)} and {@link #hasWatcherTriggered(String)}
      */
     public boolean hasAnyWatcherTriggered() {
         return mWatchersTriggers.size() > 0;
@@ -489,13 +431,14 @@ public class UiDevice {
     }
 
     /**
-     * Check if the device is in its natural orientation. This is determined by
-     * checking whether the orientation is at 0 or 180 degrees.
+     * Check if the device is in its natural orientation. This is determined by checking if the
+     * orientation is at 0 or 180 degrees.
      * @return true if it is in natural orientation
-     * @throws RemoteException
      */
-    public boolean isNaturalRotation() throws RemoteException {
-        return getAutomatorBridge().getInteractionController().isNaturalRotation();
+    public boolean isNaturalOrientation() {
+        Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
+        return display.getRotation() == Surface.ROTATION_0 ||
+                display.getRotation() == Surface.ROTATION_180;
     }
 
     /**
@@ -508,8 +451,11 @@ public class UiDevice {
     }
 
     /**
-     * Re-enables the sensors and un-freezes the device rotation
-     * allowing its contents to rotate with the device physical rotation.
+     * Re-enables the sensors and un-freezes the device rotation allowing its contents
+     * to rotate with the device physical rotation. Note that by un-freezing the rotation,
+     * the screen contents may suddenly rotate depending on the current physical position
+     * of the test device. During a test execution, it is best to keep the device frozen
+     * in a specific orientation until the test case execution is completed.
      * @throws RemoteException
      */
     public void unfreezeRotation() throws RemoteException {
@@ -517,36 +463,38 @@ public class UiDevice {
     }
 
     /**
-     * Rotates left and also freezes rotation in that position by
-     * disabling the sensors. If you want to un-freeze the rotation
-     * and re-enable the sensors see {@link #unfreezeRotation()}. Note
-     * that doing so may cause the screen contents to rotate
-     * depending on the current physical position of the test device.
+     * Orients the device to the left and also freezes rotation in that
+     * orientation by disabling the sensors. If you want to un-freeze the rotation
+     * and re-enable the sensors see {@link #unfreezeRotation()}. Note that doing
+     * so may cause the screen contents to get re-oriented depending on the current
+     * physical position of the test device.
      * @throws RemoteException
      */
-    public void setRotationLeft() throws RemoteException {
+    public void setOrientationLeft() throws RemoteException {
         getAutomatorBridge().getInteractionController().setRotationLeft();
     }
 
     /**
-     * Rotates right and also freezes rotation in that position by
+     * Orients the device to the right and also freezes rotation in that
+     * orientation by disabling the sensors. If you want to un-freeze the rotation
+     * and re-enable the sensors see {@link #unfreezeRotation()}. Note that doing
+     * so may cause the screen contents to get re-oriented depending on the current
+     * physical position of the test device.
+     * @throws RemoteException
+     */
+    public void setOrientationRight() throws RemoteException {
+        getAutomatorBridge().getInteractionController().setRotationRight();
+    }
+
+    /**
+     * Rotates right and also freezes rotation in that orientation by
      * disabling the sensors. If you want to un-freeze the rotation
      * and re-enable the sensors see {@link #unfreezeRotation()}. Note
      * that doing so may cause the screen contents to rotate
      * depending on the current physical position of the test device.
      * @throws RemoteException
      */
-    public void setRotationRight() throws RemoteException {
-        getAutomatorBridge().getInteractionController().setRotationRight();
-    }
-
-    /**
-     * Check if the device is in its natural orientation. This is determined by
-     * checking whether the orientation is at 0 or 180 degrees.
-     * @return true if it is in natural orientation
-     * @throws RemoteException
-     */
-    public void setRotationNatural() throws RemoteException {
+    public void setOrientationNatural() throws RemoteException {
         getAutomatorBridge().getInteractionController().setRotationNatural();
     }
 
@@ -586,6 +534,7 @@ public class UiDevice {
     /**
      * Helper method used for debugging to dump the current window's layout hierarchy.
      * The file root location is /data/local/tmp
+     *
      * @param fileName
      */
     public void dumpWindowHierarchy(String fileName) {
@@ -597,7 +546,6 @@ public class UiDevice {
                             "local/tmp"), fileName));
         }
     }
-
 
     /**
      * Waits for a window content update event to occur

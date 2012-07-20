@@ -20,11 +20,8 @@ import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
- * UiScrollable is a {@link UiCollection} however this class provides additional functionality
- * where the tests need to deal with scrollable contents or desire to enumerate lists of
- * items. This calls can perform automatic searches within a scrollable container. Whether
- * the content scrolls vertically or horizontally can be set by calling
- * {@link #setAsVerticalList()} which is the default, or {@link #setAsHorizontalList()}.
+ * UiScrollable is a {@link UiCollection} and provides support for searching for items in a
+ * scrollable UI elements. Used with horizontally or vertically scrollable UI.
  */
 public class UiScrollable extends UiCollection {
     private static final String LOG_TAG = UiScrollable.class.getSimpleName();
@@ -46,10 +43,10 @@ public class UiScrollable extends UiCollection {
     private double mSwipeDeadZonePercentage = DEFAULT_SWIPE_DEADZONE_PCT;
 
     /**
-     * UiScrollable is a {@link UiCollection} and as such requires a {@link UiSelector} to identify
-     * the UI element it represents. In the case of UiScrollable, the selector specified is
-     * considered a container where further calls to enumerate or find children will be performed
-     * in.
+     * UiScrollable is a {@link UiCollection} and as such requires a {@link UiSelector} to
+     * identify the container UI element of the scrollable collection. Further operations on
+     * the items in the container will require specifying UiSelector as an item selector.
+     *
      * @param container a {@link UiSelector} selector
      */
     public UiScrollable(UiSelector container) {
@@ -75,6 +72,7 @@ public class UiScrollable extends UiCollection {
     /**
      * Used privately when performing swipe searches to decide if an element has become
      * visible or not.
+     *
      * @param selector
      * @return true if found else false
      */
@@ -87,13 +85,13 @@ public class UiScrollable extends UiCollection {
 
     /**
      * Searches for child UI element within the constraints of this UiScrollable {@link UiSelector}
-     * selector. It looks for any child matching the <code>childPattern</code> argument that has
-     * a child UI element anywhere within its sub hierarchy that has content-description text.
-     * The returned UiObject will point at the <code>childPattern</code> instance that matched the
-     * search and not at the identifying child element that matched the content description.</p>
-     * By default this operation will perform scroll search while attempting to find the
-     * UI element.
+     * container. It looks for any child matching the <code>childPattern</code> argument within its
+     * hierarchy with a matching content-description text. The returned UiObject will represent the
+     * UI element matching the <code>childPattern</code> and not the sub element that matched the
+     * content description.</p>
+     * By default this operation will perform scroll search while attempting to find the UI element
      * See {@link #getChildByDescription(UiSelector, String, boolean)}
+     *
      * @param childPattern {@link UiSelector} selector of the child pattern to match and return
      * @param text String of the identifying child contents of of the <code>childPattern</code>
      * @return {@link UiObject} pointing at and instance of <code>childPattern</code>
@@ -106,11 +104,8 @@ public class UiScrollable extends UiCollection {
     }
 
     /**
-     * Searches for child UI element within the constraints of this UiScrollable {@link UiSelector}
-     * selector. It looks for any child matching the <code>childPattern</code> argument that has
-     * a child UI element anywhere within its sub hierarchy that has content-description text.
-     * The returned UiObject will point at the <code>childPattern</code> instance that matched the
-     * search and not at the identifying child element that matched the content description.
+     * See {@link #getChildByDescription(UiSelector, String)}
+     *
      * @param childPattern {@link UiSelector} selector of the child pattern to match and return
      * @param text String may be a partial match for the content-description of a child element.
      * @param allowScrollSearch set to true if scrolling is allowed
@@ -133,6 +128,7 @@ public class UiScrollable extends UiCollection {
      * selector. It looks for any child matching the <code>childPattern</code> argument and
      * return the <code>instance</code> specified. The operation is performed only on the visible
      * items and no scrolling is performed in this case.
+     *
      * @param childPattern {@link UiSelector} selector of the child pattern to match and return
      * @param instance int the desired matched instance of this <code>childPattern</code>
      * @return {@link UiObject} pointing at and instance of <code>childPattern</code>
@@ -147,14 +143,14 @@ public class UiScrollable extends UiCollection {
 
     /**
      * Searches for child UI element within the constraints of this UiScrollable {@link UiSelector}
-     * selector. It looks for any child matching the <code>childPattern</code> argument that has
-     * a child UI element anywhere within its sub hierarchy that has text attribute =
+     * container. It looks for any child matching the <code>childPattern</code> argument that has
+     * a sub UI element anywhere within its sub hierarchy that has text attribute
      * <code>text</code>. The returned UiObject will point at the <code>childPattern</code>
-     * instance that matched the search and not at the identifying child element that matched the
-     * text attribute.</p>
+     * instance that matched the search and not at the text matched sub element</p>
      * By default this operation will perform scroll search while attempting to find the UI
      * element.
      * See {@link #getChildByText(UiSelector, String, boolean)}
+     *
      * @param childPattern {@link UiSelector} selector of the child pattern to match and return
      * @param text String of the identifying child contents of of the <code>childPattern</code>
      * @return {@link UiObject} pointing at and instance of <code>childPattern</code>
@@ -167,12 +163,8 @@ public class UiScrollable extends UiCollection {
     }
 
     /**
-     * Searches for child UI element within the constraints of this UiScrollable {@link UiSelector}
-     * selector. It looks for any child matching the <code>childPattern</code> argument that has
-     * a child UI element anywhere within its sub hierarchy that has the text attribute =
-     * <code>text</code>.
-     * The returned UiObject will point at the <code>childPattern</code> instance that matched the
-     * search and not at the identifying child element that matched the text attribute.
+     * See {@link #getChildByText(UiSelector, String)}
+     *
      * @param childPattern {@link UiSelector} selector of the child pattern to match and return
      * @param text String of the identifying child contents of of the <code>childPattern</code>
      * @param allowScrollSearch set to true if scrolling is allowed
@@ -192,8 +184,9 @@ public class UiScrollable extends UiCollection {
     }
 
     /**
-     * Performs a swipe Up on the associated UI element until the requested content-description
-     * is found or until swipe attempts have been exhausted. See {@link #setMaxSearchSwipes(int)}
+     * Performs a swipe Up on the UI element until the requested content-description
+     * is visible or until swipe attempts have been exhausted. See {@link #setMaxSearchSwipes(int)}
+     *
      * @param text to look for anywhere within the contents of this scrollable.
      * @return true if item us found else false
      */
@@ -203,7 +196,8 @@ public class UiScrollable extends UiCollection {
 
     /**
      * Perform a scroll search for a UI element matching the {@link UiSelector} selector argument.
-     * Also see {@link #scrollDescriptionIntoView(String)} and {@link #scrollTextIntoView(String)}.
+     * See {@link #scrollDescriptionIntoView(String)} and {@link #scrollTextIntoView(String)}.
+     *
      * @param selector {@link UiSelector} selector
      * @return true if the item was found and now is in view else false
      */
@@ -231,8 +225,9 @@ public class UiScrollable extends UiCollection {
     }
 
     /**
-     * Performs a swipe up on the associated display element until the requested text
-     * appears or until swipe attempts have been exhausted. See {@link #setMaxSearchSwipes(int)}
+     * Performs a swipe up on the UI element until the requested text is visible
+     * or until swipe attempts have been exhausted. See {@link #setMaxSearchSwipes(int)}
+     *
      * @param text to look for
      * @return true if item us found else false
      */
@@ -245,7 +240,8 @@ public class UiScrollable extends UiCollection {
      * use an arguments that specifies if scrolling is allowed while searching for the UI element.
      * The number of scrolls allowed to perform a search can be modified by this method.
      * The current value can be read by calling {@link #getMaxSearchSwipes()}
-     * @param swipes
+     *
+     * @param swipes is the number of search swipes until abort
      */
     public void setMaxSearchSwipes(int swipes) {
         mMaxSearchSwipes = swipes;
@@ -256,6 +252,7 @@ public class UiScrollable extends UiCollection {
      * use an arguments that specifies if scrolling is allowed while searching for the UI element.
      * The number of scrolls currently allowed to perform a search can be read by this method.
      * See {@link #setMaxSearchSwipes(int)}
+     *
      * @return max value of the number of swipes currently allowed during a scroll search
      */
     public int getMaxSearchSwipes() {
@@ -284,7 +281,8 @@ public class UiScrollable extends UiCollection {
      * Perform a scroll forward. If this list is set to vertical (see {@link #setAsVerticalList()}
      * default) then the swipes will be executed from the bottom to top. If this list is set
      * to horizontal (see {@link #setAsHorizontalList()}) then the swipes will be executed from
-     * the right to left.
+     * the right to left. Caution is required on devices configured with right to left languages
+     * like Arabic and Hebrew.
      *
      * @param steps use steps to control the speed, so that it may be a scroll, or fling
      * @return true if scrolled and false if can't scroll anymore
@@ -326,7 +324,7 @@ public class UiScrollable extends UiCollection {
     }
 
     /**
-     * A convenience version of {@link UiScrollable#scrollBackward(int)}, performs a fling
+     * See {@link UiScrollable#scrollBackward(int)}
      *
      * @return true if scrolled and false if can't scroll anymore
      */
@@ -335,7 +333,7 @@ public class UiScrollable extends UiCollection {
     }
 
     /**
-     * A convenience version of {@link UiScrollable#scrollBackward(int)}, performs a regular scroll
+     * See {@link UiScrollable#scrollBackward(int)}
      *
      * @return true if scrolled and false if can't scroll anymore
      */
@@ -347,7 +345,8 @@ public class UiScrollable extends UiCollection {
      * Perform a scroll backward. If this list is set to vertical (see {@link #setAsVerticalList()}
      * default) then the swipes will be executed from the top to bottom. If this list is set
      * to horizontal (see {@link #setAsHorizontalList()}) then the swipes will be executed from
-     * the left to right.
+     * the left to right. Caution is required on devices configured with right to left languages
+     * like Arabic and Hebrew.
      *
      * @param steps use steps to control the speed, so that it may be a scroll, or fling
      * @return true if scrolled and false if can't scroll anymore
@@ -392,7 +391,8 @@ public class UiScrollable extends UiCollection {
 
     /**
      * Scrolls to the beginning of a scrollable UI element. The beginning could be the top most
-     * in case of vertical lists or the left most in case of horizontal lists.
+     * in case of vertical lists or the left most in case of horizontal lists. Caution is required
+     * on devices configured with right to left languages like Arabic and Hebrew.
      *
      * @param steps use steps to control the speed, so that it may be a scroll, or fling
      * @return true on scrolled else false
@@ -409,7 +409,7 @@ public class UiScrollable extends UiCollection {
     }
 
     /**
-     * A convenience version of {@link UiScrollable#scrollToBeginning(int, int)} with regular scroll
+     * See {@link UiScrollable#scrollToBeginning(int, int)}
      *
      * @param maxSwipes
      * @return true on scrolled else false
@@ -419,7 +419,7 @@ public class UiScrollable extends UiCollection {
     }
 
     /**
-     * A convenience version of {@link UiScrollable#scrollToBeginning(int, int)} with fling
+     * See {@link UiScrollable#scrollToBeginning(int, int)}
      *
      * @param maxSwipes
      * @return true on scrolled else false
@@ -430,7 +430,8 @@ public class UiScrollable extends UiCollection {
 
     /**
      * Scrolls to the end of a scrollable UI element. The end could be the bottom most
-     * in case of vertical controls or the right most for horizontal controls
+     * in case of vertical controls or the right most for horizontal controls. Caution
+     * is required on devices configured with right to left languages like Arabic and Hebrew.
      *
      * @param steps use steps to control the speed, so that it may be a scroll, or fling
      * @return true on scrolled else false
@@ -446,7 +447,7 @@ public class UiScrollable extends UiCollection {
     }
 
     /**
-     * A convenience version of {@link UiScrollable#scrollToEnd(int, int)} with regular scroll
+     * See {@link UiScrollable#scrollToEnd(int, int)
      *
      * @param maxSwipes
      * @return true on scrolled else false
@@ -456,7 +457,7 @@ public class UiScrollable extends UiCollection {
     }
 
     /**
-     * A convenience version of {@link UiScrollable#scrollToEnd(int, int)} with fling
+     * See {@link UiScrollable#scrollToEnd(int, int)}
      *
      * @param maxSwipes
      * @return true on scrolled else false
