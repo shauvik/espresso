@@ -165,9 +165,8 @@ public class UiObject {
      * {@link #scrollToBeginning(int)}, {@link #scrollToEnd(int)}, {@link #scrollBackward()},
      * {@link #scrollForward()}.
      *
-     * @param steps indicates the number of injected move steps into the system. More steps
-     * injected the smoother and slower the motion. Steps are injected about 10ms apart. So
-     * a 100 steps may take more than a second to complete.
+     * @param steps indicates the number of injected move steps into the system. Steps are
+     * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
      * @return true of successful
      * @throws UiObjectNotFoundException
      */
@@ -188,7 +187,7 @@ public class UiObject {
      * <code>scrollable</code> set to <code>true</code> for this operation to be performed.
      *
      * @param steps indicates the number of injected move steps into the system. Steps are
-     * injected about 10ms apart. So a 100 steps may take more than a second to complete.
+     * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
      * @return true if successful
      * @throws UiObjectNotFoundException
      */
@@ -209,7 +208,7 @@ public class UiObject {
      * <code>scrollable</code> set to <code>true</code> for this operation to be performed.
      *
      * @param steps indicates the number of injected move steps into the system. Steps are
-     * injected about 10ms apart. So a 100 steps may take more than a second to complete.
+     * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
      * @return true if successful
      * @throws UiObjectNotFoundException
      */
@@ -229,7 +228,7 @@ public class UiObject {
      * <code>scrollable</code> set to <code>true</code> for this operation to be performed.
      *
      * @param steps indicates the number of injected move steps into the system. Steps are
-     * injected about 10ms apart. So a 100 steps may take more than a second to complete.
+     * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
      * @return true if successful
      * @throws UiObjectNotFoundException
      */

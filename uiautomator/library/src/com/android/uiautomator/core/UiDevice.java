@@ -323,8 +323,8 @@ public class UiDevice {
 
     /**
      * Performs a swipe from one coordinate to another using the number of steps
-     * to determine smoothness and speed. Each step execution is throttled to 10ms
-     * per step. So for a 100 steps, the swipe will take about 1 second to complete.
+     * to determine smoothness and speed. Each step execution is throttled to 5ms
+     * per step. So for a 100 steps, the swipe will take about 1/2 second to complete.
      *
      * @param startX
      * @param startY
@@ -340,7 +340,7 @@ public class UiDevice {
 
     /**
      * Performs a swipe between points in the Point array. Each step execution is throttled
-     * to 10ms per step. So for a 100 steps, the swipe will take about 1 second to complete
+     * to 5ms per step. So for a 100 steps, the swipe will take about 1/2 second to complete
      *
      * @param segments is Point array containing at least one Point object
      * @param segmentSteps steps to inject between two Points
