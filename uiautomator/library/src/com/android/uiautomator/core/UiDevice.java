@@ -257,23 +257,6 @@ public class UiDevice {
     }
 
     /**
-     * Gets the width of the display, in pixels. The width and height details
-     * are reported based on the current orientation of the display.
-     * @return width in pixels or zero on failure
-     */
-    public int getDisplayWidth() {
-        IWindowManager wm = IWindowManager.Stub.asInterface(
-                ServiceManager.getService(Context.WINDOW_SERVICE));
-        Point p = new Point();
-        try {
-            wm.getDisplaySize(p);
-        } catch (RemoteException e) {
-            return 0;
-        }
-        return p.x;
-    }
-
-    /**
      * Press recent apps soft key
      * @return true if successful
      * @throws RemoteException
@@ -291,20 +274,23 @@ public class UiDevice {
     }
 
     /**
+     * Gets the width of the display, in pixels. The width and height details
+     * are reported based on the current orientation of the display.
+     * @return width in pixels or zero on failure
+     */
+    public int getDisplayWidth() {
+        Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
+        return display.getWidth();
+    }
+
+    /**
      * Gets the height of the display, in pixels. The size is adjusted based
      * on the current orientation of the display.
      * @return height in pixels or zero on failure
      */
     public int getDisplayHeight() {
-        IWindowManager wm = IWindowManager.Stub.asInterface(
-                ServiceManager.getService(Context.WINDOW_SERVICE));
-        Point p = new Point();
-        try {
-            wm.getDisplaySize(p);
-        } catch (RemoteException e) {
-            return 0;
-        }
-        return p.y;
+        Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
+        return display.getHeight();
     }
 
     /**
