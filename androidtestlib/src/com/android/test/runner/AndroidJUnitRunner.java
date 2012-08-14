@@ -71,10 +71,20 @@ import java.io.PrintStream;
  * <p/>
  * <b>To debug your tests, set a break point in your code and pass:</b>
  * -e debug true
+ * <p/>
+ * <b>Running a specific test size i.e. annotated with
+ * {@link android.test.suitebuilder.annotation.SmallTest} or
+ * {@link android.test.suitebuilder.annotation.MediumTest} or
+ * {@link android.test.suitebuilder.annotation.LargeTest}:</b>
+ * adb shell am instrument -w -e size [small|medium|large]
+ * com.android.foo/android.test.InstrumentationTestRunner
+ * <p/>
  */
 public class AndroidJUnitRunner extends Instrumentation {
 
     public static final String ARGUMENT_TEST_CLASS = "class";
+
+    private static final String ARGUMENT_TEST_SIZE = "size";
 
     /**
      * The following keys are used in the status bundle to provide structured reports to
@@ -231,6 +241,11 @@ public class AndroidJUnitRunner extends Instrumentation {
             for (String className : testClassName.split(",")) {
                 parseTestClass(className, builder);
             }
+        }
+
+        String testSize = arguments.getString(ARGUMENT_TEST_SIZE);
+        if (testSize != null) {
+            builder.addTestSizeFilter(testSize);
         }
         return builder.build(this);
     }
