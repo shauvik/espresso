@@ -16,6 +16,9 @@
 package com.android.test.runner;
 
 import android.app.Instrumentation;
+import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import com.android.test.runner.ClassPathScanner.ChainedClassNameFilter;
@@ -31,6 +34,7 @@ import org.junit.runners.model.InitializationError;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,6 +52,41 @@ public class TestRequestBuilder {
     private Filter mFilter = Filter.ALL;
 
     private PrintStream mWriter;
+
+    /**
+     * Filter that only runs tests whose method or class has been annotated with given filter.
+     */
+    private static class AnnotationInclusionFilter extends Filter {
+
+        private final Class<? extends Annotation> mAnnotationClass;
+
+        AnnotationInclusionFilter(Class<? extends Annotation> annotation) {
+            mAnnotationClass = annotation;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean shouldRun(Description description) {
+            if (description.isTest()) {
+                return description.getAnnotation(mAnnotationClass) != null ||
+                        description.getTestClass().isAnnotationPresent(mAnnotationClass);
+            } else {
+                // don't filter out any test classes/suites, because their methods may have correct
+                // annotation
+                return true;
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String describe() {
+            return String.format("annotation %s", mAnnotationClass.getName());
+        }
+    }
 
     public TestRequestBuilder(PrintStream writer, String... apkPaths) {
         mApkPaths = apkPaths;
@@ -73,6 +112,22 @@ public class TestRequestBuilder {
         if (clazz != null) {
             mFilter = mFilter.intersect(Filter.matchMethodDescription(
                     Description.createTestDescription(clazz, testMethodName)));
+        }
+    }
+
+    /**
+     * Run only tests with given size
+     * @param testSize
+     */
+    public void addTestSizeFilter(String testSize) {
+        if ("small".equals(testSize)) {
+            mFilter = mFilter.intersect(new AnnotationInclusionFilter(SmallTest.class));
+        } else if ("medium".equals(testSize)) {
+            mFilter = mFilter.intersect(new AnnotationInclusionFilter(MediumTest.class));
+        } else if ("large".equals(testSize)) {
+            mFilter = mFilter.intersect(new AnnotationInclusionFilter(LargeTest.class));
+        } else {
+            Log.e(LOG_TAG, String.format("Unrecognized test size '%s'", testSize));
         }
     }
 
