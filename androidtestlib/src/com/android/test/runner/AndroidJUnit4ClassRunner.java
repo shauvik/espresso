@@ -102,7 +102,7 @@ class AndroidJUnit4ClassRunner extends BlockJUnit4ClassRunner {
         List<FrameworkField> contextFields = getTestClass().getAnnotatedFields(
                 InjectContext.class);
         for (FrameworkField contextField : contextFields) {
-            setFieldValue(test, contextField.getField(), mInstr.getContext());
+            setFieldValue(test, contextField.getField(), mInstr.getTargetContext());
         }
     }
 

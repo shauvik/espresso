@@ -29,7 +29,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Use this to inject a {@link Context} representing {@link Instrumentation#getContext()}
+ * Use this to inject a {@link Context} representing {@link Instrumentation#getTargetContext()}
  * into your JUnit4-style test.
  * <p/>
  * To use, just add the correct annotation to an {@link Context} field like this:
