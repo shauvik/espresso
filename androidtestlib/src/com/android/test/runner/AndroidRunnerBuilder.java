@@ -17,6 +17,9 @@ package com.android.test.runner;
 
 import android.app.Instrumentation;
 
+import com.android.test.runner.junit3.AndroidJUnit3Builder;
+import com.android.test.runner.junit4.AndroidJUnit4Builder;
+
 import org.junit.internal.builders.AllDefaultPossibilitiesBuilder;
 import org.junit.runner.Runner;
 import org.junit.runners.model.RunnerBuilder;
@@ -30,11 +33,12 @@ class AndroidRunnerBuilder extends AllDefaultPossibilitiesBuilder {
     private final AndroidJUnit3Builder mAndroidJUnit3Builder;
     private final AndroidJUnit4Builder mAndroidJUnit4Builder;
 
-    public AndroidRunnerBuilder(boolean canUseSuiteMethod, Instrumentation instr) {
+    public AndroidRunnerBuilder(boolean canUseSuiteMethod, Instrumentation instr,
+            boolean skipExecution) {
         super(canUseSuiteMethod);
         mInstr = instr;
-        mAndroidJUnit3Builder = new AndroidJUnit3Builder(mInstr);
-        mAndroidJUnit4Builder = new AndroidJUnit4Builder(mInstr);
+        mAndroidJUnit3Builder = new AndroidJUnit3Builder(mInstr, skipExecution);
+        mAndroidJUnit4Builder = new AndroidJUnit4Builder(mInstr, skipExecution);
     }
 
     @Override

@@ -79,12 +79,19 @@ import java.io.PrintStream;
  * adb shell am instrument -w -e size [small|medium|large]
  * com.android.foo/android.test.InstrumentationTestRunner
  * <p/>
+ * <b>To run in 'log only' mode</b>
+ * -e log true
+ * This option will load and iterate through all test classes and methods, but will bypass actual
+ * test execution. Useful for quickly obtaining info on the tests to be executed by an
+ * instrumentation command.
+ * <p/>
  */
 public class AndroidJUnitRunner extends Instrumentation {
 
     public static final String ARGUMENT_TEST_CLASS = "class";
 
     private static final String ARGUMENT_TEST_SIZE = "size";
+    private static final String ARGUMENT_LOG_ONLY = "log";
 
     /**
      * The following keys are used in the status bundle to provide structured reports to
@@ -246,6 +253,11 @@ public class AndroidJUnitRunner extends Instrumentation {
         String testSize = arguments.getString(ARGUMENT_TEST_SIZE);
         if (testSize != null) {
             builder.addTestSizeFilter(testSize);
+        }
+
+        boolean logOnly = getBooleanArgument(arguments, ARGUMENT_LOG_ONLY);
+        if (logOnly) {
+            builder.setSkipExecution(true);
         }
         return builder.build(this);
     }

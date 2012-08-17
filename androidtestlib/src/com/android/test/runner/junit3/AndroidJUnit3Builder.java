@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.test.runner;
+package com.android.test.runner.junit3;
 
 import android.app.Instrumentation;
 
@@ -26,22 +26,30 @@ import org.junit.runners.model.RunnerBuilder;
  * A {@link RunnerBuilder} that will build customized runners needed for specialized Android
  * {@link TestCase}s.
  */
-class AndroidJUnit3Builder extends RunnerBuilder {
+public class AndroidJUnit3Builder extends RunnerBuilder {
 
     private Instrumentation mInstr;
+    private boolean mSkipExecution;
 
-    AndroidJUnit3Builder(Instrumentation instr) {
+    public AndroidJUnit3Builder(Instrumentation instr, boolean skipExecution) {
         mInstr = instr;
+        mSkipExecution = skipExecution;
     }
 
     @Override
     public Runner runnerForClass(Class<?> testClass) throws Throwable {
-        if (isAndroidTestCase(testClass)) {
+        if (mSkipExecution && isJUnit3TestCase(testClass)) {
+            return new NonExecutingJUnit3ClassRunner(testClass);
+        } else if (isAndroidTestCase(testClass)) {
             return new AndroidJUnit3ClassRunner(testClass, mInstr);
         } else if (isInstrumentationTestCase(testClass)) {
             return new AndroidJUnit3ClassRunner(testClass, mInstr);
         }
         return null;
+    }
+
+    boolean isJUnit3TestCase(Class<?> testClass) {
+        return junit.framework.TestCase.class.isAssignableFrom(testClass);
     }
 
     boolean isAndroidTestCase(Class<?> testClass) {
