@@ -43,7 +43,7 @@ class AndroidTestSuite extends TestSuite {
     @Override
     public void runTest(Test test, TestResult result) {
         if (test instanceof AndroidTestCase) {
-            ((AndroidTestCase)test).setContext(mInstr.getContext());
+            ((AndroidTestCase)test).setContext(mInstr.getTargetContext());
         }
         if (test instanceof InstrumentationTestCase) {
             ((InstrumentationTestCase)test).injectInstrumentation(mInstr);
