@@ -137,7 +137,7 @@ public class TestRequestBuilder {
      * If no classes have been explicitly added, will scan the classpath for all tests.
      *
      */
-    TestRequest build(Instrumentation instr) {
+    public TestRequest build(Instrumentation instr) {
         if (mTestLoader.isEmpty()) {
             // no class restrictions have been specified. Load all classes
             loadClassesFromClassPath();
