@@ -50,8 +50,8 @@ public class TestRequestBuilder {
     private String[] mApkPaths;
     private TestLoader mTestLoader;
     private Filter mFilter = Filter.ALL;
-
     private PrintStream mWriter;
+    private boolean mSkipExecution = false;
 
     /**
      * Filter that only runs tests whose method or class has been annotated with given filter.
@@ -132,6 +132,14 @@ public class TestRequestBuilder {
     }
 
     /**
+     * Build a request that will generate test started and test ended events, but will skip actual
+     * test execution.
+     */
+    public void setSkipExecution(boolean b) {
+        mSkipExecution = b;
+    }
+
+    /**
      * Builds the {@link TestRequest} based on current contents of added classes and methods.
      * <p/>
      * If no classes have been explicitly added, will scan the classpath for all tests.
@@ -143,8 +151,8 @@ public class TestRequestBuilder {
             loadClassesFromClassPath();
         }
 
-        Request request = classes(instr, new Computer(), mTestLoader.getLoadedClasses().toArray(
-                new Class[0]));
+        Request request = classes(instr, mSkipExecution, new Computer(),
+                mTestLoader.getLoadedClasses().toArray(new Class[0]));
         return new TestRequest(mTestLoader.getLoadFailures(), request.filterWith(mFilter));
     }
 
@@ -157,9 +165,10 @@ public class TestRequestBuilder {
      * @param classes the classes containing the tests
      * @return a <code>Request</code> that will cause all tests in the classes to be run
      */
-    private static Request classes(Instrumentation instr, Computer computer, Class<?>... classes) {
+    private static Request classes(Instrumentation instr, boolean skipExecution,
+            Computer computer, Class<?>... classes) {
         try {
-            AndroidRunnerBuilder builder = new AndroidRunnerBuilder(true, instr);
+            AndroidRunnerBuilder builder = new AndroidRunnerBuilder(true, instr, skipExecution);
             Runner suite = computer.getSuite(builder, classes);
             return Request.runner(suite);
         } catch (InitializationError e) {
@@ -185,7 +194,8 @@ public class TestRequestBuilder {
                     new ExcludePackageNameFilter("junit"),
                     new ExcludePackageNameFilter("org.junit"),
                     new ExcludePackageNameFilter("org.hamcrest"),
-                    new ExternalClassNameFilter()));
+                    new ExternalClassNameFilter(),
+                    new ExcludePackageNameFilter("com.android.test.runner.junit3")));
         } catch (IOException e) {
             mWriter.println("failed to scan classes");
             Log.e(LOG_TAG, "Failed to scan classes", e);
