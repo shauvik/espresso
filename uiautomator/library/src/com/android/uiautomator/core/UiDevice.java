@@ -18,6 +18,7 @@ package com.android.uiautomator.core;
 
 import android.content.Context;
 import android.graphics.Point;
+import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.RemoteException;
@@ -29,7 +30,6 @@ import android.view.Display;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.Surface;
-import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -102,7 +102,7 @@ public class UiDevice {
      * @return
      */
     public Point getDisplaySizeDp() {
-        Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
+        Display display = getDefaultDisplay();
         Point p = new Point();
         display.getSize(p);
         DisplayMetrics metrics = new DisplayMetrics();
@@ -279,7 +279,7 @@ public class UiDevice {
      * @return width in pixels or zero on failure
      */
     public int getDisplayWidth() {
-        Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
+        Display display = getDefaultDisplay();
         return display.getWidth();
     }
 
@@ -289,7 +289,7 @@ public class UiDevice {
      * @return height in pixels or zero on failure
      */
     public int getDisplayHeight() {
-        Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
+        Display display = getDefaultDisplay();
         return display.getHeight();
     }
 
@@ -456,7 +456,7 @@ public class UiDevice {
      * @return true if it is in natural orientation
      */
     public boolean isNaturalOrientation() {
-        Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
+        Display display = getDefaultDisplay();
         return display.getRotation() == Surface.ROTATION_0 ||
                 display.getRotation() == Surface.ROTATION_180;
     }
@@ -610,5 +610,9 @@ public class UiDevice {
             return false;
         }
         return true;
+    }
+
+    private static Display getDefaultDisplay() {
+        return DisplayManager.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
     }
 }
