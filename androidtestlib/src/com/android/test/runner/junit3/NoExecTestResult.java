@@ -13,23 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.test;
+package com.android.test.runner.junit3;
 
-import android.app.Instrumentation;
-import android.test.InstrumentationTestCase;
-import android.util.Log;
+import junit.framework.TestCase;
+import junit.framework.TestResult;
 
 /**
- * Placeholder test to verify {@link Instrumentation} gets injected to
- * {@link InstrumentationTestCase}.
+ * A benign test result that does no actually test execution, just runs
+ * through the motions
+ *
  */
-public class MyInstrumentationTestCase extends InstrumentationTestCase {
+class NoExecTestResult extends TestResult {
 
-    public MyInstrumentationTestCase() {
-        Log.i("MyInstrumentationTestCase", "I'm created");
+    /**
+     * Override parent to just inform listeners of test,
+     * and skip test execution.
+     */
+    @Override
+    protected void run(final TestCase test) {
+        startTest(test);
+        endTest(test);
     }
 
-    public void testInstrumentationInjected() {
-        assertNotNull("instrumentation was not injected", getInstrumentation());
-    }
 }

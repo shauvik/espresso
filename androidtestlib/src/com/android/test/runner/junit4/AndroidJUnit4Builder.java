@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.test.runner;
+package com.android.test.runner.junit4;
 
 import android.app.Instrumentation;
 
@@ -29,20 +29,25 @@ import java.lang.reflect.Field;
  * A {@link RunnerBuilder} that will build customized runners needed to handle {@link InjectContext}
  * and {@link InjectInstrumentation}.
  */
-class AndroidJUnit4Builder extends RunnerBuilder {
+public class AndroidJUnit4Builder extends RunnerBuilder {
 
     private final Instrumentation mInstrumentation;
+    private boolean mSkipExecution;
 
-    AndroidJUnit4Builder(Instrumentation instr) {
+    public AndroidJUnit4Builder(Instrumentation instr, boolean skipExecution) {
         mInstrumentation = instr;
+        mSkipExecution = skipExecution;
     }
 
     @Override
     public Runner runnerForClass(Class<?> testClass) throws Throwable {
-         if (hasInjectedFields(testClass)) {
-             return new AndroidJUnit4ClassRunner(testClass, mInstrumentation);
-         }
-         return null;
+        if (mSkipExecution) {
+            return new NonExecutingJUnit4ClassRunner(testClass);
+        }
+        if (hasInjectedFields(testClass)) {
+            return new AndroidJUnit4ClassRunner(testClass, mInstrumentation);
+        }
+        return null;
     }
 
     private boolean hasInjectedFields(Class<?> testClass) {

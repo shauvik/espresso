@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.test.runner;
+package com.android.test.runner.junit3;
 
 import android.app.Instrumentation;
 import android.content.Context;
