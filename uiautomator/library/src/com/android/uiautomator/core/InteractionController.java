@@ -135,9 +135,7 @@ class InteractionController {
     }
 
     public boolean click(int x, int y) {
-        if (DEBUG) {
-            Log.d(LOG_TAG, "tap (" + x + ", " + y + ")");
-        }
+        Log.d(LOG_TAG, "click (" + x + ", " + y + ")");
 
         mUiAutomatorBridge.setOperationTime();
         if (touchDown(x, y)) {
@@ -151,7 +149,7 @@ class InteractionController {
 
     public boolean clickAndWaitForNewWindow(final int x, final int y, long timeout) {
         if (DEBUG) {
-            Log.d(LOG_TAG, "tap (" + x + ", " + y + ")");
+            Log.d(LOG_TAG, "click (" + x + ", " + y + ")");
         }
         Runnable command = new Runnable() {
             @Override
