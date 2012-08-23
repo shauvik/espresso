@@ -190,7 +190,7 @@ public class UiScrollable extends UiCollection {
      * @param text to look for anywhere within the contents of this scrollable.
      * @return true if item us found else false
      */
-    public boolean scrollDescriptionIntoView(String text) {
+    public boolean scrollDescriptionIntoView(String text) throws UiObjectNotFoundException {
         return scrollIntoView(new UiSelector().description(text));
     }
 
@@ -201,7 +201,7 @@ public class UiScrollable extends UiCollection {
      * @param selector {@link UiSelector} selector
      * @return true if the item was found and now is in view else false
      */
-    public boolean scrollIntoView(UiSelector selector) {
+    public boolean scrollIntoView(UiSelector selector) throws UiObjectNotFoundException {
         // if we happen to be on top of the text we want then return here
         if (exists(getSelector().childSelector(selector))) {
             return (true);
@@ -231,7 +231,7 @@ public class UiScrollable extends UiCollection {
      * @param text to look for
      * @return true if item us found else false
      */
-    public boolean scrollTextIntoView(String text) {
+    public boolean scrollTextIntoView(String text) throws UiObjectNotFoundException {
         return scrollIntoView(new UiSelector().text(text));
     }
 
@@ -264,7 +264,7 @@ public class UiScrollable extends UiCollection {
      *
      * @return true if scrolled and false if can't scroll anymore
      */
-    public boolean flingForward() {
+    public boolean flingForward() throws UiObjectNotFoundException {
         return scrollForward(FLING_STEPS);
     }
 
@@ -273,7 +273,7 @@ public class UiScrollable extends UiCollection {
      *
      * @return true if scrolled and false if can't scroll anymore
      */
-    public boolean scrollForward() {
+    public boolean scrollForward() throws UiObjectNotFoundException {
         return scrollForward(SCROLL_STEPS);
     }
 
@@ -287,12 +287,11 @@ public class UiScrollable extends UiCollection {
      * @param steps use steps to control the speed, so that it may be a scroll, or fling
      * @return true if scrolled and false if can't scroll anymore
      */
-    public boolean scrollForward(int steps) {
+    public boolean scrollForward(int steps) throws UiObjectNotFoundException {
         Log.d(LOG_TAG, "scrollForward() on selector = " + getSelector());
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
         if(node == null) {
-            // Object Not Found
-            return false;
+            throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = new Rect();;
         node.getBoundsInScreen(rect);
@@ -328,7 +327,7 @@ public class UiScrollable extends UiCollection {
      *
      * @return true if scrolled and false if can't scroll anymore
      */
-    public boolean flingBackward() {
+    public boolean flingBackward() throws UiObjectNotFoundException {
         return scrollBackward(FLING_STEPS);
     }
 
@@ -337,7 +336,7 @@ public class UiScrollable extends UiCollection {
      *
      * @return true if scrolled and false if can't scroll anymore
      */
-    public boolean scrollBackward() {
+    public boolean scrollBackward() throws UiObjectNotFoundException {
         return scrollBackward(SCROLL_STEPS);
     }
 
@@ -351,12 +350,11 @@ public class UiScrollable extends UiCollection {
      * @param steps use steps to control the speed, so that it may be a scroll, or fling
      * @return true if scrolled and false if can't scroll anymore
      */
-    public boolean scrollBackward(int steps) {
+    public boolean scrollBackward(int steps) throws UiObjectNotFoundException {
         Log.d(LOG_TAG, "scrollBackward() on selector = " + getSelector());
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
-        if(node == null) {
-            // Object Not Found
-            return false;
+        if (node == null) {
+            throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = new Rect();;
         node.getBoundsInScreen(rect);
@@ -397,7 +395,7 @@ public class UiScrollable extends UiCollection {
      * @param steps use steps to control the speed, so that it may be a scroll, or fling
      * @return true on scrolled else false
      */
-    public boolean scrollToBeginning(int maxSwipes, int steps) {
+    public boolean scrollToBeginning(int maxSwipes, int steps) throws UiObjectNotFoundException {
         Log.d(LOG_TAG, "scrollToBeginning() on selector = " + getSelector());
         // protect against potential hanging and return after preset attempts
         for(int x = 0; x < maxSwipes; x++) {
@@ -414,7 +412,7 @@ public class UiScrollable extends UiCollection {
      * @param maxSwipes
      * @return true on scrolled else false
      */
-    public boolean scrollToBeginning(int maxSwipes) {
+    public boolean scrollToBeginning(int maxSwipes) throws UiObjectNotFoundException {
         return scrollToBeginning(maxSwipes, SCROLL_STEPS);
     }
 
@@ -424,7 +422,7 @@ public class UiScrollable extends UiCollection {
      * @param maxSwipes
      * @return true on scrolled else false
      */
-    public boolean flingToBeginning(int maxSwipes) {
+    public boolean flingToBeginning(int maxSwipes) throws UiObjectNotFoundException {
         return scrollToBeginning(maxSwipes, FLING_STEPS);
     }
 
@@ -436,7 +434,7 @@ public class UiScrollable extends UiCollection {
      * @param steps use steps to control the speed, so that it may be a scroll, or fling
      * @return true on scrolled else false
      */
-    public boolean scrollToEnd(int maxSwipes, int steps) {
+    public boolean scrollToEnd(int maxSwipes, int steps) throws UiObjectNotFoundException {
         // protect against potential hanging and return after preset attempts
         for(int x = 0; x < maxSwipes; x++) {
             if(!scrollForward(steps)) {
@@ -452,7 +450,7 @@ public class UiScrollable extends UiCollection {
      * @param maxSwipes
      * @return true on scrolled else false
      */
-    public boolean scrollToEnd(int maxSwipes) {
+    public boolean scrollToEnd(int maxSwipes) throws UiObjectNotFoundException {
         return scrollToEnd(maxSwipes, SCROLL_STEPS);
     }
 
@@ -462,7 +460,7 @@ public class UiScrollable extends UiCollection {
      * @param maxSwipes
      * @return true on scrolled else false
      */
-    public boolean flingToEnd(int maxSwipes) {
+    public boolean flingToEnd(int maxSwipes) throws UiObjectNotFoundException {
         return scrollToEnd(maxSwipes, FLING_STEPS);
     }
 
