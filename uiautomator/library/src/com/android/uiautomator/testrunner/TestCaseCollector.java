@@ -26,6 +26,7 @@ import java.util.List;
 /**
  * A convenient class that encapsulates functions for adding test classes
  *
+ * @hide
  */
 public class TestCaseCollector {
 

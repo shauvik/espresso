@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 /**
  * A {@link TestCaseFilter} that accepts testFoo methods and {@link UiAutomatorTestCase} classes
  *
+ * @hide
  */
 public class UiAutomatorTestCaseFilter implements TestCaseFilter {
 
