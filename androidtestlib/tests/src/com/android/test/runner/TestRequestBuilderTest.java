@@ -15,23 +15,18 @@
  */
 package com.android.test.runner;
 
-
 import android.app.Instrumentation;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
 
 import com.android.test.InjectInstrumentation;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
-import org.junit.runner.notification.RunListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-
 
 /**
  * Unit tests for {@link TestRequestBuilder}.
@@ -105,5 +100,35 @@ public class TestRequestBuilderTest {
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(3, result.getRunCount());
+    }
+
+    /**
+     * Test that annotation filtering by class works
+     */
+    @Test
+    public void testAddAnnotationInclusionFilter() {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addAnnotationInclusionFilter(SmallTest.class.getName());
+        b.addTestClass(SampleTest.class.getName());
+        b.addTestClass(SampleClassSize.class.getName());
+        TestRequest request = b.build(mInstr);
+        JUnitCore testRunner = new JUnitCore();
+        Result result = testRunner.run(request.getRequest());
+        Assert.assertEquals(3, result.getRunCount());
+    }
+
+    /**
+     * Test that annotation filtering by class works
+     */
+    @Test
+    public void testAddAnnotationExclusionFilter() {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addAnnotationExclusionFilter(SmallTest.class.getName());
+        b.addTestClass(SampleTest.class.getName());
+        b.addTestClass(SampleClassSize.class.getName());
+        TestRequest request = b.build(mInstr);
+        JUnitCore testRunner = new JUnitCore();
+        Result result = testRunner.run(request.getRequest());
+        Assert.assertEquals(1, result.getRunCount());
     }
 }

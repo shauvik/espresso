@@ -19,6 +19,7 @@ import android.app.Instrumentation;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
 import com.android.test.runner.ClassPathScanner.ChainedClassNameFilter;
@@ -49,7 +50,7 @@ public class TestRequestBuilder {
 
     private String[] mApkPaths;
     private TestLoader mTestLoader;
-    private Filter mFilter = Filter.ALL;
+    private Filter mFilter = new AnnotationExclusionFilter(Suppress.class);
     private PrintStream mWriter;
     private boolean mSkipExecution = false;
 
@@ -85,6 +86,39 @@ public class TestRequestBuilder {
         @Override
         public String describe() {
             return String.format("annotation %s", mAnnotationClass.getName());
+        }
+    }
+
+    /**
+     * Filter out tests whose method or class has been annotated with given filter.
+     */
+    private static class AnnotationExclusionFilter extends Filter {
+
+        private final Class<? extends Annotation> mAnnotationClass;
+
+        AnnotationExclusionFilter(Class<? extends Annotation> annotation) {
+            mAnnotationClass = annotation;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean shouldRun(Description description) {
+            if (description.getTestClass().isAnnotationPresent(mAnnotationClass) ||
+                    description.getAnnotation(mAnnotationClass) != null) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String describe() {
+            return String.format("not annotation %s", mAnnotationClass.getName());
         }
     }
 
@@ -128,6 +162,30 @@ public class TestRequestBuilder {
             mFilter = mFilter.intersect(new AnnotationInclusionFilter(LargeTest.class));
         } else {
             Log.e(LOG_TAG, String.format("Unrecognized test size '%s'", testSize));
+        }
+    }
+
+    /**
+     * Only run tests annotated with given annotation class.
+     *
+     * @param annotation the full class name of annotation
+     */
+    public void addAnnotationInclusionFilter(String annotation) {
+        Class<? extends Annotation> annotationClass = loadAnnotationClass(annotation);
+        if (annotationClass != null) {
+            mFilter = mFilter.intersect(new AnnotationInclusionFilter(annotationClass));
+        }
+    }
+
+    /**
+     * Skip tests annotated with given annotation class.
+     *
+     * @param notAnnotation the full class name of annotation
+     */
+    public void addAnnotationExclusionFilter(String notAnnotation) {
+        Class<? extends Annotation> annotationClass = loadAnnotationClass(notAnnotation);
+        if (annotationClass != null) {
+            mFilter = mFilter.intersect(new AnnotationExclusionFilter(annotationClass));
         }
     }
 
@@ -210,5 +268,18 @@ public class TestRequestBuilder {
      */
     ClassPathScanner createClassPathScanner(String... apkPaths) {
         return new ClassPathScanner(apkPaths);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Class<? extends Annotation> loadAnnotationClass(String className) {
+        try {
+            Class<?> clazz = Class.forName(className);
+            return (Class<? extends Annotation>)clazz;
+        } catch (ClassNotFoundException e) {
+            Log.e(LOG_TAG, String.format("Could not find annotation class: %s", className));
+        } catch (ClassCastException e) {
+            Log.e(LOG_TAG, String.format("Class %s is not an annotation", className));
+        }
+        return null;
     }
 }

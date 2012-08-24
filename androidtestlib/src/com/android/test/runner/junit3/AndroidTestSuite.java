@@ -33,10 +33,15 @@ import org.junit.Ignore;
 @Ignore
 class AndroidTestSuite extends TestSuite {
 
-    private Instrumentation mInstr;
+    private final Instrumentation mInstr;
 
     AndroidTestSuite(Class<?> clazz, Instrumentation instrumentation) {
         super(clazz);
+        mInstr = instrumentation;
+    }
+
+    AndroidTestSuite(String name, Instrumentation instrumentation) {
+        super(name);
         mInstr = instrumentation;
     }
 
@@ -49,5 +54,9 @@ class AndroidTestSuite extends TestSuite {
             ((InstrumentationTestCase)test).injectInstrumentation(mInstr);
         }
         super.runTest(test, result);
+    }
+
+    Instrumentation getInstrumentation() {
+        return mInstr;
     }
 }
