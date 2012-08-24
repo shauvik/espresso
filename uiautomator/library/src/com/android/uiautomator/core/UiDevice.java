@@ -100,6 +100,7 @@ public class UiDevice {
      * The returned display size is adjusted per screen rotation
      *
      * @return
+     * @hide
      */
     public Point getDisplaySizeDp() {
         Display display = getDefaultDisplay();
