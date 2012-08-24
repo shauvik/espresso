@@ -116,7 +116,7 @@ public class UiAutomatorTestCase extends TestCase {
         SystemClock.sleep(ms);
     }
 
-    protected void setDummyIme() throws RemoteException {
+    private void setDummyIme() throws RemoteException {
         IInputMethodManager im = IInputMethodManager.Stub.asInterface(ServiceManager
                 .getService(Context.INPUT_METHOD_SERVICE));
         List<InputMethodInfo> infos = im.getInputMethodList();
@@ -133,7 +133,7 @@ public class UiAutomatorTestCase extends TestCase {
         im.setInputMethod(null, id);
     }
 
-    protected void restoreActiveIme() throws RemoteException {
+    private void restoreActiveIme() throws RemoteException {
         // TODO: figure out a way to restore active IME
         // Currently retrieving active IME requires querying secure settings provider, which is hard
         // to do without a Context; so the caveat here is that to make the post test device usable,

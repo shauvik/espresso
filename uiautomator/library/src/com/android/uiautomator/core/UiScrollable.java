@@ -38,7 +38,7 @@ public class UiScrollable extends UiCollection {
     private static int mMaxSearchSwipes = 30;
 
     // Used in ScrollForward() and ScrollBackward() to determine swipe direction
-    protected boolean mIsVerticalList = true;
+    private boolean mIsVerticalList = true;
 
     private double mSwipeDeadZonePercentage = DEFAULT_SWIPE_DEADZONE_PCT;
 
