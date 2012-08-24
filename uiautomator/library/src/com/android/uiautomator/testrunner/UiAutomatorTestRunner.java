@@ -43,6 +43,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @hide
+ */
 public class UiAutomatorTestRunner {
 
     private static final String LOGTAG = UiAutomatorTestRunner.class.getSimpleName();

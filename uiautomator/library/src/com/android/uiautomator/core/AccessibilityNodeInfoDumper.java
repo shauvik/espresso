@@ -30,6 +30,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 
+/**
+ *
+ * @hide
+ */
 public class AccessibilityNodeInfoDumper {
 
     private static final String LOGTAG = AccessibilityNodeInfoDumper.class.getSimpleName();

@@ -39,9 +39,8 @@ public class UiObject {
     protected static final long WAIT_FOR_WINDOW_TMEOUT = 5500;
     protected static final int SWIPE_MARGIN_LIMIT = 5;
 
-    protected UiSelector mSelector;
-    protected final UiDevice mDevice;
-    protected final UiAutomatorBridge mUiAutomationBridge;
+    private UiSelector mSelector;
+    private final UiAutomatorBridge mUiAutomationBridge;
 
     /**
      * Constructs a UiObject to represent a specific UI element matched by the specified
@@ -51,7 +50,6 @@ public class UiObject {
      */
     public UiObject(UiSelector selector) {
         mUiAutomationBridge = UiDevice.getInstance().getAutomatorBridge();
-        mDevice = UiDevice.getInstance();
         mSelector = selector;
     }
 
@@ -71,7 +69,7 @@ public class UiObject {
      *
      * @return {@link QueryController}
      */
-    protected QueryController getQueryController() {
+    QueryController getQueryController() {
         return mUiAutomationBridge.getQueryController();
     }
 
@@ -81,7 +79,7 @@ public class UiObject {
      *
      * @return {@link InteractionController}
      */
-    protected InteractionController getInteractionController() {
+    InteractionController getInteractionController() {
         return mUiAutomationBridge.getInteractionController();
     }
 
