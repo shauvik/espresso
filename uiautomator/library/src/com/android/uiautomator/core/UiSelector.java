@@ -54,7 +54,6 @@ public class UiSelector {
     static final int SELECTOR_COUNT = 23;
 
     private SparseArray<Object> mSelectorAttributes = new SparseArray<Object>();
-    public static final String LOG_TAG = UiSelector.class.getSimpleName();
 
     public UiSelector() {
     }
