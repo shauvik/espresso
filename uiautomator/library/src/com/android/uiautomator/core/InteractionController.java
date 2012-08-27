@@ -148,9 +148,8 @@ class InteractionController {
     }
 
     public boolean clickAndWaitForNewWindow(final int x, final int y, long timeout) {
-        if (DEBUG) {
-            Log.d(LOG_TAG, "click (" + x + ", " + y + ")");
-        }
+        Log.d(LOG_TAG, "clickAndWaitForNewWindow (" + x + ", " + y + ")");
+
         Runnable command = new Runnable() {
             @Override
             public void run() {
