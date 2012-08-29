@@ -18,7 +18,7 @@ package com.android.uiautomator.core;
 
 import android.content.Context;
 import android.graphics.Point;
-import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerGlobal;
 import android.os.Build;
 import android.os.Environment;
 import android.os.RemoteException;
@@ -614,6 +614,6 @@ public class UiDevice {
     }
 
     private static Display getDefaultDisplay() {
-        return DisplayManager.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
+        return DisplayManagerGlobal.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
     }
 }
