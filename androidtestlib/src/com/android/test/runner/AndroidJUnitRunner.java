@@ -21,6 +21,7 @@ import android.app.Instrumentation;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Looper;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
 import org.junit.internal.TextListener;
@@ -79,6 +80,24 @@ import java.io.PrintStream;
  * adb shell am instrument -w -e size [small|medium|large]
  * com.android.foo/android.test.InstrumentationTestRunner
  * <p/>
+ * <b>Filter test run to tests with given annotation:</b> adb shell am instrument -w
+ * -e annotation com.android.foo.MyAnnotation
+ * com.android.foo/android.test.InstrumentationTestRunner
+ * <p/>
+ * If used with other options, the resulting test run will contain the intersection of the two
+ * options.
+ * e.g. "-e size large -e annotation com.android.foo.MyAnnotation" will run only tests with both
+ * the {@link LargeTest} and "com.android.foo.MyAnnotation" annotations.
+ * <p/>
+ * <b>Filter test run to tests <i>without</i> given annotation:</b> adb shell am instrument -w
+ * -e notAnnotation com.android.foo.MyAnnotation
+ * com.android.foo/android.test.InstrumentationTestRunner
+ * <p/>
+ * As above, if used with other options, the resulting test run will contain the intersection of
+ * the two options.
+ * e.g. "-e size large -e notAnnotation com.android.foo.MyAnnotation" will run tests with
+ * the {@link LargeTest} annotation that do NOT have the "com.android.foo.MyAnnotation" annotations.
+ * <p/>
  * <b>To run in 'log only' mode</b>
  * -e log true
  * This option will load and iterate through all test classes and methods, but will bypass actual
@@ -92,6 +111,8 @@ public class AndroidJUnitRunner extends Instrumentation {
 
     private static final String ARGUMENT_TEST_SIZE = "size";
     private static final String ARGUMENT_LOG_ONLY = "log";
+    private static final String ARGUMENT_ANNOTATION = "annotation";
+    private static final String ARGUMENT_NOT_ANNOTATION = "notAnnotation";
 
     /**
      * The following keys are used in the status bundle to provide structured reports to
@@ -253,6 +274,16 @@ public class AndroidJUnitRunner extends Instrumentation {
         String testSize = arguments.getString(ARGUMENT_TEST_SIZE);
         if (testSize != null) {
             builder.addTestSizeFilter(testSize);
+        }
+
+        String annotation = arguments.getString(ARGUMENT_ANNOTATION);
+        if (annotation != null) {
+            builder.addAnnotationInclusionFilter(annotation);
+        }
+
+        String notAnnotation = arguments.getString(ARGUMENT_NOT_ANNOTATION);
+        if (notAnnotation != null) {
+            builder.addAnnotationExclusionFilter(notAnnotation);
         }
 
         boolean logOnly = getBooleanArgument(arguments, ARGUMENT_LOG_ONLY);
