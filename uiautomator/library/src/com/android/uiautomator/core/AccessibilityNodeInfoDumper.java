@@ -74,6 +74,8 @@ public class AccessibilityNodeInfoDumper {
             serializer.setOutput(stringWriter);
             serializer.startDocument("UTF-8", true);
             serializer.startTag("", "hierarchy");
+            serializer.attribute("", "rotation",
+                    Integer.toString(UiDevice.getInstance().getDisplayRotation()));
             dumpNodeRec(root, serializer, 0);
             serializer.endTag("", "hierarchy");
             serializer.endDocument();
