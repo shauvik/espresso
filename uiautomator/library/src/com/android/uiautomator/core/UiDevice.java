@@ -27,7 +27,6 @@ import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
-import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.accessibility.AccessibilityEvent;
@@ -281,7 +280,9 @@ public class UiDevice {
      */
     public int getDisplayWidth() {
         Display display = getDefaultDisplay();
-        return display.getWidth();
+        Point p = new Point();
+        display.getSize(p);
+        return p.x;
     }
 
     /**
@@ -291,7 +292,9 @@ public class UiDevice {
      */
     public int getDisplayHeight() {
         Display display = getDefaultDisplay();
-        return display.getHeight();
+        Point p = new Point();
+        display.getSize(p);
+        return p.y;
     }
 
     /**
@@ -460,6 +463,14 @@ public class UiDevice {
         Display display = getDefaultDisplay();
         return display.getRotation() == Surface.ROTATION_0 ||
                 display.getRotation() == Surface.ROTATION_180;
+    }
+
+    /**
+     * Returns the current rotation of the display, as defined in {@link Surface}
+     * @return
+     */
+    public int getDisplayRotation() {
+        return getDefaultDisplay().getRotation();
     }
 
     /**
