@@ -16,7 +16,6 @@
 
 package com.android.uiautomator.core;
 
-import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Environment;
 import android.os.SystemClock;
@@ -25,12 +24,12 @@ import android.util.Xml;
 import android.view.Display;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import org.xmlpull.v1.XmlSerializer;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
+
+import org.xmlpull.v1.XmlSerializer;
 
 /**
  *
@@ -39,8 +38,12 @@ import java.io.StringWriter;
 public class AccessibilityNodeInfoDumper {
 
     private static final String LOGTAG = AccessibilityNodeInfoDumper.class.getSimpleName();
-    private static final String[] EXCLUDED_CLASSES = new String[]
-            {"LinearLayout", "RelativeLayout", "ListView"};
+    private static final String[] NAF_EXCLUDED_CLASSES = new String[] {
+        android.widget.FrameLayout.class.getName(), android.widget.GridView.class.getName(),
+        android.widget.GridLayout.class.getName(), android.widget.ListView.class.getName(),
+        android.widget.LinearLayout.class.getName(), android.widget.RelativeLayout.class.getName(),
+        android.widget.TableLayout.class.getName()
+    };
 
     /**
      * Using {@link AccessibilityNodeInfo} this method will walk the layout hierarchy
@@ -93,7 +96,7 @@ public class AccessibilityNodeInfoDumper {
 
     private static void dumpNodeRec(AccessibilityNodeInfo node, XmlSerializer serializer, int index)
             throws IOException {
-        if(!excludedClass(node) && !accessibilityCheck(node)) {
+        if(!nafExcludedClass(node) && !nafCheck(node)) {
             serializer.comment("NAF: The following control may not be accessibility friendly");
             serializer.startTag("", "node");
             serializer.attribute("", "NAF", Boolean.toString(true));
@@ -115,16 +118,15 @@ public class AccessibilityNodeInfoDumper {
         serializer.attribute("", "long-clickable", Boolean.toString(node.isLongClickable()));
         serializer.attribute("", "password", Boolean.toString(node.isPassword()));
         serializer.attribute("", "selected", Boolean.toString(node.isSelected()));
-        Rect bounds = new Rect();
-        node.getBoundsInScreen(bounds);
-        serializer.attribute("", "bounds", bounds.toShortString());
+        serializer.attribute("", "bounds",
+                AccessibilityNodeInfoHelper.getVisibleBoundsInScreen(node).toShortString());
         int count = node.getChildCount();
         for (int i = 0; i < count; i++) {
             AccessibilityNodeInfo child = node.getChild(i);
             if (child != null) {
                 if (child.isVisibleToUser()) {
-                dumpNodeRec(child, serializer, i);
-                child.recycle();
+                    dumpNodeRec(child, serializer, i);
+                    child.recycle();
                 } else {
                     Log.i(LOGTAG, String.format("Skipping invisible child: %s", child.toString()));
                 }
@@ -137,15 +139,16 @@ public class AccessibilityNodeInfoDumper {
     }
 
     /**
-     * The list of classes to exclude my not be complete. We're attempting to only
-     * reduce noise from standard layout classes that may be falsely configured to
-     * accept clicks and are also enabled.
+     * The list of classes to exclude my not be complete. We're attempting to
+     * only reduce noise from standard layout classes that may be falsely
+     * configured to accept clicks and are also enabled.
+     *
      * @param n
      * @return
      */
-    private static boolean excludedClass(AccessibilityNodeInfo n) {
+    private static boolean nafExcludedClass(AccessibilityNodeInfo n) {
         String className = safeCharSeqToString(n.getClassName());
-        for(String excludedClassName : EXCLUDED_CLASSES) {
+        for(String excludedClassName : NAF_EXCLUDED_CLASSES) {
             if(className.endsWith(excludedClassName))
                 return true;
         }
@@ -153,13 +156,16 @@ public class AccessibilityNodeInfoDumper {
     }
 
     /**
-     * We're looking for UI controls that are enabled, clickable but have no text nor
-     * content-description. Such controls configuration indicate an interactive control
-     * is present in the UI and is most likely not accessibility friendly.
+     * We're looking for UI controls that are enabled, clickable but have no
+     * text nor content-description. Such controls configuration indicate an
+     * interactive control is present in the UI and is most likely not
+     * accessibility friendly. We refer to such controls here as NAF controls
+     * (Not Accessibility Friendly)
+     *
      * @param n
      * @return
      */
-    private static boolean accessibilityCheck(AccessibilityNodeInfo n) {
+    private static boolean nafCheck(AccessibilityNodeInfo n) {
         return !(n.isClickable() && n.isEnabled() &&
                 safeCharSeqToString(n.getContentDescription()).isEmpty() &&
                 safeCharSeqToString(n.getText()).isEmpty());
