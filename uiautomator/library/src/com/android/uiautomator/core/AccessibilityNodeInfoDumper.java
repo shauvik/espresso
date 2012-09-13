@@ -17,10 +17,12 @@
 package com.android.uiautomator.core;
 
 import android.graphics.Rect;
+import android.hardware.display.DisplayManagerGlobal;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Xml;
+import android.view.Display;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.xmlpull.v1.XmlSerializer;
@@ -74,8 +76,9 @@ public class AccessibilityNodeInfoDumper {
             serializer.setOutput(stringWriter);
             serializer.startDocument("UTF-8", true);
             serializer.startTag("", "hierarchy");
-            serializer.attribute("", "rotation",
-                    Integer.toString(UiDevice.getInstance().getDisplayRotation()));
+            serializer.attribute("", "rotation", Integer.toString(
+                    DisplayManagerGlobal.getInstance().getRealDisplay(
+                            Display.DEFAULT_DISPLAY).getRotation()));
             dumpNodeRec(root, serializer, 0);
             serializer.endTag("", "hierarchy");
             serializer.endDocument();
