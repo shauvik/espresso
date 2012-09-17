@@ -39,7 +39,7 @@ public class UiObject {
     protected static final long WAIT_FOR_WINDOW_TMEOUT = 5500;
     protected static final int SWIPE_MARGIN_LIMIT = 5;
 
-    private UiSelector mSelector;
+    private final UiSelector mSelector;
     private final UiAutomatorBridge mUiAutomationBridge;
 
     /**
@@ -242,7 +242,7 @@ public class UiObject {
      * Finds the visible bounds of a partially visible UI element
      *
      * @param node
-     * @return the same AccessibilityNodeInfo passed in as argument
+     * @return null if node is null, else a Rect containing visible bounds
      */
     private Rect getVisibleBounds(AccessibilityNodeInfo node) {
         if (node == null) {
@@ -250,8 +250,7 @@ public class UiObject {
         }
 
         // targeted node's bounds
-        Rect nodeRect = new Rect();
-        node.getBoundsInScreen(nodeRect);
+        Rect nodeRect = AccessibilityNodeInfoHelper.getVisibleBoundsInScreen(node);
 
         // is the targeted node within a scrollable container?
         AccessibilityNodeInfo scrollableParentNode = getScrollableParent(node);
@@ -261,17 +260,18 @@ public class UiObject {
         }
 
         // Scrollable parent's visible bounds
-        Rect parentRect = new Rect();
-        scrollableParentNode.getBoundsInScreen(parentRect);
+        Rect parentRect = AccessibilityNodeInfoHelper
+                .getVisibleBoundsInScreen(scrollableParentNode);
         // adjust for partial clipping of targeted by parent node if required
         nodeRect.intersect(parentRect);
         return nodeRect;
     }
 
     /**
-     * Walk the hierarchy up to find a scrollable parent. A scrollable parent indicates that
-     * this node may be in a content where it is partially visible due to scrolling. its
-     * clickable center maybe invisible and adjustments should be made to the click coordinates.
+     * Walk the hierarchy up to find a scrollable parent. A scrollable parent
+     * indicates that this node may be in a content where it is partially
+     * visible due to scrolling. its clickable center maybe invisible and
+     * adjustments should be made to the click coordinates.
      *
      * @param node
      * @return
