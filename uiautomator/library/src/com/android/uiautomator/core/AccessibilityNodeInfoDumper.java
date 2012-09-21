@@ -39,10 +39,8 @@ public class AccessibilityNodeInfoDumper {
 
     private static final String LOGTAG = AccessibilityNodeInfoDumper.class.getSimpleName();
     private static final String[] NAF_EXCLUDED_CLASSES = new String[] {
-        android.widget.FrameLayout.class.getName(), android.widget.GridView.class.getName(),
-        android.widget.GridLayout.class.getName(), android.widget.ListView.class.getName(),
-        android.widget.LinearLayout.class.getName(), android.widget.RelativeLayout.class.getName(),
-        android.widget.TableLayout.class.getName()
+            android.widget.GridView.class.getName(), android.widget.GridLayout.class.getName(),
+            android.widget.ListView.class.getName(), android.widget.TableLayout.class.getName()
     };
 
     /**
@@ -94,24 +92,25 @@ public class AccessibilityNodeInfoDumper {
         Log.w(LOGTAG, "Fetch time: " + (endTime - startTime) + "ms");
     }
 
-    private static void dumpNodeRec(AccessibilityNodeInfo node, XmlSerializer serializer, int index)
-            throws IOException {
-        if(!nafExcludedClass(node) && !nafCheck(node)) {
-            serializer.comment("NAF: The following control may not be accessibility friendly");
-            serializer.startTag("", "node");
-            serializer.attribute("", "NAF", Boolean.toString(true));
-        } else {
-            serializer.startTag("", "node");
-        }
+    private static boolean dumpNodeRec(AccessibilityNodeInfo node, XmlSerializer serializer,
+            int index) throws IOException {
+        boolean hasTextOrContentDescription = false;
+        boolean isClickable = node.isClickable();
+        boolean isEnabled = node.isEnabled();
+        String textValue = safeCharSeqToString(node.getText());
+        String descriptionValue = safeCharSeqToString(node.getContentDescription());
+        if (!textValue.isEmpty() || !descriptionValue.isEmpty())
+            hasTextOrContentDescription = true;
+        serializer.startTag("", "node");
         serializer.attribute("", "index", Integer.toString(index));
-        serializer.attribute("", "text", safeCharSeqToString(node.getText()));
+        serializer.attribute("", "text", textValue);
         serializer.attribute("", "class", safeCharSeqToString(node.getClassName()));
         serializer.attribute("", "package", safeCharSeqToString(node.getPackageName()));
-        serializer.attribute("", "content-desc", safeCharSeqToString(node.getContentDescription()));
+        serializer.attribute("", "content-desc", descriptionValue);
         serializer.attribute("", "checkable", Boolean.toString(node.isCheckable()));
         serializer.attribute("", "checked", Boolean.toString(node.isChecked()));
-        serializer.attribute("", "clickable", Boolean.toString(node.isClickable()));
-        serializer.attribute("", "enabled", Boolean.toString(node.isEnabled()));
+        serializer.attribute("", "clickable", Boolean.toString(isClickable));
+        serializer.attribute("", "enabled", Boolean.toString(isEnabled));
         serializer.attribute("", "focusable", Boolean.toString(node.isFocusable()));
         serializer.attribute("", "focused", Boolean.toString(node.isFocused()));
         serializer.attribute("", "scrollable", Boolean.toString(node.isScrollable()));
@@ -125,7 +124,7 @@ public class AccessibilityNodeInfoDumper {
             AccessibilityNodeInfo child = node.getChild(i);
             if (child != null) {
                 if (child.isVisibleToUser()) {
-                    dumpNodeRec(child, serializer, i);
+                    hasTextOrContentDescription |= dumpNodeRec(child, serializer, i);
                     child.recycle();
                 } else {
                     Log.i(LOGTAG, String.format("Skipping invisible child: %s", child.toString()));
@@ -135,7 +134,12 @@ public class AccessibilityNodeInfoDumper {
                         i, count, node.toString()));
             }
         }
+        // NAF check
+        if (!nafExcludedClass(node) && isClickable && isEnabled && !hasTextOrContentDescription)
+            serializer.attribute("", "NAF", Boolean.toString(true));
+
         serializer.endTag("", "node");
+        return hasTextOrContentDescription;
     }
 
     /**
@@ -153,22 +157,6 @@ public class AccessibilityNodeInfoDumper {
                 return true;
         }
         return false;
-    }
-
-    /**
-     * We're looking for UI controls that are enabled, clickable but have no
-     * text nor content-description. Such controls configuration indicate an
-     * interactive control is present in the UI and is most likely not
-     * accessibility friendly. We refer to such controls here as NAF controls
-     * (Not Accessibility Friendly)
-     *
-     * @param n
-     * @return
-     */
-    private static boolean nafCheck(AccessibilityNodeInfo n) {
-        return !(n.isClickable() && n.isEnabled() &&
-                safeCharSeqToString(n.getContentDescription()).isEmpty() &&
-                safeCharSeqToString(n.getText()).isEmpty());
     }
 
     private static String safeCharSeqToString(CharSequence cs) {
