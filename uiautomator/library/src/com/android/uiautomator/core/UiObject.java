@@ -308,8 +308,8 @@ public class UiObject {
 
     /**
      * See {@link #clickAndWaitForNewWindow(long)}
-     * This method is intended for reliably wait for window transitions that would typically take
-     * longer than the usual deault timeouts.
+     * This method is intended to reliably wait for window transitions that would typically take
+     * longer than the usual default timeouts.
      *
      * @return true if the event was triggered, else false
      * @throws UiObjectNotFoundException
