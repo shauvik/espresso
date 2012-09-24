@@ -17,6 +17,9 @@
 package com.android.uiautomator.core;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Build;
@@ -36,6 +39,8 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.Predicate;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -626,5 +631,106 @@ public class UiDevice {
 
     private static Display getDefaultDisplay() {
         return DisplayManagerGlobal.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
+    }
+
+    /**
+     * @return the current display rotation in degrees
+     */
+    private static float getDegreesForRotation(int value) {
+        switch (value) {
+        case Surface.ROTATION_90:
+            return 360f - 90f;
+        case Surface.ROTATION_180:
+            return 360f - 180f;
+        case Surface.ROTATION_270:
+            return 360f - 270f;
+        }
+        return 0f;
+    }
+
+    /**
+     * Take a screenshot of current window and store it as PNG
+     *
+     * Default scale of 1.0f (original size) and 90% quality is used
+     *
+     * @param storePath where the PNG should be written to
+     * @return
+     */
+    public boolean takeScreenshot(File storePath) {
+        return takeScreenshot(storePath, 1.0f, 90);
+    }
+
+    /**
+     * Take a screenshot of current window and store it as PNG
+     *
+     * The screenshot is adjusted per screen rotation;
+     *
+     * @param storePath where the PNG should be written to
+     * @param scale scale the screenshot down if needed; 1.0f for original size
+     * @param quality quality of the PNG compression; range: 0-100
+     * @return
+     */
+    public boolean takeScreenshot(File storePath, float scale, int quality) {
+        // This is from com.android.systemui.screenshot.GlobalScreenshot#takeScreenshot
+        // We need to orient the screenshot correctly (and the Surface api seems to take screenshots
+        // only in the natural orientation of the device :!)
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        Display display = getDefaultDisplay();
+        display.getRealMetrics(displayMetrics);
+        float[] dims = {displayMetrics.widthPixels, displayMetrics.heightPixels};
+        float degrees = getDegreesForRotation(display.getRotation());
+        boolean requiresRotation = (degrees > 0);
+        Matrix matrix = new Matrix();
+        matrix.reset();
+        if (scale != 1.0f) {
+            matrix.setScale(scale, scale);
+        }
+        if (requiresRotation) {
+            // Get the dimensions of the device in its native orientation
+            matrix.preRotate(-degrees);
+        }
+        matrix.mapPoints(dims);
+        dims[0] = Math.abs(dims[0]);
+        dims[1] = Math.abs(dims[1]);
+
+        // Take the screenshot
+        Bitmap screenShot = Surface.screenshot((int) dims[0], (int) dims[1]);
+        if (screenShot == null) {
+            return false;
+        }
+
+        if (requiresRotation) {
+            // Rotate the screenshot to the current orientation
+            int width = displayMetrics.widthPixels;
+            int height = displayMetrics.heightPixels;
+            if (scale != 1.0f) {
+                width = Math.round(scale * width);
+                height = Math.round(scale * height);
+            }
+            Bitmap ss = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(ss);
+            c.translate(ss.getWidth() / 2, ss.getHeight() / 2);
+            c.rotate(degrees);
+            c.translate(-dims[0] / 2, -dims[1] / 2);
+            c.drawBitmap(screenShot, 0, 0, null);
+            c.setBitmap(null);
+            screenShot = ss;
+        }
+
+        // Optimizations
+        screenShot.setHasAlpha(false);
+
+        try {
+            FileOutputStream fos = new FileOutputStream(storePath);
+            screenShot.compress(Bitmap.CompressFormat.PNG, quality, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException ioe) {
+            Log.e(LOG_TAG, "failed to save screen shot to file", ioe);
+            return false;
+        } finally {
+            screenShot.recycle();
+        }
+        return true;
     }
 }
