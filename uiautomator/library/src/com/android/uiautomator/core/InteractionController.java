@@ -30,6 +30,7 @@ import android.os.IPowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.IWindowManager;
@@ -107,7 +108,7 @@ class InteractionController {
             IBinder token = new Binder();
             try {
                 ContentProviderHolder holder = activityManager.getContentProviderExternal(
-                        providerName, token);
+                        providerName, UserHandle.USER_OWNER, token);
                 if (holder == null) {
                     throw new IllegalStateException("Could not find provider: " + providerName);
                 }
