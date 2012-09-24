@@ -18,6 +18,7 @@ package com.android.commands.uiautomator;
 
 import android.accessibilityservice.UiTestAutomationBridge;
 import android.os.Environment;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.commands.uiautomator.Launcher.Command;
 import com.android.uiautomator.core.AccessibilityNodeInfoDumper;
@@ -32,7 +33,7 @@ import java.io.File;
 public class DumpCommand extends Command {
 
     private static final File DEFAULT_DUMP_FILE = new File(
-            Environment.getExternalStorageDirectory(), "window_dump.xml");
+            Environment.getLegacyExternalStorageDirectory(), "window_dump.xml");
 
     public DumpCommand() {
         super("dump");
@@ -62,8 +63,12 @@ public class DumpCommand extends Command {
         // bridge immediately after connecting seems to cause exceptions. So let's also
         // do a wait for idle in case the app is busy.
         bridge.waitForIdle(1000, 1000 * 10);
-        AccessibilityNodeInfoDumper.dumpWindowToFile(
-                bridge.getRootAccessibilityNodeInfoInActiveWindow(), dumpFile);
+        AccessibilityNodeInfo info = bridge.getRootAccessibilityNodeInfoInActiveWindow();
+        if (info == null) {
+            System.err.println("ERROR: null root node returned by UiTestAutomationBridge.");
+            return;
+        }
+        AccessibilityNodeInfoDumper.dumpWindowToFile(info, dumpFile);
         bridge.disconnect();
         System.out.println(
                 String.format("UI hierchary dumped to: %s", dumpFile.getAbsolutePath()));
