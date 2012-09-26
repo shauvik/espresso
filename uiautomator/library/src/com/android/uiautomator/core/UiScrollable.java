@@ -464,10 +464,36 @@ public class UiScrollable extends UiCollection {
         return scrollToEnd(maxSwipes, FLING_STEPS);
     }
 
+    /**
+     * Returns the percentage of a widget's size that's considered as no touch zone when swiping
+     *
+     * Dead zones are set as percentage of a widget's total width or height where
+     * swipe start point cannot start or swipe end point cannot end. It is like a margin
+     * around the actual dimensions of the widget. Swipes will always be start and
+     * end inside this margin.
+     *
+     * This is important when the widget being swiped may not respond to the swipe if
+     * started at a point too near to the edge. The default is 10% from either edge.
+     *
+     * @return a value between 0 and 1
+     */
     public double getSwipeDeadZonePercentage() {
         return mSwipeDeadZonePercentage;
     }
 
+    /**
+     * Sets the percentage of a widget's size that's considered as no touch zone when swiping
+     *
+     * Dead zones are set as percentage of a widget's total width or height where
+     * swipe start point cannot start or swipe end point cannot end. It is like a margin
+     * around the actual dimensions of the widget. Swipes will always start and
+     * end inside this margin.
+     *
+     * This is important when the widget being swiped may not respond to the swipe if
+     * started at a point too near to the edge. The default is 10% from either edge
+     *
+     * @param swipeDeadZonePercentage is a value between 0 and 1
+     */
     public void setSwipeDeadZonePercentage(double swipeDeadZonePercentage) {
         mSwipeDeadZonePercentage = swipeDeadZonePercentage;
     }
