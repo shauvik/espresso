@@ -23,13 +23,11 @@ import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
- * UiObject is a representation of UI element. It is not in any way directly bound to a
- * UI element as an object reference. A UiObject holds information to help it locate
- * at runtime a matching UI element based on its {@UiSelector} properties specified in
- * its constructor. Since a UiObject is a representative for a matching UI element, it can
- * be reused on different screens and applications with matching UI elements. Using a
- * UiObject on a screen where none of the displayed UI elements match its UiSelector's
- * properties will result in a {@UiObjectNotFoundException} to be thrown.
+ * A UiObject is a representation of a UI element. It is not in any way directly bound to a
+ * UI element as an object reference. A UiObject holds information to help it
+ * locate a matching UI element at runtime based on the {@link UiSelector} properties specified in
+ * its constructor. Since a UiObject is a representative for a UI element, it can
+ * be reused for different views with matching UI elements.
  */
 public class UiObject {
     private static final String LOG_TAG = UiObject.class.getSimpleName();
@@ -289,10 +287,7 @@ public class UiObject {
 
     /**
      * Performs a click at the center of the visible bounds of the UI element represented
-     * by this UiObject </p>
-     * Take note that the UI element represented by this UiObject may not have its attribute
-     * <code>clickable</code> set to <code>true</code> however one of its ancestor elements
-     * may be clickable. This is the reason this method does not check the clickable attribute.
+     * by this UiObject.
      *
      * @return true id successful else false
      * @throws UiObjectNotFoundException
@@ -319,10 +314,11 @@ public class UiObject {
     }
 
     /**
-     * Performs a click at the center of the visible bounds of the UI element UI element represented
-     * by this UiObject </p>
+     * Performs a click at the center of the visible bounds of the UI element represented
+     * by this UiObject and waits for window transitions.
+     *
      * This method differ from {@link UiObject#click()} only in that this method waits for a
-     * a new window transition as a result of the tap. Some examples of a window transition:
+     * a new window transition as a result of the click. Some examples of a window transition:
      * <li>launching a new activity</li>
      * <li>bringing up a pop-up menu</li>
      * <li>bringing up a dialog</li>
@@ -447,13 +443,18 @@ public class UiObject {
     }
 
     /**
-     * First this function clears the existing text from the field. If this is not the intended
-     * behavior, do a {@link #getText()} first, modify the text and then use this function.
-     * The {@link UiSelector} selector of this object MUST be pointing directly at a UI element
-     * that accepts edits. The way this method works is by first performing a {@link #click()}
-     * on the edit field to set focus then it begins injecting the text
+     * Sets the text in an editable field, after clearing the field's content.
      *
-     * @param text
+     * The {@link UiSelector} selector of this object must reference a UI element that is editable.
+     *
+     * When you call this method, the method first simulates a {@link #click()} on
+     * editable field to set focus. The method then clears the field's contents
+     * and injects your specified text into the field.
+     *
+     * If you want to capture the original contents of the field, call {@link #getText()} first.
+     * You can then modify the text and use this method to update the field.
+     *
+     * @param text string to set
      * @return true if operation is successful
      * @throws UiObjectNotFoundException
      */
@@ -463,12 +464,21 @@ public class UiObject {
     }
 
     /**
-     * The object targeted must be an edit field capable of performing text insert. This
-     * method sets focus at the start edge of the field and long presses to select
-     * existing text. Note: It is possible that not all the text is selected especially
-     * if the text contains separators such as spaces, slashes, at signs etc... The function
-     * will attempt to use the "Select-All" option if one is displayed to ensure full text
-     * selection.
+     * Clears the existing text contents in an editable field.
+     *
+     * The {@link UiSelector} of this object must reference a UI element that is editable.
+     *
+     * When you call this method, the method first sets focus at the start edge of the field.
+     * The method then simulates a long-press to select the existing text, and deletes the
+     * selected text.
+     *
+     * If a "Select-All" option is displayed, the method will automatically attempt to use it
+     * to ensure full text selection.
+     *
+     * Note that it is possible that not all the text in the field is selected; for example,
+     * if the text contains separators such as spaces, slashes, at symbol etc.
+     * Also, not all editable fields support the long-press functionality.
+     *
      * @throws UiObjectNotFoundException
      */
     public void clearTextField() throws UiObjectNotFoundException {
@@ -629,11 +639,14 @@ public class UiObject {
     }
 
     /**
-     * Reports the visible bounds of the UI element. If a portion of the UI element is
-     * visible, only the bounds of the visible portion are reported. see {@link #getBound()}
+     * Returns the visible bounds of the UI element.
+     *
+     * If a portion of the UI element is visible, only the bounds of the visible portion are
+     * reported.
      *
      * @return Rect
      * @throws UiObjectNotFoundException
+     * @see {@link #getBound()}
      */
     public Rect getVisibleBounds() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -644,7 +657,7 @@ public class UiObject {
     }
 
     /**
-     * Reads the UI element's <code>bounds</code> property. See {@link #getVisibleBounds()}
+     * Returns the UI element's <code>bounds</code> property. See {@link #getVisibleBounds()}
      *
      * @return Rect
      * @throws UiObjectNotFoundException
@@ -661,11 +674,14 @@ public class UiObject {
     }
 
     /**
-     * This method will wait for a UI element to become visible on the display. It
-     * can be used for situations where the content to be selected is not yet displayed
+     * Waits a specified length of time for a UI element to become visible.
      *
-     * @param timeout
-     * @return true if the UI element exists else false for timeout while waiting
+     * This method waits until the UI element becomes visible on the display, or
+     * until the timeout has elapsed. You can use this method in situations where
+     * the content that you want to select is not immediately displayed.
+     *
+     * @param timeout the amount of time to wait (in milliseconds)
+     * @return true if the UI element is displayed, else false if timeout elapsed while waiting
      */
     public boolean waitForExists(long timeout) {
         if(findAccessibilityNodeInfo(timeout) != null) {
@@ -675,12 +691,21 @@ public class UiObject {
     }
 
     /**
-     * Helper to wait for a UI element to no longer be matchable. An element becomes
-     * un-matchable when this UiObject's {@link UiSelector} no longer matches the
-     * UI element because it has either changed its state or is no longer displayed.
+     * Waits a specified length of time for a UI element to become undetectable.
      *
-     * @param timeout
-     * @return true if gone before timeout else false for still matching an element
+     * This method waits until a UI element is no longer matchable, or until the
+     * timeout has elapsed.
+     *
+     * A UI element becomes undetectable when the {@link UiSelector} of the object is
+     * unable to find a match because the element has either changed its state or is no
+     * longer displayed.
+     *
+     * You can use this method when attempting to wait for some long operation
+     * to compete, such as downloading a large file or connecting to a remote server.
+     *
+     * @param timeout time to wait (in milliseconds)
+     * @return true if the element is gone before timeout elapsed, else false if timeout elapsed
+     * but a matching element is still found.
      */
     public boolean waitUntilGone(long timeout) {
         long startMills = SystemClock.uptimeMillis();
@@ -696,6 +721,8 @@ public class UiObject {
     }
 
     /**
+     * Check if UI element exists.
+     *
      * This methods performs a {@link #waitForExists(long)} with zero timeout. This
      * basically returns immediately whether the UI element represented by this UiObject
      * exists or not. If you need to wait longer for this UI element, then see
