@@ -161,8 +161,8 @@ public class RunTestCommand extends Command {
     @Override
     public String detailedOptions() {
         return "    runtest <class spec> [options]\n"
-            + "    <class spec>: <JARS> [-c <CLASSES> | -e class <CLASSES>]\n"
-            + "      <JARS>: a list of jar file containing test classes and dependencies. If\n"
+            + "    <class spec>: <JARS> < -c <CLASSES> | -e class <CLASSES> >\n"
+            + "      <JARS>: a list of jar files containing test classes and dependencies. If\n"
             + "        the path is relative, it's assumed to be under /data/local/tmp. Use\n"
             + "        absolute path if the file is elsewhere. Multiple files can be\n"
             + "        specified, separated by space.\n"
