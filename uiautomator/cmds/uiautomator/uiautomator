@@ -66,6 +66,11 @@ args=
 if [ "${cmd}" == "runtest" ]; then
   # first parse the jar paths
   while [ true ]; do
+    if [ -z "${1}" ]; then
+      echo "Error: more parameters expected for runtest; please see usage for details"
+      cmd="help"
+      break
+    fi
     jar=${1}
     if [ "${1:0:1}" = "-" ]; then
       # we are done with jars, starting with parameters now
