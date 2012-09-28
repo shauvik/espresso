@@ -92,25 +92,20 @@ public class AccessibilityNodeInfoDumper {
         Log.w(LOGTAG, "Fetch time: " + (endTime - startTime) + "ms");
     }
 
-    private static boolean dumpNodeRec(AccessibilityNodeInfo node, XmlSerializer serializer,
+    private static void dumpNodeRec(AccessibilityNodeInfo node, XmlSerializer serializer,
             int index) throws IOException {
-        boolean hasTextOrContentDescription = false;
-        boolean isClickable = node.isClickable();
-        boolean isEnabled = node.isEnabled();
-        String textValue = safeCharSeqToString(node.getText());
-        String descriptionValue = safeCharSeqToString(node.getContentDescription());
-        if (!textValue.isEmpty() || !descriptionValue.isEmpty())
-            hasTextOrContentDescription = true;
         serializer.startTag("", "node");
+        if (!nafExcludedClass(node) && !nafCheck(node))
+            serializer.attribute("", "NAF", Boolean.toString(true));
         serializer.attribute("", "index", Integer.toString(index));
-        serializer.attribute("", "text", textValue);
+        serializer.attribute("", "text", safeCharSeqToString(node.getText()));
         serializer.attribute("", "class", safeCharSeqToString(node.getClassName()));
         serializer.attribute("", "package", safeCharSeqToString(node.getPackageName()));
-        serializer.attribute("", "content-desc", descriptionValue);
+        serializer.attribute("", "content-desc", safeCharSeqToString(node.getContentDescription()));
         serializer.attribute("", "checkable", Boolean.toString(node.isCheckable()));
         serializer.attribute("", "checked", Boolean.toString(node.isChecked()));
-        serializer.attribute("", "clickable", Boolean.toString(isClickable));
-        serializer.attribute("", "enabled", Boolean.toString(isEnabled));
+        serializer.attribute("", "clickable", Boolean.toString(node.isClickable()));
+        serializer.attribute("", "enabled", Boolean.toString(node.isEnabled()));
         serializer.attribute("", "focusable", Boolean.toString(node.isFocusable()));
         serializer.attribute("", "focused", Boolean.toString(node.isFocused()));
         serializer.attribute("", "scrollable", Boolean.toString(node.isScrollable()));
@@ -124,7 +119,7 @@ public class AccessibilityNodeInfoDumper {
             AccessibilityNodeInfo child = node.getChild(i);
             if (child != null) {
                 if (child.isVisibleToUser()) {
-                    hasTextOrContentDescription |= dumpNodeRec(child, serializer, i);
+                    dumpNodeRec(child, serializer, i);
                     child.recycle();
                 } else {
                     Log.i(LOGTAG, String.format("Skipping invisible child: %s", child.toString()));
@@ -134,12 +129,7 @@ public class AccessibilityNodeInfoDumper {
                         i, count, node.toString()));
             }
         }
-        // NAF check
-        if (!nafExcludedClass(node) && isClickable && isEnabled && !hasTextOrContentDescription)
-            serializer.attribute("", "NAF", Boolean.toString(true));
-
         serializer.endTag("", "node");
-        return hasTextOrContentDescription;
     }
 
     /**
@@ -155,6 +145,56 @@ public class AccessibilityNodeInfoDumper {
         for(String excludedClassName : NAF_EXCLUDED_CLASSES) {
             if(className.endsWith(excludedClassName))
                 return true;
+        }
+        return false;
+    }
+
+    /**
+     * We're looking for UI controls that are enabled, clickable but have no
+     * text nor content-description. Such controls configuration indicate an
+     * interactive control is present in the UI and is most likely not
+     * accessibility friendly. We refer to such controls here as NAF controls
+     * (Not Accessibility Friendly)
+     *
+     * @param node
+     * @return false if a node fails the check, true if all is OK
+     */
+    private static boolean nafCheck(AccessibilityNodeInfo node) {
+        boolean isNaf = node.isClickable() && node.isEnabled()
+                && safeCharSeqToString(node.getContentDescription()).isEmpty()
+                && safeCharSeqToString(node.getText()).isEmpty();
+
+        if (!isNaf)
+            return true;
+
+        // check children since sometimes the containing element is clickable
+        // and NAF but a child's text or description is available. Will assume
+        // such layout as fine.
+        return childNafCheck(node);
+    }
+
+    /**
+     * This should be used when it's already determined that the node is NAF and
+     * a further check of its children is in order. A node maybe a container
+     * such as LinerLayout and may be set to be clickable but have no text or
+     * content description but it is counting on one of its children to fulfill
+     * the requirement for being accessibility friendly by having one or more of
+     * its children fill the text or content-description. Such a combination is
+     * considered by this dumper as acceptable for accessibility.
+     *
+     * @param node
+     * @return
+     */
+    private static boolean childNafCheck(AccessibilityNodeInfo node) {
+        int childCount = node.getChildCount();
+        for (int x = 0; x < childCount; x++) {
+            AccessibilityNodeInfo childNode = node.getChild(x);
+
+            if (!safeCharSeqToString(childNode.getContentDescription()).isEmpty()
+                    || !safeCharSeqToString(childNode.getText()).isEmpty())
+                return true;
+
+            return childNafCheck(childNode);
         }
         return false;
     }
