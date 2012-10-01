@@ -52,6 +52,7 @@ public class UiSelector {
     static final int SELECTOR_PATTERN = 21;
     static final int SELECTOR_PARENT = 22;
     static final int SELECTOR_COUNT = 23;
+    static final int SELECTOR_LONG_CLICKABLE = 24;
 
     private SparseArray<Object> mSelectorAttributes = new SparseArray<Object>();
 
@@ -372,6 +373,24 @@ public class UiSelector {
     }
 
     /**
+     * Set the search criteria to match widgets that are long-clickable.
+     *
+     * Typically, using this search criteria alone is not useful.
+     * You should also include additional criteria, such as text,
+     * content-description, or the class name for a widget.
+     *
+     * If no other search criteria is specified, and there is more
+     * than one matching widget, the first widget in the tree
+     * is selected.
+     *
+     * @param val Value to match
+     * @return UiSelector with the specified search criteria
+     */
+    public UiSelector longClickable(boolean val) {
+        return buildSelector(SELECTOR_LONG_CLICKABLE, val);
+    }
+
+    /**
      * Adds a child UiSelector criteria to this selector.
      *
      * Use this selector to narrow the search scope to
@@ -509,6 +528,11 @@ public class UiSelector {
                 break;
             case UiSelector.SELECTOR_CLICKABLE:
                 if (node.isClickable() != getBoolean(criterion)) {
+                    return false;
+                }
+                break;
+            case UiSelector.SELECTOR_LONG_CLICKABLE:
+                if (node.isLongClickable() != getBoolean(criterion)) {
                     return false;
                 }
                 break;
@@ -737,6 +761,9 @@ public class UiSelector {
                 break;
             case SELECTOR_CLICKABLE:
                 builder.append("CLICKABLE=").append(mSelectorAttributes.valueAt(i));
+                break;
+            case SELECTOR_LONG_CLICKABLE:
+                builder.append("LONG_CLICKABLE=").append(mSelectorAttributes.valueAt(i));
                 break;
             case SELECTOR_CHECKED:
                 builder.append("CHECKED=").append(mSelectorAttributes.valueAt(i));
