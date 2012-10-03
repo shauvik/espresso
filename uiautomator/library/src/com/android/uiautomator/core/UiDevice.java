@@ -47,8 +47,9 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 /**
- * UiDevice provides access to device wide states. Also provides methods to simulate
- * pressing hardware buttons such as DPad or the soft buttons such as Home and Menu.
+ * UiDevice provides access to state information about the device.
+ * You can also use this class to simulate user actions on the device,
+ * such as pressing the d-pad or pressing the Home and Menu buttons.
  */
 public class UiDevice {
     private static final String LOG_TAG = UiDevice.class.getSimpleName();
@@ -85,10 +86,8 @@ public class UiDevice {
         return mUiAutomationBridge;
     }
     /**
-     * Allow both the direct creation of a UiDevice and retrieving a existing
-     * instance of UiDevice. This helps tests and their libraries to have access
-     * to UiDevice with necessitating having to always pass copies of UiDevice
-     * instances around.
+     * Retrieves a singleton instance of UiDevice
+     *
      * @return UiDevice instance
      */
     public static UiDevice getInstance() {
@@ -103,7 +102,7 @@ public class UiDevice {
      *
      * The returned display size is adjusted per screen rotation
      *
-     * @return
+     * @return a Point containing the display size in dp
      * @hide
      */
     public Point getDisplaySizeDp() {
@@ -120,33 +119,40 @@ public class UiDevice {
     }
 
     /**
-     * Returns the product name of the device
+     * Retrieves the product name of the device.
      *
-     * This provides info on what type of device that the test is running on. However, for the
-     * purpose of adapting to different styles of UI, test should favor
-     * {@link UiDevice#getDisplaySizeDp()} over this method, and only use product name as a fallback
-     * mechanism
+     * This method provides information on what type of device the
+     * test is running on. If you are trying to test for different types of
+     * UI screen sizes, your test should use
+     * {@link UiDevice#getDisplaySizeDp()} instead. This value is the same
+     * returned by invoking #adb shell getprop ro.product.name.
+     *
+     * @return product name of the device
      */
     public String getProductName() {
         return Build.PRODUCT;
     }
 
     /**
-     * This method returns the text from the last UI traversal event received.
-     * This is helpful in WebView when the test performs directional arrow presses to focus
-     * on different elements inside the WebView. The accessibility fires events
-     * with every text highlighted. One can read the contents of a WebView control this way
-     * however slow slow and unreliable it is. When the view control used can return a
-     * reference to is Document Object Model, it is recommended then to use the view's
+     * Retrieves the text from the last UI traversal event received.
+     *
+     * You can use this method to read the contents in a WebView container
+     * because the accessibility framework fires events
+     * as each text is highlighted. You can write a test to perform
+     * directional arrow presses to focus on different elements inside a WebView,
+     * and call this method to get the text from each traversed element.
+     * If you are testing a view container that can return a reference to a
+     * Document Object Model (DOM) object, your test should use the view's
      * DOM instead.
-     * @return text of the last traversal event else an empty string
+     *
+     * @return text of the last traversal event, else return an empty string
      */
     public String getLastTraversedText() {
         return mUiAutomationBridge.getQueryController().getLastTraversedText();
     }
 
     /**
-     * Helper to clear the text saved from the last accessibility UI traversal event.
+     * Clears the text from the last UI traversal event.
      * See {@link #getLastTraversedText()}.
      */
     public void clearLastTraversedText() {
@@ -154,96 +160,98 @@ public class UiDevice {
     }
 
     /**
-     * Helper method to do a short press on MENU button
-     * @return true if successful else false
+     * Simulates a short press on the MENU button.
+     * @return true if successful, else return false
      */
     public boolean pressMenu() {
         return pressKeyCode(KeyEvent.KEYCODE_MENU);
     }
 
     /**
-     * Helper method to do a short press on BACK button
-     * @return true if successful else false
+     * Simulates a short press on the BACK button.
+     * @return true if successful, else return false
      */
     public boolean pressBack() {
         return pressKeyCode(KeyEvent.KEYCODE_BACK);
     }
 
     /**
-     * Helper method to do a short press on HOME button
-     * @return true if successful else false
+     * Simulates a short press on the HOME button.
+     * @return true if successful, else return false
      */
     public boolean pressHome() {
         return pressKeyCode(KeyEvent.KEYCODE_HOME);
     }
 
     /**
-     * Helper method to do a short press on SEARCH button
-     * @return true if successful else false
+     * Simulates a short press on the SEARCH button.
+     * @return true if successful, else return false
      */
     public boolean pressSearch() {
         return pressKeyCode(KeyEvent.KEYCODE_SEARCH);
     }
 
     /**
-     * Helper method to do a short press on DOWN button
-     * @return true if successful else false
+     * Simulates a short press on the CENTER button.
+     * @return true if successful, else return false
      */
     public boolean pressDPadCenter() {
         return pressKeyCode(KeyEvent.KEYCODE_DPAD_CENTER);
     }
 
     /**
-     * Helper method to do a short press on DOWN button
-     * @return true if successful else false
+     * Simulates a short press on the DOWN button.
+     * @return true if successful, else return false
      */
     public boolean pressDPadDown() {
         return pressKeyCode(KeyEvent.KEYCODE_DPAD_DOWN);
     }
 
     /**
-     * Helper method to do a short press on UP button
-     * @return true if successful else false
+     * Simulates a short press on the UP button.
+     * @return true if successful, else return false
      */
     public boolean pressDPadUp() {
         return pressKeyCode(KeyEvent.KEYCODE_DPAD_UP);
     }
 
     /**
-     * Helper method to do a short press on LEFT button
-     * @return true if successful else false
+     * Simulates a short press on the LEFT button.
+     * @return true if successful, else return false
      */
     public boolean pressDPadLeft() {
         return pressKeyCode(KeyEvent.KEYCODE_DPAD_LEFT);
     }
 
     /**
-     * Helper method to do a short press on RIGTH button
-     * @return true if successful else false
+     * Simulates a short press on the RIGHT button.
+     * @return true if successful, else return false
      */
     public boolean pressDPadRight() {
         return pressKeyCode(KeyEvent.KEYCODE_DPAD_RIGHT);
     }
 
     /**
-     * Helper method to do a short press on DELETE
-     * @return true if successful else false
+     * Simulates a short press on the DELETE key.
+     * @return true if successful, else return false
      */
     public boolean pressDelete() {
         return pressKeyCode(KeyEvent.KEYCODE_DEL);
     }
 
     /**
-     * Helper method to do a short press on ENTER
-     * @return true if successful else false
+     * Simulates a short press on the ENTER key.
+     * @return true if successful, else return false
      */
     public boolean pressEnter() {
         return pressKeyCode(KeyEvent.KEYCODE_ENTER);
     }
 
     /**
-     * Helper method to do a short press using a key code. See {@link KeyEvent}
-     * @return true if successful else false
+     * Simulates a short press using a key code.
+     *
+     * See {@link KeyEvent}
+     * @return true if successful, else return false
      */
     public boolean pressKeyCode(int keyCode) {
         waitForIdle();
@@ -251,10 +259,12 @@ public class UiDevice {
     }
 
     /**
-     * Helper method to do a short press using a key code. See {@link KeyEvent}
-     * @param keyCode See {@link KeyEvent}
-     * @param metaState See {@link KeyEvent}
-     * @return true if successful else false
+     * Simulates a short press using a key code.
+     *
+     * See {@link KeyEvent}.
+     * @param keyCode the key code of the event.
+     * @param metaState an integer in which each bit set to 1 represents a pressed meta key
+     * @return true if successful, else return false
      */
     public boolean pressKeyCode(int keyCode, int metaState) {
         waitForIdle();
@@ -262,8 +272,9 @@ public class UiDevice {
     }
 
     /**
-     * Press recent apps soft key
-     * @return true if successful
+     * Simulates a short press on the Recent Apps button.
+     *
+     * @return true if successful, else return false
      * @throws RemoteException
      */
     public boolean pressRecentApps() throws RemoteException {
@@ -345,16 +356,24 @@ public class UiDevice {
         return mUiAutomationBridge.getInteractionController().swipe(segments, segmentSteps);
     }
 
+    /**
+     * Waits for the current application to idle.
+     * Default wait timeout is 10 seconds
+     */
     public void waitForIdle() {
         waitForIdle(DEFAULT_TIMEOUT_MILLIS);
     }
 
+    /**
+     * Waits for the current application to idle.
+     * @param timeout in milliseconds
+     */
     public void waitForIdle(long time) {
         mUiAutomationBridge.waitForIdle(time);
     }
 
     /**
-     * Last activity to report accessibility events
+     * Retrieves the last activity to report accessibility events.
      * @return String name of activity
      */
     public String getCurrentActivityName() {
@@ -362,7 +381,7 @@ public class UiDevice {
     }
 
     /**
-     * Last package to report accessibility events
+     * Retrieves the name of the last package to report accessibility events.
      * @return String name of package
      */
     public String getCurrentPackageName() {
@@ -370,14 +389,10 @@ public class UiDevice {
     }
 
     /**
-     * Registers a condition watcher to be called by the automation library only when a
-     * {@link UiObject} method call is in progress and is in retry waiting to match
-     * its UI element. Only during these conditions the watchers are invoked to check if
-     * there is something else unexpected on the screen that may be causing the match failure
-     * and retries. Under normal conditions when UiObject methods are immediately matching
-     * their UI element, watchers may never get to run. See {@link UiDevice#runWatchers()}
+     * Registers a {@link UiWatcher} to run automatically when the testing framework is unable to
+     * find a match using a {@link UiSelector}. See {@link #runWatchers()}
      *
-     * @param name of watcher
+     * @param name to register the UiWatcher
      * @param watcher {@link UiWatcher}
      */
     public void registerWatcher(String name, UiWatcher watcher) {
@@ -388,9 +403,10 @@ public class UiDevice {
     }
 
     /**
-     * Removes a previously registered {@link #registerWatcher(String, UiWatcher)}.
+     * Removes a previously registered {@link UiWatcher}.
      *
-     * @param name of watcher used when <code>registerWatcher</code> was called.
+     * See {@link #registerWatcher(String, UiWatcher)}
+     * @param name used to register the UiWatcher
      * @throws UiAutomationException
      */
     public void removeWatcher(String name) {
@@ -401,8 +417,8 @@ public class UiDevice {
     }
 
     /**
-     * See {@link #registerWatcher(String, UiWatcher)}. This forces all registered watchers
-     * to run.
+     * This method forces all registered watchers to run.
+     * See {@link #registerWatcher(String, UiWatcher)}
      */
     public void runWatchers() {
         if (mInWatcherContext) {
@@ -427,32 +443,43 @@ public class UiDevice {
     }
 
     /**
-     * See {@link #registerWatcher(String, UiWatcher)}. If a watcher is run and
-     * returns true from its implementation of {@link UiWatcher#checkForCondition()} then
-     * it is considered triggered.
+     * Resets a {@link UiWatcher} that has been triggered.
+     * If a UiWatcher runs and its {@link UiWatcher#checkForCondition()} call
+     * returned <code>true</code>, then the UiWatcher is considered triggered.
+     * See {@link #registerWatcher(String, UiWatcher)}
      */
     public void resetWatcherTriggers() {
         mWatchersTriggers.clear();
     }
 
     /**
-     * See {@link #registerWatcher(String, UiWatcher)}. If a watcher is run and
-     * returns true from its implementation of {@link UiWatcher#checkForCondition()} then
-     * it is considered triggered. This method can be used to check if a specific UiWatcher
-     * has been triggered during the test. This is helpful if a watcher is detecting errors
+     * Checks if a specific registered  {@link UiWatcher} has triggered.
+     * See {@link #registerWatcher(String, UiWatcher)}. If a UiWatcher runs and its
+     * {@link UiWatcher#checkForCondition()} call returned <code>true</code>, then
+     * the UiWatcher is considered triggered. This is helpful if a watcher is detecting errors
      * from ANR or crash dialogs and the test needs to know if a UiWatcher has been triggered.
+     *
+     * @param watcherName
+     * @return true if triggered else false
      */
     public boolean hasWatcherTriggered(String watcherName) {
         return mWatchersTriggers.contains(watcherName);
     }
 
     /**
-     * See {@link #registerWatcher(String, UiWatcher)} and {@link #hasWatcherTriggered(String)}
+     * Checks if any registered {@link UiWatcher} have triggered.
+     *
+     * See {@link #registerWatcher(String, UiWatcher)}
+     * See {@link #hasWatcherTriggered(String)}
      */
     public boolean hasAnyWatcherTriggered() {
         return mWatchersTriggers.size() > 0;
     }
 
+    /**
+     * Used internally by this class to set a {@link UiWatcher} state as triggered.
+     * @param watcherName
+     */
     private void setWatcherTriggered(String watcherName) {
         if (!hasWatcherTriggered(watcherName)) {
             mWatchersTriggers.add(watcherName);
@@ -489,10 +516,8 @@ public class UiDevice {
 
     /**
      * Re-enables the sensors and un-freezes the device rotation allowing its contents
-     * to rotate with the device physical rotation. Note that by un-freezing the rotation,
-     * the screen contents may suddenly rotate depending on the current physical position
-     * of the test device. During a test execution, it is best to keep the device frozen
-     * in a specific orientation until the test case execution is completed.
+     * to rotate with the device physical rotation. During a test execution, it is best to
+     * keep the device frozen in a specific orientation until the test case execution has completed.
      * @throws RemoteException
      */
     public void unfreezeRotation() throws RemoteException {
@@ -500,11 +525,11 @@ public class UiDevice {
     }
 
     /**
-     * Orients the device to the left and also freezes rotation in that
-     * orientation by disabling the sensors. If you want to un-freeze the rotation
-     * and re-enable the sensors see {@link #unfreezeRotation()}. Note that doing
-     * so may cause the screen contents to get re-oriented depending on the current
-     * physical position of the test device.
+     * Simulates orienting the device to the left and also freezes rotation
+     * by disabling the sensors.
+     *
+     * If you want to un-freeze the rotation and re-enable the sensors
+     * see {@link #unfreezeRotation()}.
      * @throws RemoteException
      */
     public void setOrientationLeft() throws RemoteException {
@@ -512,11 +537,11 @@ public class UiDevice {
     }
 
     /**
-     * Orients the device to the right and also freezes rotation in that
-     * orientation by disabling the sensors. If you want to un-freeze the rotation
-     * and re-enable the sensors see {@link #unfreezeRotation()}. Note that doing
-     * so may cause the screen contents to get re-oriented depending on the current
-     * physical position of the test device.
+     * Simulates orienting the device to the right and also freezes rotation
+     * by disabling the sensors.
+     *
+     * If you want to un-freeze the rotation and re-enable the sensors
+     * see {@link #unfreezeRotation()}.
      * @throws RemoteException
      */
     public void setOrientationRight() throws RemoteException {
@@ -524,11 +549,11 @@ public class UiDevice {
     }
 
     /**
-     * Rotates right and also freezes rotation in that orientation by
-     * disabling the sensors. If you want to un-freeze the rotation
-     * and re-enable the sensors see {@link #unfreezeRotation()}. Note
-     * that doing so may cause the screen contents to rotate
-     * depending on the current physical position of the test device.
+     * Simulates orienting the device into its natural orientation and also freezes rotation
+     * by disabling the sensors.
+     *
+     * If you want to un-freeze the rotation and re-enable the sensors
+     * see {@link #unfreezeRotation()}.
      * @throws RemoteException
      */
     public void setOrientationNatural() throws RemoteException {
@@ -536,10 +561,11 @@ public class UiDevice {
     }
 
     /**
-     * This method simply presses the power button if the screen is OFF else
-     * it does nothing if the screen is already ON. If the screen was OFF and
-     * it just got turned ON, this method will insert a 500ms delay to allow
-     * the device time to wake up and accept input.
+     * This method simulates pressing the power button if the screen is OFF else
+     * it does nothing if the screen is already ON.
+     *
+     * If the screen was OFF and it just got turned ON, this method will insert a 500ms delay
+     * to allow the device time to wake up and accept input.
      * @throws RemoteException
      */
     public void wakeUp() throws RemoteException {
@@ -551,7 +577,8 @@ public class UiDevice {
     }
 
     /**
-     * Checks the power manager if the screen is ON
+     * Checks the power manager if the screen is ON.
+     *
      * @return true if the screen is ON else false
      * @throws RemoteException
      */
@@ -562,6 +589,7 @@ public class UiDevice {
     /**
      * This method simply presses the power button if the screen is ON else
      * it does nothing if the screen is already OFF.
+     *
      * @throws RemoteException
      */
     public void sleep() throws RemoteException {
@@ -585,17 +613,17 @@ public class UiDevice {
     }
 
     /**
-     * Waits for a window content update event to occur
+     * Waits for a window content update event to occur.
      *
-     * if a package name for window is specified, but current window is not with the same package
-     * name, the function will return immediately
+     * If a package name for the window is specified, but the current window
+     * does not have the same package name, the function returns immediately.
      *
-     * @param packageName the specified window package name; maybe <code>null</code>, and a window
-     *                    update from any frontend window will end the wait
+     * @param packageName the specified window package name (can be <code>null</code>).
+     *        If <code>null</code>, a window update from any front-end window will end the wait
      * @param timeout the timeout for the wait
      *
-     * @return true if a window update occured, false if timeout has reached or current window is
-     * not the specified package name
+     * @return true if a window update occurred, false if timeout has elapsed or if the current
+     *         window does not have the specified package name
      */
     public boolean waitForWindowUpdate(final String packageName, long timeout) {
         if (packageName != null) {
