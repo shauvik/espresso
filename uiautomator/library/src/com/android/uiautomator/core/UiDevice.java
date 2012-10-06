@@ -56,6 +56,10 @@ public class UiDevice {
 
     private static final long DEFAULT_TIMEOUT_MILLIS = 10 * 1000;
 
+    // Sometimes HOME and BACK key presses will generate no events if already on
+    // home page or there is nothing to go back to, Set low timeouts.
+    private static final long KEY_PRESS_EVENT_TIMEOUT = 1 * 1000;
+
     // store for registered UiWatchers
     private final HashMap<String, UiWatcher> mWatchers = new HashMap<String, UiWatcher>();
     private final List<String> mWatchersTriggers = new ArrayList<String>();
@@ -172,7 +176,10 @@ public class UiDevice {
      * @return true if successful, else return false
      */
     public boolean pressBack() {
-        return pressKeyCode(KeyEvent.KEYCODE_BACK);
+        waitForIdle();
+        return mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
+                KeyEvent.KEYCODE_BACK, 0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
+                KEY_PRESS_EVENT_TIMEOUT);
     }
 
     /**
@@ -180,7 +187,10 @@ public class UiDevice {
      * @return true if successful, else return false
      */
     public boolean pressHome() {
-        return pressKeyCode(KeyEvent.KEYCODE_HOME);
+        waitForIdle();
+        return mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
+                KeyEvent.KEYCODE_HOME, 0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
+                KEY_PRESS_EVENT_TIMEOUT);
     }
 
     /**
