@@ -20,6 +20,7 @@ import android.graphics.Rect;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
@@ -35,6 +36,7 @@ public class UiObject {
     protected static final long WAIT_FOR_SELECTOR_POLL = 1000;
     // set a default timeout to 5.5s, since ANR threshold is 5s
     protected static final long WAIT_FOR_WINDOW_TMEOUT = 5500;
+    protected static final long WAIT_FOR_EVENT_TMEOUT = 3 * 1000;
     protected static final int SWIPE_MARGIN_LIMIT = 5;
 
     private final UiSelector mSelector;
@@ -298,7 +300,8 @@ public class UiObject {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = getVisibleBounds(node);
-        return getInteractionController().click(rect.centerX(), rect.centerY());
+        return getInteractionController().clickAndWaitForEvent(rect.centerX(), rect.centerY(),
+                AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED, WAIT_FOR_EVENT_TMEOUT);
     }
 
     /**
