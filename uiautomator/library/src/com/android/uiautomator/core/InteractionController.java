@@ -135,22 +135,24 @@ class InteractionController {
         return longPressTimeout;
     }
 
-    public boolean click(int x, int y) {
-        Log.d(LOG_TAG, "click (" + x + ", " + y + ")");
+    /**
+     * Click at coordinates and blocks until the first specified accessibility event.
+     *
+     * All clicks will cause some UI change to occur. If the device is busy, this will
+     * block until the device begins to process the click at which point the call returns
+     * and normal wait for idle processing may begin. If no evens are detected for the
+     * timeout period specified, the call will return anyway.
+     * @param x
+     * @param y
+     * @param eventType is an {@link AccessibilityEvent} type
+     * @param timeout
+     * @return True if busy state is detected else false for timeout waiting for busy state
+     */
+    public boolean clickAndWaitForEvent(final int x, final int y, final int eventType,
+            long timeout) {
+        Log.d(LOG_TAG, "clickAndWaitForEvent (" + x + ", " + y + ")");
 
         mUiAutomatorBridge.setOperationTime();
-        if (touchDown(x, y)) {
-            SystemClock.sleep(REGULAR_CLICK_LENGTH);
-            if(touchUp(x, y)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean clickAndWaitForNewWindow(final int x, final int y, long timeout) {
-        Log.d(LOG_TAG, "clickAndWaitForNewWindow (" + x + ", " + y + ")");
-
         Runnable command = new Runnable() {
             @Override
             public void run() {
@@ -163,19 +165,88 @@ class InteractionController {
         Predicate<AccessibilityEvent> predicate = new Predicate<AccessibilityEvent>() {
             @Override
             public boolean apply(AccessibilityEvent t) {
-                return t.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;
+                return t.getEventType() == eventType;
             }
         };
         try {
             mUiAutomatorBridge.executeCommandAndWaitForAccessibilityEvent(
                     command, predicate, timeout);
         } catch (TimeoutException e) {
+            Log.w(LOG_TAG, "WARNING: clickAndWaitForEvent timedout waiting for event");
             return false;
         } catch (Exception e) {
             Log.e(LOG_TAG, "exception from executeCommandAndWaitForAccessibilityEvent", e);
             return false;
         }
         return true;
+    }
+
+    /**
+     * Send keys and blocks until the first specified accessibility event.
+     *
+     * Most key presses will cause some UI change to occur. If the device is busy, this will
+     * block until the device begins to process the key press at which point the call returns
+     * and normal wait for idle processing may begin. If no evens are detected for the
+     * timeout period specified, the call will return anyway with false.
+     *
+     * @param keyCode
+     * @param metaState
+     * @param eventType
+     * @param timeout
+     * @return
+     */
+    public boolean sendKeyAndWaitForEvent(final int keyCode, final int metaState,
+            final int eventType, long timeout) {
+        mUiAutomatorBridge.setOperationTime();
+        Runnable command = new Runnable() {
+            @Override
+            public void run() {
+                final long eventTime = SystemClock.uptimeMillis();
+                KeyEvent downEvent = KeyEvent.obtain(eventTime, eventTime, KeyEvent.ACTION_DOWN,
+                        keyCode, 0, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0,
+                        InputDevice.SOURCE_KEYBOARD, null);
+                if (injectEventSync(downEvent)) {
+                    KeyEvent upEvent = KeyEvent.obtain(eventTime, eventTime, KeyEvent.ACTION_UP,
+                            keyCode, 0, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0,
+                            InputDevice.SOURCE_KEYBOARD, null);
+                    injectEventSync(upEvent);
+                }
+            }
+        };
+
+        Predicate<AccessibilityEvent> predicate = new Predicate<AccessibilityEvent>() {
+            @Override
+            public boolean apply(AccessibilityEvent t) {
+                return t.getEventType() == eventType;
+            }
+        };
+        try {
+            mUiAutomatorBridge.executeCommandAndWaitForAccessibilityEvent(
+                    command, predicate, timeout);
+        } catch (TimeoutException e) {
+            Log.w(LOG_TAG, "WARNING: sendKeyAndWaitForEvent timedout waiting for event");
+            return false;
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "exception from executeCommandAndWaitForAccessibilityEvent", e);
+            return false;
+        }
+        return true;
+    }
+
+    public boolean click(int x, int y) {
+        Log.d(LOG_TAG, "click (" + x + ", " + y + ")");
+        mUiAutomatorBridge.setOperationTime();
+
+        if (touchDown(x, y)) {
+            SystemClock.sleep(REGULAR_CLICK_LENGTH);
+            if (touchUp(x, y))
+                return true;
+        }
+        return false;
+    }
+
+    public boolean clickAndWaitForNewWindow(final int x, final int y, long timeout) {
+        return clickAndWaitForEvent(x, y, AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, timeout);
     }
 
     public boolean longTap(int x, int y) {
