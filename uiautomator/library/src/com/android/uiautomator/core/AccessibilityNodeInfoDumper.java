@@ -194,7 +194,8 @@ public class AccessibilityNodeInfoDumper {
                     || !safeCharSeqToString(childNode.getText()).isEmpty())
                 return true;
 
-            return childNafCheck(childNode);
+            if (childNafCheck(childNode))
+                return true;
         }
         return false;
     }
