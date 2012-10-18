@@ -57,16 +57,20 @@ public class UiScrollable extends UiCollection {
 
     /**
      * Set the direction of swipes when performing scroll search
+     * @return reference to itself
      */
-    public void setAsVerticalList() {
+    public UiScrollable setAsVerticalList() {
         mIsVerticalList = true;
+        return this;
     }
 
     /**
      * Set the direction of swipes when performing scroll search
+     * @return reference to itself
      */
-    public void setAsHorizontalList() {
+    public UiScrollable setAsHorizontalList() {
         mIsVerticalList = false;
+        return this;
     }
 
     /**
@@ -198,6 +202,17 @@ public class UiScrollable extends UiCollection {
      * Perform a scroll search for a UI element matching the {@link UiSelector} selector argument.
      * See {@link #scrollDescriptionIntoView(String)} and {@link #scrollTextIntoView(String)}.
      *
+     * @param obj {@link UiObject}
+     * @return true if the item was found and now is in view else false
+     */
+    public boolean scrollIntoView(UiObject obj) throws UiObjectNotFoundException {
+        return scrollIntoView(obj.getSelector());
+    }
+
+    /**
+     * Perform a scroll search for a UI element matching the {@link UiSelector} selector argument.
+     * See {@link #scrollDescriptionIntoView(String)} and {@link #scrollTextIntoView(String)}.
+     *
      * @param selector {@link UiSelector} selector
      * @return true if the item was found and now is in view else false
      */
@@ -242,9 +257,11 @@ public class UiScrollable extends UiCollection {
      * The current value can be read by calling {@link #getMaxSearchSwipes()}
      *
      * @param swipes is the number of search swipes until abort
+     * @return reference to itself
      */
-    public void setMaxSearchSwipes(int swipes) {
+    public UiScrollable setMaxSearchSwipes(int swipes) {
         mMaxSearchSwipes = swipes;
+        return this;
     }
 
     /**
@@ -493,8 +510,10 @@ public class UiScrollable extends UiCollection {
      * started at a point too near to the edge. The default is 10% from either edge
      *
      * @param swipeDeadZonePercentage is a value between 0 and 1
+     * @return reference to itself
      */
-    public void setSwipeDeadZonePercentage(double swipeDeadZonePercentage) {
+    public UiScrollable setSwipeDeadZonePercentage(double swipeDeadZonePercentage) {
         mSwipeDeadZonePercentage = swipeDeadZonePercentage;
+        return this;
     }
 }
