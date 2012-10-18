@@ -266,8 +266,11 @@ class InteractionController {
      * @return true if both events occurred in the expected order
      */
     public boolean clickAndWaitForNewWindow(final int x, final int y, long timeout) {
-        return clickAndWaitForEvent(x, y, AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, timeout)
-            && waitForEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED, timeout);
+        if (clickAndWaitForEvent(x, y, AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, timeout)) {
+            waitForEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED, timeout);
+            return true;
+        }
+        return false;
     }
 
     public boolean longTap(int x, int y) {
