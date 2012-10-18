@@ -162,6 +162,33 @@ class InteractionController {
                 }
             }
         };
+        return runAndWaitForEvent(command, eventType, timeout);
+    }
+
+    /**
+     * Waits for event up to the timeout specified
+     * @param eventType
+     * @param timeout
+     * @return false on timeout else true for event received.
+     */
+    private boolean waitForEvent(int eventType, long timeout) {
+        Runnable command = new Runnable() {
+            @Override
+            public void run() {
+                // do nothing. Just wait for the event
+            }
+        };
+        return runAndWaitForEvent(command, eventType, timeout);
+    }
+
+    /**
+     * Runs a command and waits for a specific accessibility event.
+     * @param command is a Runnable to execute before waiting for the event.
+     * @param eventType
+     * @param timeout
+     * @return
+     */
+    private boolean runAndWaitForEvent(Runnable command, final int eventType, long timeout) {
         Predicate<AccessibilityEvent> predicate = new Predicate<AccessibilityEvent>() {
             @Override
             public boolean apply(AccessibilityEvent t) {
@@ -169,10 +196,10 @@ class InteractionController {
             }
         };
         try {
-            mUiAutomatorBridge.executeCommandAndWaitForAccessibilityEvent(
-                    command, predicate, timeout);
+            mUiAutomatorBridge.executeCommandAndWaitForAccessibilityEvent(command, predicate,
+                    timeout);
         } catch (TimeoutException e) {
-            Log.w(LOG_TAG, "WARNING: clickAndWaitForEvent timedout waiting for event");
+            Log.w(LOG_TAG, "runAndwaitForEvent timedout waiting for event: " + eventType);
             return false;
         } catch (Exception e) {
             Log.e(LOG_TAG, "exception from executeCommandAndWaitForAccessibilityEvent", e);
@@ -214,23 +241,7 @@ class InteractionController {
             }
         };
 
-        Predicate<AccessibilityEvent> predicate = new Predicate<AccessibilityEvent>() {
-            @Override
-            public boolean apply(AccessibilityEvent t) {
-                return t.getEventType() == eventType;
-            }
-        };
-        try {
-            mUiAutomatorBridge.executeCommandAndWaitForAccessibilityEvent(
-                    command, predicate, timeout);
-        } catch (TimeoutException e) {
-            Log.w(LOG_TAG, "WARNING: sendKeyAndWaitForEvent timedout waiting for event");
-            return false;
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "exception from executeCommandAndWaitForAccessibilityEvent", e);
-            return false;
-        }
-        return true;
+        return runAndWaitForEvent(command, eventType, timeout);
     }
 
     public boolean click(int x, int y) {
@@ -245,8 +256,21 @@ class InteractionController {
         return false;
     }
 
+    /**
+     * Clicks at coordinates and waits for for a TYPE_WINDOW_STATE_CHANGED event followed
+     * by TYPE_WINDOW_CONTENT_CHANGED. If timeout occurs waiting for TYPE_WINDOW_STATE_CHANGED,
+     * no further waits will be performed and the function returns.
+     * @param x
+     * @param y
+     * @param timeout
+     * @return true if both events occurred in the expected order
+     */
     public boolean clickAndWaitForNewWindow(final int x, final int y, long timeout) {
-        return clickAndWaitForEvent(x, y, AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, timeout);
+        if (clickAndWaitForEvent(x, y, AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, timeout)) {
+            waitForEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED, timeout);
+            return true;
+        }
+        return false;
     }
 
     public boolean longTap(int x, int y) {
@@ -312,25 +336,16 @@ class InteractionController {
             final int steps) {
         Log.d(LOG_TAG, "scrollSwipe (" +  downX + ", " + downY + ", " + upX + ", "
                 + upY + ", " + steps +")");
-        try {
-            mUiAutomatorBridge.executeCommandAndWaitForAccessibilityEvent(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            swipe(downX, downY, upX, upY, steps);
-                        }
-                    },
-                    new Predicate<AccessibilityEvent>() {
-                        @Override
-                        public boolean apply(AccessibilityEvent event) {
-                            return (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED);
-                        }
-                    }, DEFAULT_SCROLL_EVENT_TIMEOUT_MILLIS);
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "Error in scrollSwipe: " + e.getMessage());
-            return false;
-        }
-        return true;
+
+        Runnable command = new Runnable() {
+            @Override
+            public void run() {
+                swipe(downX, downY, upX, upY, steps);
+            }
+        };
+
+        return runAndWaitForEvent(command, AccessibilityEvent.TYPE_VIEW_SCROLLED,
+                DEFAULT_SCROLL_EVENT_TIMEOUT_MILLIS);
     }
 
     /**
