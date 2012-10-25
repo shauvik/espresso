@@ -55,6 +55,7 @@ public class AndroidJUnitRunnerTest {
                 return mMockContext;
             }
         };
+        mAndroidJUnitRunner.setArguments(new Bundle());
         mStubStream = new PrintStream(new ByteArrayOutputStream());
         LittleMock.initMocks(this);
     }
