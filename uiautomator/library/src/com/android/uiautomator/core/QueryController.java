@@ -39,7 +39,6 @@ class QueryController {
     private final Object mLock = new Object();
 
     private String mLastActivityName = null;
-    private String mLastPackageName = null;
 
     // During a pattern selector search, the recursive pattern search
     // methods will track their counts and indexes here.
@@ -61,22 +60,23 @@ class QueryController {
             @Override
             public void onAccessibilityEvent(AccessibilityEvent event) {
                 synchronized (mLock) {
-                    mLastPackageName = event.getPackageName().toString();
-                    // don't trust event.getText(), check for nulls
-                    if (event.getText() != null && event.getText().size() > 0) {
-                        if(event.getText().get(0) != null)
-                            mLastActivityName = event.getText().get(0).toString();
-                    }
-
                     switch(event.getEventType()) {
-                    case AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY:
-                        // don't trust event.getText(), check for nulls
-                        if (event.getText() != null && event.getText().size() > 0)
-                            if(event.getText().get(0) != null)
-                                mLastTraversedText = event.getText().get(0).toString();
-                        if(DEBUG)
-                            Log.i(LOG_TAG, "Last text selection reported: " + mLastTraversedText);
-                        break;
+                        case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+                            // don't trust event.getText(), check for nulls
+                            if (event.getText() != null && event.getText().size() > 0) {
+                                if(event.getText().get(0) != null)
+                                    mLastActivityName = event.getText().get(0).toString();
+                            }
+                           break;
+                        case AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY:
+                            // don't trust event.getText(), check for nulls
+                            if (event.getText() != null && event.getText().size() > 0)
+                                if(event.getText().get(0) != null)
+                                    mLastTraversedText = event.getText().get(0).toString();
+                            if(DEBUG)
+                                Log.i(LOG_TAG, "Last text selection reported: " +
+                                        mLastTraversedText);
+                            break;
                     }
                     mLock.notifyAll();
                 }
@@ -488,9 +488,11 @@ class QueryController {
     }
 
     /**
-     * Last activity to report accessibility events
+     * Last activity to report accessibility events.
+     * @deprecated The results returned should be considered unreliable
      * @return String name of activity
      */
+    @Deprecated
     public String getCurrentActivityName() {
         mUiAutomatorBridge.waitForIdle();
         synchronized (mLock) {
@@ -504,9 +506,10 @@ class QueryController {
      */
     public String getCurrentPackageName() {
         mUiAutomatorBridge.waitForIdle();
-        synchronized (mLock) {
-            return mLastPackageName;
-        }
+        AccessibilityNodeInfo rootNode = getRootNode();
+        if (rootNode == null)
+            return null;
+        return rootNode.getPackageName() != null ? rootNode.getPackageName().toString() : null;
     }
 
     private String formatLog(String str) {
