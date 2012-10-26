@@ -105,7 +105,6 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
 
     @Override
     public void testRunFinished(Result result) throws Exception {
-        // TODO: implement this
     }
 
     /**
