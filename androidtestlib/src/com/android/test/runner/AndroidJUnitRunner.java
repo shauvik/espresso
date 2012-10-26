@@ -24,6 +24,7 @@ import android.os.Looper;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
+import com.android.test.runner.listener.DelayInjector;
 import com.android.test.runner.listener.InstrumentationResultPrinter;
 
 import org.junit.internal.TextListener;
@@ -112,6 +113,7 @@ public class AndroidJUnitRunner extends Instrumentation {
     private static final String ARGUMENT_LOG_ONLY = "log";
     private static final String ARGUMENT_ANNOTATION = "annotation";
     private static final String ARGUMENT_NOT_ANNOTATION = "notAnnotation";
+    private static final String ARGUMENT_DELAY_MSEC = "delay_msec";
 
     private static final String LOG_TAG = "AndroidJUnitRunner";
 
@@ -174,6 +176,7 @@ public class AndroidJUnitRunner extends Instrumentation {
 
             testRunner.addListener(new TextListener(writer));
             testRunner.addListener(new InstrumentationResultPrinter(this));
+            addDelayListener(testRunner);
 
             TestRequest testRequest = buildRequest(getArguments(), writer);
             Result result = testRunner.run(testRequest.getRequest());
@@ -262,6 +265,22 @@ public class AndroidJUnitRunner extends Instrumentation {
             testRequestBuilder.addTestMethod(testClassName, testMethodName);
         } else {
             testRequestBuilder.addTestClass(testClassName);
+        }
+    }
+
+    /**
+     * Sets up listener to inject {@link #ARGUMENT_DELAY_MSEC}, if specified.
+     * @param testRunner
+     */
+    private void addDelayListener(JUnitCore testRunner) {
+        try {
+            Object delay = getArguments().get(ARGUMENT_DELAY_MSEC);  // Accept either string or int
+            if (delay != null) {
+                int delayMsec = Integer.parseInt(delay.toString());
+                testRunner.addListener(new DelayInjector(delayMsec));
+            }
+        } catch (NumberFormatException e) {
+            Log.e(LOG_TAG, "Invalid delay_msec parameter", e);
         }
     }
 }
