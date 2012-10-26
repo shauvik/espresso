@@ -24,12 +24,12 @@ import android.os.Looper;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
+import com.android.test.runner.listener.DelayInjector;
+import com.android.test.runner.listener.InstrumentationResultPrinter;
+
 import org.junit.internal.TextListener;
-import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
-import org.junit.runner.notification.Failure;
-import org.junit.runner.notification.RunListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -113,71 +113,9 @@ public class AndroidJUnitRunner extends Instrumentation {
     private static final String ARGUMENT_LOG_ONLY = "log";
     private static final String ARGUMENT_ANNOTATION = "annotation";
     private static final String ARGUMENT_NOT_ANNOTATION = "notAnnotation";
+    private static final String ARGUMENT_DELAY_MSEC = "delay_msec";
 
-    /**
-     * The following keys are used in the status bundle to provide structured reports to
-     * an IInstrumentationWatcher.
-     */
-
-    /**
-     * This value, if stored with key {@link android.app.Instrumentation#REPORT_KEY_IDENTIFIER},
-     * identifies InstrumentationTestRunner as the source of the report.  This is sent with all
-     * status messages.
-     */
-    public static final String REPORT_VALUE_ID = "InstrumentationTestRunner";
-    /**
-     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
-     * identifies the total number of tests that are being run.  This is sent with all status
-     * messages.
-     */
-    public static final String REPORT_KEY_NUM_TOTAL = "numtests";
-    /**
-     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
-     * identifies the sequence number of the current test.  This is sent with any status message
-     * describing a specific test being started or completed.
-     */
-    public static final String REPORT_KEY_NUM_CURRENT = "current";
-    /**
-     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
-     * identifies the name of the current test class.  This is sent with any status message
-     * describing a specific test being started or completed.
-     */
-    public static final String REPORT_KEY_NAME_CLASS = "class";
-    /**
-     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
-     * identifies the name of the current test.  This is sent with any status message
-     * describing a specific test being started or completed.
-     */
-    public static final String REPORT_KEY_NAME_TEST = "test";
-
-    /**
-     * The test is starting.
-     */
-    public static final int REPORT_VALUE_RESULT_START = 1;
-    /**
-     * The test completed successfully.
-     */
-    public static final int REPORT_VALUE_RESULT_OK = 0;
-    /**
-     * The test completed with an error.
-     */
-    public static final int REPORT_VALUE_RESULT_ERROR = -1;
-    /**
-     * The test completed with a failure.
-     */
-    public static final int REPORT_VALUE_RESULT_FAILURE = -2;
-    /**
-     * The test was ignored.
-     */
-    public static final int REPORT_VALUE_RESULT_IGNORED = -3;
-    /**
-     * If included in the status bundle sent to an IInstrumentationWatcher, this key
-     * identifies a stack trace describing an error or failure.  This is sent with any status
-     * message describing a specific test being completed.
-     */
-    public static final String REPORT_KEY_STACK = "stack";
-
-    private static final String LOG_TAG = "InstrumentationTestRunner";
+    private static final String LOG_TAG = "AndroidJUnitRunner";
 
     private final Bundle mResults = new Bundle();
     private Bundle mArguments;
@@ -200,8 +138,17 @@ public class AndroidJUnitRunner extends Instrumentation {
         return mArguments;
     }
 
-    private boolean getBooleanArgument(Bundle arguments, String tag) {
-        String tagString = arguments.getString(tag);
+    /**
+     * Set the arguments.
+     *
+     * @VisibleForTesting
+     */
+    void setArguments(Bundle args) {
+        mArguments = args;
+    }
+
+    private boolean getBooleanArgument(String tag) {
+        String tagString = getArguments().getString(tag);
         return tagString != null && Boolean.parseBoolean(tagString);
     }
 
@@ -218,7 +165,7 @@ public class AndroidJUnitRunner extends Instrumentation {
     public void onStart() {
         prepareLooper();
 
-        if (getBooleanArgument(getArguments(), "debug")) {
+        if (getBooleanArgument("debug")) {
             Debug.waitForDebugger();
         }
 
@@ -226,9 +173,10 @@ public class AndroidJUnitRunner extends Instrumentation {
         PrintStream writer = new PrintStream(byteArrayOutputStream);
         try {
             JUnitCore testRunner = new JUnitCore();
+
             testRunner.addListener(new TextListener(writer));
-            WatcherResultPrinter detailedResultPrinter = new WatcherResultPrinter();
-            testRunner.addListener(detailedResultPrinter);
+            testRunner.addListener(new InstrumentationResultPrinter(this));
+            addDelayListener(testRunner);
 
             TestRequest testRequest = buildRequest(getArguments(), writer);
             Result result = testRunner.run(testRequest.getRequest());
@@ -286,8 +234,7 @@ public class AndroidJUnitRunner extends Instrumentation {
             builder.addAnnotationExclusionFilter(notAnnotation);
         }
 
-        boolean logOnly = getBooleanArgument(arguments, ARGUMENT_LOG_ONLY);
-        if (logOnly) {
+        if (getBooleanArgument(ARGUMENT_LOG_ONLY)) {
             builder.setSkipExecution(true);
         }
         return builder.build(this);
@@ -322,89 +269,18 @@ public class AndroidJUnitRunner extends Instrumentation {
     }
 
     /**
-     * This class sends status reports back to the IInstrumentationWatcher
+     * Sets up listener to inject {@link #ARGUMENT_DELAY_MSEC}, if specified.
+     * @param testRunner
      */
-    private class WatcherResultPrinter extends RunListener {
-        private final Bundle mResultTemplate;
-        Bundle mTestResult;
-        int mTestNum = 0;
-        int mTestResultCode = 0;
-        String mTestClass = null;
-
-        public WatcherResultPrinter() {
-            mResultTemplate = new Bundle();
-        }
-
-        @Override
-        public void testRunStarted(Description description) throws Exception {
-            mResultTemplate.putString(Instrumentation.REPORT_KEY_IDENTIFIER, REPORT_VALUE_ID);
-            mResultTemplate.putInt(REPORT_KEY_NUM_TOTAL, description.testCount());
-        }
-
-        @Override
-        public void testRunFinished(Result result) throws Exception {
-            // TODO: implement this
-        }
-
-        /**
-         * send a status for the start of a each test, so long tests can be seen
-         * as "running"
-         */
-        @Override
-        public void testStarted(Description description) throws Exception {
-            String testClass = description.getClassName();
-            String testName = description.getMethodName();
-            mTestResult = new Bundle(mResultTemplate);
-            mTestResult.putString(REPORT_KEY_NAME_CLASS, testClass);
-            mTestResult.putString(REPORT_KEY_NAME_TEST, testName);
-            mTestResult.putInt(REPORT_KEY_NUM_CURRENT, ++mTestNum);
-            // pretty printing
-            if (testClass != null && !testClass.equals(mTestClass)) {
-                mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
-                        String.format("\n%s:", testClass));
-                mTestClass = testClass;
-            } else {
-                mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT, "");
+    private void addDelayListener(JUnitCore testRunner) {
+        try {
+            Object delay = getArguments().get(ARGUMENT_DELAY_MSEC);  // Accept either string or int
+            if (delay != null) {
+                int delayMsec = Integer.parseInt(delay.toString());
+                testRunner.addListener(new DelayInjector(delayMsec));
             }
-
-            sendStatus(REPORT_VALUE_RESULT_START, mTestResult);
-            mTestResultCode = 0;
-        }
-
-        @Override
-        public void testFinished(Description description) throws Exception {
-            if (mTestResultCode == 0) {
-                mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT, ".");
-            }
-            sendStatus(mTestResultCode, mTestResult);
-        }
-
-        @Override
-        public void testFailure(Failure failure) throws Exception {
-            mTestResultCode = REPORT_VALUE_RESULT_ERROR;
-            reportFailure(failure);
-        }
-
-
-        @Override
-        public void testAssumptionFailure(Failure failure) {
-            mTestResultCode = REPORT_VALUE_RESULT_FAILURE;
-            reportFailure(failure);
-        }
-
-        private void reportFailure(Failure failure) {
-            mTestResult.putString(REPORT_KEY_STACK, failure.getTrace());
-            // pretty printing
-            mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
-                    String.format("\nError in %s:\n%s",
-                            failure.getDescription().getDisplayName(), failure.getTrace()));
-        }
-
-        @Override
-        public void testIgnored(Description description) throws Exception {
-            testStarted(description);
-            mTestResultCode = REPORT_VALUE_RESULT_IGNORED;
-            testFinished(description);
+        } catch (NumberFormatException e) {
+            Log.e(LOG_TAG, "Invalid delay_msec parameter", e);
         }
     }
 }
