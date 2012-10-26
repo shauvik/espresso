@@ -24,15 +24,20 @@ import android.os.Looper;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
+import com.android.test.runner.listener.CoverageListener;
 import com.android.test.runner.listener.DelayInjector;
 import com.android.test.runner.listener.InstrumentationResultPrinter;
+import com.android.test.runner.listener.InstrumentationRunListener;
 
 import org.junit.internal.TextListener;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
+import org.junit.runner.notification.RunListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An {@link Instrumentation} that runs JUnit3 and JUnit4 tests against
@@ -104,6 +109,15 @@ import java.io.PrintStream;
  * test execution. Useful for quickly obtaining info on the tests to be executed by an
  * instrumentation command.
  * <p/>
+ * <b>To generate EMMA code coverage:</b>
+ * -e coverage true
+ * Note: this requires an emma instrumented build. By default, the code coverage results file
+ * will be saved in a /data/<app>/coverage.ec file, unless overridden by coverageFile flag (see
+ * below)
+ * <p/>
+ * <b> To specify EMMA code coverage results file path:</b>
+ * -e coverageFile /sdcard/myFile.ec
+ * <p/>
  */
 public class AndroidJUnitRunner extends Instrumentation {
 
@@ -114,10 +128,11 @@ public class AndroidJUnitRunner extends Instrumentation {
     private static final String ARGUMENT_ANNOTATION = "annotation";
     private static final String ARGUMENT_NOT_ANNOTATION = "notAnnotation";
     private static final String ARGUMENT_DELAY_MSEC = "delay_msec";
+    private static final String ARGUMENT_COVERAGE = "coverage";
+    private static final String ARGUMENT_COVERAGE_PATH = "coverageFile";
 
     private static final String LOG_TAG = "AndroidJUnitRunner";
 
-    private final Bundle mResults = new Bundle();
     private Bundle mArguments;
 
     @Override
@@ -171,12 +186,15 @@ public class AndroidJUnitRunner extends Instrumentation {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         PrintStream writer = new PrintStream(byteArrayOutputStream);
+        List<RunListener> listeners = new ArrayList<RunListener>();
+
         try {
             JUnitCore testRunner = new JUnitCore();
 
-            testRunner.addListener(new TextListener(writer));
-            testRunner.addListener(new InstrumentationResultPrinter(this));
-            addDelayListener(testRunner);
+            addListener(listeners, testRunner, new TextListener(writer));
+            addListener(listeners, testRunner, new InstrumentationResultPrinter(this));
+            addDelayListener(listeners, testRunner);
+            addCoverageListener(listeners, testRunner);
 
             TestRequest testRequest = buildRequest(getArguments(), writer);
             Result result = testRunner.run(testRequest.getRequest());
@@ -191,13 +209,51 @@ public class AndroidJUnitRunner extends Instrumentation {
             t.printStackTrace(writer);
 
         } finally {
+            Bundle results = new Bundle();
+            reportRunEnded(listeners, writer, results);
             writer.close();
-            mResults.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
+            results.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
                     String.format("\n%s",
                             byteArrayOutputStream.toString()));
-            finish(Activity.RESULT_OK, mResults);
+            finish(Activity.RESULT_OK, results);
         }
 
+    }
+
+    private void addListener(List<RunListener> list, JUnitCore testRunner, RunListener listener) {
+        list.add(listener);
+        testRunner.addListener(listener);
+    }
+
+    private void addCoverageListener(List<RunListener> list, JUnitCore testRunner) {
+        if (getBooleanArgument(ARGUMENT_COVERAGE)) {
+            String coverageFilePath = getArguments().getString(ARGUMENT_COVERAGE_PATH);
+            addListener(list, testRunner, new CoverageListener(this, coverageFilePath));
+        }
+    }
+
+    /**
+     * Sets up listener to inject {@link #ARGUMENT_DELAY_MSEC}, if specified.
+     * @param testRunner
+     */
+    private void addDelayListener(List<RunListener> list, JUnitCore testRunner) {
+        try {
+            Object delay = getArguments().get(ARGUMENT_DELAY_MSEC);  // Accept either string or int
+            if (delay != null) {
+                int delayMsec = Integer.parseInt(delay.toString());
+                addListener(list, testRunner, new DelayInjector(delayMsec));
+            }
+        } catch (NumberFormatException e) {
+            Log.e(LOG_TAG, "Invalid delay_msec parameter", e);
+        }
+    }
+
+    private void reportRunEnded(List<RunListener> listeners, PrintStream writer, Bundle results) {
+        for (RunListener listener : listeners) {
+            if (listener instanceof InstrumentationRunListener) {
+                ((InstrumentationRunListener)listener).instrumentationRunFinished(writer, results);
+            }
+        }
     }
 
     /**
@@ -265,22 +321,6 @@ public class AndroidJUnitRunner extends Instrumentation {
             testRequestBuilder.addTestMethod(testClassName, testMethodName);
         } else {
             testRequestBuilder.addTestClass(testClassName);
-        }
-    }
-
-    /**
-     * Sets up listener to inject {@link #ARGUMENT_DELAY_MSEC}, if specified.
-     * @param testRunner
-     */
-    private void addDelayListener(JUnitCore testRunner) {
-        try {
-            Object delay = getArguments().get(ARGUMENT_DELAY_MSEC);  // Accept either string or int
-            if (delay != null) {
-                int delayMsec = Integer.parseInt(delay.toString());
-                testRunner.addListener(new DelayInjector(delayMsec));
-            }
-        } catch (NumberFormatException e) {
-            Log.e(LOG_TAG, "Invalid delay_msec parameter", e);
         }
     }
 }
