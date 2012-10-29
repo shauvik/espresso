@@ -17,6 +17,7 @@ package com.android.test;
 
 import android.content.Context;
 import android.test.AndroidTestCase;
+import android.util.Log;
 
 /**
  * Placeholder test to verify {@link Context} gets injected to {@link AndroidTestCase}.
@@ -24,4 +25,8 @@ import android.test.AndroidTestCase;
 public class MyAndroidTestCase extends AndroidTestCase {
 
     // rely on testCaseSetupProperly to test for context
+
+    public MyAndroidTestCase() {
+        Log.i("MyAndroidTestCase", "I'm created");
+    }
 }
