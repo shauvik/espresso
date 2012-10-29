@@ -48,6 +48,10 @@ public class TestRequestBuilder {
 
     private static final String LOG_TAG = "TestRequestBuilder";
 
+    public static final String LARGE_SIZE = "large";
+    public static final String MEDIUM_SIZE = "medium";
+    public static final String SMALL_SIZE = "small";
+
     private String[] mApkPaths;
     private TestLoader mTestLoader;
     private Filter mFilter = new AnnotationExclusionFilter(Suppress.class);
@@ -154,11 +158,11 @@ public class TestRequestBuilder {
      * @param testSize
      */
     public void addTestSizeFilter(String testSize) {
-        if ("small".equals(testSize)) {
+        if (SMALL_SIZE.equals(testSize)) {
             mFilter = mFilter.intersect(new AnnotationInclusionFilter(SmallTest.class));
-        } else if ("medium".equals(testSize)) {
+        } else if (MEDIUM_SIZE.equals(testSize)) {
             mFilter = mFilter.intersect(new AnnotationInclusionFilter(MediumTest.class));
-        } else if ("large".equals(testSize)) {
+        } else if (LARGE_SIZE.equals(testSize)) {
             mFilter = mFilter.intersect(new AnnotationInclusionFilter(LargeTest.class));
         } else {
             Log.e(LOG_TAG, String.format("Unrecognized test size '%s'", testSize));
