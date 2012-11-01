@@ -144,13 +144,31 @@ class InteractionController {
      * timeout period specified, the call will return anyway.
      * @param x
      * @param y
-     * @param eventType is an {@link AccessibilityEvent} type
      * @param timeout
+     * @param eventType is an {@link AccessibilityEvent} type
      * @return True if busy state is detected else false for timeout waiting for busy state
      */
-    public boolean clickAndWaitForEvent(final int x, final int y, final int eventType,
-            long timeout) {
-        Log.d(LOG_TAG, "clickAndWaitForEvent (" + x + ", " + y + ")");
+    public boolean clickAndWaitForEvent(final int x, final int y, long timeout,
+            final int eventType) {
+        return clickAndWaitForEvents(x, y, timeout, false, eventType);
+    }
+
+    /**
+     * Click at coordinates and blocks until the specified accessibility events. It is possible to
+     * set the wait for all events to occur, in no specific order, or to the wait for any.
+     *
+     * @param x
+     * @param y
+     * @param timeout
+     * @param waitForAll boolean to indicate whether to wait for any or all events
+     * @param eventTypes mask
+     * @return
+     */
+    public boolean clickAndWaitForEvents(final int x, final int y, long timeout,
+            boolean waitForAll, int eventTypes) {
+        String logString = String.format("clickAndWaitForEvents(%d, %d, %d, %s, %d)", x, y, timeout,
+                Boolean.toString(waitForAll), eventTypes);
+        Log.d(LOG_TAG, logString);
 
         mUiAutomatorBridge.setOperationTime();
         Runnable command = new Runnable() {
@@ -162,44 +180,68 @@ class InteractionController {
                 }
             }
         };
-        return runAndWaitForEvent(command, eventType, timeout);
-    }
-
-    /**
-     * Waits for event up to the timeout specified
-     * @param eventType
-     * @param timeout
-     * @return false on timeout else true for event received.
-     */
-    private boolean waitForEvent(int eventType, long timeout) {
-        Runnable command = new Runnable() {
-            @Override
-            public void run() {
-                // do nothing. Just wait for the event
-            }
-        };
-        return runAndWaitForEvent(command, eventType, timeout);
+        return runAndWaitForEvents(command, timeout, waitForAll, eventTypes);
     }
 
     /**
      * Runs a command and waits for a specific accessibility event.
      * @param command is a Runnable to execute before waiting for the event.
-     * @param eventType
      * @param timeout
+     * @param eventType
      * @return
      */
-    private boolean runAndWaitForEvent(Runnable command, final int eventType, long timeout) {
-        Predicate<AccessibilityEvent> predicate = new Predicate<AccessibilityEvent>() {
+    private boolean runAndWaitForEvent(Runnable command, long timeout, int eventType) {
+        return runAndWaitForEvents(command, timeout, false, eventType);
+    }
+
+    /**
+     * Runs a command and waits for accessibility events. It is possible to set the wait for all
+     * events to occur at least once for each, or wait for any one to occur at least once.
+     *
+     * @param command
+     * @param timeout
+     * @param waitForAll boolean to indicate whether to wait for any or all events
+     * @param eventTypesMask
+     * @return
+     */
+    private boolean runAndWaitForEvents(Runnable command, long timeout, final boolean waitForAll,
+            final int eventTypesMask) {
+
+        if (eventTypesMask == 0)
+            throw new IllegalArgumentException("events mask cannot be zero");
+
+        class EventPredicate implements Predicate<AccessibilityEvent> {
+            int mMask;
+            EventPredicate(int mask) {
+                mMask = mask;
+            }
             @Override
             public boolean apply(AccessibilityEvent t) {
-                return t.getEventType() == eventType;
+                // check current event in the list
+                if ((t.getEventType() & mMask) != 0) {
+                    if (!waitForAll)
+                        return true;
+
+                    // remove from mask since this condition is satisfied
+                    mMask &= ~t.getEventType();
+
+                    // Since we're waiting for all events to be matched at least once
+                    if (mMask != 0)
+                        return false;
+
+                    // all matched
+                    return true;
+                }
+                // not one of our events
+                return false;
             }
-        };
+        }
+
         try {
-            mUiAutomatorBridge.executeCommandAndWaitForAccessibilityEvent(command, predicate,
-                    timeout);
+            mUiAutomatorBridge.executeCommandAndWaitForAccessibilityEvent(command,
+                    new EventPredicate(eventTypesMask), timeout);
         } catch (TimeoutException e) {
-            Log.w(LOG_TAG, "runAndwaitForEvent timedout waiting for event: " + eventType);
+            Log.w(LOG_TAG, "runAndwaitForEvent timedout waiting for events: " + eventTypesMask);
             return false;
         } catch (Exception e) {
             Log.e(LOG_TAG, "exception from executeCommandAndWaitForAccessibilityEvent", e);
@@ -241,9 +283,16 @@ class InteractionController {
             }
         };
 
-        return runAndWaitForEvent(command, eventType, timeout);
+        return runAndWaitForEvent(command, timeout, eventType);
     }
 
+    /**
+     * Clicks at coordinates without waiting for device idle. This may be used for operations
+     * that require stressing the target.
+     * @param x
+     * @param y
+     * @return
+     */
     public boolean click(int x, int y) {
         Log.d(LOG_TAG, "click (" + x + ", " + y + ")");
         mUiAutomatorBridge.setOperationTime();
@@ -266,11 +315,9 @@ class InteractionController {
      * @return true if both events occurred in the expected order
      */
     public boolean clickAndWaitForNewWindow(final int x, final int y, long timeout) {
-        if (clickAndWaitForEvent(x, y, AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, timeout)) {
-            waitForEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED, timeout);
-            return true;
-        }
-        return false;
+        return (clickAndWaitForEvents(x, y, timeout, true,
+                AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED +
+                AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED));
     }
 
     public boolean longTap(int x, int y) {
@@ -344,8 +391,8 @@ class InteractionController {
             }
         };
 
-        return runAndWaitForEvent(command, AccessibilityEvent.TYPE_VIEW_SCROLLED,
-                DEFAULT_SCROLL_EVENT_TIMEOUT_MILLIS);
+        return runAndWaitForEvent(command, DEFAULT_SCROLL_EVENT_TIMEOUT_MILLIS,
+                AccessibilityEvent.TYPE_VIEW_SCROLLED);
     }
 
     /**
