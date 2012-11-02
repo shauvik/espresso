@@ -294,7 +294,7 @@ class InteractionController {
         }
         mDownTime = SystemClock.uptimeMillis();
         MotionEvent event = MotionEvent.obtain(
-                mDownTime, mDownTime, MotionEvent.ACTION_DOWN, x, y, 0);
+                mDownTime, mDownTime, MotionEvent.ACTION_DOWN, x, y, 1);
         event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
         return injectEventSync(event);
     }
@@ -305,7 +305,7 @@ class InteractionController {
         }
         final long eventTime = SystemClock.uptimeMillis();
         MotionEvent event = MotionEvent.obtain(
-                mDownTime, eventTime, MotionEvent.ACTION_UP, x, y, 0);
+                mDownTime, eventTime, MotionEvent.ACTION_UP, x, y, 1);
         event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
         mDownTime = 0;
         return injectEventSync(event);
@@ -317,7 +317,7 @@ class InteractionController {
         }
         final long eventTime = SystemClock.uptimeMillis();
         MotionEvent event = MotionEvent.obtain(
-                mDownTime, eventTime, MotionEvent.ACTION_MOVE, x, y, 0);
+                mDownTime, eventTime, MotionEvent.ACTION_MOVE, x, y, 1);
         event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
         return injectEventSync(event);
     }
