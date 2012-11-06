@@ -300,8 +300,9 @@ public class UiObject {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = getVisibleBounds(node);
-        return getInteractionController().clickAndWaitForEvent(rect.centerX(), rect.centerY(),
-                AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED, WAIT_FOR_EVENT_TMEOUT);
+        return getInteractionController().clickAndWaitForEvents(rect.centerX(), rect.centerY(),
+                WAIT_FOR_EVENT_TMEOUT, false, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED +
+                AccessibilityEvent.TYPE_VIEW_SELECTED);
     }
 
     /**
