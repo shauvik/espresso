@@ -180,7 +180,7 @@ class InteractionController {
                 }
             }
         };
-        return runAndWaitForEvents(command, timeout, waitForAll, eventTypes);
+        return runAndWaitForEvents(command, timeout, waitForAll, eventTypes) != null;
     }
 
     /**
@@ -188,9 +188,9 @@ class InteractionController {
      * @param command is a Runnable to execute before waiting for the event.
      * @param timeout
      * @param eventType
-     * @return
+     * @return The AccessibilityEvent if one is received, otherwise null.
      */
-    private boolean runAndWaitForEvent(Runnable command, long timeout, int eventType) {
+    private AccessibilityEvent runAndWaitForEvent(Runnable command, long timeout, int eventType) {
         return runAndWaitForEvents(command, timeout, false, eventType);
     }
 
@@ -202,11 +202,10 @@ class InteractionController {
      * @param timeout
      * @param waitForAll boolean to indicate whether to wait for any or all events
      * @param eventTypesMask
-     * @return
+     * @return The AccessibilityEvent if one is received, otherwise null.
      */
-    private boolean runAndWaitForEvents(Runnable command, long timeout, final boolean waitForAll,
-            final int eventTypesMask) {
-
+    private AccessibilityEvent runAndWaitForEvents(Runnable command, long timeout,
+            final boolean waitForAll, final int eventTypesMask) {
         if (eventTypesMask == 0)
             throw new IllegalArgumentException("events mask cannot be zero");
 
@@ -237,17 +236,18 @@ class InteractionController {
             }
         }
 
+        AccessibilityEvent event = null;
         try {
-            mUiAutomatorBridge.executeCommandAndWaitForAccessibilityEvent(command,
+            event = mUiAutomatorBridge.executeCommandAndWaitForAccessibilityEvent(command,
                     new EventPredicate(eventTypesMask), timeout);
         } catch (TimeoutException e) {
             Log.w(LOG_TAG, "runAndwaitForEvent timedout waiting for events: " + eventTypesMask);
-            return false;
+            return null;
         } catch (Exception e) {
             Log.e(LOG_TAG, "exception from executeCommandAndWaitForAccessibilityEvent", e);
-            return false;
+            return null;
         }
-        return true;
+        return event;
     }
 
     /**
@@ -283,7 +283,7 @@ class InteractionController {
             }
         };
 
-        return runAndWaitForEvent(command, timeout, eventType);
+        return runAndWaitForEvent(command, timeout, eventType) != null;
     }
 
     /**
@@ -376,8 +376,8 @@ class InteractionController {
      * @param downY
      * @param upX
      * @param upY
-     * @param duration
-     * @return true if the swipe and scrolling have been successfully completed.
+     * @param steps
+     * @return true if we are not at the beginning or end of the scrollable view.
      */
     public boolean scrollSwipe(final int downX, final int downY, final int upX, final int upY,
             final int steps) {
@@ -391,8 +391,34 @@ class InteractionController {
             }
         };
 
-        return runAndWaitForEvent(command, DEFAULT_SCROLL_EVENT_TIMEOUT_MILLIS,
-                AccessibilityEvent.TYPE_VIEW_SCROLLED);
+        AccessibilityEvent event = runAndWaitForEvent(command,
+                DEFAULT_SCROLL_EVENT_TIMEOUT_MILLIS, AccessibilityEvent.TYPE_VIEW_SCROLLED);
+        if (event == null) {
+            return false;
+        }
+        // AdapterViews have indices we can use to check for the beginning.
+        if (event.getFromIndex() != -1 && event.getToIndex() != -1 && event.getItemCount() != -1) {
+            boolean foundEnd = event.getFromIndex() == 0 ||
+                    (event.getItemCount() - 1) == event.getToIndex();
+            Log.d(LOG_TAG, "scrollSwipe reached scroll end: " + foundEnd);
+            return !foundEnd;
+        } else if (event.getScrollX() != -1 && event.getScrollY() != -1) {
+            // Determine if we are scrolling vertically or horizontally.
+            if (downX == upX) {
+                // Vertical
+                boolean foundEnd = event.getScrollY() == 0 ||
+                        event.getScrollY() == event.getMaxScrollY();
+                Log.d(LOG_TAG, "Vertical scrollSwipe reached scroll end: " + foundEnd);
+                return !foundEnd;
+            } else if (downY == upY) {
+                // Horizontal
+                boolean foundEnd = event.getScrollX() == 0 ||
+                        event.getScrollX() == event.getMaxScrollX();
+                Log.d(LOG_TAG, "Horizontal scrollSwipe reached scroll end: " + foundEnd);
+                return !foundEnd;
+            }
+        }
+        return event != null;
     }
 
     /**
@@ -401,7 +427,7 @@ class InteractionController {
      * @param downY
      * @param upX
      * @param upY
-     * @param duration
+     * @param steps
      * @return
      */
     public boolean swipe(int downX, int downY, int upX, int upY, int steps) {
