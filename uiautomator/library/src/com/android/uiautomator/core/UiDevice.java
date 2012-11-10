@@ -107,7 +107,6 @@ public class UiDevice {
      * The returned display size is adjusted per screen rotation
      *
      * @return a Point containing the display size in dp
-     * @hide
      */
     public Point getDisplaySizeDp() {
         Display display = getDefaultDisplay();
@@ -387,8 +386,10 @@ public class UiDevice {
 
     /**
      * Retrieves the last activity to report accessibility events.
+     * @deprecated The results returned should be considered unreliable
      * @return String name of activity
      */
+    @Deprecated
     public String getCurrentActivityName() {
         return mUiAutomationBridge.getQueryController().getCurrentActivityName();
     }
