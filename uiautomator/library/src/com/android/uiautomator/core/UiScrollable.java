@@ -22,6 +22,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 /**
  * UiScrollable is a {@link UiCollection} and provides support for searching for items in a
  * scrollable UI elements. Used with horizontally or vertically scrollable UI.
+ * @since API Level 16
  */
 public class UiScrollable extends UiCollection {
     private static final String LOG_TAG = UiScrollable.class.getSimpleName();
@@ -48,6 +49,7 @@ public class UiScrollable extends UiCollection {
      * the items in the container will require specifying UiSelector as an item selector.
      *
      * @param container a {@link UiSelector} selector
+     * @since API Level 16
      */
     public UiScrollable(UiSelector container) {
         // wrap the container selector with container so that QueryController can handle
@@ -58,6 +60,7 @@ public class UiScrollable extends UiCollection {
     /**
      * Set the direction of swipes when performing scroll search
      * @return reference to itself
+     * @since API Level 16
      */
     public UiScrollable setAsVerticalList() {
         mIsVerticalList = true;
@@ -67,6 +70,7 @@ public class UiScrollable extends UiCollection {
     /**
      * Set the direction of swipes when performing scroll search
      * @return reference to itself
+     * @since API Level 16
      */
     public UiScrollable setAsHorizontalList() {
         mIsVerticalList = false;
@@ -79,6 +83,7 @@ public class UiScrollable extends UiCollection {
      *
      * @param selector
      * @return true if found else false
+     * @since API Level 16
      */
     protected boolean exists(UiSelector selector) {
         if(getQueryController().findAccessibilityNodeInfo(selector) != null) {
@@ -100,6 +105,7 @@ public class UiScrollable extends UiCollection {
      * @param text String of the identifying child contents of of the <code>childPattern</code>
      * @return {@link UiObject} pointing at and instance of <code>childPattern</code>
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     @Override
     public UiObject getChildByDescription(UiSelector childPattern, String text)
@@ -115,6 +121,7 @@ public class UiScrollable extends UiCollection {
      * @param allowScrollSearch set to true if scrolling is allowed
      * @return {@link UiObject} pointing at and instance of <code>childPattern</code>
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public UiObject getChildByDescription(UiSelector childPattern, String text,
             boolean allowScrollSearch) throws UiObjectNotFoundException {
@@ -136,6 +143,7 @@ public class UiScrollable extends UiCollection {
      * @param childPattern {@link UiSelector} selector of the child pattern to match and return
      * @param instance int the desired matched instance of this <code>childPattern</code>
      * @return {@link UiObject} pointing at and instance of <code>childPattern</code>
+     * @since API Level 16
      */
     @Override
     public UiObject getChildByInstance(UiSelector childPattern, int instance)
@@ -159,6 +167,7 @@ public class UiScrollable extends UiCollection {
      * @param text String of the identifying child contents of of the <code>childPattern</code>
      * @return {@link UiObject} pointing at and instance of <code>childPattern</code>
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     @Override
     public UiObject getChildByText(UiSelector childPattern, String text)
@@ -174,6 +183,7 @@ public class UiScrollable extends UiCollection {
      * @param allowScrollSearch set to true if scrolling is allowed
      * @return {@link UiObject} pointing at and instance of <code>childPattern</code>
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public UiObject getChildByText(UiSelector childPattern, String text, boolean allowScrollSearch)
             throws UiObjectNotFoundException {
@@ -193,6 +203,7 @@ public class UiScrollable extends UiCollection {
      *
      * @param text to look for anywhere within the contents of this scrollable.
      * @return true if item us found else false
+     * @since API Level 16
      */
     public boolean scrollDescriptionIntoView(String text) throws UiObjectNotFoundException {
         return scrollIntoView(new UiSelector().description(text));
@@ -204,6 +215,7 @@ public class UiScrollable extends UiCollection {
      *
      * @param obj {@link UiObject}
      * @return true if the item was found and now is in view else false
+     * @since API Level 16
      */
     public boolean scrollIntoView(UiObject obj) throws UiObjectNotFoundException {
         return scrollIntoView(obj.getSelector());
@@ -215,6 +227,7 @@ public class UiScrollable extends UiCollection {
      *
      * @param selector {@link UiSelector} selector
      * @return true if the item was found and now is in view else false
+     * @since API Level 16
      */
     public boolean scrollIntoView(UiSelector selector) throws UiObjectNotFoundException {
         // if we happen to be on top of the text we want then return here
@@ -245,6 +258,7 @@ public class UiScrollable extends UiCollection {
      *
      * @param text to look for
      * @return true if item us found else false
+     * @since API Level 16
      */
     public boolean scrollTextIntoView(String text) throws UiObjectNotFoundException {
         return scrollIntoView(new UiSelector().text(text));
@@ -258,6 +272,7 @@ public class UiScrollable extends UiCollection {
      *
      * @param swipes is the number of search swipes until abort
      * @return reference to itself
+     * @since API Level 16
      */
     public UiScrollable setMaxSearchSwipes(int swipes) {
         mMaxSearchSwipes = swipes;
@@ -271,6 +286,7 @@ public class UiScrollable extends UiCollection {
      * See {@link #setMaxSearchSwipes(int)}
      *
      * @return max value of the number of swipes currently allowed during a scroll search
+     * @since API Level 16
      */
     public int getMaxSearchSwipes() {
         return mMaxSearchSwipes;
@@ -280,6 +296,7 @@ public class UiScrollable extends UiCollection {
      * A convenience version of {@link UiScrollable#scrollForward(int)}, performs a fling
      *
      * @return true if scrolled and false if can't scroll anymore
+     * @since API Level 16
      */
     public boolean flingForward() throws UiObjectNotFoundException {
         return scrollForward(FLING_STEPS);
@@ -289,6 +306,7 @@ public class UiScrollable extends UiCollection {
      * A convenience version of {@link UiScrollable#scrollForward(int)}, performs a regular scroll
      *
      * @return true if scrolled and false if can't scroll anymore
+     * @since API Level 16
      */
     public boolean scrollForward() throws UiObjectNotFoundException {
         return scrollForward(SCROLL_STEPS);
@@ -303,6 +321,7 @@ public class UiScrollable extends UiCollection {
      *
      * @param steps use steps to control the speed, so that it may be a scroll, or fling
      * @return true if scrolled and false if can't scroll anymore
+     * @since API Level 16
      */
     public boolean scrollForward(int steps) throws UiObjectNotFoundException {
         Log.d(LOG_TAG, "scrollForward() on selector = " + getSelector());
@@ -343,6 +362,7 @@ public class UiScrollable extends UiCollection {
      * See {@link UiScrollable#scrollBackward(int)}
      *
      * @return true if scrolled and false if can't scroll anymore
+     * @since API Level 16
      */
     public boolean flingBackward() throws UiObjectNotFoundException {
         return scrollBackward(FLING_STEPS);
@@ -352,6 +372,7 @@ public class UiScrollable extends UiCollection {
      * See {@link UiScrollable#scrollBackward(int)}
      *
      * @return true if scrolled and false if can't scroll anymore
+     * @since API Level 16
      */
     public boolean scrollBackward() throws UiObjectNotFoundException {
         return scrollBackward(SCROLL_STEPS);
@@ -366,6 +387,7 @@ public class UiScrollable extends UiCollection {
      *
      * @param steps use steps to control the speed, so that it may be a scroll, or fling
      * @return true if scrolled and false if can't scroll anymore
+     * @since API Level 16
      */
     public boolean scrollBackward(int steps) throws UiObjectNotFoundException {
         Log.d(LOG_TAG, "scrollBackward() on selector = " + getSelector());
@@ -411,6 +433,7 @@ public class UiScrollable extends UiCollection {
      *
      * @param steps use steps to control the speed, so that it may be a scroll, or fling
      * @return true on scrolled else false
+     * @since API Level 16
      */
     public boolean scrollToBeginning(int maxSwipes, int steps) throws UiObjectNotFoundException {
         Log.d(LOG_TAG, "scrollToBeginning() on selector = " + getSelector());
@@ -428,6 +451,7 @@ public class UiScrollable extends UiCollection {
      *
      * @param maxSwipes
      * @return true on scrolled else false
+     * @since API Level 16
      */
     public boolean scrollToBeginning(int maxSwipes) throws UiObjectNotFoundException {
         return scrollToBeginning(maxSwipes, SCROLL_STEPS);
@@ -438,6 +462,7 @@ public class UiScrollable extends UiCollection {
      *
      * @param maxSwipes
      * @return true on scrolled else false
+     * @since API Level 16
      */
     public boolean flingToBeginning(int maxSwipes) throws UiObjectNotFoundException {
         return scrollToBeginning(maxSwipes, FLING_STEPS);
@@ -450,6 +475,7 @@ public class UiScrollable extends UiCollection {
      *
      * @param steps use steps to control the speed, so that it may be a scroll, or fling
      * @return true on scrolled else false
+     * @since API Level 16
      */
     public boolean scrollToEnd(int maxSwipes, int steps) throws UiObjectNotFoundException {
         // protect against potential hanging and return after preset attempts
@@ -466,6 +492,7 @@ public class UiScrollable extends UiCollection {
      *
      * @param maxSwipes
      * @return true on scrolled else false
+     * @since API Level 16
      */
     public boolean scrollToEnd(int maxSwipes) throws UiObjectNotFoundException {
         return scrollToEnd(maxSwipes, SCROLL_STEPS);
@@ -476,6 +503,7 @@ public class UiScrollable extends UiCollection {
      *
      * @param maxSwipes
      * @return true on scrolled else false
+     * @since API Level 16
      */
     public boolean flingToEnd(int maxSwipes) throws UiObjectNotFoundException {
         return scrollToEnd(maxSwipes, FLING_STEPS);
@@ -493,6 +521,7 @@ public class UiScrollable extends UiCollection {
      * started at a point too near to the edge. The default is 10% from either edge.
      *
      * @return a value between 0 and 1
+     * @since API Level 16
      */
     public double getSwipeDeadZonePercentage() {
         return mSwipeDeadZonePercentage;
@@ -511,6 +540,7 @@ public class UiScrollable extends UiCollection {
      *
      * @param swipeDeadZonePercentage is a value between 0 and 1
      * @return reference to itself
+     * @since API Level 16
      */
     public UiScrollable setSwipeDeadZonePercentage(double swipeDeadZonePercentage) {
         mSwipeDeadZonePercentage = swipeDeadZonePercentage;
