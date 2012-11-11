@@ -29,14 +29,30 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * locate a matching UI element at runtime based on the {@link UiSelector} properties specified in
  * its constructor. Since a UiObject is a representative for a UI element, it can
  * be reused for different views with matching UI elements.
+ * @since API Level 16
  */
 public class UiObject {
     private static final String LOG_TAG = UiObject.class.getSimpleName();
+    /**
+     * @since API Level 16
+     **/
     protected static final long WAIT_FOR_SELECTOR_TIMEOUT = 10 * 1000;
+    /**
+     * @since API Level 16
+     **/
     protected static final long WAIT_FOR_SELECTOR_POLL = 1000;
     // set a default timeout to 5.5s, since ANR threshold is 5s
+    /**
+     * @since API Level 16
+     **/
     protected static final long WAIT_FOR_WINDOW_TMEOUT = 5500;
+    /**
+     * @since API Level 17
+     **/
     protected static final long WAIT_FOR_EVENT_TMEOUT = 3 * 1000;
+    /**
+     * @since API Level 16
+     **/
     protected static final int SWIPE_MARGIN_LIMIT = 5;
 
     private final UiSelector mSelector;
@@ -45,8 +61,8 @@ public class UiObject {
     /**
      * Constructs a UiObject to represent a specific UI element matched by the specified
      * {@link UiSelector} selector properties.
-     *
      * @param selector
+     * @since API Level 16
      */
     public UiObject(UiSelector selector) {
         mUiAutomationBridge = UiDevice.getInstance().getAutomatorBridge();
@@ -58,6 +74,7 @@ public class UiObject {
      * to its logs if needed. <code>getSelector().toString();</code>
      *
      * @return {@link UiSelector}
+     * @since API Level 16
      */
     public final UiSelector getSelector() {
         return new UiSelector(mSelector);
@@ -89,6 +106,7 @@ public class UiObject {
      *
      * @param selector for UI element to match
      * @return a new UiObject representing the matched UI element
+     * @since API Level 16
      */
     public UiObject getChild(UiSelector selector) throws UiObjectNotFoundException {
         return new UiObject(getSelector().childSelector(selector));
@@ -103,6 +121,7 @@ public class UiObject {
      * @param selector for the UI element to match
      * @return a new UiObject representing the matched UI element
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public UiObject getFromParent(UiSelector selector) throws UiObjectNotFoundException {
         return new UiObject(getSelector().fromParent(selector));
@@ -114,6 +133,7 @@ public class UiObject {
      *
      * @return the count of child UI elements.
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public int getChildCount() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -130,6 +150,7 @@ public class UiObject {
      * @param selector {@link UiSelector}
      * @param timeout in milliseconds
      * @return AccessibilityNodeInfo if found else null
+     * @since API Level 16
      */
     protected AccessibilityNodeInfo findAccessibilityNodeInfo(long timeout) {
         AccessibilityNodeInfo node = null;
@@ -167,6 +188,7 @@ public class UiObject {
      * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
      * @return true of successful
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean swipeUp(int steps) throws UiObjectNotFoundException {
         Rect rect = getVisibleBounds();
@@ -188,6 +210,7 @@ public class UiObject {
      * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
      * @return true if successful
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean swipeDown(int steps) throws UiObjectNotFoundException {
         Rect rect = getVisibleBounds();
@@ -209,6 +232,7 @@ public class UiObject {
      * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
      * @return true if successful
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean swipeLeft(int steps) throws UiObjectNotFoundException {
         Rect rect = getVisibleBounds();
@@ -229,6 +253,7 @@ public class UiObject {
      * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
      * @return true if successful
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean swipeRight(int steps) throws UiObjectNotFoundException {
         Rect rect = getVisibleBounds();
@@ -293,6 +318,7 @@ public class UiObject {
      *
      * @return true id successful else false
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean click() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -312,6 +338,7 @@ public class UiObject {
      *
      * @return true if the event was triggered, else false
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean clickAndWaitForNewWindow() throws UiObjectNotFoundException {
         return clickAndWaitForNewWindow(WAIT_FOR_WINDOW_TMEOUT);
@@ -330,6 +357,7 @@ public class UiObject {
      * @param timeout timeout before giving up on waiting for a new window
      * @return true if the event was triggered, else false
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean clickAndWaitForNewWindow(long timeout) throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -346,6 +374,7 @@ public class UiObject {
      *
      * @return true on success
      * @throws Exception
+     * @since API Level 16
      */
     public boolean clickTopLeft() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -361,6 +390,7 @@ public class UiObject {
      *
      * @return true if operation was successful
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean longClickBottomRight() throws UiObjectNotFoundException  {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -376,6 +406,7 @@ public class UiObject {
      *
      * @return true on success
      * @throws Exception
+     * @since API Level 16
      */
     public boolean clickBottomRight() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -391,6 +422,7 @@ public class UiObject {
      *
      * @return true if operation was successful
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean longClick() throws UiObjectNotFoundException  {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -406,6 +438,7 @@ public class UiObject {
      *
      * @return true if operation was successful
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean longClickTopLeft() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -421,6 +454,7 @@ public class UiObject {
      *
      * @return text value of the current node represented by this UiObject
      * @throws UiObjectNotFoundException if no match could be found
+     * @since API Level 16
      */
     public String getText() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -437,6 +471,7 @@ public class UiObject {
      *
      * @return value of node attribute "content_desc"
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public String getContentDescription() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -461,6 +496,7 @@ public class UiObject {
      * @param text string to set
      * @return true if operation is successful
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean setText(String text) throws UiObjectNotFoundException {
         clearTextField();
@@ -484,6 +520,7 @@ public class UiObject {
      * Also, not all editable fields support the long-press functionality.
      *
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public void clearTextField() throws UiObjectNotFoundException {
         // long click left + center
@@ -507,6 +544,7 @@ public class UiObject {
      * Check if the UI element's <code>checked</code> property is currently true
      *
      * @return true if it is else false
+     * @since API Level 16
      */
     public boolean isChecked() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -521,6 +559,7 @@ public class UiObject {
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean isSelected() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -535,6 +574,7 @@ public class UiObject {
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean isCheckable() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -549,6 +589,7 @@ public class UiObject {
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean isEnabled() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -563,6 +604,7 @@ public class UiObject {
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean isClickable() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -577,6 +619,7 @@ public class UiObject {
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean isFocused() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -591,6 +634,7 @@ public class UiObject {
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean isFocusable() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -605,6 +649,7 @@ public class UiObject {
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean isScrollable() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -619,6 +664,7 @@ public class UiObject {
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public boolean isLongClickable() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -633,6 +679,7 @@ public class UiObject {
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public String getPackageName() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -651,6 +698,7 @@ public class UiObject {
      * @return Rect
      * @throws UiObjectNotFoundException
      * @see {@link #getBound()}
+     * @since API Level 16
      */
     public Rect getVisibleBounds() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -665,6 +713,7 @@ public class UiObject {
      *
      * @return Rect
      * @throws UiObjectNotFoundException
+     * @since API Level 16
      */
     public Rect getBounds() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
@@ -686,6 +735,7 @@ public class UiObject {
      *
      * @param timeout the amount of time to wait (in milliseconds)
      * @return true if the UI element is displayed, else false if timeout elapsed while waiting
+     * @since API Level 16
      */
     public boolean waitForExists(long timeout) {
         if(findAccessibilityNodeInfo(timeout) != null) {
@@ -710,6 +760,7 @@ public class UiObject {
      * @param timeout time to wait (in milliseconds)
      * @return true if the element is gone before timeout elapsed, else false if timeout elapsed
      * but a matching element is still found.
+     * @since API Level 16
      */
     public boolean waitUntilGone(long timeout) {
         long startMills = SystemClock.uptimeMillis();
@@ -733,6 +784,7 @@ public class UiObject {
      * {@link #waitForExists(long)}.
      *
      * @return true if the UI element represented by this UiObject does exist
+     * @since API Level 16
      */
     public boolean exists() {
         return waitForExists(0);
