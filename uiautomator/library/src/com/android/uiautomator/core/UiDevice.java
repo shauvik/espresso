@@ -50,6 +50,7 @@ import java.util.concurrent.TimeoutException;
  * UiDevice provides access to state information about the device.
  * You can also use this class to simulate user actions on the device,
  * such as pressing the d-pad or pressing the Home and Menu buttons.
+ * @since API Level 16
  */
 public class UiDevice {
     private static final String LOG_TAG = UiDevice.class.getSimpleName();
@@ -93,6 +94,7 @@ public class UiDevice {
      * Retrieves a singleton instance of UiDevice
      *
      * @return UiDevice instance
+     * @since API Level 16
      */
     public static UiDevice getInstance() {
         if (mDevice == null) {
@@ -107,6 +109,7 @@ public class UiDevice {
      * The returned display size is adjusted per screen rotation
      *
      * @return a Point containing the display size in dp
+     * @hide
      */
     public Point getDisplaySizeDp() {
         Display display = getDefaultDisplay();
@@ -124,13 +127,11 @@ public class UiDevice {
     /**
      * Retrieves the product name of the device.
      *
-     * This method provides information on what type of device the
-     * test is running on. If you are trying to test for different types of
-     * UI screen sizes, your test should use
-     * {@link UiDevice#getDisplaySizeDp()} instead. This value is the same
-     * returned by invoking #adb shell getprop ro.product.name.
+     * This method provides information on what type of device the test is running on. This value is
+     * the same as returned by invoking #adb shell getprop ro.product.name.
      *
      * @return product name of the device
+     * @since API Level 16
      */
     public String getProductName() {
         return Build.PRODUCT;
@@ -149,6 +150,7 @@ public class UiDevice {
      * DOM instead.
      *
      * @return text of the last traversal event, else return an empty string
+     * @since API Level 16
      */
     public String getLastTraversedText() {
         return mUiAutomationBridge.getQueryController().getLastTraversedText();
@@ -157,6 +159,7 @@ public class UiDevice {
     /**
      * Clears the text from the last UI traversal event.
      * See {@link #getLastTraversedText()}.
+     * @since API Level 16
      */
     public void clearLastTraversedText() {
         mUiAutomationBridge.getQueryController().clearLastTraversedText();
@@ -165,6 +168,7 @@ public class UiDevice {
     /**
      * Simulates a short press on the MENU button.
      * @return true if successful, else return false
+     * @since API Level 16
      */
     public boolean pressMenu() {
         waitForIdle();
@@ -176,6 +180,7 @@ public class UiDevice {
     /**
      * Simulates a short press on the BACK button.
      * @return true if successful, else return false
+     * @since API Level 16
      */
     public boolean pressBack() {
         waitForIdle();
@@ -187,6 +192,7 @@ public class UiDevice {
     /**
      * Simulates a short press on the HOME button.
      * @return true if successful, else return false
+     * @since API Level 16
      */
     public boolean pressHome() {
         waitForIdle();
@@ -198,6 +204,7 @@ public class UiDevice {
     /**
      * Simulates a short press on the SEARCH button.
      * @return true if successful, else return false
+     * @since API Level 16
      */
     public boolean pressSearch() {
         return pressKeyCode(KeyEvent.KEYCODE_SEARCH);
@@ -206,6 +213,7 @@ public class UiDevice {
     /**
      * Simulates a short press on the CENTER button.
      * @return true if successful, else return false
+     * @since API Level 16
      */
     public boolean pressDPadCenter() {
         return pressKeyCode(KeyEvent.KEYCODE_DPAD_CENTER);
@@ -214,6 +222,7 @@ public class UiDevice {
     /**
      * Simulates a short press on the DOWN button.
      * @return true if successful, else return false
+     * @since API Level 16
      */
     public boolean pressDPadDown() {
         return pressKeyCode(KeyEvent.KEYCODE_DPAD_DOWN);
@@ -222,6 +231,7 @@ public class UiDevice {
     /**
      * Simulates a short press on the UP button.
      * @return true if successful, else return false
+     * @since API Level 16
      */
     public boolean pressDPadUp() {
         return pressKeyCode(KeyEvent.KEYCODE_DPAD_UP);
@@ -230,6 +240,7 @@ public class UiDevice {
     /**
      * Simulates a short press on the LEFT button.
      * @return true if successful, else return false
+     * @since API Level 16
      */
     public boolean pressDPadLeft() {
         return pressKeyCode(KeyEvent.KEYCODE_DPAD_LEFT);
@@ -238,6 +249,7 @@ public class UiDevice {
     /**
      * Simulates a short press on the RIGHT button.
      * @return true if successful, else return false
+     * @since API Level 16
      */
     public boolean pressDPadRight() {
         return pressKeyCode(KeyEvent.KEYCODE_DPAD_RIGHT);
@@ -246,6 +258,7 @@ public class UiDevice {
     /**
      * Simulates a short press on the DELETE key.
      * @return true if successful, else return false
+     * @since API Level 16
      */
     public boolean pressDelete() {
         return pressKeyCode(KeyEvent.KEYCODE_DEL);
@@ -254,6 +267,7 @@ public class UiDevice {
     /**
      * Simulates a short press on the ENTER key.
      * @return true if successful, else return false
+     * @since API Level 16
      */
     public boolean pressEnter() {
         return pressKeyCode(KeyEvent.KEYCODE_ENTER);
@@ -264,6 +278,7 @@ public class UiDevice {
      *
      * See {@link KeyEvent}
      * @return true if successful, else return false
+     * @since API Level 16
      */
     public boolean pressKeyCode(int keyCode) {
         waitForIdle();
@@ -277,6 +292,7 @@ public class UiDevice {
      * @param keyCode the key code of the event.
      * @param metaState an integer in which each bit set to 1 represents a pressed meta key
      * @return true if successful, else return false
+     * @since API Level 16
      */
     public boolean pressKeyCode(int keyCode, int metaState) {
         waitForIdle();
@@ -288,6 +304,7 @@ public class UiDevice {
      *
      * @return true if successful, else return false
      * @throws RemoteException
+     * @since API Level 16
      */
     public boolean pressRecentApps() throws RemoteException {
         waitForIdle();
@@ -305,6 +322,7 @@ public class UiDevice {
      * Gets the width of the display, in pixels. The width and height details
      * are reported based on the current orientation of the display.
      * @return width in pixels or zero on failure
+     * @since API Level 16
      */
     public int getDisplayWidth() {
         Display display = getDefaultDisplay();
@@ -317,6 +335,7 @@ public class UiDevice {
      * Gets the height of the display, in pixels. The size is adjusted based
      * on the current orientation of the display.
      * @return height in pixels or zero on failure
+     * @since API Level 16
      */
     public int getDisplayHeight() {
         Display display = getDefaultDisplay();
@@ -331,6 +350,7 @@ public class UiDevice {
      * @param x coordinate
      * @param y coordinate
      * @return true if the click succeeded else false
+     * @since API Level 16
      */
     public boolean click(int x, int y) {
         if (x >= getDisplayWidth() || y >= getDisplayHeight()) {
@@ -350,6 +370,7 @@ public class UiDevice {
      * @param endY
      * @param steps is the number of move steps sent to the system
      * @return false if the operation fails or the coordinates are invalid
+     * @since API Level 16
      */
     public boolean swipe(int startX, int startY, int endX, int endY, int steps) {
         return mUiAutomationBridge.getInteractionController()
@@ -363,6 +384,7 @@ public class UiDevice {
      * @param segments is Point array containing at least one Point object
      * @param segmentSteps steps to inject between two Points
      * @return true on success
+     * @since API Level 16
      */
     public boolean swipe(Point[] segments, int segmentSteps) {
         return mUiAutomationBridge.getInteractionController().swipe(segments, segmentSteps);
@@ -371,6 +393,7 @@ public class UiDevice {
     /**
      * Waits for the current application to idle.
      * Default wait timeout is 10 seconds
+     * @since API Level 16
      */
     public void waitForIdle() {
         waitForIdle(DEFAULT_TIMEOUT_MILLIS);
@@ -379,6 +402,7 @@ public class UiDevice {
     /**
      * Waits for the current application to idle.
      * @param timeout in milliseconds
+     * @since API Level 16
      */
     public void waitForIdle(long time) {
         mUiAutomationBridge.waitForIdle(time);
@@ -388,6 +412,7 @@ public class UiDevice {
      * Retrieves the last activity to report accessibility events.
      * @deprecated The results returned should be considered unreliable
      * @return String name of activity
+     * @since API Level 16
      */
     @Deprecated
     public String getCurrentActivityName() {
@@ -397,6 +422,7 @@ public class UiDevice {
     /**
      * Retrieves the name of the last package to report accessibility events.
      * @return String name of package
+     * @since API Level 16
      */
     public String getCurrentPackageName() {
         return mUiAutomationBridge.getQueryController().getCurrentPackageName();
@@ -408,6 +434,7 @@ public class UiDevice {
      *
      * @param name to register the UiWatcher
      * @param watcher {@link UiWatcher}
+     * @since API Level 16
      */
     public void registerWatcher(String name, UiWatcher watcher) {
         if (mInWatcherContext) {
@@ -422,6 +449,7 @@ public class UiDevice {
      * See {@link #registerWatcher(String, UiWatcher)}
      * @param name used to register the UiWatcher
      * @throws UiAutomationException
+     * @since API Level 16
      */
     public void removeWatcher(String name) {
         if (mInWatcherContext) {
@@ -433,6 +461,7 @@ public class UiDevice {
     /**
      * This method forces all registered watchers to run.
      * See {@link #registerWatcher(String, UiWatcher)}
+     * @since API Level 16
      */
     public void runWatchers() {
         if (mInWatcherContext) {
@@ -461,6 +490,7 @@ public class UiDevice {
      * If a UiWatcher runs and its {@link UiWatcher#checkForCondition()} call
      * returned <code>true</code>, then the UiWatcher is considered triggered.
      * See {@link #registerWatcher(String, UiWatcher)}
+     * @since API Level 16
      */
     public void resetWatcherTriggers() {
         mWatchersTriggers.clear();
@@ -475,6 +505,7 @@ public class UiDevice {
      *
      * @param watcherName
      * @return true if triggered else false
+     * @since API Level 16
      */
     public boolean hasWatcherTriggered(String watcherName) {
         return mWatchersTriggers.contains(watcherName);
@@ -485,6 +516,7 @@ public class UiDevice {
      *
      * See {@link #registerWatcher(String, UiWatcher)}
      * See {@link #hasWatcherTriggered(String)}
+     * @since API Level 16
      */
     public boolean hasAnyWatcherTriggered() {
         return mWatchersTriggers.size() > 0;
@@ -504,6 +536,7 @@ public class UiDevice {
      * Check if the device is in its natural orientation. This is determined by checking if the
      * orientation is at 0 or 180 degrees.
      * @return true if it is in natural orientation
+     * @since API Level 16
      */
     public boolean isNaturalOrientation() {
         Display display = getDefaultDisplay();
@@ -514,6 +547,7 @@ public class UiDevice {
     /**
      * Returns the current rotation of the display, as defined in {@link Surface}
      * @return
+     * @since API Level 17
      */
     public int getDisplayRotation() {
         return getDefaultDisplay().getRotation();
@@ -523,6 +557,7 @@ public class UiDevice {
      * Disables the sensors and freezes the device rotation at its
      * current rotation state.
      * @throws RemoteException
+     * @since API Level 16
      */
     public void freezeRotation() throws RemoteException {
         getAutomatorBridge().getInteractionController().freezeRotation();
@@ -545,6 +580,7 @@ public class UiDevice {
      * If you want to un-freeze the rotation and re-enable the sensors
      * see {@link #unfreezeRotation()}.
      * @throws RemoteException
+     * @since API Level 16
      */
     public void setOrientationLeft() throws RemoteException {
         getAutomatorBridge().getInteractionController().setRotationLeft();
@@ -557,6 +593,7 @@ public class UiDevice {
      * If you want to un-freeze the rotation and re-enable the sensors
      * see {@link #unfreezeRotation()}.
      * @throws RemoteException
+     * @since API Level 16
      */
     public void setOrientationRight() throws RemoteException {
         getAutomatorBridge().getInteractionController().setRotationRight();
@@ -569,6 +606,7 @@ public class UiDevice {
      * If you want to un-freeze the rotation and re-enable the sensors
      * see {@link #unfreezeRotation()}.
      * @throws RemoteException
+     * @since API Level 16
      */
     public void setOrientationNatural() throws RemoteException {
         getAutomatorBridge().getInteractionController().setRotationNatural();
@@ -581,6 +619,7 @@ public class UiDevice {
      * If the screen was OFF and it just got turned ON, this method will insert a 500ms delay
      * to allow the device time to wake up and accept input.
      * @throws RemoteException
+     * @since API Level 16
      */
     public void wakeUp() throws RemoteException {
         if(getAutomatorBridge().getInteractionController().wakeDevice()) {
@@ -595,6 +634,7 @@ public class UiDevice {
      *
      * @return true if the screen is ON else false
      * @throws RemoteException
+     * @since API Level 16
      */
     public boolean isScreenOn() throws RemoteException {
         return getAutomatorBridge().getInteractionController().isScreenOn();
@@ -605,6 +645,7 @@ public class UiDevice {
      * it does nothing if the screen is already OFF.
      *
      * @throws RemoteException
+     * @since API Level 16
      */
     public void sleep() throws RemoteException {
         getAutomatorBridge().getInteractionController().sleepDevice();
@@ -615,6 +656,7 @@ public class UiDevice {
      * The file root location is /data/local/tmp
      *
      * @param fileName
+     * @since API Level 16
      */
     public void dumpWindowHierarchy(String fileName) {
         AccessibilityNodeInfo root =
@@ -638,6 +680,7 @@ public class UiDevice {
      *
      * @return true if a window update occurred, false if timeout has elapsed or if the current
      *         window does not have the specified package name
+     * @since API Level 16
      */
     public boolean waitForWindowUpdate(final String packageName, long timeout) {
         if (packageName != null) {
@@ -697,7 +740,8 @@ public class UiDevice {
      * The screenshot is adjusted per screen rotation
      *
      * @param storePath where the PNG should be written to
-     * @return
+     * @return true if screen shot is created successfully, false otherwise
+     * @since API Level 17
      */
     public boolean takeScreenshot(File storePath) {
         return takeScreenshot(storePath, 1.0f, 90);
@@ -711,7 +755,8 @@ public class UiDevice {
      * @param storePath where the PNG should be written to
      * @param scale scale the screenshot down if needed; 1.0f for original size
      * @param quality quality of the PNG compression; range: 0-100
-     * @return
+     * @return true if screen shot is created successfully, false otherwise
+     * @since API Level 17
      */
     public boolean takeScreenshot(File storePath, float scale, int quality) {
         // This is from com.android.systemui.screenshot.GlobalScreenshot#takeScreenshot
