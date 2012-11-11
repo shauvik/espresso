@@ -35,6 +35,7 @@ import java.util.List;
  * to the following:
  * {@link UiDevice} instance
  * {@link Bundle} for command line parameters.
+ * @since API Level 16
  */
 public class UiAutomatorTestCase extends TestCase {
 
@@ -65,6 +66,7 @@ public class UiAutomatorTestCase extends TestCase {
     /**
      * Get current instance of {@link UiDevice}. Works similar to calling the static
      * {@link UiDevice#getInstance()} from anywhere in the test classes.
+     * @since API Level 16
      */
     public UiDevice getUiDevice() {
         return mUiDevice;
@@ -74,6 +76,7 @@ public class UiAutomatorTestCase extends TestCase {
      * Get command line parameters. On the command line when passing <code>-e key value</code>
      * pairs, the {@link Bundle} will have the key value pairs conveniently available to the
      * tests.
+     * @since API Level 16
      */
     public Bundle getParams() {
         return mParams;
@@ -83,6 +86,7 @@ public class UiAutomatorTestCase extends TestCase {
      * Provides support for running tests to report interim status
      *
      * @return
+     * @since API Level 16
      */
     public IAutomationSupport getAutomationSupport() {
         return mAutomationSupport;
@@ -111,6 +115,7 @@ public class UiAutomatorTestCase extends TestCase {
     /**
      * Calls {@link SystemClock#sleep(long)} to sleep
      * @param ms is in milliseconds.
+     * @since API Level 16
      */
     public void sleep(long ms) {
         SystemClock.sleep(ms);
