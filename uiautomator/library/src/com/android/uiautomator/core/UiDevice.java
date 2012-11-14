@@ -131,7 +131,7 @@ public class UiDevice {
      * the same as returned by invoking #adb shell getprop ro.product.name.
      *
      * @return product name of the device
-     * @since API Level 16
+     * @since API Level 17
      */
     public String getProductName() {
         return Build.PRODUCT;
@@ -536,7 +536,7 @@ public class UiDevice {
      * Check if the device is in its natural orientation. This is determined by checking if the
      * orientation is at 0 or 180 degrees.
      * @return true if it is in natural orientation
-     * @since API Level 16
+     * @since API Level 17
      */
     public boolean isNaturalOrientation() {
         Display display = getDefaultDisplay();
@@ -580,7 +580,7 @@ public class UiDevice {
      * If you want to un-freeze the rotation and re-enable the sensors
      * see {@link #unfreezeRotation()}.
      * @throws RemoteException
-     * @since API Level 16
+     * @since API Level 17
      */
     public void setOrientationLeft() throws RemoteException {
         getAutomatorBridge().getInteractionController().setRotationLeft();
@@ -593,7 +593,7 @@ public class UiDevice {
      * If you want to un-freeze the rotation and re-enable the sensors
      * see {@link #unfreezeRotation()}.
      * @throws RemoteException
-     * @since API Level 16
+     * @since API Level 17
      */
     public void setOrientationRight() throws RemoteException {
         getAutomatorBridge().getInteractionController().setRotationRight();
@@ -606,7 +606,7 @@ public class UiDevice {
      * If you want to un-freeze the rotation and re-enable the sensors
      * see {@link #unfreezeRotation()}.
      * @throws RemoteException
-     * @since API Level 16
+     * @since API Level 17
      */
     public void setOrientationNatural() throws RemoteException {
         getAutomatorBridge().getInteractionController().setRotationNatural();
