@@ -72,7 +72,7 @@ public class UiSelector {
     }
 
     /**
-     * @since API Level 16
+     * @since API Level 17
      */
     protected UiSelector cloneSelector() {
         UiSelector ret = new UiSelector();
