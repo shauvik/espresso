@@ -19,7 +19,7 @@ LOCAL_PATH:= $(call my-dir)
 uiautomator.core_src_files := $(call all-java-files-under, src)
 uiautomator.core_java_libraries := android.test.runner core-junit
 
-INTERNAL_UIAUTOMATOR_API_FILE := $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/uiautomator_api.txt
+uiautomator_internal_api_file := $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/uiautomator_api.txt
 
 ###############################################
 include $(CLEAR_VARS)
@@ -40,7 +40,7 @@ LOCAL_DROIDDOC_HTML_DIR :=
 LOCAL_DROIDDOC_OPTIONS:= \
     -stubs $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_uiautomator_intermediates/src \
     -stubpackages com.android.uiautomator.core:com.android.uiautomator.testrunner \
-    -api $(INTERNAL_UIAUTOMATOR_API_FILE) \
+    -api $(uiautomator_internal_api_file) \
     -nodocs
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR := build/tools/droiddoc/templates-sdk
@@ -49,7 +49,8 @@ LOCAL_UNINSTALLABLE_MODULE := true
 LOCAL_MODULE := uiautomator-stubs
 
 include $(BUILD_DROIDDOC)
-uiautomator-stubs-stamp := $(full_target)
+uiautomator_stubs_stamp := $(full_target)
+$(uiautomator_internal_api_file) : $(full_target)
 
 ###############################################
 # Build the stub source files into a jar.
@@ -59,10 +60,63 @@ LOCAL_JAVA_LIBRARIES := $(uiautomator.core_java_libraries)
 LOCAL_SOURCE_FILES_ALL_GENERATED := true
 include $(BUILD_STATIC_JAVA_LIBRARY)
 # Make sure to run droiddoc first to generate the stub source files.
-$(full_classes_compiled_jar) : $(uiautomator-stubs-stamp)
+$(full_classes_compiled_jar) : $(uiautomator_stubs_stamp)
+uiautomator_stubs_jar := $(full_classes_compiled_jar)
+
+###############################################
+# API check
+# Please refer to build/core/tasks/apicheck.mk.
+uiautomator_api_dir := frameworks/testing/uiautomator/api
+last_released_sdk_version := $(lastword $(call numerically_sort, \
+    $(filter-out current, \
+        $(patsubst $(uiautomator_api_dir)/%.txt,%, $(wildcard $(uiautomator_api_dir)/*.txt)) \
+    )))
+
+checkapi_last_error_level_flags := \
+    -hide 2 -hide 3 -hide 4 -hide 5 -hide 6 -hide 24 -hide 25 \
+    -error 7 -error 8 -error 9 -error 10 -error 11 -error 12 -error 13 -error 14 -error 15 \
+    -error 16 -error 17 -error 18
+
+# Check that the API we're building hasn't broken the last-released SDK version.
+$(eval $(call check-api, \
+    uiautomator-checkapi-last, \
+    $(uiautomator_api_dir)/$(last_released_sdk_version).txt, \
+    $(uiautomator_internal_api_file), \
+    $(checkapi_last_error_level_flags), \
+    cat $(LOCAL_PATH)/apicheck_msg_last.txt, \
+    $(uiautomator_stubs_jar), \
+    $(uiautomator_stubs_stamp)))
+
+checkapi_current_error_level_flags := \
+    -error 2 -error 3 -error 4 -error 5 -error 6 \
+    -error 7 -error 8 -error 9 -error 10 -error 11 -error 12 -error 13 -error 14 -error 15 \
+    -error 16 -error 17 -error 18 -error 19 -error 20 -error 21 -error 23 -error 24 \
+    -error 25
+
+# Check that the API we're building hasn't changed from the not-yet-released
+# SDK version.
+$(eval $(call check-api, \
+    uiautomator-checkapi-current, \
+    $(uiautomator_api_dir)/current.txt, \
+    $(uiautomator_internal_api_file), \
+    $(checkapi_current_error_level_flags), \
+    cat $(LOCAL_PATH)/apicheck_msg_current.txt, \
+    $(uiautomator_stubs_jar), \
+    $(uiautomator_stubs_stamp)))
+
+.PHONY: update-uiautomator-api
+update-uiautomator-api: PRIVATE_API_DIR := $(uiautomator_api_dir)
+update-uiautomator-api: $(uiautomator_internal_api_file) | $(ACP)
+	@echo Copying uiautomator current.txt
+	$(hide) $(ACP) $< $(PRIVATE_API_DIR)/current.txt
 
 ###############################################
 # clean up temp vars
 uiautomator.core_src_files :=
 uiautomator.core_java_libraries :=
-uiautomator-stubs-stamp :=
+uiautomator_stubs_stamp :=
+uiautomator_internal_api_file :=
+uiautomator_stubs_jar :=
+uiautomator_api_dir :=
+checkapi_last_error_level_flags :=
+checkapi_current_error_level_flags :=
