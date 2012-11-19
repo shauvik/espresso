@@ -147,7 +147,6 @@ public class UiObject {
      * Uses the member UiSelector properties to find a matching UI element reported in
      * the accessibility hierarchy.
      *
-     * @param selector {@link UiSelector}
      * @param timeout in milliseconds
      * @return AccessibilityNodeInfo if found else null
      * @since API Level 16
@@ -181,8 +180,8 @@ public class UiObject {
 
     /**
      * Perform the action on the UI element that is represented by this UiObject. Also see
-     * {@link #scrollToBeginning(int)}, {@link #scrollToEnd(int)}, {@link #scrollBackward()},
-     * {@link #scrollForward()}.
+     * {@link UiScrollable#scrollToBeginning(int)}, {@link UiScrollable#scrollToEnd(int)},
+     * {@link UiScrollable#scrollBackward()}, {@link UiScrollable#scrollForward()}.
      *
      * @param steps indicates the number of injected move steps into the system. Steps are
      * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
@@ -201,10 +200,11 @@ public class UiObject {
 
     /**
      * Perform the action on the UI element that is represented by this object, Also see
-     * {@link #scrollToBeginning(int)}, {@link #scrollToEnd(int)}, {@link #scrollBackward()},
-     * {@link #scrollForward()}. This method will perform the swipe gesture over any
-     * surface. The targeted UI element does not need to have the attribute
-     * <code>scrollable</code> set to <code>true</code> for this operation to be performed.
+     * {@link UiScrollable#scrollToBeginning(int)}, {@link UiScrollable#scrollToEnd(int)},
+     * {@link UiScrollable#scrollBackward()}, {@link UiScrollable#scrollForward()}. This method will
+     * perform the swipe gesture over any surface.  The targeted UI element does not need to have
+     * the attribute <code>scrollable</code> set to <code>true</code> for this operation to be
+     * performed.
      *
      * @param steps indicates the number of injected move steps into the system. Steps are
      * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
@@ -223,10 +223,11 @@ public class UiObject {
 
     /**
      * Perform the action on the UI element that is represented by this object. Also see
-     * {@link #scrollToBeginning(int)}, {@link #scrollToEnd(int)}, {@link #scrollBackward()},
-     * {@link #scrollForward()}. This method will perform the swipe gesture over any
-     * surface. The targeted UI element does not need to have the attribute
-     * <code>scrollable</code> set to <code>true</code> for this operation to be performed.
+     * {@link UiScrollable#scrollToBeginning(int)}, {@link UiScrollable#scrollToEnd(int)},
+     * {@link UiScrollable#scrollBackward()}, {@link UiScrollable#scrollForward()}. This method will
+     * perform the swipe gesture over any surface. The targeted UI element does not need to have the
+     * attribute <code>scrollable</code> set to <code>true</code> for this operation to be
+     * performed.
      *
      * @param steps indicates the number of injected move steps into the system. Steps are
      * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
@@ -244,10 +245,11 @@ public class UiObject {
 
     /**
      * Perform the action on the UI element that is represented by this object. Also see
-     * {@link #scrollToBeginning(int)}, {@link #scrollToEnd(int)}, {@link #scrollBackward()},
-     * {@link #scrollForward()}. This method will perform the swipe gesture over any
-     * surface. The targeted UI element does not need to have the attribute
-     * <code>scrollable</code> set to <code>true</code> for this operation to be performed.
+     * {@link UiScrollable#scrollToBeginning(int)}, {@link UiScrollable#scrollToEnd(int)},
+     * {@link UiScrollable#scrollBackward()}, {@link UiScrollable#scrollForward()}. This method will
+     * perform the swipe gesture over any surface. The targeted UI element does not need to have the
+     * attribute <code>scrollable</code> set to <code>true</code> for this operation to be
+     * performed.
      *
      * @param steps indicates the number of injected move steps into the system. Steps are
      * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
@@ -299,7 +301,7 @@ public class UiObject {
      * adjustments should be made to the click coordinates.
      *
      * @param node
-     * @return
+     * @return The accessibility node info.
      */
     private AccessibilityNodeInfo getScrollableParent(AccessibilityNodeInfo node) {
         AccessibilityNodeInfo parent = node;
@@ -373,7 +375,7 @@ public class UiObject {
      * Clicks the top and left corner of the UI element
      *
      * @return true on success
-     * @throws Exception
+     * @throws UiObjectNotFoundException
      * @since API Level 16
      */
     public boolean clickTopLeft() throws UiObjectNotFoundException {
@@ -405,7 +407,7 @@ public class UiObject {
      * Clicks the bottom and right corner of the UI element
      *
      * @return true on success
-     * @throws Exception
+     * @throws UiObjectNotFoundException
      * @since API Level 16
      */
     public boolean clickBottomRight() throws UiObjectNotFoundException {
@@ -697,7 +699,7 @@ public class UiObject {
      *
      * @return Rect
      * @throws UiObjectNotFoundException
-     * @see {@link #getBound()}
+     * @see {@link #getBounds()}
      * @since API Level 17
      */
     public Rect getVisibleBounds() throws UiObjectNotFoundException {

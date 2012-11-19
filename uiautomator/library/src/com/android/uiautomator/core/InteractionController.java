@@ -162,7 +162,7 @@ class InteractionController {
      * @param timeout
      * @param waitForAll boolean to indicate whether to wait for any or all events
      * @param eventTypes mask
-     * @return
+     * @return true if events are received, else false if timeout.
      */
     public boolean clickAndWaitForEvents(final int x, final int y, long timeout,
             boolean waitForAll, int eventTypes) {
@@ -255,14 +255,14 @@ class InteractionController {
      *
      * Most key presses will cause some UI change to occur. If the device is busy, this will
      * block until the device begins to process the key press at which point the call returns
-     * and normal wait for idle processing may begin. If no evens are detected for the
+     * and normal wait for idle processing may begin. If no events are detected for the
      * timeout period specified, the call will return anyway with false.
      *
      * @param keyCode
      * @param metaState
      * @param eventType
      * @param timeout
-     * @return
+     * @return true if events is received, otherwise false.
      */
     public boolean sendKeyAndWaitForEvent(final int keyCode, final int metaState,
             final int eventType, long timeout) {
@@ -291,7 +291,7 @@ class InteractionController {
      * that require stressing the target.
      * @param x
      * @param y
-     * @return
+     * @return true if the click executed successfully
      */
     public boolean click(int x, int y) {
         Log.d(LOG_TAG, "click (" + x + ", " + y + ")");
@@ -428,7 +428,7 @@ class InteractionController {
      * @param upX
      * @param upY
      * @param steps
-     * @return
+     * @return true if the swipe executed successfully
      */
     public boolean swipe(int downX, int downY, int upX, int upY, int steps) {
         boolean ret = false;

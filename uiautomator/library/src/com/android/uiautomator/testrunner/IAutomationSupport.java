@@ -28,7 +28,8 @@ public interface IAutomationSupport {
     /**
      * Allows the running test cases to send out interim status
      *
-     * @param bundle status report, consisting of key value pairs
+     * @param resultCode
+     * @param status status report, consisting of key value pairs
      * @since API Level 16
      */
     public void sendStatus(int resultCode, Bundle status);

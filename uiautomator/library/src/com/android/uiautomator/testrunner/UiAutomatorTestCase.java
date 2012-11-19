@@ -85,7 +85,7 @@ public class UiAutomatorTestCase extends TestCase {
     /**
      * Provides support for running tests to report interim status
      *
-     * @return
+     * @return IAutomationSupport
      * @since API Level 16
      */
     public IAutomationSupport getAutomationSupport() {
