@@ -59,7 +59,7 @@ public class TestCaseCollector {
      *
      * The class name may be in "<class name>#<method name>" format
      *
-     * @param classNames classes must be subclass of {@link UiAutomatorTestCase}
+     * @param className classes must be subclass of {@link UiAutomatorTestCase}
      * @throws ClassNotFoundException
      */
     public void addTestClass(String className) throws ClassNotFoundException {
@@ -96,8 +96,7 @@ public class TestCaseCollector {
 
     /**
      * Gets the list of added test cases so far
-     *
-     * @return
+     * @return a list of {@link TestCase}
      */
     public List<TestCase> getTestCases() {
         return Collections.unmodifiableList(mTestCases);

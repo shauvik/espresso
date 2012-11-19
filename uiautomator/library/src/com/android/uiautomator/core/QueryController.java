@@ -23,10 +23,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import com.android.uiautomator.core.UiAutomatorBridge.AccessibilityEventListener;
 
 /**
- * The QuertController main purpose is to translate a {@link UiSelector} selectors to
- * {@link AccessibilityNodeInfo}. This is all this controller does. It is typically
- * created in conjunction with a {@link InteractionController} by {@link UiAutomationContext}
- * which owns both. {@link UiAutomationContext} is used by {@link UiBase} classes.
+ * The QueryController main purpose is to translate a {@link UiSelector} selectors to
+ * {@link AccessibilityNodeInfo}. This is all this controller does.
  */
 class QueryController {
 
@@ -88,7 +86,6 @@ class QueryController {
      * Returns the last text selection reported by accessibility
      * event TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY. One way to cause
      * this event is using a DPad arrows to focus on UI elements.
-     * @return
      */
     public String getLastTraversedText() {
         mUiAutomatorBridge.waitForIdle();
@@ -115,7 +112,7 @@ class QueryController {
         mPatternCounter = 0;
         mPatternIndexer = 0;
         mLogIndent = 0;
-        mLogParentIndent = 0;;
+        mLogParentIndent = 0;
     }
 
     /**
@@ -134,7 +131,7 @@ class QueryController {
     /**
      * Main search method for translating By selectors to AccessibilityInfoNodes
      * @param selector
-     * @return
+     * @return AccessibilityNodeInfo
      */
     public AccessibilityNodeInfo findAccessibilityNodeInfo(UiSelector selector) {
         return findAccessibilityNodeInfo(selector, false);
@@ -212,7 +209,7 @@ class QueryController {
      * @param selector
      * @param fromNode
      * @param isCounting
-     * @return
+     * @return AccessibilityNodeInfo
      */
     private AccessibilityNodeInfo translateCompoundSelector(UiSelector selector,
             AccessibilityNodeInfo fromNode, boolean isCounting) {
@@ -282,7 +279,6 @@ class QueryController {
      * <p/>
      * @param selector
      * @param fromNode
-     * @param index
      * @return AccessibilityNodeInfo if found else null
      */
     private AccessibilityNodeInfo translateReqularSelector(UiSelector selector,
@@ -369,7 +365,7 @@ class QueryController {
      * until the end of the tree.
      * @param subSelector
      * @param fromNode
-     * @param originalPattern
+     * @param isCounting
      * @return null of node is not found or if counting mode is true.
      * See {@link #translateCompoundSelector(UiSelector, AccessibilityNodeInfo, boolean)}
      */

@@ -121,7 +121,7 @@ public class UiSelector {
      * The text for the widget must match exactly
      * with the string in your input argument.
      *
-     * @param regular expression
+     * @param regex a regular expression
      * @return UiSelector with the specified search criteria
      * @since API Level 17
      */
@@ -176,7 +176,7 @@ public class UiSelector {
      * Set the search criteria to match the class property
      * for a widget (for example, "android.widget.Button").
      *
-     * @param regular expression
+     * @param regex a regular expression
      * @return UiSelector with the specified search criteria
      * @since API Level 17
      */
@@ -188,7 +188,7 @@ public class UiSelector {
      * Set the search criteria to match the class property
      * for a widget (for example, "android.widget.Button").
      *
-     * @param class type
+     * @param type type
      * @return UiSelector with the specified search criteria
      * @since API Level 17
      */
@@ -228,7 +228,7 @@ public class UiSelector {
      * for the widget must match exactly
      * with the string in your input argument.
      *
-     * @param regular expression
+     * @param regex a regular expression
      * @return UiSelector with the specified search criteria
      * @since API Level 17
      */
@@ -529,7 +529,7 @@ public class UiSelector {
      * Set the search criteria to match the package name
      * of the application that contains the widget.
      *
-     * @param regular expression
+     * @param regex a regular expression
      * @return UiSelector with the specified search criteria
      * @since API Level 17
      */
