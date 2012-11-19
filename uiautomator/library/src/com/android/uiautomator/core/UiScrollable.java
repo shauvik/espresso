@@ -265,10 +265,11 @@ public class UiScrollable extends UiCollection {
     }
 
     /**
-     * {@link #getChildByDescription(String, boolean)} and {@link #getChildByText(String, boolean)}
-     * use an arguments that specifies if scrolling is allowed while searching for the UI element.
-     * The number of scrolls allowed to perform a search can be modified by this method.
-     * The current value can be read by calling {@link #getMaxSearchSwipes()}
+     * {@link #getChildByDescription(UiSelector, String)} and
+     * {@link #getChildByText(UiSelector, String)} use an arguments that specifies if scrolling is
+     * allowed while searching for the UI element.  The number of scrolls allowed to perform a
+     * search can be modified by this method.  The current value can be read by calling
+     * {@link #getMaxSearchSwipes()}
      *
      * @param swipes is the number of search swipes until abort
      * @return reference to itself
@@ -280,9 +281,10 @@ public class UiScrollable extends UiCollection {
     }
 
     /**
-     * {@link #getChildByDescription(String, boolean)} and {@link #getChildByText(String, boolean)}
-     * use an arguments that specifies if scrolling is allowed while searching for the UI element.
-     * The number of scrolls currently allowed to perform a search can be read by this method.
+     * {@link #getChildByDescription(UiSelector, String)} and
+     * {@link #getChildByText(UiSelector, String)} use an arguments that specifies if scrolling is
+     * allowed while searching for the UI element.  The number of scrolls currently allowed to
+     * perform a search can be read by this method.
      * See {@link #setMaxSearchSwipes(int)}
      *
      * @return max value of the number of swipes currently allowed during a scroll search
@@ -329,7 +331,7 @@ public class UiScrollable extends UiCollection {
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
-        Rect rect = new Rect();;
+        Rect rect = new Rect();
         node.getBoundsInScreen(rect);
 
         int downX = 0;
@@ -395,7 +397,7 @@ public class UiScrollable extends UiCollection {
         if (node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
-        Rect rect = new Rect();;
+        Rect rect = new Rect();
         node.getBoundsInScreen(rect);
 
         int downX = 0;
@@ -488,7 +490,7 @@ public class UiScrollable extends UiCollection {
     }
 
     /**
-     * See {@link UiScrollable#scrollToEnd(int, int)
+     * See {@link UiScrollable#scrollToEnd(int, int)}
      *
      * @param maxSwipes
      * @return true on scrolled else false

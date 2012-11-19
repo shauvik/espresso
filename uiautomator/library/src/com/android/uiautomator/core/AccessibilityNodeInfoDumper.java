@@ -63,7 +63,8 @@ public class AccessibilityNodeInfoDumper {
     /**
      * Using {@link AccessibilityNodeInfo} this method will walk the layout hierarchy
      * and generates an xml dump to the location specified by <code>dumpFile</code>
-     * @param info
+     * @param root The root accessibility node.
+     * @param dumpFile The file to dump to.
      */
     public static void dumpWindowToFile(AccessibilityNodeInfo root, File dumpFile) {
         if (root == null) {
@@ -137,11 +138,11 @@ public class AccessibilityNodeInfoDumper {
      * only reduce noise from standard layout classes that may be falsely
      * configured to accept clicks and are also enabled.
      *
-     * @param n
-     * @return
+     * @param node
+     * @return true if node is excluded.
      */
-    private static boolean nafExcludedClass(AccessibilityNodeInfo n) {
-        String className = safeCharSeqToString(n.getClassName());
+    private static boolean nafExcludedClass(AccessibilityNodeInfo node) {
+        String className = safeCharSeqToString(node.getClassName());
         for(String excludedClassName : NAF_EXCLUDED_CLASSES) {
             if(className.endsWith(excludedClassName))
                 return true;
@@ -183,7 +184,7 @@ public class AccessibilityNodeInfoDumper {
      * considered by this dumper as acceptable for accessibility.
      *
      * @param node
-     * @return
+     * @return false if node fails the check.
      */
     private static boolean childNafCheck(AccessibilityNodeInfo node) {
         int childCount = node.getChildCount();

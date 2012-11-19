@@ -404,8 +404,8 @@ public class UiDevice {
      * @param timeout in milliseconds
      * @since API Level 16
      */
-    public void waitForIdle(long time) {
-        mUiAutomationBridge.waitForIdle(time);
+    public void waitForIdle(long timeout) {
+        mUiAutomationBridge.waitForIdle(timeout);
     }
 
     /**
@@ -448,7 +448,6 @@ public class UiDevice {
      *
      * See {@link #registerWatcher(String, UiWatcher)}
      * @param name used to register the UiWatcher
-     * @throws UiAutomationException
      * @since API Level 16
      */
     public void removeWatcher(String name) {
@@ -546,7 +545,6 @@ public class UiDevice {
 
     /**
      * Returns the current rotation of the display, as defined in {@link Surface}
-     * @return
      * @since API Level 17
      */
     public int getDisplayRotation() {
