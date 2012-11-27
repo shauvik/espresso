@@ -698,7 +698,7 @@ public class UiObject {
      * @return Rect
      * @throws UiObjectNotFoundException
      * @see {@link #getBound()}
-     * @since API Level 16
+     * @since API Level 17
      */
     public Rect getVisibleBounds() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
