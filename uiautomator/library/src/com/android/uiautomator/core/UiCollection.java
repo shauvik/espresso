@@ -49,6 +49,7 @@ public class UiCollection extends UiObject {
      */
     public UiObject getChildByDescription(UiSelector childPattern, String text)
             throws UiObjectNotFoundException {
+        Tracer.trace(childPattern, text);
         if (text != null) {
             int count = getChildCount(childPattern);
             for (int x = 0; x < count; x++) {
@@ -82,6 +83,7 @@ public class UiCollection extends UiObject {
      */
     public UiObject getChildByInstance(UiSelector childPattern, int instance)
             throws UiObjectNotFoundException {
+        Tracer.trace(childPattern, instance);
         UiSelector patternSelector = UiSelector.patternBuilder(getSelector(),
                 UiSelector.patternBuilder(childPattern).instance(instance));
         return new UiObject(patternSelector);
@@ -105,7 +107,7 @@ public class UiCollection extends UiObject {
      */
     public UiObject getChildByText(UiSelector childPattern, String text)
             throws UiObjectNotFoundException {
-
+        Tracer.trace(childPattern, text);
         if (text != null) {
             int count = getChildCount(childPattern);
             for (int x = 0; x < count; x++) {
@@ -135,6 +137,7 @@ public class UiCollection extends UiObject {
      * @since API Level 16
      */
     public int getChildCount(UiSelector childPattern) {
+        Tracer.trace(childPattern);
         UiSelector patternSelector =
                 UiSelector.patternBuilder(getSelector(), UiSelector.patternBuilder(childPattern));
         return getQueryController().getPatternCount(patternSelector);

@@ -26,6 +26,8 @@ import android.os.IBinder;
 import android.test.RepetitiveTest;
 import android.util.Log;
 
+import com.android.uiautomator.core.Tracer;
+import com.android.uiautomator.core.Tracer.Mode;
 import com.android.uiautomator.core.UiDevice;
 
 import junit.framework.AssertionFailedError;
@@ -105,6 +107,21 @@ public class UiAutomatorTestRunner {
         Bundle testRunOutput = new Bundle();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         PrintStream writer = new PrintStream(byteArrayOutputStream);
+
+        String traceType = mParams.getString("traceOutputMode");
+        if(traceType != null) {
+            Tracer.Mode mode = Tracer.Mode.valueOf(Tracer.Mode.class, traceType);
+            if (mode == Tracer.Mode.FILE || mode == Tracer.Mode.ALL) {
+                String filename = mParams.getString("traceLogFilename");
+                if (filename == null) {
+                    throw new RuntimeException("Name of log file not specified. " +
+                            "Please specify it using traceLogFilename parameter");
+                }
+                Tracer.getInstance().setOutputFilename(filename);
+            }
+            Tracer.getInstance().setOutputMode(mode);
+        }
+
         try {
             StringResultPrinter resultPrinter = new StringResultPrinter(writer);
 
