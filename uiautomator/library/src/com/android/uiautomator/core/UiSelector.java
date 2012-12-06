@@ -62,6 +62,9 @@ public class UiSelector {
         mSelectorAttributes = selector.cloneSelector().mSelectorAttributes;
     }
 
+    /**
+     * @hide
+     **/
     protected UiSelector cloneSelector() {
         UiSelector ret = new UiSelector();
         ret.mSelectorAttributes = mSelectorAttributes.clone();

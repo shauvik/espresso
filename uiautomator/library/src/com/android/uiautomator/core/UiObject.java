@@ -634,6 +634,7 @@ public class UiObject {
      *
      * @return Rect
      * @throws UiObjectNotFoundException
+     * @hide
      */
     public Rect getVisibleBounds() throws UiObjectNotFoundException {
         AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
