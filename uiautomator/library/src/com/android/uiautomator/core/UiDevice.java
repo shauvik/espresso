@@ -122,6 +122,7 @@ public class UiDevice {
      * purpose of adapting to different styles of UI, test should favor
      * {@link UiDevice#getDisplaySizeDp()} over this method, and only use product name as a fallback
      * mechanism
+     * @hide
      */
     public String getProductName() {
         return Build.PRODUCT;
@@ -469,6 +470,7 @@ public class UiDevice {
      * Check if the device is in its natural orientation. This is determined by checking if the
      * orientation is at 0 or 180 degrees.
      * @return true if it is in natural orientation
+     * @hide
      */
     public boolean isNaturalOrientation() {
         Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
@@ -504,6 +506,7 @@ public class UiDevice {
      * so may cause the screen contents to get re-oriented depending on the current
      * physical position of the test device.
      * @throws RemoteException
+     * @hide
      */
     public void setOrientationLeft() throws RemoteException {
         getAutomatorBridge().getInteractionController().setRotationLeft();
@@ -516,6 +519,7 @@ public class UiDevice {
      * so may cause the screen contents to get re-oriented depending on the current
      * physical position of the test device.
      * @throws RemoteException
+     * @hide
      */
     public void setOrientationRight() throws RemoteException {
         getAutomatorBridge().getInteractionController().setRotationRight();
@@ -528,6 +532,7 @@ public class UiDevice {
      * that doing so may cause the screen contents to rotate
      * depending on the current physical position of the test device.
      * @throws RemoteException
+     * @hide
      */
     public void setOrientationNatural() throws RemoteException {
         getAutomatorBridge().getInteractionController().setRotationNatural();
