@@ -68,7 +68,6 @@ package com.android.uiautomator.core {
     method public java.lang.String getPackageName() throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public final com.android.uiautomator.core.UiSelector getSelector();
     method public java.lang.String getText() throws com.android.uiautomator.core.UiObjectNotFoundException;
-    method public android.graphics.Rect getVisibleBounds() throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public boolean isCheckable() throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public boolean isChecked() throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public boolean isClickable() throws com.android.uiautomator.core.UiObjectNotFoundException;
