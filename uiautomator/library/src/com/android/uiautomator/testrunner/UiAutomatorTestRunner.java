@@ -326,7 +326,16 @@ public class UiAutomatorTestRunner {
     }
 
     protected TestCaseCollector getTestCaseCollector(ClassLoader classLoader) {
-        return new TestCaseCollector(classLoader, new UiAutomatorTestCaseFilter());
+        return new TestCaseCollector(classLoader, getTestCaseFilter());
+    }
+
+    /**
+     * Returns an object which determines if the class and its methods should be
+     * accepted into the test suite.
+     * @return
+     */
+    public UiAutomatorTestCaseFilter getTestCaseFilter() {
+        return new UiAutomatorTestCaseFilter();
     }
 
     protected void addTestListener(TestListener listener) {
