@@ -36,6 +36,8 @@ import java.util.List;
 public class RunTestCommand extends Command {
     private static final String LOGTAG = RunTestCommand.class.getSimpleName();
 
+    private static final String OUTPUT_SIMPLE = "simple";
+    private static final String OUTPUT_FORMAT_KEY = "outputFormat";
     private static final String CLASS_PARAM = "class";
     private static final String JARS_PARAM = "jars";
     private static final String DEBUG_PARAM = "debug";
@@ -97,6 +99,7 @@ public class RunTestCommand extends Command {
         // key is "debug", parameter will determine whether to wait for debugger
         // to attach
         // -c <class name>
+        // -s turns on the simple output format
         // equivalent to -e class <class name>, i.e. passed onto JUnit
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-e")) {
@@ -121,6 +124,8 @@ public class RunTestCommand extends Command {
                 } else {
                     return ARG_FAIL_INCOMPLETE_C;
                 }
+            } else if (args[i].equals("-s")) {
+                mParams.putString(OUTPUT_FORMAT_KEY, OUTPUT_SIMPLE);
             } else {
                 return ARG_FAIL_UNSUPPORTED;
             }
@@ -238,7 +243,8 @@ public class RunTestCommand extends Command {
             + "      -e runner [CLASS]: use specified test runner class instead. If\n"
             + "        unspecified, framework default runner will be used.\n"
             + "      -e <NAME> <VALUE>: other name-value pairs to be passed to test classes.\n"
-            + "        May be repeated.\n";
+            + "        May be repeated.\n"
+            + "      -e outputFormat simple | -s: enabled less verbose JUnit style output.\n";
     }
 
     @Override
