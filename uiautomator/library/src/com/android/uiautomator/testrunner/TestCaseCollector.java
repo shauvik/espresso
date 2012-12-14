@@ -16,7 +16,10 @@
 
 package com.android.uiautomator.testrunner;
 
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestResult;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -111,12 +114,23 @@ public class TestCaseCollector {
             testCase.setName(method);
             mTestCases.add(testCase);
         } catch (InstantiationException e) {
-            throw new RuntimeException("Could not instantiate test class. Class: "
-                    + clazz.getName());
+            mTestCases.add(error(clazz, "InstantiationException: could not instantiate " +
+                    "test class. Class: " + clazz.getName()));
         } catch (IllegalAccessException e) {
-            throw new RuntimeException("Could not access test class. Class: " + clazz.getName());
+            mTestCases.add(error(clazz, "IllegalAccessException: could not instantiate " +
+                    "test class. Class: " + clazz.getName()));
         }
+    }
 
+    private UiAutomatorTestCase error(Class<?> clazz, final String message) {
+        UiAutomatorTestCase warning = new UiAutomatorTestCase() {
+            protected void runTest() {
+                fail(message);
+            }
+        };
+
+        warning.setName(clazz.getName());
+        return warning;
     }
 
     /**
