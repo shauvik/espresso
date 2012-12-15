@@ -23,6 +23,7 @@ import org.junit.runner.notification.Failure;
 
 import java.io.PrintStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -126,6 +127,11 @@ public class TestLoader {
      * @return <code>true</code> if loadedClass is a test
      */
     private boolean isTestClass(Class<?> loadedClass) {
+        if (Modifier.isAbstract(loadedClass.getModifiers())) {
+            Log.v(LOG_TAG, String.format("Skipping abstract class %s: not a test",
+                    loadedClass.getName()));
+            return false;
+        }
         // TODO: try to find upstream junit calls to replace these checks
         if (junit.framework.Test.class.isAssignableFrom(loadedClass)) {
             return true;
