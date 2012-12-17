@@ -28,6 +28,7 @@ import com.android.test.runner.listener.CoverageListener;
 import com.android.test.runner.listener.DelayInjector;
 import com.android.test.runner.listener.InstrumentationResultPrinter;
 import com.android.test.runner.listener.InstrumentationRunListener;
+import com.android.test.runner.listener.SuiteAssignmentPrinter;
 
 import org.junit.internal.TextListener;
 import org.junit.runner.JUnitCore;
@@ -121,8 +122,8 @@ import java.util.List;
  */
 public class AndroidJUnitRunner extends Instrumentation {
 
+    // constants for supported instrumentation arguments
     public static final String ARGUMENT_TEST_CLASS = "class";
-
     private static final String ARGUMENT_TEST_SIZE = "size";
     private static final String ARGUMENT_LOG_ONLY = "log";
     private static final String ARGUMENT_ANNOTATION = "annotation";
@@ -130,6 +131,9 @@ public class AndroidJUnitRunner extends Instrumentation {
     private static final String ARGUMENT_DELAY_MSEC = "delay_msec";
     private static final String ARGUMENT_COVERAGE = "coverage";
     private static final String ARGUMENT_COVERAGE_PATH = "coverageFile";
+    private static final String ARGUMENT_SUITE_ASSIGNMENT = "suiteAssignment";
+    private static final String ARGUMENT_DEBUG = "debug";
+    // TODO: consider supporting 'count' from InstrumentationTestRunner
 
     private static final String LOG_TAG = "AndroidJUnitRunner";
 
@@ -180,7 +184,7 @@ public class AndroidJUnitRunner extends Instrumentation {
     public void onStart() {
         prepareLooper();
 
-        if (getBooleanArgument("debug")) {
+        if (getBooleanArgument(ARGUMENT_DEBUG)) {
             Debug.waitForDebugger();
         }
 
@@ -190,11 +194,7 @@ public class AndroidJUnitRunner extends Instrumentation {
 
         try {
             JUnitCore testRunner = new JUnitCore();
-
-            addListener(listeners, testRunner, new TextListener(writer));
-            addListener(listeners, testRunner, new InstrumentationResultPrinter(this));
-            addDelayListener(listeners, testRunner);
-            addCoverageListener(listeners, testRunner);
+            addListeners(listeners, testRunner, writer);
 
             TestRequest testRequest = buildRequest(getArguments(), writer);
             Result result = testRunner.run(testRequest.getRequest());
@@ -218,6 +218,18 @@ public class AndroidJUnitRunner extends Instrumentation {
             finish(Activity.RESULT_OK, results);
         }
 
+    }
+
+    private void addListeners(List<RunListener> listeners, JUnitCore testRunner,
+            PrintStream writer) {
+        if (getBooleanArgument(ARGUMENT_SUITE_ASSIGNMENT)) {
+            addListener(listeners, testRunner, new SuiteAssignmentPrinter(writer));
+        } else {
+            addListener(listeners, testRunner, new TextListener(writer));
+            addListener(listeners, testRunner, new InstrumentationResultPrinter(this));
+            addDelayListener(listeners, testRunner);
+            addCoverageListener(listeners, testRunner);
+        }
     }
 
     private void addListener(List<RunListener> list, JUnitCore testRunner, RunListener listener) {
