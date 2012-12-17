@@ -34,6 +34,9 @@ public class TestLoaderTest {
     public static class JUnit3Test extends TestCase {
     }
 
+    public static abstract class AbstractTest extends TestCase {
+    }
+
     public static class JUnit4Test {
         @Test
         public void thisIsATest() {
@@ -92,5 +95,12 @@ public class TestLoaderTest {
         Assert.assertEquals(1, mLoader.getLoadedClasses().size());
         Assert.assertEquals(0, mLoader.getLoadFailures().size());
         Assert.assertTrue(mLoader.getLoadedClasses().contains(clazz));
+    }
+
+    @Test
+    public void testLoadTests_abstract() {
+        Assert.assertNull(mLoader.loadIfTest(AbstractTest.class.getName()));
+        Assert.assertEquals(0, mLoader.getLoadedClasses().size());
+        Assert.assertEquals(0, mLoader.getLoadFailures().size());
     }
 }
