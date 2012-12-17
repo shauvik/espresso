@@ -20,6 +20,8 @@ import android.os.Bundle;
 
 import org.junit.runner.notification.RunListener;
 
+import java.io.PrintStream;
+
 /**
  * A {@link RunListener} that has access to a {@link Instrumentation}. This is useful for
  * test result listeners that want to dump data back to the instrumentation results.
@@ -41,5 +43,16 @@ public abstract class InstrumentationRunListener extends RunListener {
      */
     public void sendStatus(int code, Bundle bundle) {
         getInstrumentation().sendStatus(code, bundle);
+    }
+
+    /**
+     * Optional callback subclasses can implement. Will be called when instrumentation run
+     * completes.
+     *
+     * @param streamResult the {@link PrintStream} to instrumentation out.
+     * @param resultBundle the instrumentation result bundle. Can be used to inject key-value pairs
+     * into the instrumentation output when run in -r/raw mode
+     */
+    public void instrumentationRunFinished(PrintStream streamResult, Bundle resultBundle) {
     }
 }
