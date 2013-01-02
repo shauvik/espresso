@@ -16,22 +16,13 @@
 
 package com.android.uiautomator.core;
 
-import android.app.ActivityManagerNative;
-import android.app.IActivityManager;
-import android.app.IActivityManager.ContentProviderHolder;
+import android.app.UiAutomation;
 import android.content.Context;
-import android.content.IContentProvider;
-import android.database.Cursor;
 import android.graphics.Point;
-import android.hardware.input.InputManager;
-import android.os.Binder;
-import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.InputDevice;
@@ -39,7 +30,6 @@ import android.view.InputEvent;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.Surface;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.util.Predicate;
@@ -69,8 +59,6 @@ class InteractionController {
 
     private final IWindowManager mWindowManager;
 
-    private final long mLongPressTimeout;
-
     private static final long REGULAR_CLICK_LENGTH = 100;
 
     private long mDownTime;
@@ -85,54 +73,6 @@ class InteractionController {
             throw new RuntimeException("Unable to connect to WindowManager, "
                     + "is the system running?");
         }
-
-        // the value returned is on the border of going undetected as used
-        // by this framework during long presses. Adding few extra 100ms
-        // of long press time helps ensure long enough time for a valid
-        // longClick detection.
-        mLongPressTimeout = getSystemLongPressTime() * 2 + 100;
-    }
-
-    /**
-     * Get the system long press time
-     * @return milliseconds
-     */
-    private long getSystemLongPressTime() {
-        // Read the long press timeout setting.
-        long longPressTimeout = 0;
-        try {
-            IContentProvider provider = null;
-            Cursor cursor = null;
-            IActivityManager activityManager = ActivityManagerNative.getDefault();
-            String providerName = Settings.Secure.CONTENT_URI.getAuthority();
-            IBinder token = new Binder();
-            try {
-                ContentProviderHolder holder = activityManager.getContentProviderExternal(
-                        providerName, UserHandle.USER_OWNER, token);
-                if (holder == null) {
-                    throw new IllegalStateException("Could not find provider: " + providerName);
-                }
-                provider = holder.provider;
-                cursor = provider.query(null, Settings.Secure.CONTENT_URI,
-                        new String[] {Settings.Secure.VALUE}, "name=?",
-                        new String[] {Settings.Secure.LONG_PRESS_TIMEOUT}, null, null);
-                if (cursor.moveToFirst()) {
-                    longPressTimeout = cursor.getInt(0);
-                }
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
-                }
-                if (provider != null) {
-                    activityManager.removeContentProviderExternal(providerName, token);
-                }
-            }
-        } catch (RemoteException e) {
-            String message = "Error reading long press timeout setting.";
-            Log.e(LOG_TAG, message, e);
-            throw new RuntimeException(message, e);
-        }
-        return longPressTimeout;
     }
 
     /**
@@ -170,7 +110,6 @@ class InteractionController {
                 Boolean.toString(waitForAll), eventTypes);
         Log.d(LOG_TAG, logString);
 
-        mUiAutomatorBridge.setOperationTime();
         Runnable command = new Runnable() {
             @Override
             public void run() {
@@ -266,7 +205,6 @@ class InteractionController {
      */
     public boolean sendKeyAndWaitForEvent(final int keyCode, final int metaState,
             final int eventType, long timeout) {
-        mUiAutomatorBridge.setOperationTime();
         Runnable command = new Runnable() {
             @Override
             public void run() {
@@ -295,7 +233,6 @@ class InteractionController {
      */
     public boolean click(int x, int y) {
         Log.d(LOG_TAG, "click (" + x + ", " + y + ")");
-        mUiAutomatorBridge.setOperationTime();
 
         if (touchDown(x, y)) {
             SystemClock.sleep(REGULAR_CLICK_LENGTH);
@@ -325,9 +262,8 @@ class InteractionController {
             Log.d(LOG_TAG, "longTap (" + x + ", " + y + ")");
         }
 
-        mUiAutomatorBridge.setOperationTime();
         if (touchDown(x, y)) {
-            SystemClock.sleep(mLongPressTimeout);
+            SystemClock.sleep(mUiAutomatorBridge.getSystemLongPressTime());
             if(touchUp(x, y)) {
                 return true;
             }
@@ -510,7 +446,6 @@ class InteractionController {
             Log.d(LOG_TAG, "sendText (" + text + ")");
         }
 
-        mUiAutomatorBridge.setOperationTime();
         KeyEvent[] events = mKeyCharacterMap.getEvents(text.toCharArray());
         if (events != null) {
             for (KeyEvent event2 : events) {
@@ -534,7 +469,6 @@ class InteractionController {
             Log.d(LOG_TAG, "sendKey (" + keyCode + ", " + metaState + ")");
         }
 
-        mUiAutomatorBridge.setOperationTime();
         final long eventTime = SystemClock.uptimeMillis();
         KeyEvent downEvent = KeyEvent.obtain(eventTime, eventTime, KeyEvent.ACTION_DOWN,
                 keyCode, 0, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0,
@@ -557,8 +491,8 @@ class InteractionController {
      * @throws RemoteException
      */
     public boolean isNaturalRotation() throws RemoteException {
-        return mWindowManager.getRotation() == Surface.ROTATION_0
-                || mWindowManager.getRotation() == Surface.ROTATION_180;
+        return mWindowManager.getRotation() == UiAutomation.ROTATION_FREEZE_0
+                || mWindowManager.getRotation() == UiAutomation.ROTATION_FREEZE_180;
     }
 
     /**
@@ -569,8 +503,8 @@ class InteractionController {
      * depending on the current physical position of the test device.
      * @throws RemoteException
      */
-    public void setRotationRight() throws RemoteException {
-        mWindowManager.freezeRotation(Surface.ROTATION_270);
+    public void setRotationRight() {
+        mUiAutomatorBridge.setRotation(UiAutomation.ROTATION_FREEZE_270);
     }
 
     /**
@@ -581,8 +515,8 @@ class InteractionController {
      * depending on the current physical position of the test device.
      * @throws RemoteException
      */
-    public void setRotationLeft() throws RemoteException {
-        mWindowManager.freezeRotation(Surface.ROTATION_90);
+    public void setRotationLeft() {
+        mUiAutomatorBridge.setRotation(UiAutomation.ROTATION_FREEZE_90);
     }
 
     /**
@@ -593,8 +527,8 @@ class InteractionController {
      * depending on the current physical position of the test device.
      * @throws RemoteException
      */
-    public void setRotationNatural() throws RemoteException {
-        mWindowManager.freezeRotation(Surface.ROTATION_0);
+    public void setRotationNatural() {
+        mUiAutomatorBridge.setRotation(UiAutomation.ROTATION_FREEZE_0);
     }
 
     /**
@@ -602,8 +536,8 @@ class InteractionController {
      * current rotation state.
      * @throws RemoteException
      */
-    public void freezeRotation() throws RemoteException {
-        mWindowManager.freezeRotation(-1);
+    public void freezeRotation() {
+        mUiAutomatorBridge.setRotation(UiAutomation.ROTATION_FREEZE_CURRENT);
     }
 
     /**
@@ -611,8 +545,8 @@ class InteractionController {
      * allowing its contents to rotate with the device physical rotation.
      * @throws RemoteException
      */
-    public void unfreezeRotation() throws RemoteException {
-        mWindowManager.thawRotation();
+    public void unfreezeRotation() {
+        mUiAutomatorBridge.setRotation(UiAutomation.ROTATION_UNFREEZE);
     }
 
     /**
@@ -654,8 +588,7 @@ class InteractionController {
         return pm.isScreenOn();
     }
 
-    private static boolean injectEventSync(InputEvent event) {
-        return InputManager.getInstance().injectInputEvent(event,
-                InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
+    private boolean injectEventSync(InputEvent event) {
+        return mUiAutomatorBridge.injectInputEvent(event, true);
     }
 }

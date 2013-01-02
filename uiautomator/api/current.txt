@@ -166,6 +166,7 @@ package com.android.uiautomator.core {
     method public com.android.uiautomator.core.UiSelector textContains(java.lang.String);
     method public com.android.uiautomator.core.UiSelector textMatches(java.lang.String);
     method public com.android.uiautomator.core.UiSelector textStartsWith(java.lang.String);
+    method public com.android.uiautomator.core.UiSelector viewId(java.lang.String);
   }
 
   public abstract interface UiWatcher {
@@ -178,6 +179,18 @@ package com.android.uiautomator.testrunner {
 
   public abstract interface IAutomationSupport {
     method public abstract void sendStatus(int, android.os.Bundle);
+  }
+
+  public class OnDeviceUiTestCase extends android.test.UiTestCase {
+    ctor public OnDeviceUiTestCase();
+    method public com.android.uiautomator.testrunner.IAutomationSupport getAutomationSupport();
+    method public android.os.Bundle getParams();
+    method public com.android.uiautomator.core.UiDevice getUiDevice();
+    method public void sleep(long);
+  }
+
+  public class OnDeviceUiTestRunner extends android.test.InstrumentationTestRunner {
+    ctor public OnDeviceUiTestRunner();
   }
 
   public class UiAutomatorTestCase extends junit.framework.TestCase {

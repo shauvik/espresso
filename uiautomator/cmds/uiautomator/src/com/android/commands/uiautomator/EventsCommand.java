@@ -16,10 +16,11 @@
 
 package com.android.commands.uiautomator;
 
-import android.accessibilityservice.UiTestAutomationBridge;
+import android.app.UiAutomation.OnAccessibilityEventListener;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.commands.uiautomator.Launcher.Command;
+import com.android.uiautomator.core.UiAutomationShellWrapper;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -49,15 +50,17 @@ public class EventsCommand extends Command {
 
     @Override
     public void run(String[] args) {
-        final UiTestAutomationBridge bridge = new UiTestAutomationBridge() {
+        UiAutomationShellWrapper automationWrapper = new UiAutomationShellWrapper();
+        automationWrapper.connect();
+        automationWrapper.getUiAutomation().setOnAccessibilityEventListener(
+                new OnAccessibilityEventListener() {
             @Override
             public void onAccessibilityEvent(AccessibilityEvent event) {
                 SimpleDateFormat formatter = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
                 System.out.println(String.format("%s %s",
                         formatter.format(new Date()), event.toString()));
             }
-        };
-        bridge.connect();
+        });
         // there's really no way to stop, essentially we just block indefinitely here and wait
         // for user to press Ctrl+C
         synchronized (mQuitLock) {
@@ -67,5 +70,6 @@ public class EventsCommand extends Command {
                 e.printStackTrace();
             }
         }
+        automationWrapper.disconnect();
     }
 }

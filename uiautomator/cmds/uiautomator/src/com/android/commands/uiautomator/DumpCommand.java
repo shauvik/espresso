@@ -16,14 +16,16 @@
 
 package com.android.commands.uiautomator;
 
-import android.accessibilityservice.UiTestAutomationBridge;
+import android.app.UiAutomation;
 import android.os.Environment;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.commands.uiautomator.Launcher.Command;
 import com.android.uiautomator.core.AccessibilityNodeInfoDumper;
+import com.android.uiautomator.core.UiAutomationShellWrapper;
 
 import java.io.File;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Implementation of the dump subcommand
@@ -57,21 +59,27 @@ public class DumpCommand extends Command {
         if (args.length > 0) {
             dumpFile = new File(args[0]);
         }
-        UiTestAutomationBridge bridge = new UiTestAutomationBridge();
-        bridge.connect();
+        UiAutomationShellWrapper automationWrapper = new UiAutomationShellWrapper();
+        automationWrapper.connect();
         // It appears that the bridge needs time to be ready. Making calls to the
         // bridge immediately after connecting seems to cause exceptions. So let's also
         // do a wait for idle in case the app is busy.
-        bridge.waitForIdle(1000, 1000 * 10);
-        AccessibilityNodeInfo info = bridge.getRootAccessibilityNodeInfoInActiveWindow();
-        if (info == null) {
-            System.err.println("ERROR: null root node returned by UiTestAutomationBridge.");
+        try {
+            UiAutomation uiAutomation = automationWrapper.getUiAutomation();
+            uiAutomation.waitForIdle(1000, 1000 * 10);
+            AccessibilityNodeInfo info = uiAutomation.getRootInActiveWindow();
+            if (info == null) {
+                System.err.println("ERROR: null root node returned by UiTestAutomationBridge.");
+                return;
+            }
+            AccessibilityNodeInfoDumper.dumpWindowToFile(info, dumpFile);
+        } catch (TimeoutException re) {
+            System.err.println("ERROR: could not get idle state.");
             return;
+        } finally {
+            automationWrapper.disconnect();
         }
-        AccessibilityNodeInfoDumper.dumpWindowToFile(info, dumpFile);
-        bridge.disconnect();
         System.out.println(
                 String.format("UI hierchary dumped to: %s", dumpFile.getAbsolutePath()));
     }
-
 }

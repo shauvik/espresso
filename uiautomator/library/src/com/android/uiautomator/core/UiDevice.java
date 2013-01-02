@@ -16,6 +16,8 @@
 
 package com.android.uiautomator.core;
 
+import android.app.UiAutomation;
+import android.app.UiAutomationConnection;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -27,7 +29,6 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.Trace;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -70,27 +71,38 @@ public class UiDevice {
     private boolean mInWatcherContext = false;
 
     // provides access the {@link QueryController} and {@link InteractionController}
-    private final UiAutomatorBridge mUiAutomationBridge;
+    private UiAutomatorBridge mUiAutomationBridge;
 
     // reference to self
-    private static UiDevice mDevice;
+    private static UiDevice sDevice;
 
     private UiDevice() {
-        mUiAutomationBridge = new UiAutomatorBridge();
-        mDevice = this;
+        /* hide constructor */
     }
 
+    /**
+     * @hide
+     */
+    public void initialize(Context context, UiAutomation uiAutomation) {
+        if (context == null) {
+            mUiAutomationBridge = new ShellUiAutomatorBridge(uiAutomation);
+        } else {
+            mUiAutomationBridge = new OnDeviceUiAutomatorBridge(context, uiAutomation);
+        }
+    }
+    
     boolean isInWatcherContext() {
         return mInWatcherContext;
     }
 
     /**
      * Provides access the {@link QueryController} and {@link InteractionController}
-     * @return {@link UiAutomatorBridge}
+     * @return {@link ShellUiAutomatorBridge}
      */
     UiAutomatorBridge getAutomatorBridge() {
         return mUiAutomationBridge;
     }
+
     /**
      * Retrieves a singleton instance of UiDevice
      *
@@ -98,10 +110,10 @@ public class UiDevice {
      * @since API Level 16
      */
     public static UiDevice getInstance() {
-        if (mDevice == null) {
-            mDevice = new UiDevice();
+        if (sDevice == null) {
+            sDevice = new UiDevice();
         }
-        return mDevice;
+        return sDevice;
     }
 
     /**
