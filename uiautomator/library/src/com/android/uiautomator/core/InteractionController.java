@@ -113,7 +113,7 @@ class InteractionController {
                     throw new IllegalStateException("Could not find provider: " + providerName);
                 }
                 provider = holder.provider;
-                cursor = provider.query(Settings.Secure.CONTENT_URI,
+                cursor = provider.query(null, Settings.Secure.CONTENT_URI,
                         new String[] {Settings.Secure.VALUE}, "name=?",
                         new String[] {Settings.Secure.LONG_PRESS_TIMEOUT}, null, null);
                 if (cursor.moveToFirst()) {
