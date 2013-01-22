@@ -30,7 +30,8 @@ class QueryController {
 
     private static final String LOG_TAG = QueryController.class.getSimpleName();
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
+    private static final boolean VERBOSE = Log.isLoggable(LOG_TAG, Log.VERBOSE);
 
     private final UiAutomatorBridge mUiAutomatorBridge;
 
@@ -71,8 +72,8 @@ class QueryController {
                             if (event.getText() != null && event.getText().size() > 0)
                                 if(event.getText().get(0) != null)
                                     mLastTraversedText = event.getText().get(0).toString();
-                            if(DEBUG)
-                                Log.i(LOG_TAG, "Last text selection reported: " +
+                            if (DEBUG)
+                                Log.d(LOG_TAG, "Last text selection reported: " +
                                         mLastTraversedText);
                             break;
                     }
@@ -142,8 +143,8 @@ class QueryController {
         mUiAutomatorBridge.waitForIdle();
         initializeNewSearch();
 
-        if(DEBUG)
-            Log.i(LOG_TAG, "Searching: " + selector);
+        if (DEBUG)
+            Log.d(LOG_TAG, "Searching: " + selector);
 
         synchronized (mLock) {
             AccessibilityNodeInfo rootNode = getRootNode();
@@ -229,8 +230,8 @@ class QueryController {
             fromNode = translateReqularSelector(selector, fromNode);
 
         if(fromNode == null) {
-            if(DEBUG)
-                Log.i(LOG_TAG, "Container selector not found: " + selector.dumpToString(false));
+            if (DEBUG)
+                Log.d(LOG_TAG, "Container selector not found: " + selector.dumpToString(false));
             return null;
         }
 
@@ -244,8 +245,8 @@ class QueryController {
                 return null;
             } else {
                 if(fromNode == null) {
-                    if(DEBUG)
-                        Log.i(LOG_TAG, "Pattern selector not found: " +
+                    if (DEBUG)
+                        Log.d(LOG_TAG, "Pattern selector not found: " +
                                 selector.dumpToString(false));
                     return null;
                 }
@@ -260,8 +261,8 @@ class QueryController {
         }
 
         if(fromNode == null) {
-            if(DEBUG)
-                Log.i(LOG_TAG, "Object Not Found for selector " + selector);
+            if (DEBUG)
+                Log.d(LOG_TAG, "Object Not Found for selector " + selector);
             return null;
         }
         Log.i(LOG_TAG, String.format("Matched selector: %s <<==>> [%s]", selector, fromNode));
@@ -334,9 +335,8 @@ class QueryController {
                 continue;
             }
             if (!childNode.isVisibleToUser()) {
-                // TODO: need to remove this or move it under if (DEBUG)
-                if(DEBUG)
-                    Log.d(LOG_TAG,
+                if (VERBOSE)
+                    Log.v(LOG_TAG,
                             String.format("Skipping invisible child: %s", childNode.toString()));
                 continue;
             }
@@ -411,7 +411,7 @@ class QueryController {
                                 String.format("%s", subSelector.dumpToString(false))));
                     return fromNode;
                 } else {
-                    if(DEBUG)
+                    if (DEBUG)
                         Log.d(LOG_TAG, formatLog(
                                 String.format("%s", subSelector.dumpToString(false))));
                     mPatternCounter++; //count the pattern matched
@@ -426,7 +426,7 @@ class QueryController {
                     mLogIndent = mLogParentIndent;
                 }
             } else {
-                if(DEBUG)
+                if (DEBUG)
                     Log.d(LOG_TAG, formatLog(
                             String.format("%s", subSelector.dumpToString(false))));
 
@@ -465,7 +465,7 @@ class QueryController {
                 continue;
             }
             if (!childNode.isVisibleToUser()) {
-                if(DEBUG)
+                if (DEBUG)
                     Log.d(LOG_TAG,
                         String.format("Skipping invisible child: %s", childNode.toString()));
                 continue;
