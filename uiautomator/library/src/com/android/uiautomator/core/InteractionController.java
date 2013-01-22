@@ -58,7 +58,7 @@ class InteractionController {
 
     private static final String LOG_TAG = InteractionController.class.getSimpleName();
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
 
     private static final long DEFAULT_SCROLL_EVENT_TIMEOUT_MILLIS = 500;
 
