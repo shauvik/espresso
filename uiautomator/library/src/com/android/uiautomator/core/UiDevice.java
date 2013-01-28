@@ -27,7 +27,6 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.Trace;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -107,18 +106,18 @@ public class UiDevice {
     /**
      * Returns the display size in dp (device-independent pixel)
      *
-     * The returned display size is adjusted per screen rotation
+     * The returned display size is adjusted per screen rotation. Also this will return the actual
+     * size of the screen, rather than adjusted per system decorations (like status bar).
      *
      * @return a Point containing the display size in dp
-     * @hide
      */
     public Point getDisplaySizeDp() {
         Tracer.trace();
         Display display = getDefaultDisplay();
         Point p = new Point();
-        display.getSize(p);
+        display.getRealSize(p);
         DisplayMetrics metrics = new DisplayMetrics();
-        display.getMetrics(metrics);
+        display.getRealMetrics(metrics);
         float dpx = p.x / metrics.density;
         float dpy = p.y / metrics.density;
         p.x = Math.round(dpx);
