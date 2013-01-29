@@ -182,7 +182,7 @@ package com.android.uiautomator.testrunner {
     method public abstract void sendStatus(int, android.os.Bundle);
   }
 
-  public class OnDeviceUiTestCase extends android.test.UiTestCase {
+  public class OnDeviceUiTestCase extends android.test.AndroidTestCase {
     ctor public OnDeviceUiTestCase();
     method public com.android.uiautomator.testrunner.IAutomationSupport getAutomationSupport();
     method public android.os.Bundle getParams();
