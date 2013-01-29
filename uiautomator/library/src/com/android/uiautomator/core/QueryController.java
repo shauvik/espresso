@@ -15,12 +15,12 @@
  */
 package com.android.uiautomator.core;
 
+import android.app.UiAutomation.OnAccessibilityEventListener;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import com.android.uiautomator.core.UiAutomatorBridge.AccessibilityEventListener;
 
 /**
  * The QueryController main purpose is to translate a {@link UiSelector} selectors to
@@ -55,7 +55,7 @@ class QueryController {
 
     public QueryController(UiAutomatorBridge bridge) {
         mUiAutomatorBridge = bridge;
-        bridge.addAccessibilityEventListener(new AccessibilityEventListener() {
+        bridge.setOnAccessibilityEventListener(new OnAccessibilityEventListener() {
             @Override
             public void onAccessibilityEvent(AccessibilityEvent event) {
                 synchronized (mLock) {
@@ -169,7 +169,7 @@ class QueryController {
         final long waitInterval = 250;
         AccessibilityNodeInfo rootNode = null;
         for(int x = 0; x < maxRetry; x++) {
-            rootNode = mUiAutomatorBridge.getRootAccessibilityNodeInfoInActiveWindow();
+            rootNode = mUiAutomatorBridge.getRootInActiveWindow();
             if (rootNode != null) {
                 return rootNode;
             }
@@ -480,7 +480,7 @@ class QueryController {
     }
 
     public AccessibilityNodeInfo getAccessibilityRootNode() {
-        return mUiAutomatorBridge.getRootAccessibilityNodeInfoInActiveWindow();
+        return mUiAutomatorBridge.getRootInActiveWindow();
     }
 
     /**

@@ -22,12 +22,14 @@ import android.app.Instrumentation;
 import android.content.ComponentName;
 import android.os.Bundle;
 import android.os.Debug;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.test.RepetitiveTest;
 import android.util.Log;
 
 import com.android.uiautomator.core.Tracer;
+import com.android.uiautomator.core.UiAutomationShellWrapper;
 import com.android.uiautomator.core.UiDevice;
 
 import junit.framework.AssertionFailedError;
@@ -54,6 +56,8 @@ public class UiAutomatorTestRunner {
     private static final int EXIT_OK = 0;
     private static final int EXIT_EXCEPTION = -1;
 
+    private static final String HANDLER_THREAD_NAME = "UiAutomatorHandlerThread";
+
     private boolean mDebug;
     private Bundle mParams = null;
     private UiDevice mUiDevice;
@@ -66,6 +70,8 @@ public class UiAutomatorTestRunner {
         }
     };
     private List<TestListener> mTestListeners = new ArrayList<TestListener>();
+
+    private HandlerThread mHandlerThread;
 
     public void run(List<String> testClasses, Bundle params, boolean debug) {
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
@@ -102,6 +108,12 @@ public class UiAutomatorTestRunner {
         if (mDebug) {
             Debug.waitForDebugger();
         }
+        mHandlerThread = new HandlerThread(HANDLER_THREAD_NAME);
+        mHandlerThread.setDaemon(true);
+        mHandlerThread.start();
+        UiAutomationShellWrapper automationWrapper = new UiAutomationShellWrapper();
+        automationWrapper.connect();
+        UiDevice.getInstance().initialize(null, automationWrapper.getUiAutomation());
         mUiDevice = UiDevice.getInstance();
         List<TestCase> testCases = collector.getTestCases();
         Bundle testRunOutput = new Bundle();
@@ -149,6 +161,8 @@ public class UiAutomatorTestRunner {
         } finally {
             long runTime = SystemClock.uptimeMillis() - startTime;
             resultPrinter.print(testRunResult, runTime, testRunOutput);
+            automationWrapper.disconnect();
+            mHandlerThread.quit();
         }
     }
 

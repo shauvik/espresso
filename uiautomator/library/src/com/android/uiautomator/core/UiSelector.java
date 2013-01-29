@@ -58,6 +58,7 @@ public class UiSelector {
     static final int SELECTOR_CLASS_REGEX = 26;
     static final int SELECTOR_DESCRIPTION_REGEX = 27;
     static final int SELECTOR_PACKAGE_NAME_REGEX = 28;
+    static final int SELECTOR_VIEW_ID = 29;
 
     private SparseArray<Object> mSelectorAttributes = new SparseArray<Object>();
 
@@ -276,6 +277,17 @@ public class UiSelector {
      */
     public UiSelector descriptionContains(String desc) {
         return buildSelector(SELECTOR_CONTAINS_DESCRIPTION, desc);
+    }
+
+    /**
+     * Set the search criteria to match the given view id.
+     *
+     * @param desc Value to match
+     * @return UiSelector with the specified search criteria
+     * @since API Level 18
+     */
+    public UiSelector viewId(String viewId) {
+        return buildSelector(SELECTOR_VIEW_ID, viewId);
     }
 
     /**
@@ -734,6 +746,11 @@ public class UiSelector {
                     return false;
                 }
                 break;
+            case UiSelector.SELECTOR_VIEW_ID:
+                if (node.getViewId() != getString(criterion)) {
+                    return false;
+                }
+                break;
             }
         }
         return matchOrUpdateInstance();
@@ -940,6 +957,9 @@ public class UiSelector {
                 break;
             case SELECTOR_PACKAGE_NAME_REGEX:
                 builder.append("PACKAGE_NAME_REGEX=").append(mSelectorAttributes.valueAt(i));
+                break;
+            case SELECTOR_VIEW_ID:
+                builder.append("VIEW_ID=").append(mSelectorAttributes.valueAt(i));
                 break;
             default:
                 builder.append("UNDEFINED="+criterion+" ").append(mSelectorAttributes.valueAt(i));
