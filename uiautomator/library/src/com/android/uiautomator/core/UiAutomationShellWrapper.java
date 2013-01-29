@@ -4,6 +4,9 @@ import android.app.UiAutomation;
 import android.app.UiAutomationConnection;
 import android.os.HandlerThread;
 
+/**
+ * @hide
+ */
 public class UiAutomationShellWrapper {
 
     private static final String HANDLER_THREAD_NAME = "UiAutomatorHandlerThread";
