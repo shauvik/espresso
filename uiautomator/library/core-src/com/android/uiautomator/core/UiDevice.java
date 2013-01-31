@@ -17,7 +17,6 @@
 package com.android.uiautomator.core;
 
 import android.app.UiAutomation;
-import android.app.UiAutomationConnection;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -90,7 +89,7 @@ public class UiDevice {
             mUiAutomationBridge = new OnDeviceUiAutomatorBridge(context, uiAutomation);
         }
     }
-    
+
     boolean isInWatcherContext() {
         return mInWatcherContext;
     }

@@ -16,10 +16,7 @@
 
 package com.android.uiautomator.testrunner;
 
-import junit.framework.AssertionFailedError;
-import junit.framework.Test;
 import junit.framework.TestCase;
-import junit.framework.TestResult;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

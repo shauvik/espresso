@@ -16,7 +16,8 @@
 
 LOCAL_PATH:= $(call my-dir)
 
-uiautomator.core_src_files := $(call all-java-files-under, src)
+uiautomator.core_src_files := $(call all-java-files-under, core-src) \
+	$(call all-java-files-under, testrunner-src)
 uiautomator.core_java_libraries := android.test.runner core-junit
 
 uiautomator_internal_api_file := $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/uiautomator_api.txt
@@ -34,7 +35,8 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(uiautomator.core_src_files)
 LOCAL_JAVA_LIBRARIES := $(uiautomator.core_java_libraries)
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
-LOCAL_DROIDDOC_SOURCE_PATH := $(LOCAL_PATH)/src
+LOCAL_DROIDDOC_SOURCE_PATH := $(LOCAL_PATH)/core-src \
+	$(LOCAL_PATH)/testrunner-src
 LOCAL_DROIDDOC_HTML_DIR :=
 
 LOCAL_DROIDDOC_OPTIONS:= \
