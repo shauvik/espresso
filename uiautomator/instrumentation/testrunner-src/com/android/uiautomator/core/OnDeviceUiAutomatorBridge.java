@@ -19,11 +19,15 @@ package com.android.uiautomator.core;
 import android.app.Service;
 import android.app.UiAutomation;
 import android.content.Context;
+import android.os.PowerManager;
 import android.view.Display;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 
-class OnDeviceUiAutomatorBridge extends UiAutomatorBridge {
+/**
+ * @hide
+ */
+public class OnDeviceUiAutomatorBridge extends UiAutomatorBridge {
 
     private final Context mContext;
 
@@ -36,6 +40,18 @@ class OnDeviceUiAutomatorBridge extends UiAutomatorBridge {
         WindowManager windowManager = (WindowManager)
                 mContext.getSystemService(Service.WINDOW_SERVICE);
         return windowManager.getDefaultDisplay();
+    }
+
+    @Override
+    public int getRotation() {
+        return getDefaultDisplay().getRotation();
+    }
+
+    @Override
+    public boolean isScreenOn() {
+        PowerManager pm = (PowerManager)
+                mContext.getSystemService(Service.POWER_SERVICE);
+        return pm.isScreenOn();
     }
 
     public long getSystemLongPressTime() {

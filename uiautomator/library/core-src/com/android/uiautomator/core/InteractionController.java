@@ -17,14 +17,10 @@
 package com.android.uiautomator.core;
 
 import android.app.UiAutomation;
-import android.content.Context;
 import android.graphics.Point;
-import android.os.IPowerManager;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.Log;
-import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.KeyCharacterMap;
@@ -57,22 +53,12 @@ class InteractionController {
 
     private final UiAutomatorBridge mUiAutomatorBridge;
 
-    private final IWindowManager mWindowManager;
-
     private static final long REGULAR_CLICK_LENGTH = 100;
 
     private long mDownTime;
 
     public InteractionController(UiAutomatorBridge bridge) {
         mUiAutomatorBridge = bridge;
-
-        // Obtain the window manager.
-        mWindowManager = IWindowManager.Stub.asInterface(
-                ServiceManager.getService(Context.WINDOW_SERVICE));
-        if (mWindowManager == null) {
-            throw new RuntimeException("Unable to connect to WindowManager, "
-                    + "is the system running?");
-        }
     }
 
     /**
@@ -491,8 +477,8 @@ class InteractionController {
      * @throws RemoteException
      */
     public boolean isNaturalRotation() throws RemoteException {
-        return mWindowManager.getRotation() == UiAutomation.ROTATION_FREEZE_0
-                || mWindowManager.getRotation() == UiAutomation.ROTATION_FREEZE_180;
+        int ret = mUiAutomatorBridge.getRotation();
+        return ret == UiAutomation.ROTATION_FREEZE_0 || ret == UiAutomation.ROTATION_FREEZE_180;
     }
 
     /**
@@ -583,9 +569,7 @@ class InteractionController {
      * @throws RemoteException
      */
     public boolean isScreenOn() throws RemoteException {
-        IPowerManager pm =
-                IPowerManager.Stub.asInterface(ServiceManager.getService(Context.POWER_SERVICE));
-        return pm.isScreenOn();
+        return mUiAutomatorBridge.isScreenOn();
     }
 
     private boolean injectEventSync(InputEvent event) {

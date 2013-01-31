@@ -182,18 +182,6 @@ package com.android.uiautomator.testrunner {
     method public abstract void sendStatus(int, android.os.Bundle);
   }
 
-  public class OnDeviceUiTestCase extends android.test.AndroidTestCase {
-    ctor public OnDeviceUiTestCase();
-    method public com.android.uiautomator.testrunner.IAutomationSupport getAutomationSupport();
-    method public android.os.Bundle getParams();
-    method public com.android.uiautomator.core.UiDevice getUiDevice();
-    method public void sleep(long);
-  }
-
-  public class OnDeviceUiTestRunner extends android.test.InstrumentationTestRunner {
-    ctor public OnDeviceUiTestRunner();
-  }
-
   public class UiAutomatorTestCase extends junit.framework.TestCase {
     ctor public UiAutomatorTestCase();
     method public com.android.uiautomator.testrunner.IAutomationSupport getAutomationSupport();

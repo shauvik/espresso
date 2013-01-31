@@ -26,12 +26,13 @@ import android.test.AndroidTestCase;
 import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.view.IInputMethodManager;
+import com.android.uiautomator.core.OnDeviceUiAutomatorBridge;
 import com.android.uiautomator.core.UiDevice;
 
 import java.util.List;
 
 /**
- * UI automator test case that is executed on the device. 
+ * UI automator test case that is executed on the device.
  */
 public class OnDeviceUiTestCase extends AndroidTestCase {
     private static final String DISABLE_IME = "disable_ime";
@@ -51,7 +52,7 @@ public class OnDeviceUiTestCase extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        UiDevice.getInstance().initialize(getContext(), mUiAutomation);
+        UiDevice.getInstance().initialize(new OnDeviceUiAutomatorBridge(mContext, mUiAutomation));
         mShouldDisableIme = "true".equals(getParams().getString(DISABLE_IME));
         if (mShouldDisableIme) {
             setDummyIme();

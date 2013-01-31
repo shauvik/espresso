@@ -17,7 +17,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-abstract class UiAutomatorBridge {
+/**
+ * @hide
+ */
+public abstract class UiAutomatorBridge {
 
     private static final String LOG_TAG = UiAutomatorBridge.class.getSimpleName();
 
@@ -78,6 +81,10 @@ abstract class UiAutomatorBridge {
     public boolean setRotation(int rotation) {
         return mUiAutomation.setRotation(rotation);
     }
+
+    public abstract int getRotation();
+
+    public abstract boolean isScreenOn();
 
     public void waitForIdle() {
         waitForIdle(TOTAL_TIME_TO_WAIT_FOR_IDLE_STATE);

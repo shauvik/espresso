@@ -28,6 +28,7 @@ import android.os.SystemClock;
 import android.test.RepetitiveTest;
 import android.util.Log;
 
+import com.android.uiautomator.core.ShellUiAutomatorBridge;
 import com.android.uiautomator.core.Tracer;
 import com.android.uiautomator.core.UiAutomationShellWrapper;
 import com.android.uiautomator.core.UiDevice;
@@ -113,8 +114,8 @@ public class UiAutomatorTestRunner {
         mHandlerThread.start();
         UiAutomationShellWrapper automationWrapper = new UiAutomationShellWrapper();
         automationWrapper.connect();
-        UiDevice.getInstance().initialize(null, automationWrapper.getUiAutomation());
         mUiDevice = UiDevice.getInstance();
+        mUiDevice.initialize(new ShellUiAutomatorBridge(automationWrapper.getUiAutomation()));
         List<TestCase> testCases = collector.getTestCases();
         Bundle testRunOutput = new Bundle();
 

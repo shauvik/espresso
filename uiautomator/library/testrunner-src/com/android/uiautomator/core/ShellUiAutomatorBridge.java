@@ -18,24 +18,31 @@ package com.android.uiautomator.core;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
-import android.app.UiAutomation;
 import android.app.IActivityManager.ContentProviderHolder;
+import android.app.UiAutomation;
+import android.content.Context;
 import android.content.IContentProvider;
 import android.database.Cursor;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.IPowerManager;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
+import android.view.IWindowManager;
 
-class ShellUiAutomatorBridge extends UiAutomatorBridge {
+/**
+ * @hide
+ */
+public class ShellUiAutomatorBridge extends UiAutomatorBridge {
 
     private static final String LOG_TAG = ShellUiAutomatorBridge.class.getSimpleName();
 
-    ShellUiAutomatorBridge(UiAutomation uiAutomation) {
+    public ShellUiAutomatorBridge(UiAutomation uiAutomation) {
         super(uiAutomation);
     }
 
@@ -83,5 +90,33 @@ class ShellUiAutomatorBridge extends UiAutomatorBridge {
             throw new RuntimeException(message, e);
         }
         return longPressTimeout;
+    }
+
+    @Override
+    public int getRotation() {
+        IWindowManager wm =
+                IWindowManager.Stub.asInterface(ServiceManager.getService(Context.WINDOW_SERVICE));
+        int ret = -1;
+        try {
+            ret = wm.getRotation();
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Error getting screen rotation", e);
+            throw new RuntimeException(e);
+        }
+        return ret;
+    }
+
+    @Override
+    public boolean isScreenOn() {
+        IPowerManager pm =
+                IPowerManager.Stub.asInterface(ServiceManager.getService(Context.POWER_SERVICE));
+        boolean ret = false;
+        try {
+            ret = pm.isScreenOn();
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Error getting screen status", e);
+            throw new RuntimeException(e);
+        }
+        return ret;
     }
 }
