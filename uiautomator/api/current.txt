@@ -90,13 +90,18 @@ package com.android.uiautomator.core {
     method public boolean longClick() throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public boolean longClickBottomRight() throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public boolean longClickTopLeft() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method public void multiPointerGesture(android.view.MotionEvent.PointerCoords...);
+    method public void pinchIn(int, int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method public void pinchOut(int, int) throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public boolean setText(java.lang.String) throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public boolean swipeDown(int) throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public boolean swipeLeft(int) throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public boolean swipeRight(int) throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public boolean swipeUp(int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method public void twoPointerGesture(android.graphics.Point, android.graphics.Point, android.graphics.Point, android.graphics.Point, int);
     method public boolean waitForExists(long);
     method public boolean waitUntilGone(long);
+    field protected static final int FINGER_TOUCH_HALF_WIDTH = 20; // 0x14
     field protected static final int SWIPE_MARGIN_LIMIT = 5; // 0x5
     field protected static final long WAIT_FOR_EVENT_TMEOUT = 3000L; // 0xbb8L
     field protected static final long WAIT_FOR_SELECTOR_POLL = 1000L; // 0x3e8L

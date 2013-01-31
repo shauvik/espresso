@@ -16,10 +16,12 @@
 
 package com.android.uiautomator.core;
 
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent.PointerCoords;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -47,13 +49,17 @@ public class UiObject {
      **/
     protected static final long WAIT_FOR_WINDOW_TMEOUT = 5500;
     /**
+     * @since API Level 16
+     **/
+    protected static final int SWIPE_MARGIN_LIMIT = 5;
+    /**
      * @since API Level 17
      **/
     protected static final long WAIT_FOR_EVENT_TMEOUT = 3 * 1000;
     /**
-     * @since API Level 16
+     * @since API Level 18
      **/
-    protected static final int SWIPE_MARGIN_LIMIT = 5;
+    protected static final int FINGER_TOUCH_HALF_WIDTH = 20;
 
     private final UiSelector mSelector;
     private final UiAutomatorBridge mUiAutomationBridge;
@@ -338,7 +344,7 @@ public class UiObject {
         }
         Rect rect = getVisibleBounds(node);
         return getInteractionController().clickAndWaitForEvents(rect.centerX(), rect.centerY(),
-                WAIT_FOR_EVENT_TMEOUT, false, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED +
+                WAIT_FOR_EVENT_TMEOUT, false, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED |
                 AccessibilityEvent.TYPE_VIEW_SELECTED);
     }
 
@@ -831,5 +837,176 @@ public class UiObject {
         if(cs == null)
             return "";
         return cs.toString();
+    }
+
+    /**
+     * PinchOut generates a 2 pointer gesture where each pointer is moving from the center out
+     * away from each other diagonally towards the edges of the current UI element represented by
+     * this UiObject.
+     * @param percent of the object's diagonal length to use for the pinch
+     * @param steps indicates the number of injected move steps into the system. Steps are
+     * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
+     * @throws UiObjectNotFoundException
+     * @since API Level 18
+     */
+    public void pinchOut(int percent, int steps) throws UiObjectNotFoundException {
+        // make value between 1 and 100
+        percent = (percent < 0) ? 1 : (percent > 100) ? 100 : percent;
+        float percentage = percent / 100f;
+
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        if (node == null) {
+            throw new UiObjectNotFoundException(getSelector().toString());
+        }
+
+        Rect rect = getVisibleBounds(node);
+        if (rect.width() <= FINGER_TOUCH_HALF_WIDTH * 2)
+            throw new IllegalStateException("Object width is too small for operation");
+
+        // start from the same point at the center of the control
+        Point startPoint1 = new Point(rect.centerX() - FINGER_TOUCH_HALF_WIDTH, rect.centerY());
+        Point startPoint2 = new Point(rect.centerX() + FINGER_TOUCH_HALF_WIDTH, rect.centerY());
+
+        // End at the top-left and bottom-right corners of the control
+        Point endPoint1 = new Point(rect.centerX() - (int)((rect.width()/2) * percentage),
+                rect.centerY());
+        Point endPoint2 = new Point(rect.centerX() + (int)((rect.width()/2) * percentage),
+                rect.centerY());
+
+        twoPointerGesture(startPoint1, startPoint2, endPoint1, endPoint2, steps);
+    }
+
+    /**
+     * PinchIn generates a 2 pointer gesture where each pointer is moving towards the other
+     * diagonally from the edges of the current UI element represented by this UiObject, until the
+     * center.
+     * @param percent of the object's diagonal length to use for the pinch
+     * @param steps indicates the number of injected move steps into the system. Steps are
+     * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
+     * @throws UiObjectNotFoundException
+     * @since API Level 18
+     */
+    public void pinchIn(int percent, int steps) throws UiObjectNotFoundException {
+        // make value between 1 and 100
+        percent = (percent < 0) ? 0 : (percent > 100) ? 100 : percent;
+        float percentage = percent / 100f;
+
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        if (node == null) {
+            throw new UiObjectNotFoundException(getSelector().toString());
+        }
+
+        Rect rect = getVisibleBounds(node);
+        if (rect.width() <= FINGER_TOUCH_HALF_WIDTH * 2)
+            throw new IllegalStateException("Object width is too small for operation");
+
+        Point startPoint1 = new Point(rect.centerX() - (int)((rect.width()/2) * percentage),
+                rect.centerY());
+        Point startPoint2 = new Point(rect.centerX() + (int)((rect.width()/2) * percentage),
+                rect.centerY());
+
+        Point endPoint1 = new Point(rect.centerX() - FINGER_TOUCH_HALF_WIDTH, rect.centerY());
+        Point endPoint2 = new Point(rect.centerX() + FINGER_TOUCH_HALF_WIDTH, rect.centerY());
+
+        twoPointerGesture(startPoint1, startPoint2, endPoint1, endPoint2, steps);
+    }
+
+    /**
+     * Generates a 2 pointer gesture from an arbitrary starting and ending points.
+     *
+     * @param startPoint1 start point of pointer 1
+     * @param startPoint2 start point of pointer 2
+     * @param endPoint1 end point of pointer 1
+     * @param endPoint2 end point of pointer 2
+     * @param steps indicates the number of injected move steps into the system. Steps are
+     * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
+     * @since API Level 18
+     */
+    public void twoPointerGesture(Point startPoint1, Point startPoint2, Point endPoint1,
+            Point endPoint2, int steps) {
+
+        // avoid a divide by zero
+        if(steps == 0)
+            steps = 1;
+
+        final float stepX1 = (endPoint1.x - startPoint1.x) / steps;
+        final float stepY1 = (endPoint1.y - startPoint1.y) / steps;
+        final float stepX2 = (endPoint2.x - startPoint2.x) / steps;
+        final float stepY2 = (endPoint2.y - startPoint2.y) / steps;
+
+        int eventX1, eventY1, eventX2, eventY2;
+        eventX1 = startPoint1.x;
+        eventY1 = startPoint1.y;
+        eventX2 = startPoint2.x;
+        eventY2 = startPoint2.y;
+
+        // allocate for steps plus first down and last up
+        PointerCoords[] points1 = new PointerCoords[steps + 2];
+        PointerCoords[] points2 = new PointerCoords[steps + 2];
+
+        // Include the first and last touch downs in the arrays of steps
+        for (int i = 0; i < steps + 1; i++) {
+            PointerCoords p1 = new PointerCoords();
+            p1.x = eventX1;
+            p1.y = eventY1;
+            p1.pressure = 1;
+            p1.size = 1;
+            points1[i] = p1;
+
+            PointerCoords p2 = new PointerCoords();
+            p2.x = eventX2;
+            p2.y = eventY2;
+            p2.pressure = 1;
+            p2.size = 1;
+            points2[i] = p2;
+
+            eventX1 += stepX1;
+            eventY1 += stepY1;
+            eventX2 += stepX2;
+            eventY2 += stepY2;
+        }
+
+        // ending pointers coordinates
+        PointerCoords p1 = new PointerCoords();
+        p1.x = endPoint1.x;
+        p1.y = endPoint1.y;
+        p1.pressure = 1;
+        p1.size = 1;
+        points1[steps + 1] = p1;
+
+        PointerCoords p2 = new PointerCoords();
+        p2.x = endPoint2.x;
+        p2.y = endPoint2.y;
+        p2.pressure = 1;
+        p2.size = 1;
+        points2[steps + 1] = p2;
+
+        multiPointerGesture(points1, points2);
+    }
+
+    /**
+     * Performs a multi-touch gesture
+     *
+     * Takes a series of touch coordinates for at least 2 pointers. Each pointer must have
+     * all of its touch steps defined in an array of {@link PointerCoords}. By having the ability
+     * to specify the touch points along the path of a pointer, the caller is able to specify
+     * complex gestures like circles, irregular shapes etc, where each pointer may take a
+     * different path.
+     *
+     * To create a single point on a pointer's touch path
+     * <code>
+     *       PointerCoords p = new PointerCoords();
+     *       p.x = stepX;
+     *       p.y = stepY;
+     *       p.pressure = 1;
+     *       p.size = 1;
+     * </code>
+     * @param touches each array of {@link PointerCoords} constitute a single pointer's touch path.
+     *        Multiple {@link PointerCoords} arrays constitute multiple pointers, each with its own
+     *        path. Each {@link PointerCoords} in an array constitute a point on a pointer's path.
+     * @since API Level 18
+     */
+    public void multiPointerGesture(PointerCoords[] ...touches) {
+        getInteractionController().generateMultiPointerGesture(touches);
     }
 }
