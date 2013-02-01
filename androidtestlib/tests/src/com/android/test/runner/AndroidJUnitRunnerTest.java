@@ -18,11 +18,12 @@ package com.android.test.runner;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.google.testing.littlemock.LittleMock;
-import com.google.testing.littlemock.Mock;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -57,7 +58,7 @@ public class AndroidJUnitRunnerTest {
         };
         mAndroidJUnitRunner.setArguments(new Bundle());
         mStubStream = new PrintStream(new ByteArrayOutputStream());
-        LittleMock.initMocks(this);
+        MockitoAnnotations.initMocks(this);
     }
 
     /**
@@ -68,9 +69,8 @@ public class AndroidJUnitRunnerTest {
     public void testBuildRequest_singleClass() {
         Bundle b = new Bundle();
         b.putString(AndroidJUnitRunner.ARGUMENT_TEST_CLASS, "ClassName");
-        LittleMock.doNothing().when(mMockBuilder).addTestClass("ClassName");
         mAndroidJUnitRunner.buildRequest(b, mStubStream);
-        LittleMock.verify(mMockBuilder);
+        Mockito.verify(mMockBuilder).addTestClass("ClassName");
     }
 
     /**
@@ -81,10 +81,9 @@ public class AndroidJUnitRunnerTest {
     public void testBuildRequest_multiClass() {
         Bundle b = new Bundle();
         b.putString(AndroidJUnitRunner.ARGUMENT_TEST_CLASS, "ClassName1,ClassName2");
-        LittleMock.doNothing().when(mMockBuilder).addTestClass("ClassName1");
-        LittleMock.doNothing().when(mMockBuilder).addTestClass("ClassName2");
         mAndroidJUnitRunner.buildRequest(b, mStubStream);
-        LittleMock.verify(mMockBuilder);
+        Mockito.verify(mMockBuilder).addTestClass("ClassName1");
+        Mockito.verify(mMockBuilder).addTestClass("ClassName2");
     }
 
     /**
@@ -95,8 +94,7 @@ public class AndroidJUnitRunnerTest {
     public void testBuildRequest_method() {
         Bundle b = new Bundle();
         b.putString(AndroidJUnitRunner.ARGUMENT_TEST_CLASS, "ClassName1#method");
-        LittleMock.doNothing().when(mMockBuilder).addTestMethod("ClassName1", "method");
         mAndroidJUnitRunner.buildRequest(b, mStubStream);
-        LittleMock.verify(mMockBuilder);
+        Mockito.verify(mMockBuilder).addTestMethod("ClassName1", "method");
     }
 }

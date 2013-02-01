@@ -3,7 +3,6 @@
 *.class
 bin/
 *.properties
-*.project
 *.cproject
 *.settings
 *.pyc

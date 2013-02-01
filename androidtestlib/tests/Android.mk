@@ -25,9 +25,10 @@ LOCAL_PACKAGE_NAME := AndroidTestLibTests
 
 LOCAL_MODULE_TAGS := tests
 
-LOCAL_SDK_VERSION := 8
+# SDK 10 needed for mockito/objnesis. Otherwise 8 would work
+LOCAL_SDK_VERSION := 10
 
-LOCAL_STATIC_JAVA_LIBRARIES := android-test-lib dexmaker littlemock
+LOCAL_STATIC_JAVA_LIBRARIES := android-test-lib mockito-target dexmaker
 
 LOCAL_PROGUARD_ENABLED := disabled
 
