@@ -58,7 +58,7 @@ public class UiSelector {
     static final int SELECTOR_CLASS_REGEX = 26;
     static final int SELECTOR_DESCRIPTION_REGEX = 27;
     static final int SELECTOR_PACKAGE_NAME_REGEX = 28;
-    static final int SELECTOR_VIEW_ID = 29;
+    static final int SELECTOR_RESOURCE_ID = 29;
 
     private SparseArray<Object> mSelectorAttributes = new SparseArray<Object>();
 
@@ -280,14 +280,14 @@ public class UiSelector {
     }
 
     /**
-     * Set the search criteria to match the given view id.
+     * Set the search criteria to match the given resource id.
      *
-     * @param desc Value to match
+     * @param id value to match
      * @return UiSelector with the specified search criteria
      * @since API Level 18
      */
-    public UiSelector viewId(String viewId) {
-        return buildSelector(SELECTOR_VIEW_ID, viewId);
+    public UiSelector resourceId(String id) {
+        return buildSelector(SELECTOR_RESOURCE_ID, id);
     }
 
     /**
@@ -746,7 +746,7 @@ public class UiSelector {
                     return false;
                 }
                 break;
-            case UiSelector.SELECTOR_VIEW_ID:
+            case UiSelector.SELECTOR_RESOURCE_ID:
                 if (node.getViewId() != getString(criterion)) {
                     return false;
                 }
@@ -958,8 +958,8 @@ public class UiSelector {
             case SELECTOR_PACKAGE_NAME_REGEX:
                 builder.append("PACKAGE_NAME_REGEX=").append(mSelectorAttributes.valueAt(i));
                 break;
-            case SELECTOR_VIEW_ID:
-                builder.append("VIEW_ID=").append(mSelectorAttributes.valueAt(i));
+            case SELECTOR_RESOURCE_ID:
+                builder.append("RESOURCE_ID=").append(mSelectorAttributes.valueAt(i));
                 break;
             default:
                 builder.append("UNDEFINED="+criterion+" ").append(mSelectorAttributes.valueAt(i));

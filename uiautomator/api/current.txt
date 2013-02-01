@@ -166,13 +166,13 @@ package com.android.uiautomator.core {
     method public com.android.uiautomator.core.UiSelector longClickable(boolean);
     method public com.android.uiautomator.core.UiSelector packageName(java.lang.String);
     method public com.android.uiautomator.core.UiSelector packageNameMatches(java.lang.String);
+    method public com.android.uiautomator.core.UiSelector resourceId(java.lang.String);
     method public com.android.uiautomator.core.UiSelector scrollable(boolean);
     method public com.android.uiautomator.core.UiSelector selected(boolean);
     method public com.android.uiautomator.core.UiSelector text(java.lang.String);
     method public com.android.uiautomator.core.UiSelector textContains(java.lang.String);
     method public com.android.uiautomator.core.UiSelector textMatches(java.lang.String);
     method public com.android.uiautomator.core.UiSelector textStartsWith(java.lang.String);
-    method public com.android.uiautomator.core.UiSelector viewId(java.lang.String);
   }
 
   public abstract interface UiWatcher {
