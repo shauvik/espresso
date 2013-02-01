@@ -59,6 +59,7 @@ public class UiSelector {
     static final int SELECTOR_DESCRIPTION_REGEX = 27;
     static final int SELECTOR_PACKAGE_NAME_REGEX = 28;
     static final int SELECTOR_RESOURCE_ID = 29;
+    static final int SELECTOR_CHECKABLE = 30;
 
     private SparseArray<Object> mSelectorAttributes = new SparseArray<Object>();
 
@@ -470,6 +471,25 @@ public class UiSelector {
     }
 
     /**
+     * Set the search criteria to match widgets that are checkable.
+     *
+     * Typically, using this search criteria alone is not useful.
+     * You should also include additional criteria, such as text,
+     * content-description, or the class name for a widget.
+     *
+     * If no other search criteria is specified, and there is more
+     * than one matching widget, the first widget in the tree
+     * is selected.
+     *
+     * @param val Value to match
+     * @return UiSelector with the specified search criteria
+     * @since API Level 18
+     */
+    public UiSelector checkable(boolean val) {
+        return buildSelector(SELECTOR_CHECKABLE, val);
+    }
+
+    /**
      * Set the search criteria to match widgets that are long-clickable.
      *
      * Typically, using this search criteria alone is not useful.
@@ -647,6 +667,11 @@ public class UiSelector {
                 break;
             case UiSelector.SELECTOR_CLICKABLE:
                 if (node.isClickable() != getBoolean(criterion)) {
+                    return false;
+                }
+                break;
+            case UiSelector.SELECTOR_CHECKABLE:
+                if (node.isCheckable() != getBoolean(criterion)) {
                     return false;
                 }
                 break;
@@ -912,6 +937,9 @@ public class UiSelector {
                 break;
             case SELECTOR_CLICKABLE:
                 builder.append("CLICKABLE=").append(mSelectorAttributes.valueAt(i));
+                break;
+            case SELECTOR_CHECKABLE:
+                builder.append("CHECKABLE=").append(mSelectorAttributes.valueAt(i));
                 break;
             case SELECTOR_LONG_CLICKABLE:
                 builder.append("LONG_CLICKABLE=").append(mSelectorAttributes.valueAt(i));

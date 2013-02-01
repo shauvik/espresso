@@ -492,6 +492,24 @@ public class UiObject {
     }
 
     /**
+     * Reads the <code>className</code> property of the UI element
+     *
+     * @return class name of the current node represented by this UiObject
+     * @throws UiObjectNotFoundException if no match could be found
+     * @since API Level 18
+     */
+    public String getClassName() throws UiObjectNotFoundException {
+        Tracer.trace();
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        if(node == null) {
+            throw new UiObjectNotFoundException(getSelector().toString());
+        }
+        String retVal = safeStringReturn(node.getClassName());
+        Log.d(LOG_TAG, String.format("getClassName() = %s", retVal));
+        return retVal;
+    }
+
+    /**
      * Reads the <code>content_desc</code> property of the UI element
      *
      * @return value of node attribute "content_desc"

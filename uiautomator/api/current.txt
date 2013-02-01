@@ -72,6 +72,7 @@ package com.android.uiautomator.core {
     method public android.graphics.Rect getBounds() throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public com.android.uiautomator.core.UiObject getChild(com.android.uiautomator.core.UiSelector) throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public int getChildCount() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method public java.lang.String getClassName() throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public java.lang.String getContentDescription() throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public com.android.uiautomator.core.UiObject getFromParent(com.android.uiautomator.core.UiSelector) throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public java.lang.String getPackageName() throws com.android.uiautomator.core.UiObjectNotFoundException;
@@ -146,6 +147,7 @@ package com.android.uiautomator.core {
 
   public class UiSelector {
     ctor public UiSelector();
+    method public com.android.uiautomator.core.UiSelector checkable(boolean);
     method public com.android.uiautomator.core.UiSelector checked(boolean);
     method public com.android.uiautomator.core.UiSelector childSelector(com.android.uiautomator.core.UiSelector);
     method public com.android.uiautomator.core.UiSelector className(java.lang.String);

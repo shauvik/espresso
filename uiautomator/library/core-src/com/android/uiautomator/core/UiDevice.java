@@ -591,6 +591,7 @@ public class UiDevice {
      */
     public int getDisplayRotation() {
         Tracer.trace();
+        waitForIdle();
         return getDefaultDisplay().getRotation();
     }
 
