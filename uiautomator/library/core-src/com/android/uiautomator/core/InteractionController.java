@@ -200,13 +200,13 @@ class InteractionController {
             @Override
             public void run() {
                 final long eventTime = SystemClock.uptimeMillis();
-                KeyEvent downEvent = KeyEvent.obtain(eventTime, eventTime, KeyEvent.ACTION_DOWN,
+                KeyEvent downEvent = new KeyEvent(eventTime, eventTime, KeyEvent.ACTION_DOWN,
                         keyCode, 0, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0,
-                        InputDevice.SOURCE_KEYBOARD, null);
+                        InputDevice.SOURCE_KEYBOARD);
                 if (injectEventSync(downEvent)) {
-                    KeyEvent upEvent = KeyEvent.obtain(eventTime, eventTime, KeyEvent.ACTION_UP,
+                    KeyEvent upEvent = new KeyEvent(eventTime, eventTime, KeyEvent.ACTION_UP,
                             keyCode, 0, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0,
-                            InputDevice.SOURCE_KEYBOARD, null);
+                            InputDevice.SOURCE_KEYBOARD);
                     injectEventSync(upEvent);
                 }
             }
@@ -462,29 +462,18 @@ class InteractionController {
         }
 
         final long eventTime = SystemClock.uptimeMillis();
-        KeyEvent downEvent = KeyEvent.obtain(eventTime, eventTime, KeyEvent.ACTION_DOWN,
+        KeyEvent downEvent = new KeyEvent(eventTime, eventTime, KeyEvent.ACTION_DOWN,
                 keyCode, 0, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0,
-                InputDevice.SOURCE_KEYBOARD, null);
+                InputDevice.SOURCE_KEYBOARD);
         if (injectEventSync(downEvent)) {
-            KeyEvent upEvent = KeyEvent.obtain(eventTime, eventTime, KeyEvent.ACTION_UP,
+            KeyEvent upEvent = new KeyEvent(eventTime, eventTime, KeyEvent.ACTION_UP,
                     keyCode, 0, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0,
-                    InputDevice.SOURCE_KEYBOARD, null);
+                    InputDevice.SOURCE_KEYBOARD);
             if(injectEventSync(upEvent)) {
                 return true;
             }
         }
         return false;
-    }
-
-    /**
-     * Check if the device is in its natural orientation. This is determined by
-     * checking whether the orientation is at 0 or 180 degrees.
-     * @return true if it is in natural orientation
-     * @throws RemoteException
-     */
-    public boolean isNaturalRotation() throws RemoteException {
-        int ret = mUiAutomatorBridge.getRotation();
-        return ret == UiAutomation.ROTATION_FREEZE_0 || ret == UiAutomation.ROTATION_FREEZE_180;
     }
 
     /**

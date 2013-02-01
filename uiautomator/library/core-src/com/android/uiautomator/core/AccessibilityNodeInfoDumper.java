@@ -16,20 +16,18 @@
 
 package com.android.uiautomator.core;
 
-import android.hardware.display.DisplayManagerGlobal;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Xml;
-import android.view.Display;
 import android.view.accessibility.AccessibilityNodeInfo;
+
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
-
-import org.xmlpull.v1.XmlSerializer;
 
 /**
  *
@@ -46,9 +44,13 @@ public class AccessibilityNodeInfoDumper {
     /**
      * Using {@link AccessibilityNodeInfo} this method will walk the layout hierarchy
      * and generates an xml dump into the /data/local/window_dump.xml
-     * @param info
+     * @param root The root accessibility node.
+     * @param rotation The rotaion of current display
+     * @param width The pixel width of current display
+     * @param height The pixel height of current display
      */
-    public static void dumpWindowToFile(AccessibilityNodeInfo info) {
+    public static void dumpWindowToFile(AccessibilityNodeInfo root, int rotation,
+            int width, int height) {
         File baseDir = new File(Environment.getDataDirectory(), "local");
         if (!baseDir.exists()) {
             baseDir.mkdir();
@@ -56,8 +58,9 @@ public class AccessibilityNodeInfoDumper {
             baseDir.setWritable(true, false);
             baseDir.setReadable(true, false);
         }
-        dumpWindowToFile(info, new File(
-                new File(Environment.getDataDirectory(), "local"), "window_dump.xml"));
+        dumpWindowToFile(root,
+                new File(new File(Environment.getDataDirectory(), "local"), "window_dump.xml"),
+                rotation, width, height);
     }
 
     /**
@@ -65,8 +68,12 @@ public class AccessibilityNodeInfoDumper {
      * and generates an xml dump to the location specified by <code>dumpFile</code>
      * @param root The root accessibility node.
      * @param dumpFile The file to dump to.
+     * @param rotation The rotaion of current display
+     * @param width The pixel width of current display
+     * @param height The pixel height of current display
      */
-    public static void dumpWindowToFile(AccessibilityNodeInfo root, File dumpFile) {
+    public static void dumpWindowToFile(AccessibilityNodeInfo root, File dumpFile, int rotation,
+            int width, int height) {
         if (root == null) {
             return;
         }
@@ -78,10 +85,8 @@ public class AccessibilityNodeInfoDumper {
             serializer.setOutput(stringWriter);
             serializer.startDocument("UTF-8", true);
             serializer.startTag("", "hierarchy");
-            serializer.attribute("", "rotation", Integer.toString(
-                    DisplayManagerGlobal.getInstance().getRealDisplay(
-                            Display.DEFAULT_DISPLAY).getRotation()));
-            dumpNodeRec(root, serializer, 0);
+            serializer.attribute("", "rotation", Integer.toString(rotation));
+            dumpNodeRec(root, serializer, 0, width, height);
             serializer.endTag("", "hierarchy");
             serializer.endDocument();
             writer.write(stringWriter.toString());
@@ -93,8 +98,8 @@ public class AccessibilityNodeInfoDumper {
         Log.w(LOGTAG, "Fetch time: " + (endTime - startTime) + "ms");
     }
 
-    private static void dumpNodeRec(AccessibilityNodeInfo node, XmlSerializer serializer,
-            int index) throws IOException {
+    private static void dumpNodeRec(AccessibilityNodeInfo node, XmlSerializer serializer,int index,
+            int width, int height) throws IOException {
         serializer.startTag("", "node");
         if (!nafExcludedClass(node) && !nafCheck(node))
             serializer.attribute("", "NAF", Boolean.toString(true));
@@ -114,14 +119,14 @@ public class AccessibilityNodeInfoDumper {
         serializer.attribute("", "long-clickable", Boolean.toString(node.isLongClickable()));
         serializer.attribute("", "password", Boolean.toString(node.isPassword()));
         serializer.attribute("", "selected", Boolean.toString(node.isSelected()));
-        serializer.attribute("", "bounds",
-                AccessibilityNodeInfoHelper.getVisibleBoundsInScreen(node).toShortString());
+        serializer.attribute("", "bounds", AccessibilityNodeInfoHelper.getVisibleBoundsInScreen(
+                node, width, height).toShortString());
         int count = node.getChildCount();
         for (int i = 0; i < count; i++) {
             AccessibilityNodeInfo child = node.getChild(i);
             if (child != null) {
                 if (child.isVisibleToUser()) {
-                    dumpNodeRec(child, serializer, i);
+                    dumpNodeRec(child, serializer, i, width, height);
                     child.recycle();
                 } else {
                     Log.i(LOGTAG, String.format("Skipping invisible child: %s", child.toString()));

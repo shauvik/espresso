@@ -17,7 +17,10 @@
 package com.android.commands.uiautomator;
 
 import android.app.UiAutomation;
+import android.graphics.Point;
+import android.hardware.display.DisplayManagerGlobal;
 import android.os.Environment;
+import android.view.Display;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.commands.uiautomator.Launcher.Command;
@@ -72,7 +75,13 @@ public class DumpCommand extends Command {
                 System.err.println("ERROR: null root node returned by UiTestAutomationBridge.");
                 return;
             }
-            AccessibilityNodeInfoDumper.dumpWindowToFile(info, dumpFile);
+
+            Display display =
+                    DisplayManagerGlobal.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
+            int rotation = display.getRotation();
+            Point size = new Point();
+            display.getSize(size);
+            AccessibilityNodeInfoDumper.dumpWindowToFile(info, dumpFile, rotation, size.x, size.y);
         } catch (TimeoutException re) {
             System.err.println("ERROR: could not get idle state.");
             return;
