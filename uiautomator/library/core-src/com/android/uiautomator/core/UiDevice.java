@@ -384,7 +384,7 @@ public class UiDevice {
         if (x >= getDisplayWidth() || y >= getDisplayHeight()) {
             return (false);
         }
-        return getAutomatorBridge().getInteractionController().click(x, y);
+        return getAutomatorBridge().getInteractionController().clickNoSync(x, y);
     }
 
     /**
