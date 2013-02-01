@@ -305,7 +305,7 @@ public class AndroidJUnitRunner extends Instrumentation {
         if (getBooleanArgument(ARGUMENT_LOG_ONLY)) {
             builder.setSkipExecution(true);
         }
-        return builder.build(this);
+        return builder.build(this, arguments);
     }
 
     /**

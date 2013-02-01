@@ -16,8 +16,10 @@
 package com.android.test.runner;
 
 import android.app.Instrumentation;
+import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.test.InjectBundle;
 import com.android.test.InjectInstrumentation;
 
 import org.junit.Assert;
@@ -60,6 +62,10 @@ public class TestRequestBuilderTest {
     @InjectInstrumentation
     public Instrumentation mInstr;
 
+    @InjectBundle
+    public Bundle mBundle;
+
+
     /**
      * Test initial condition for size filtering - that all tests run when no filter is attached
      */
@@ -67,7 +73,7 @@ public class TestRequestBuilderTest {
     public void testNoSize() {
         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
         b.addTestClass(SampleTest.class.getName());
-        TestRequest request = b.build(mInstr);
+        TestRequest request = b.build(mInstr, mBundle);
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(2, result.getRunCount());
@@ -81,7 +87,7 @@ public class TestRequestBuilderTest {
         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
         b.addTestClass(SampleTest.class.getName());
         b.addTestSizeFilter("small");
-        TestRequest request = b.build(mInstr);
+        TestRequest request = b.build(mInstr, mBundle);
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(1, result.getRunCount());
@@ -96,7 +102,7 @@ public class TestRequestBuilderTest {
         b.addTestClass(SampleTest.class.getName());
         b.addTestClass(SampleClassSize.class.getName());
         b.addTestSizeFilter("small");
-        TestRequest request = b.build(mInstr);
+        TestRequest request = b.build(mInstr, mBundle);
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(3, result.getRunCount());
@@ -111,7 +117,7 @@ public class TestRequestBuilderTest {
         b.addAnnotationInclusionFilter(SmallTest.class.getName());
         b.addTestClass(SampleTest.class.getName());
         b.addTestClass(SampleClassSize.class.getName());
-        TestRequest request = b.build(mInstr);
+        TestRequest request = b.build(mInstr, mBundle);
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(3, result.getRunCount());
@@ -126,7 +132,7 @@ public class TestRequestBuilderTest {
         b.addAnnotationExclusionFilter(SmallTest.class.getName());
         b.addTestClass(SampleTest.class.getName());
         b.addTestClass(SampleClassSize.class.getName());
-        TestRequest request = b.build(mInstr);
+        TestRequest request = b.build(mInstr, mBundle);
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(1, result.getRunCount());
