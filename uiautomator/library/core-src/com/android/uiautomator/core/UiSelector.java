@@ -772,7 +772,7 @@ public class UiSelector {
                 }
                 break;
             case UiSelector.SELECTOR_RESOURCE_ID:
-                if (node.getViewId() != getString(criterion)) {
+                if (node.getViewIdResourceName() != getString(criterion)) {
                     return false;
                 }
                 break;

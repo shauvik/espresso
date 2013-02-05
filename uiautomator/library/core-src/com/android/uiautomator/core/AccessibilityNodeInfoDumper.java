@@ -100,7 +100,7 @@ public class AccessibilityNodeInfoDumper {
             serializer.attribute("", "NAF", Boolean.toString(true));
         serializer.attribute("", "index", Integer.toString(index));
         serializer.attribute("", "text", safeCharSeqToString(node.getText()));
-        serializer.attribute("", "resource-id", safeCharSeqToString(node.getViewId()));
+        serializer.attribute("", "resource-id", safeCharSeqToString(node.getViewIdResourceName()));
         serializer.attribute("", "class", safeCharSeqToString(node.getClassName()));
         serializer.attribute("", "package", safeCharSeqToString(node.getPackageName()));
         serializer.attribute("", "content-desc", safeCharSeqToString(node.getContentDescription()));
