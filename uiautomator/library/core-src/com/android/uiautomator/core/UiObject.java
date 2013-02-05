@@ -22,7 +22,6 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent.PointerCoords;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
@@ -343,9 +342,7 @@ public class UiObject {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = getVisibleBounds(node);
-        return getInteractionController().clickAndWaitForEvents(rect.centerX(), rect.centerY(),
-                WAIT_FOR_EVENT_TMEOUT, false, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED |
-                AccessibilityEvent.TYPE_VIEW_SELECTED);
+        return getInteractionController().clickAndSync(rect.centerX(), rect.centerY());
     }
 
     /**
@@ -384,8 +381,7 @@ public class UiObject {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = getVisibleBounds(node);
-        return getInteractionController().clickAndWaitForNewWindow(
-                rect.centerX(), rect.centerY(), timeout);
+        return getInteractionController().clickAndWaitForNewWindow(rect.centerX(), rect.centerY());
     }
 
     /**
@@ -402,7 +398,7 @@ public class UiObject {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = getVisibleBounds(node);
-        return getInteractionController().click(rect.left + 5, rect.top + 5);
+        return getInteractionController().clickNoSync(rect.left + 5, rect.top + 5);
     }
 
     /**
@@ -419,7 +415,7 @@ public class UiObject {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = getVisibleBounds(node);
-        return getInteractionController().longTap(rect.right - 5, rect.bottom - 5);
+        return getInteractionController().longTapNoSync(rect.right - 5, rect.bottom - 5);
     }
 
     /**
@@ -436,7 +432,7 @@ public class UiObject {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = getVisibleBounds(node);
-        return getInteractionController().click(rect.right - 5, rect.bottom - 5);
+        return getInteractionController().clickNoSync(rect.right - 5, rect.bottom - 5);
     }
 
     /**
@@ -453,7 +449,7 @@ public class UiObject {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = getVisibleBounds(node);
-        return getInteractionController().longTap(rect.centerX(), rect.centerY());
+        return getInteractionController().longTapNoSync(rect.centerX(), rect.centerY());
     }
 
     /**
@@ -470,7 +466,7 @@ public class UiObject {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = getVisibleBounds(node);
-        return getInteractionController().longTap(rect.left + 5, rect.top + 5);
+        return getInteractionController().longTapNoSync(rect.left + 5, rect.top + 5);
     }
 
     /**
@@ -575,7 +571,7 @@ public class UiObject {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = getVisibleBounds(node);
-        getInteractionController().longTap(rect.left + 20, rect.centerY());
+        getInteractionController().longTapNoSync(rect.left + 20, rect.centerY());
         // check if the edit menu is open
         UiObject selectAll = new UiObject(new UiSelector().descriptionContains("Select all"));
         if(selectAll.waitForExists(50))
