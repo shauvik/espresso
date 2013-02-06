@@ -188,6 +188,42 @@ public class UiObject {
     }
 
     /**
+     * Performs a drag of this object to a destination UiObject. Note that the number of steps
+     * used can influence the drag speed and varying speeds may impact the results. Consider
+     * evaluating different speeds when testing this method.
+     *
+     * @param destObj
+     * @param steps usually 40 steps. More or less to change the speed.
+     * @return true of successful
+     * @throws UiObjectNotFoundException
+     * @since API Level 18
+     */
+    public boolean dragTo(UiObject destObj, int steps) throws UiObjectNotFoundException {
+        Rect srcRect = getVisibleBounds();
+        Rect dstRect = destObj.getVisibleBounds();
+        return getInteractionController().swipe(srcRect.centerX(), srcRect.centerY(),
+                dstRect.centerX(), dstRect.centerY(), steps, true);
+    }
+
+    /**
+     * Performs a drag of this object to arbitrary coordinates. Note that the number of steps
+     * used will influence the drag speed and varying speeds may impact the results. Consider
+     * evaluating different speeds when testing this method.
+     *
+     * @param destX
+     * @param destY
+     * @param steps
+     * @return true of successful
+     * @throws UiObjectNotFoundException
+     * @since API Level 18
+     */
+    public boolean dragTo(int destX, int destY, int steps) throws UiObjectNotFoundException {
+        Rect srcRect = getVisibleBounds();
+        return getInteractionController().swipe(srcRect.centerX(), srcRect.centerY(), destX, destY,
+                steps, true);
+    }
+
+    /**
      * Perform the action on the UI element that is represented by this UiObject. Also see
      * {@link UiScrollable#scrollToBeginning(int)}, {@link UiScrollable#scrollToEnd(int)},
      * {@link UiScrollable#scrollBackward()}, {@link UiScrollable#scrollForward()}.

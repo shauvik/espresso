@@ -403,7 +403,26 @@ public class UiDevice {
     public boolean swipe(int startX, int startY, int endX, int endY, int steps) {
         Tracer.trace(startX, startY, endX, endY, steps);
         return mUiAutomationBridge.getInteractionController()
-                .scrollSwipe(startX, startY, endX, endY, steps);
+                .swipe(startX, startY, endX, endY, steps);
+    }
+
+    /**
+     * Performs a swipe from one coordinate to another using the number of steps
+     * to determine smoothness and speed. Each step execution is throttled to 5ms
+     * per step. So for a 100 steps, the swipe will take about 1/2 second to complete.
+     *
+     * @param startX
+     * @param startY
+     * @param endX
+     * @param endY
+     * @param steps is the number of move steps sent to the system
+     * @return false if the operation fails or the coordinates are invalid
+     * @since API Level 18
+     */
+    public boolean drag(int startX, int startY, int endX, int endY, int steps) {
+        Tracer.trace(startX, startY, endX, endY, steps);
+        return mUiAutomationBridge.getInteractionController()
+                .swipe(startX, startY, endX, endY, steps, true);
     }
 
     /**

@@ -11,6 +11,7 @@ package com.android.uiautomator.core {
   public class UiDevice {
     method public void clearLastTraversedText();
     method public boolean click(int, int);
+    method public boolean drag(int, int, int, int, int);
     method public void dumpWindowHierarchy(java.lang.String);
     method public void freezeRotation() throws android.os.RemoteException;
     method public deprecated java.lang.String getCurrentActivityName();
@@ -67,6 +68,8 @@ package com.android.uiautomator.core {
     method public boolean clickAndWaitForNewWindow(long) throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public boolean clickBottomRight() throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public boolean clickTopLeft() throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method public boolean dragTo(com.android.uiautomator.core.UiObject, int) throws com.android.uiautomator.core.UiObjectNotFoundException;
+    method public boolean dragTo(int, int, int) throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public boolean exists();
     method protected android.view.accessibility.AccessibilityNodeInfo findAccessibilityNodeInfo(long);
     method public android.graphics.Rect getBounds() throws com.android.uiautomator.core.UiObjectNotFoundException;
