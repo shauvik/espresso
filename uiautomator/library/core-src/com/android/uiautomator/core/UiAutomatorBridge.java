@@ -58,14 +58,6 @@ public abstract class UiAutomatorBridge {
         return mQueryController;
     }
 
-    public void connect() {
-        mUiAutomation.connect();
-    }
-
-    public void disconnect() {
-        mUiAutomation.disconnect();
-    }
-
     public void setOnAccessibilityEventListener(OnAccessibilityEventListener listener) {
         mUiAutomation.setOnAccessibilityEventListener(listener);
     }

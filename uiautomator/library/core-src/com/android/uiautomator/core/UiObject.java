@@ -290,7 +290,9 @@ public class UiObject {
         }
 
         // targeted node's bounds
-        Rect nodeRect = AccessibilityNodeInfoHelper.getVisibleBoundsInScreen(node);
+        int w = UiDevice.getInstance().getDisplayWidth();
+        int h = UiDevice.getInstance().getDisplayHeight();
+        Rect nodeRect = AccessibilityNodeInfoHelper.getVisibleBoundsInScreen(node, w, h);
 
         // is the targeted node within a scrollable container?
         AccessibilityNodeInfo scrollableParentNode = getScrollableParent(node);
@@ -301,7 +303,7 @@ public class UiObject {
 
         // Scrollable parent's visible bounds
         Rect parentRect = AccessibilityNodeInfoHelper
-                .getVisibleBoundsInScreen(scrollableParentNode);
+                .getVisibleBoundsInScreen(scrollableParentNode, w, h);
         // adjust for partial clipping of targeted by parent node if required
         nodeRect.intersect(parentRect);
         return nodeRect;

@@ -15,10 +15,7 @@
  */
 package com.android.uiautomator.core;
 
-import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.display.DisplayManagerGlobal;
-import android.view.Display;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
@@ -31,9 +28,11 @@ class AccessibilityNodeInfoHelper {
      * Returns the node's bounds clipped to the size of the display
      *
      * @param node
+     * @param width pixel width of the display
+     * @param height pixel height of the display
      * @return null if node is null, else a Rect containing visible bounds
      */
-    static Rect getVisibleBoundsInScreen(AccessibilityNodeInfo node) {
+    static Rect getVisibleBoundsInScreen(AccessibilityNodeInfo node, int width, int height) {
         if (node == null) {
             return null;
         }
@@ -42,14 +41,10 @@ class AccessibilityNodeInfoHelper {
         node.getBoundsInScreen(nodeRect);
 
         Rect displayRect = new Rect();
-        Display display = DisplayManagerGlobal.getInstance()
-                .getRealDisplay(Display.DEFAULT_DISPLAY);
-        Point outSize = new Point();
-        display.getSize(outSize);
         displayRect.top = 0;
         displayRect.left = 0;
-        displayRect.right = outSize.x;
-        displayRect.bottom = outSize.y;
+        displayRect.right = width;
+        displayRect.bottom = height;
 
         nodeRect.intersect(displayRect);
         return nodeRect;
