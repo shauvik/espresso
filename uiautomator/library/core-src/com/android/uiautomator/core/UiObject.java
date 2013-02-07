@@ -36,7 +36,9 @@ public class UiObject {
     private static final String LOG_TAG = UiObject.class.getSimpleName();
     /**
      * @since API Level 16
+     * @deprecated use {@link Configurator#setWaitForSelectorTimeout(long)}
      **/
+    @Deprecated
     protected static final long WAIT_FOR_SELECTOR_TIMEOUT = 10 * 1000;
     /**
      * @since API Level 16
@@ -53,7 +55,9 @@ public class UiObject {
     protected static final int SWIPE_MARGIN_LIMIT = 5;
     /**
      * @since API Level 17
+     * @deprecated use {@link Configurator#setScrollAcknowledgmentTimeout(long)}
      **/
+    @Deprecated
     protected static final long WAIT_FOR_EVENT_TMEOUT = 3 * 1000;
     /**
      * @since API Level 18
@@ -62,6 +66,8 @@ public class UiObject {
 
     private final UiSelector mSelector;
     private final UiAutomatorBridge mUiAutomationBridge;
+
+    private final Configurator mConfig = Configurator.getInstance();
 
     /**
      * Constructs a UiObject to represent a specific UI element matched by the specified
@@ -145,7 +151,7 @@ public class UiObject {
      */
     public int getChildCount() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -375,12 +381,13 @@ public class UiObject {
      */
     public boolean click() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = getVisibleBounds(node);
-        return getInteractionController().clickAndSync(rect.centerX(), rect.centerY());
+        return getInteractionController().clickAndSync(rect.centerX(), rect.centerY(),
+                mConfig.getActionAcknowledgmentTimeout());
     }
 
     /**
@@ -414,12 +421,13 @@ public class UiObject {
      */
     public boolean clickAndWaitForNewWindow(long timeout) throws UiObjectNotFoundException {
         Tracer.trace(timeout);
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
         Rect rect = getVisibleBounds(node);
-        return getInteractionController().clickAndWaitForNewWindow(rect.centerX(), rect.centerY());
+        return getInteractionController().clickAndWaitForNewWindow(rect.centerX(), rect.centerY(),
+                mConfig.getActionAcknowledgmentTimeout());
     }
 
     /**
@@ -431,7 +439,7 @@ public class UiObject {
      */
     public boolean clickTopLeft() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -448,7 +456,7 @@ public class UiObject {
      */
     public boolean longClickBottomRight() throws UiObjectNotFoundException  {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -465,7 +473,7 @@ public class UiObject {
      */
     public boolean clickBottomRight() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -482,7 +490,7 @@ public class UiObject {
      */
     public boolean longClick() throws UiObjectNotFoundException  {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -499,7 +507,7 @@ public class UiObject {
      */
     public boolean longClickTopLeft() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -516,7 +524,7 @@ public class UiObject {
      */
     public String getText() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -534,7 +542,7 @@ public class UiObject {
      */
     public String getClassName() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -552,7 +560,7 @@ public class UiObject {
      */
     public String getContentDescription() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -604,7 +612,7 @@ public class UiObject {
     public void clearTextField() throws UiObjectNotFoundException {
         Tracer.trace();
         // long click left + center
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -628,7 +636,7 @@ public class UiObject {
      */
     public boolean isChecked() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -644,7 +652,7 @@ public class UiObject {
      */
     public boolean isSelected() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -660,7 +668,7 @@ public class UiObject {
      */
     public boolean isCheckable() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -676,7 +684,7 @@ public class UiObject {
      */
     public boolean isEnabled() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -692,7 +700,7 @@ public class UiObject {
      */
     public boolean isClickable() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -708,7 +716,7 @@ public class UiObject {
      */
     public boolean isFocused() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -724,7 +732,7 @@ public class UiObject {
      */
     public boolean isFocusable() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -740,7 +748,7 @@ public class UiObject {
      */
     public boolean isScrollable() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -756,7 +764,7 @@ public class UiObject {
      */
     public boolean isLongClickable() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -772,7 +780,7 @@ public class UiObject {
      */
     public String getPackageName() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -792,7 +800,7 @@ public class UiObject {
      */
     public Rect getVisibleBounds() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -808,7 +816,7 @@ public class UiObject {
      */
     public Rect getBounds() throws UiObjectNotFoundException {
         Tracer.trace();
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if(node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -906,7 +914,7 @@ public class UiObject {
         percent = (percent < 0) ? 1 : (percent > 100) ? 100 : percent;
         float percentage = percent / 100f;
 
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if (node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }
@@ -943,7 +951,7 @@ public class UiObject {
         percent = (percent < 0) ? 0 : (percent > 100) ? 100 : percent;
         float percentage = percent / 100f;
 
-        AccessibilityNodeInfo node = findAccessibilityNodeInfo(WAIT_FOR_SELECTOR_TIMEOUT);
+        AccessibilityNodeInfo node = findAccessibilityNodeInfo(mConfig.getWaitForSelectorTimeout());
         if (node == null) {
             throw new UiObjectNotFoundException(getSelector().toString());
         }

@@ -50,8 +50,6 @@ import java.util.concurrent.TimeoutException;
 public class UiDevice {
     private static final String LOG_TAG = UiDevice.class.getSimpleName();
 
-    private static final long DEFAULT_TIMEOUT_MILLIS = 10 * 1000;
-
     // Sometimes HOME and BACK key presses will generate no events if already on
     // home page or there is nothing to go back to, Set low timeouts.
     private static final long KEY_PRESS_EVENT_TIMEOUT = 1 * 1000;
@@ -441,7 +439,7 @@ public class UiDevice {
      */
     public void waitForIdle() {
         Tracer.trace();
-        waitForIdle(DEFAULT_TIMEOUT_MILLIS);
+        waitForIdle(Configurator.getInstance().getWaitForIdleTimeout());
     }
 
     /**

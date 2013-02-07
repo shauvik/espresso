@@ -1,5 +1,19 @@
 package com.android.uiautomator.core {
 
+  public final class Configurator {
+    method public long getActionAcknowledgmentTimeout();
+    method public static com.android.uiautomator.core.Configurator getInstance();
+    method public long getKeyInjectionDelay();
+    method public long getScrollAcknowledgmentTimeout();
+    method public long getWaitForIdleTimeout();
+    method public long getWaitForSelectorTimeout();
+    method public com.android.uiautomator.core.Configurator setActionAcknowledgmentTimeout(long);
+    method public com.android.uiautomator.core.Configurator setKeyInjectionDelay(long);
+    method public com.android.uiautomator.core.Configurator setScrollAcknowledgmentTimeout(long);
+    method public com.android.uiautomator.core.Configurator setWaitForIdleTimeout(long);
+    method public com.android.uiautomator.core.Configurator setWaitForSelectorTimeout(long);
+  }
+
   public class UiCollection extends com.android.uiautomator.core.UiObject {
     ctor public UiCollection(com.android.uiautomator.core.UiSelector);
     method public com.android.uiautomator.core.UiObject getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String) throws com.android.uiautomator.core.UiObjectNotFoundException;
@@ -107,9 +121,9 @@ package com.android.uiautomator.core {
     method public boolean waitUntilGone(long);
     field protected static final int FINGER_TOUCH_HALF_WIDTH = 20; // 0x14
     field protected static final int SWIPE_MARGIN_LIMIT = 5; // 0x5
-    field protected static final long WAIT_FOR_EVENT_TMEOUT = 3000L; // 0xbb8L
+    field protected static final deprecated long WAIT_FOR_EVENT_TMEOUT = 3000L; // 0xbb8L
     field protected static final long WAIT_FOR_SELECTOR_POLL = 1000L; // 0x3e8L
-    field protected static final long WAIT_FOR_SELECTOR_TIMEOUT = 10000L; // 0x2710L
+    field protected static final deprecated long WAIT_FOR_SELECTOR_TIMEOUT = 10000L; // 0x2710L
     field protected static final long WAIT_FOR_WINDOW_TMEOUT = 5500L; // 0x157cL
   }
 

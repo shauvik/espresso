@@ -51,10 +51,6 @@ class InteractionController {
 
     private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
 
-    // The events for a scroll typically complete even before touchUp occurs.
-    // This short timeout to make sure we get the very last in cases where the above isn't true.
-    private static final long DEFAULT_SCROLL_EVENT_TIMEOUT_MILLIS = 200;
-
     private final KeyCharacterMap mKeyCharacterMap =
             KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
 
@@ -63,8 +59,6 @@ class InteractionController {
     private static final long REGULAR_CLICK_LENGTH = 100;
 
     private long mDownTime;
-
-    private static final long WAIT_FOR_EVENT_TMEOUT = 3 * 1000;
 
     // Inserted after each motion event injection.
     private static final int MOTION_EVENT_INJECTION_DELAY_MILLIS = 5;
@@ -234,16 +228,17 @@ class InteractionController {
      *
      * @param x
      * @param y
+     * @param timeout waiting for event
      * @return true if events are received, else false if timeout.
      */
-    public boolean clickAndSync(final int x, final int y) {
+    public boolean clickAndSync(final int x, final int y, long timeout) {
 
         String logString = String.format("clickAndSync(%d, %d)", x, y);
         Log.d(LOG_TAG, logString);
 
         return runAndWaitForEvents(clickRunnable(x, y), new WaitForAnyEventPredicate(
                 AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED |
-                AccessibilityEvent.TYPE_VIEW_SELECTED), WAIT_FOR_EVENT_TMEOUT) != null;
+                AccessibilityEvent.TYPE_VIEW_SELECTED), timeout) != null;
     }
 
     /**
@@ -252,15 +247,16 @@ class InteractionController {
      * no further waits will be performed and the function returns.
      * @param x
      * @param y
+     * @param timeout waiting for event
      * @return true if both events occurred in the expected order
      */
-    public boolean clickAndWaitForNewWindow(final int x, final int y) {
+    public boolean clickAndWaitForNewWindow(final int x, final int y, long timeout) {
         String logString = String.format("clickAndWaitForNewWindow(%d, %d)", x, y);
         Log.d(LOG_TAG, logString);
 
         return runAndWaitForEvents(clickRunnable(x, y), new WaitForAllEventPredicate(
                 AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED |
-                AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED), WAIT_FOR_EVENT_TMEOUT) != null;
+                AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED), timeout) != null;
     }
 
     /**
@@ -365,7 +361,7 @@ class InteractionController {
         ArrayList<AccessibilityEvent> events = new ArrayList<AccessibilityEvent>();
         runAndWaitForEvents(command,
                 new EventCollectingPredicate(AccessibilityEvent.TYPE_VIEW_SCROLLED, events),
-                DEFAULT_SCROLL_EVENT_TIMEOUT_MILLIS);
+                Configurator.getInstance().getScrollAcknowledgmentTimeout());
 
         AccessibilityEvent event = getLastMatchingEvent(events,
                 AccessibilityEvent.TYPE_VIEW_SCROLLED);
@@ -525,6 +521,7 @@ class InteractionController {
         KeyEvent[] events = mKeyCharacterMap.getEvents(text.toCharArray());
 
         if (events != null) {
+            long keyDelay = Configurator.getInstance().getKeyInjectionDelay();
             for (KeyEvent event2 : events) {
                 // We have to change the time of an event before injecting it because
                 // all KeyEvents returned by KeyCharacterMap.getEvents() have the same
@@ -536,6 +533,7 @@ class InteractionController {
                 if (!injectEventSync(event)) {
                     return false;
                 }
+                SystemClock.sleep(keyDelay);
             }
         }
         return true;
