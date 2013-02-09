@@ -260,6 +260,9 @@ public class TestRequestBuilder {
                     new ExcludePackageNameFilter("junit"),
                     new ExcludePackageNameFilter("org.junit"),
                     new ExcludePackageNameFilter("org.hamcrest"),
+                    new ExcludePackageNameFilter("org.mockito"),
+                    new ExcludePackageNameFilter("com.android.dx"),
+                    new ExcludePackageNameFilter("com.google.dexmaker"),
                     new ExternalClassNameFilter(),
                     new ExcludePackageNameFilter("com.android.test.runner.junit3")));
         } catch (IOException e) {
