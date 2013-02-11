@@ -424,6 +424,20 @@ class InteractionController {
      * @return true if the swipe executed successfully
      */
     public boolean swipe(int downX, int downY, int upX, int upY, int steps) {
+        return swipe(downX, downY, upX, upY, steps, false /*drag*/);
+    }
+
+    /**
+     * Handle swipes/drags in any direction.
+     * @param downX
+     * @param downY
+     * @param upX
+     * @param upY
+     * @param steps
+     * @param drag when true, the swipe becomes a drag swipe
+     * @return true if the swipe executed successfully
+     */
+    public boolean swipe(int downX, int downY, int upX, int upY, int steps, boolean drag) {
         boolean ret = false;
         int swipeSteps = steps;
         double xStep = 0;
@@ -438,6 +452,8 @@ class InteractionController {
 
         // first touch starts exactly at the point requested
         ret = touchDown(downX, downY);
+        if (drag)
+            SystemClock.sleep(mUiAutomatorBridge.getSystemLongPressTime());
         for(int i = 1; i < swipeSteps; i++) {
             ret &= touchMove(downX + (int)(xStep * i), downY + (int)(yStep * i));
             if(ret == false)
@@ -448,6 +464,8 @@ class InteractionController {
             // a preset delay.
             SystemClock.sleep(MOTION_EVENT_INJECTION_DELAY_MILLIS);
         }
+        if (drag)
+            SystemClock.sleep(REGULAR_CLICK_LENGTH);
         ret &= touchUp(upX, upY);
         return(ret);
     }
