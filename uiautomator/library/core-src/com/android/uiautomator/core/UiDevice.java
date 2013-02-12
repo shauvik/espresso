@@ -17,6 +17,7 @@
 package com.android.uiautomator.core;
 
 import android.app.UiAutomation;
+import android.app.UiAutomation.AccessibilityEventFilter;
 import android.content.Context;
 import android.graphics.Point;
 import android.os.Build;
@@ -33,7 +34,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.util.Predicate;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -762,9 +762,9 @@ public class UiDevice {
             public void run() {
             }
         };
-        Predicate<AccessibilityEvent> checkWindowUpdate = new Predicate<AccessibilityEvent>() {
+        AccessibilityEventFilter checkWindowUpdate = new AccessibilityEventFilter() {
             @Override
-            public boolean apply(AccessibilityEvent t) {
+            public boolean accept(AccessibilityEvent t) {
                 if (t.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
                     return packageName == null || packageName.equals(t.getPackageName());
                 }
