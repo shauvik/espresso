@@ -1,6 +1,7 @@
 package com.android.uiautomator.core;
 
 import android.app.UiAutomation;
+import android.app.UiAutomation.AccessibilityEventFilter;
 import android.app.UiAutomation.OnAccessibilityEventListener;
 import android.graphics.Bitmap;
 import android.util.Log;
@@ -8,8 +9,6 @@ import android.view.Display;
 import android.view.InputEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-
-import com.android.internal.util.Predicate;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -91,7 +90,7 @@ public abstract class UiAutomatorBridge {
     }
 
     public AccessibilityEvent executeCommandAndWaitForAccessibilityEvent(Runnable command,
-            Predicate<AccessibilityEvent> filter, long timeoutMillis) throws TimeoutException {
+            AccessibilityEventFilter filter, long timeoutMillis) throws TimeoutException {
         return mUiAutomation.executeAndWaitForEvent(command,
                 filter, timeoutMillis);
     }

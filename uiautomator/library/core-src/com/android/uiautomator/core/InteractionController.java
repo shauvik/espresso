@@ -17,6 +17,7 @@
 package com.android.uiautomator.core;
 
 import android.app.UiAutomation;
+import android.app.UiAutomation.AccessibilityEventFilter;
 import android.graphics.Point;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -75,13 +76,13 @@ class InteractionController {
     /**
      * Predicate for waiting for any of the events specified in the mask
      */
-    class WaitForAnyEventPredicate implements Predicate<AccessibilityEvent> {
+    class WaitForAnyEventPredicate implements AccessibilityEventFilter {
         int mMask;
         WaitForAnyEventPredicate(int mask) {
             mMask = mask;
         }
         @Override
-        public boolean apply(AccessibilityEvent t) {
+        public boolean accept(AccessibilityEvent t) {
             // check current event in the list
             if ((t.getEventType() & mMask) != 0) {
                 return true;
@@ -97,7 +98,7 @@ class InteractionController {
      * a ctor passed list with matching events. User of this Predicate must recycle
      * all populated events in the events list.
      */
-    class EventCollectingPredicate implements Predicate<AccessibilityEvent> {
+    class EventCollectingPredicate implements AccessibilityEventFilter {
         int mMask;
         List<AccessibilityEvent> mEventsList;
 
@@ -107,7 +108,7 @@ class InteractionController {
         }
 
         @Override
-        public boolean apply(AccessibilityEvent t) {
+        public boolean accept(AccessibilityEvent t) {
             // check current event in the list
             if ((t.getEventType() & mMask) != 0) {
                 // For the events you need, always store a copy when returning false from
@@ -123,14 +124,14 @@ class InteractionController {
     /**
      * Predicate for waiting for every event specified in the mask to be matched at least once
      */
-    class WaitForAllEventPredicate implements Predicate<AccessibilityEvent> {
+    class WaitForAllEventPredicate implements AccessibilityEventFilter {
         int mMask;
         WaitForAllEventPredicate(int mask) {
             mMask = mask;
         }
 
         @Override
-        public boolean apply(AccessibilityEvent t) {
+        public boolean accept(AccessibilityEvent t) {
             // check current event in the list
             if ((t.getEventType() & mMask) != 0) {
                 // remove from mask since this condition is satisfied
@@ -159,7 +160,7 @@ class InteractionController {
      * @return
      */
     private AccessibilityEvent runAndWaitForEvents(Runnable command,
-            Predicate<AccessibilityEvent> filter, long timeout) {
+            AccessibilityEventFilter filter, long timeout) {
 
         try {
             return mUiAutomatorBridge.executeCommandAndWaitForAccessibilityEvent(command, filter,
