@@ -16,6 +16,7 @@
 package com.android.test.runner.junit3;
 
 import android.app.Instrumentation;
+import android.os.Bundle;
 
 import junit.framework.TestCase;
 
@@ -30,9 +31,11 @@ public class AndroidJUnit3Builder extends RunnerBuilder {
 
     private Instrumentation mInstr;
     private boolean mSkipExecution;
+    private final Bundle mBundle;
 
-    public AndroidJUnit3Builder(Instrumentation instr, boolean skipExecution) {
+    public AndroidJUnit3Builder(Instrumentation instr, Bundle bundle, boolean skipExecution) {
         mInstr = instr;
+        mBundle = bundle;
         mSkipExecution = skipExecution;
     }
 
@@ -41,9 +44,11 @@ public class AndroidJUnit3Builder extends RunnerBuilder {
         if (mSkipExecution && isJUnit3TestCase(testClass)) {
             return new NonExecutingJUnit3ClassRunner(testClass);
         } else if (isAndroidTestCase(testClass)) {
-            return new AndroidJUnit3ClassRunner(testClass, mInstr);
+            return new AndroidJUnit3ClassRunner(testClass, mBundle, mInstr);
         } else if (isInstrumentationTestCase(testClass)) {
-            return new AndroidJUnit3ClassRunner(testClass, mInstr);
+            return new AndroidJUnit3ClassRunner(testClass, mBundle, mInstr);
+        } else if (isBundleTest(testClass)) {
+            return new AndroidJUnit3ClassRunner(testClass, mBundle, mInstr);
         }
         return null;
     }
@@ -59,4 +64,9 @@ public class AndroidJUnit3Builder extends RunnerBuilder {
     boolean isInstrumentationTestCase(Class<?> testClass) {
         return android.test.InstrumentationTestCase.class.isAssignableFrom(testClass);
     }
+
+    boolean isBundleTest(Class<?> testClass) {
+       return com.android.test.BundleTest.class.isAssignableFrom(testClass);
+    }
+
 }

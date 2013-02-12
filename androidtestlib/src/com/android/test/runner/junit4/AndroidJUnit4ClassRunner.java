@@ -83,7 +83,7 @@ class AndroidJUnit4ClassRunner extends BlockJUnit4ClassRunner {
         List<FrameworkField> bundleFields = getTestClass().getAnnotatedFields(
                 InjectBundle.class);
         for (FrameworkField bundleField : bundleFields) {
-            validateInjectField(errors, bundleField, Context.class);
+            validateInjectField(errors, bundleField, Bundle.class);
         }
     }
 
