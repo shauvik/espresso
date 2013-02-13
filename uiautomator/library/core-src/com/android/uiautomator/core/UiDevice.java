@@ -91,6 +91,20 @@ public class UiDevice {
     }
 
     /**
+     * Enabled or disabled the compressed layout hierarchy
+     *
+     * Enabling the compressed layout hierarchy, limits the layout hierarchy returned
+     * by accessibility, only to the important nodes to automation, removing unnecessary
+     * surrounding layout nodes that make viewing and searching the hierarchy inefficient.
+     *
+     * @param compressed is true to enabled else false to disable
+     * @since API Level 18
+     */
+    public void setCompressedLayoutHeirarchy(boolean compressed) {
+        mUiAutomationBridge.setCompressedLayoutHierarchy(compressed);
+    }
+
+    /**
      * Retrieves a singleton instance of UiDevice
      *
      * @return UiDevice instance

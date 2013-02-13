@@ -1,5 +1,6 @@
 package com.android.uiautomator.core;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.UiAutomation;
 import android.app.UiAutomationConnection;
 import android.os.HandlerThread;
@@ -35,5 +36,14 @@ public class UiAutomationShellWrapper {
 
     public UiAutomation getUiAutomation() {
         return mUiAutomation;
+    }
+
+    public void setCompressedLayoutHierarchy(boolean compressed) {
+        AccessibilityServiceInfo info = mUiAutomation.getServiceInfo();
+        if (compressed)
+            info.flags &= ~AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+        else
+            info.flags |= AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+        mUiAutomation.setServiceInfo(info);
     }
 }
