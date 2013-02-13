@@ -1,5 +1,6 @@
 package com.android.uiautomator.core;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.UiAutomation;
 import android.app.UiAutomation.AccessibilityEventFilter;
 import android.app.UiAutomation.OnAccessibilityEventListener;
@@ -71,6 +72,15 @@ public abstract class UiAutomatorBridge {
 
     public boolean setRotation(int rotation) {
         return mUiAutomation.setRotation(rotation);
+    }
+
+    public void setCompressedLayoutHierarchy(boolean compressed) {
+        AccessibilityServiceInfo info = mUiAutomation.getServiceInfo();
+        if (compressed)
+            info.flags &= ~AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+        else
+            info.flags |= AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+        mUiAutomation.setServiceInfo(info);
     }
 
     public abstract int getRotation();

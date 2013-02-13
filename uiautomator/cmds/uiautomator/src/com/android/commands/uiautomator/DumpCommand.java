@@ -51,7 +51,8 @@ public class DumpCommand extends Command {
 
     @Override
     public String detailedOptions() {
-        return "    dump [file]\n"
+        return "    dump [--verbose][file]\n"
+            + "      [--verbose]: dumps all layout information.\n"
             + "      [file]: the location where the dumped XML should be stored, default is\n      "
             + DEFAULT_DUMP_FILE.getAbsolutePath() + "\n";
     }
@@ -59,11 +60,25 @@ public class DumpCommand extends Command {
     @Override
     public void run(String[] args) {
         File dumpFile = DEFAULT_DUMP_FILE;
-        if (args.length > 0) {
-            dumpFile = new File(args[0]);
+        boolean verboseMode = false;
+
+        for (String arg : args) {
+            if (arg.equals("--verbose"))
+                verboseMode = true;
+            else if (!arg.startsWith("-")) {
+                dumpFile = new File(arg);
+            }
         }
+
         UiAutomationShellWrapper automationWrapper = new UiAutomationShellWrapper();
         automationWrapper.connect();
+        if (verboseMode) {
+            automationWrapper.setCompressedLayoutHierarchy(false);
+        } else {
+            // default
+            automationWrapper.setCompressedLayoutHierarchy(true);
+        }
+
         // It appears that the bridge needs time to be ready. Making calls to the
         // bridge immediately after connecting seems to cause exceptions. So let's also
         // do a wait for idle in case the app is busy.
