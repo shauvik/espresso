@@ -188,6 +188,8 @@ public class AndroidJUnitRunner extends Instrumentation {
             Debug.waitForDebugger();
         }
 
+        setupDexmaker();
+
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         PrintStream writer = new PrintStream(byteArrayOutputStream);
         List<RunListener> listeners = new ArrayList<RunListener>();
@@ -334,5 +336,12 @@ public class AndroidJUnitRunner extends Instrumentation {
         } else {
             testRequestBuilder.addTestClass(testClassName);
         }
+    }
+
+    private void setupDexmaker() {
+        // Explicitly set the Dexmaker cache, so tests that use mocking frameworks work
+        String dexCache = getTargetContext().getCacheDir().getPath();
+        Log.i(LOG_TAG, "Setting dexmaker.dexcache to " + dexCache);
+        System.setProperty("dexmaker.dexcache", getTargetContext().getCacheDir().getPath());
     }
 }

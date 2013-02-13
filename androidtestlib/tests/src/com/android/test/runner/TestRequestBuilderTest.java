@@ -65,7 +65,6 @@ public class TestRequestBuilderTest {
     @InjectBundle
     public Bundle mBundle;
 
-
     /**
      * Test initial condition for size filtering - that all tests run when no filter is attached
      */
