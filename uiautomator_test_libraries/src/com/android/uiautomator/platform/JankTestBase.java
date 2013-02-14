@@ -44,7 +44,7 @@ public class JankTestBase extends UiAutomatorTestCase {
     protected String mTestCaseName;
     protected int mSuccessTestRuns = 0;
 
-    private final static String TAG = "BasePerformance";
+    private final static String TAG = JankTestBase.class.getSimpleName();
     // holds all params for the derived tests
     private final static String PROPERTY_FILE_NAME = "UiJankinessTests.conf";
     private final static String PARAM_CONFIG = "conf";
