@@ -16,6 +16,7 @@
 package com.android.test.runner;
 
 import android.app.Instrumentation;
+import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -250,13 +251,13 @@ public class TestRequestBuilder {
      * If no classes have been explicitly added, will scan the classpath for all tests.
      *
      */
-    public TestRequest build(Instrumentation instr) {
+    public TestRequest build(Instrumentation instr, Bundle bundle) {
         if (mTestLoader.isEmpty()) {
             // no class restrictions have been specified. Load all classes
             loadClassesFromClassPath();
         }
 
-        Request request = classes(instr, mSkipExecution, new Computer(),
+        Request request = classes(instr, bundle, mSkipExecution, new Computer(),
                 mTestLoader.getLoadedClasses().toArray(new Class[0]));
         return new TestRequest(mTestLoader.getLoadFailures(), request.filterWith(mFilter));
     }
@@ -266,14 +267,17 @@ public class TestRequestBuilder {
      * in a set of classes.
      *
      * @param instr the {@link Instrumentation} to inject into any tests that require it
+     * @param bundle the {@link Bundle} of command line args to inject into any tests that require
+     *         it
      * @param computer Helps construct Runners from classes
      * @param classes the classes containing the tests
      * @return a <code>Request</code> that will cause all tests in the classes to be run
      */
-    private static Request classes(Instrumentation instr, boolean skipExecution,
+    private static Request classes(Instrumentation instr, Bundle bundle, boolean skipExecution,
             Computer computer, Class<?>... classes) {
         try {
-            AndroidRunnerBuilder builder = new AndroidRunnerBuilder(true, instr, skipExecution);
+            AndroidRunnerBuilder builder = new AndroidRunnerBuilder(true, instr, bundle,
+                    skipExecution);
             Runner suite = computer.getSuite(builder, classes);
             return Request.runner(suite);
         } catch (InitializationError e) {

@@ -17,8 +17,10 @@ package com.android.test.runner.junit4;
 
 import android.app.Instrumentation;
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 
+import com.android.test.InjectBundle;
 import com.android.test.InjectContext;
 import com.android.test.InjectInstrumentation;
 
@@ -37,6 +39,7 @@ class AndroidJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
     private static final String LOG_TAG = "AndroidJUnit4ClassRunner";
     private final Instrumentation mInstr;
+    private final Bundle mBundle;
 
     @SuppressWarnings("serial")
     private static class InvalidInjectException extends Exception {
@@ -45,10 +48,11 @@ class AndroidJUnit4ClassRunner extends BlockJUnit4ClassRunner {
         }
     }
 
-    public AndroidJUnit4ClassRunner(Class<?> klass, Instrumentation instr)
+    public AndroidJUnit4ClassRunner(Class<?> klass, Instrumentation instr, Bundle bundle)
             throws InitializationError {
         super(klass);
         mInstr = instr;
+        mBundle = bundle;
     }
 
     @Override
@@ -75,6 +79,11 @@ class AndroidJUnit4ClassRunner extends BlockJUnit4ClassRunner {
                 InjectContext.class);
         for (FrameworkField contextField : contextFields) {
             validateInjectField(errors, contextField, Context.class);
+        }
+        List<FrameworkField> bundleFields = getTestClass().getAnnotatedFields(
+                InjectBundle.class);
+        for (FrameworkField bundleField : bundleFields) {
+            validateInjectField(errors, bundleField, Context.class);
         }
     }
 
@@ -103,6 +112,11 @@ class AndroidJUnit4ClassRunner extends BlockJUnit4ClassRunner {
                 InjectContext.class);
         for (FrameworkField contextField : contextFields) {
             setFieldValue(test, contextField.getField(), mInstr.getTargetContext());
+        }
+        List<FrameworkField> bundleFields = getTestClass().getAnnotatedFields(
+                InjectBundle.class);
+        for (FrameworkField bundleField : bundleFields) {
+            setFieldValue(test, bundleField.getField(), mBundle);
         }
     }
 
