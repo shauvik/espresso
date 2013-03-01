@@ -133,6 +133,7 @@ public class AndroidJUnitRunner extends Instrumentation {
     private static final String ARGUMENT_COVERAGE_PATH = "coverageFile";
     private static final String ARGUMENT_SUITE_ASSIGNMENT = "suiteAssignment";
     private static final String ARGUMENT_DEBUG = "debug";
+    private static final String ARGUMENT_EXTRA_LISTENER = "extraListener";
     // TODO: consider supporting 'count' from InstrumentationTestRunner
 
     private static final String LOG_TAG = "AndroidJUnitRunner";
@@ -232,6 +233,8 @@ public class AndroidJUnitRunner extends Instrumentation {
             addDelayListener(listeners, testRunner);
             addCoverageListener(listeners, testRunner);
         }
+
+        addExtraListeners(listeners, testRunner, writer);
     }
 
     private void addListener(List<RunListener> list, JUnitCore testRunner, RunListener listener) {
@@ -260,6 +263,56 @@ public class AndroidJUnitRunner extends Instrumentation {
         } catch (NumberFormatException e) {
             Log.e(LOG_TAG, "Invalid delay_msec parameter", e);
         }
+    }
+
+    private void addExtraListeners(List<RunListener> listeners, JUnitCore testRunner,
+            PrintStream writer) {
+        String extraListenerList = getArguments().getString(ARGUMENT_EXTRA_LISTENER);
+        if (extraListenerList == null) {
+            return;
+        }
+
+        for (String listenerName : extraListenerList.split(",")) {
+            addExtraListener(listeners, testRunner, writer, listenerName);
+        }
+    }
+
+    private void addExtraListener(List<RunListener> listeners, JUnitCore testRunner,
+            PrintStream writer, String extraListener) {
+        if (extraListener == null || extraListener.length() == 0) {
+            return;
+        }
+
+        final Class<?> klass;
+        try {
+            klass = Class.forName(extraListener);
+        } catch (ClassNotFoundException e) {
+            writer.println("Could not find extra RunListener class " + extraListener);
+            return;
+        }
+
+        if (!RunListener.class.isAssignableFrom(klass)) {
+            writer.println("Extra listeners must extend RunListener class " + extraListener);
+            return;
+        }
+
+        try {
+            klass.getConstructor().setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            writer.println("Must have no argument constructor for class " + extraListener);
+            return;
+        }
+
+        final RunListener l;
+        try {
+            l = (RunListener) klass.newInstance();
+        } catch (Throwable t) {
+            writer.println("Could not instantiate extra RunListener class " + extraListener);
+            t.printStackTrace(writer);
+            return;
+        }
+
+        addListener(listeners, testRunner, l);
     }
 
     private void reportRunEnded(List<RunListener> listeners, PrintStream writer, Bundle results) {
