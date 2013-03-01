@@ -40,6 +40,7 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.regex.Pattern;
 
 /**
  * Builds a {@link Request} from test classes in given apk paths, filtered on provided set of
@@ -110,7 +111,14 @@ public class TestRequestBuilder {
          */
         @Override
         public boolean shouldRun(Description description) {
-            if (description.getTestClass().isAnnotationPresent(mAnnotationClass) ||
+            final Class<?> testClass = description.getTestClass();
+
+            /* Parameterized tests have no test classes. */
+            if (testClass == null) {
+                return true;
+            }
+
+            if (testClass.isAnnotationPresent(mAnnotationClass) ||
                     description.getAnnotation(mAnnotationClass) != null) {
                 return false;
             } else {
@@ -149,9 +157,44 @@ public class TestRequestBuilder {
     public void addTestMethod(String testClassName, String testMethodName) {
         Class<?> clazz = mTestLoader.loadClass(testClassName);
         if (clazz != null) {
-            mFilter = mFilter.intersect(Filter.matchMethodDescription(
+            mFilter = mFilter.intersect(matchParameterizedMethod(
                     Description.createTestDescription(clazz, testMethodName)));
         }
+    }
+
+    /**
+     * A filter to get around the fact that parameterized tests append "[#]" at
+     * the end of the method names. For instance, "getFoo" would become
+     * "getFoo[0]".
+     */
+    private static Filter matchParameterizedMethod(final Description target) {
+        return new Filter() {
+            Pattern pat = Pattern.compile(target.getMethodName() + "(\\[[0-9]+\\])?");
+
+            @Override
+            public boolean shouldRun(Description desc) {
+                if (desc.isTest()) {
+                    return target.getClassName().equals(desc.getClassName())
+                            && isMatch(desc.getMethodName());
+                }
+
+                for (Description child : desc.getChildren()) {
+                    if (shouldRun(child)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            private boolean isMatch(String first) {
+                return pat.matcher(first).matches();
+            }
+
+            @Override
+            public String describe() {
+                return String.format("Method %s", target.getDisplayName());
+            }
+        };
     }
 
     /**
