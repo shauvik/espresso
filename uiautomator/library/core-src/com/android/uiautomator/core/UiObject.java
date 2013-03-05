@@ -168,26 +168,19 @@ public class UiObject {
      */
     protected AccessibilityNodeInfo findAccessibilityNodeInfo(long timeout) {
         AccessibilityNodeInfo node = null;
-        if(UiDevice.getInstance().isInWatcherContext()) {
-            // we will NOT run watchers or do any sort of polling if the
-            // reason we're here is because of a watcher is executing. Watchers
-            // will not have other watchers run for them so they should not block
-            // while they poll for items to become present. We disable polling for them.
+        long startMills = SystemClock.uptimeMillis();
+        long currentMills = 0;
+        while (currentMills <= timeout) {
             node = getQueryController().findAccessibilityNodeInfo(getSelector());
-        } else {
-            long startMills = SystemClock.uptimeMillis();
-            long currentMills = 0;
-            while (currentMills <= timeout) {
-                node = getQueryController().findAccessibilityNodeInfo(getSelector());
-                if (node != null) {
-                    break;
-                } else {
-                    UiDevice.getInstance().runWatchers();
-                }
-                currentMills = SystemClock.uptimeMillis() - startMills;
-                if(timeout > 0) {
-                    SystemClock.sleep(WAIT_FOR_SELECTOR_POLL);
-                }
+            if (node != null) {
+                break;
+            } else {
+                // does nothing if we're reentering another runWatchers()
+                UiDevice.getInstance().runWatchers();
+            }
+            currentMills = SystemClock.uptimeMillis() - startMills;
+            if(timeout > 0) {
+                SystemClock.sleep(WAIT_FOR_SELECTOR_POLL);
             }
         }
         return node;
