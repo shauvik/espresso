@@ -38,6 +38,7 @@ import java.lang.annotation.Target;
  * object construction but before any {@link Before} methods are called.
  * <p/>
  * Declaring this in a JUnit3 test (ie a class that is a {@link Test}) will have no effect.
+ * Use {@link BundleTest} instead.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

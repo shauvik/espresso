@@ -36,7 +36,7 @@ class AndroidRunnerBuilder extends AllDefaultPossibilitiesBuilder {
     public AndroidRunnerBuilder(boolean canUseSuiteMethod, Instrumentation instr, Bundle bundle,
             boolean skipExecution) {
         super(canUseSuiteMethod);
-        mAndroidJUnit3Builder = new AndroidJUnit3Builder(instr, skipExecution);
+        mAndroidJUnit3Builder = new AndroidJUnit3Builder(instr, bundle, skipExecution);
         mAndroidJUnit4Builder = new AndroidJUnit4Builder(instr, bundle, skipExecution);
     }
 

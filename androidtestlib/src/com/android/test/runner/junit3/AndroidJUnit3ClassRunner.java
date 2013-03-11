@@ -16,6 +16,7 @@
 package com.android.test.runner.junit3;
 
 import android.app.Instrumentation;
+import android.os.Bundle;
 
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -27,18 +28,15 @@ import org.junit.internal.runners.JUnit38ClassRunner;
  */
 class AndroidJUnit3ClassRunner extends JUnit38ClassRunner {
 
-    /**
-     * @param klass
-     */
-    public AndroidJUnit3ClassRunner(Class<?> klass, Instrumentation instr) {
-        super(new AndroidTestSuite(klass.asSubclass(TestCase.class), instr));
+    public AndroidJUnit3ClassRunner(Class<?> klass, Bundle bundle, Instrumentation instr) {
+        super(new AndroidTestSuite(klass.asSubclass(TestCase.class), bundle, instr));
     }
 
     @Override
     protected TestSuite createCopyOfSuite(TestSuite s) {
         if (s instanceof AndroidTestSuite) {
             AndroidTestSuite a = (AndroidTestSuite)s;
-            return new AndroidTestSuite(a.getName(), a.getInstrumentation());
+            return new AndroidTestSuite(a.getName(), a.getBundle(), a.getInstrumentation());
         } else {
             return super.createCopyOfSuite(s);
         }
