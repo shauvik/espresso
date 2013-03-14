@@ -39,7 +39,7 @@ public class JankTestBase extends UiAutomatorTestCase {
     protected UiDevice mDevice;
     protected BufferedWriter mWriter = null;
     protected BufferedWriter mStatusWriter = null;
-    protected int mIteration = 1; // default iteration is set 1
+    protected int mIteration = 20; // default iteration is set 20
     protected Bundle mParams;
     protected String mTestCaseName;
     protected int mSuccessTestRuns = 0;
