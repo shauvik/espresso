@@ -240,25 +240,69 @@ public class UiScrollable extends UiCollection {
     public boolean scrollIntoView(UiSelector selector) throws UiObjectNotFoundException {
         Tracer.trace(selector);
         // if we happen to be on top of the text we want then return here
-        if (exists(getSelector().childSelector(selector))) {
+        UiSelector childSelector = getSelector().childSelector(selector);
+        if (exists(childSelector)) {
             return (true);
         } else {
             // we will need to reset the search from the beginning to start search
             scrollToBeginning(mMaxSearchSwipes);
-            if (exists(getSelector().childSelector(selector))) {
+            if (exists(childSelector)) {
                 return (true);
             }
             for (int x = 0; x < mMaxSearchSwipes; x++) {
-                if(!scrollForward()) {
-                    return false;
-                }
-
-                if(exists(getSelector().childSelector(selector))) {
+                boolean scrolled = scrollForward();
+                if(exists(childSelector)) {
                     return true;
+                }
+                if (!scrolled) {
+                    return false;
                 }
             }
         }
         return false;
+    }
+
+    /**
+     * Ensures the child object is fully visible in the scrollable container
+     *
+     * Current implementation may actually scroll the item's edges off screen
+     * Current implementation does not check if the item can fully fit into the display area
+     *
+     * @param childSelector
+     * @return
+     * @throws UiObjectNotFoundException
+     * @hide
+     */
+    public boolean ensureFullyVisible(UiObject childObject) throws UiObjectNotFoundException {
+        Rect actual = childObject.getBounds();
+        Rect visible = childObject.getVisibleBounds();
+        if (visible.width() * visible.height() == actual.width() * actual.height()) {
+            // area match, item fully visible
+            return true;
+        }
+        boolean shouldSwipeForward = false;
+        if (mIsVerticalList) {
+            // if list is vertical, matching top edge implies obscured bottom edge
+            // so we need to scroll list forward
+            shouldSwipeForward = actual.top == visible.top;
+        } else {
+            // if list is horizontal, matching left edge implies obscured right edge,
+            // so we need to scroll list forward
+            shouldSwipeForward = actual.left == visible.left;
+        }
+        if (mIsVerticalList) {
+            if (shouldSwipeForward) {
+                return swipeUp(10);
+            } else {
+                return swipeDown(10);
+            }
+        } else {
+            if (shouldSwipeForward) {
+                return swipeLeft(10);
+            } else {
+                return swipeRight(10);
+            }
+        }
     }
 
     /**
