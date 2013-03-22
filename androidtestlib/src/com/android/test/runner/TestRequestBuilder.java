@@ -80,9 +80,18 @@ public class TestRequestBuilder {
                 return description.getAnnotation(mAnnotationClass) != null ||
                         description.getTestClass().isAnnotationPresent(mAnnotationClass);
             } else {
-                // don't filter out any test classes/suites, because their methods may have correct
-                // annotation
-                return true;
+                // the entire test class/suite should be filtered out if all its methods are
+                // filtered
+                // TODO: This is not efficient since some children may end up being evaluated more
+                // than once. This logic seems to be only necessary for JUnit3 tests. Look into
+                // fixing in upstream
+                for (Description child : description.getChildren()) {
+                    if (shouldRun(child)) {
+                        return true;
+                    }
+                }
+                // no children to run, filter this out
+                return false;
             }
         }
 
