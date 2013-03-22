@@ -22,10 +22,14 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.android.test.InjectBundle;
 import com.android.test.InjectInstrumentation;
 
+import junit.framework.TestCase;
+
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
+import org.junit.runner.notification.RunListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -57,6 +61,16 @@ public class TestRequestBuilderTest {
         @Test
         public void testSmallToo() {
         }
+    }
+
+    public static class SampleNoSize extends TestCase {
+
+        public void testOther() {
+        }
+
+        public void testOther2() {
+        }
+
     }
 
     @InjectInstrumentation
@@ -106,6 +120,31 @@ public class TestRequestBuilderTest {
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(3, result.getRunCount());
+    }
+
+    /**
+     * Test case where entire JUnit3 test class has been filtered out
+     */
+    @Test
+    public void testSize_classFiltered() {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addTestClass(SampleTest.class.getName());
+        b.addTestClass(SampleNoSize.class.getName());
+        b.addTestSizeFilter("small");
+        TestRequest request = b.build(mInstr, mBundle);
+        MyRunListener l = new MyRunListener();
+        JUnitCore testRunner = new JUnitCore();
+        testRunner.addListener(l);
+        testRunner.run(request.getRequest());
+        Assert.assertEquals(1, l.mTestCount);
+    }
+
+    private static class MyRunListener extends RunListener {
+        private int mTestCount = -1;
+
+        public void testRunStarted(Description description) throws Exception {
+            mTestCount = description.testCount();
+        }
     }
 
     /**
