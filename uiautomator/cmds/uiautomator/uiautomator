@@ -101,7 +101,7 @@ if [ "${cmd}" == "runtest" ]; then
       trap "" HUP
       shift
     else
-      args+=("${1}")
+      args="${args} ${1}"
       shift
     fi
   done
