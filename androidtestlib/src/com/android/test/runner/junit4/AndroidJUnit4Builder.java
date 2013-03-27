@@ -56,14 +56,19 @@ public class AndroidJUnit4Builder extends RunnerBuilder {
     private boolean hasInjectedFields(Class<?> testClass) {
         // TODO: evaluate performance of this method, would be nice to utilize the annotation
         // caching mechanism of ParentRunner
-        for (Field field : testClass.getDeclaredFields()) {
-            if (field.isAnnotationPresent(InjectInstrumentation.class)) {
-                return true;
+        Class<?> superClass = testClass;
+        while (superClass != null) {
+            for (Field field : superClass.getDeclaredFields()) {
+                if (field.isAnnotationPresent(InjectInstrumentation.class)) {
+                    return true;
+                }
+                if (field.isAnnotationPresent(InjectContext.class)) {
+                    return true;
+                }
             }
-            if (field.isAnnotationPresent(InjectContext.class)) {
-                return true;
-            }
+            superClass = superClass.getSuperclass();
         }
         return false;
     }
+
 }
