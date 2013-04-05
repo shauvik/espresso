@@ -18,6 +18,7 @@ package com.android.test.runner;
 import android.app.Instrumentation;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.Suppress;
 
 import com.android.test.InjectBundle;
 import com.android.test.InjectInstrumentation;
@@ -69,6 +70,45 @@ public class TestRequestBuilderTest {
         }
 
         public void testOther2() {
+        }
+
+    }
+
+    public static class SampleJUnit3Test extends TestCase {
+
+        @SmallTest
+        public void testSmall() {
+        }
+
+        @SmallTest
+        public void testSmall2() {
+        }
+
+        public void testOther() {
+        }
+    }
+
+    @SmallTest
+    public static class SampleJUnit3ClassSize extends TestCase {
+
+        public void testSmall() {
+        }
+
+        public void testSmall2() {
+        }
+
+    }
+
+    public static class SampleJUnit3Suppressed extends TestCase {
+
+        public void testRun() {
+        }
+
+        public void testRun2() {
+        }
+
+        @Suppress
+        public void testSuppressed() {
         }
 
     }
@@ -144,6 +184,34 @@ public class TestRequestBuilderTest {
         public void testRunStarted(Description description) throws Exception {
             mTestCount = description.testCount();
         }
+    }
+
+    /**
+     * Test size annotations with JUnit3 test methods
+     */
+    @Test
+    public void testSize_junit3Method() {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addTestClass(SampleJUnit3Test.class.getName());
+        b.addTestClass(SampleNoSize.class.getName());
+        b.addTestSizeFilter("small");
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        Result r = testRunner.run(request.getRequest());
+        Assert.assertEquals(2, r.getRunCount());
+    }
+
+    /**
+     * Test @Suppress with JUnit3 tests
+     */
+    @Test
+    public void testSuppress_junit3Method() {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addTestClass(SampleJUnit3Suppressed.class.getName());
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        Result r = testRunner.run(request.getRequest());
+        Assert.assertEquals(2, r.getRunCount());
     }
 
     /**
