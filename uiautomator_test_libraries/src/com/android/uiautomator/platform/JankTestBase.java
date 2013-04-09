@@ -23,28 +23,40 @@ import android.util.Log;
 import com.android.uiautomator.core.UiDevice;
 import com.android.uiautomator.testrunner.UiAutomatorTestCase;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
- * Helper class for jankiness test.
- * All the jank test must extend the JankBaseHelper
+ * Base class for jank test.
+ * All jank test needs to extend JankTestBase
  */
 public class JankTestBase extends UiAutomatorTestCase {
+    private final static String TAG = JankTestBase.class.getSimpleName();
+
     protected UiDevice mDevice;
+    protected TestWatchers mTestWatchers = null;
     protected BufferedWriter mWriter = null;
     protected BufferedWriter mStatusWriter = null;
     protected int mIteration = 20; // default iteration is set 20
+    /* can be used to enable/disable systrace in the test */
+    protected int mTraceTime = 0;
     protected Bundle mParams;
     protected String mTestCaseName;
     protected int mSuccessTestRuns = 0;
+    protected Thread mThread = null;
 
-    private final static String TAG = JankTestBase.class.getSimpleName();
     // holds all params for the derived tests
     private final static String PROPERTY_FILE_NAME = "UiJankinessTests.conf";
     private final static String PARAM_CONFIG = "conf";
@@ -53,8 +65,15 @@ public class JankTestBase extends UiAutomatorTestCase {
     private static String OUTPUT_FILE_NAME = LOCAL_TMP_DIR + "UiJankinessTestsOutput.txt";
     // File that hold test status, e.g successful test iterations
     private static String STATUS_FILE_NAME = LOCAL_TMP_DIR + "UiJankinessTestsStatus.txt";
+    private final static String RAW_DATA_DIR = LOCAL_TMP_DIR + "UiJankinessRawData";
+
     private static int SUCCESS_THRESHOLD = 80;
     private static boolean DEBUG = false;
+
+    /* default animation time is set to 2 seconds */
+    protected final static long DEFAULT_ANIMATION_TIME = 2 * 1000;
+    /* default swipe steps for fling animation */
+    protected final static int DEFAULT_FLING_STEPS = 8;
 
     /* Array to record jankiness data in each test iteration */
     private int[] jankinessArray;
@@ -62,11 +81,96 @@ public class JankTestBase extends UiAutomatorTestCase {
     private double[] frameRateArray;
     /* Array to save max accumulated frame number in each test iteration */
     private int[] maxDeltaVsyncArray;
+    /* Default file to store the systrace */
+    private final static File SYSTRACE_DIR = new File(LOCAL_TMP_DIR, "systrace");
+    /* Default trace file name */
+    private final static String TRACE_FILE_NAME = "trace.txt";
+    /* Default tracing time is 5 seconds */
+    private final static int DEFAULT_TRACE_TIME = 5; // 5 seconds
+    // Command to dump compressed trace data
+    private final static String ATRACE_COMMAND = "atrace -z -t %d gfx input view sched freq";
+
+    /**
+     * Thread to capture systrace log from the test
+     */
+    public class SystraceTracker implements Runnable {
+        File mFile = new File(SYSTRACE_DIR, TRACE_FILE_NAME);
+        int mTime = DEFAULT_TRACE_TIME;
+
+        public SystraceTracker(int traceTime, String fileName) {
+            try {
+                if (!SYSTRACE_DIR.exists()) {
+                    if (!SYSTRACE_DIR.mkdir()) {
+                        log(String.format("create directory %s failed, you can manually create "
+                                + "it and start the test again", SYSTRACE_DIR.getAbsolutePath()));
+                        return;
+                    }
+                }
+            } catch (SecurityException e) {
+                Log.e(TAG, "creating directory failed?", e);
+            }
+
+            if (traceTime > 0) {
+                mTime = traceTime;
+            }
+            if (fileName != null) {
+                mFile = new File(SYSTRACE_DIR, fileName);
+            }
+        }
+
+        @Override
+        public void run() {
+            String command = String.format(ATRACE_COMMAND, mTime);
+            Log.v(TAG, "command: " + command);
+            Process p = null;
+            InputStream in = null;
+            BufferedOutputStream out = null;
+            try {
+                p = Runtime.getRuntime().exec(command);
+                Log.v(TAG, "write systrace into file: " + mFile.getAbsolutePath());
+                // read bytes from the process output stream as the output is compressed
+                byte[] buffer = new byte[1024];
+                in = p.getInputStream();
+                out = new BufferedOutputStream(new FileOutputStream(mFile));
+                int n;
+                while ((n = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, n);
+                    out.flush();
+                }
+                in.close();
+                out.close();
+                // read error message
+                BufferedReader br = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    Log.e(TAG, "Command return errors: " + line);
+                }
+                br.close();
+
+                // Due to limited buffer size for standard input and output stream,
+                // promptly reading from the input stream or output stream to avoid block
+                int status = p.waitFor();
+                if (status != 0) {
+                    Log.e(TAG, String.format("Run shell command: %s, status: %s",
+                            command, status));
+                }
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Exception from command " + command + ":");
+                Log.e(TAG, "Thread interrupted? ", e);
+            } catch (IOException e) {
+                Log.e(TAG, "Open file error: ", e);
+            } catch (IllegalThreadStateException e) {
+                Log.e(TAG, "the process has not exit yet ", e);
+            }
+        }
+    }
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         mDevice = UiDevice.getInstance();
+        mTestWatchers = new TestWatchers(); // extends the common class UiWatchers
+        mTestWatchers.registerAnrAndCrashWatchers();
 
         mWriter = new BufferedWriter(new FileWriter(new File(OUTPUT_FILE_NAME), true));
         mStatusWriter = new BufferedWriter(new FileWriter(new File(STATUS_FILE_NAME), true));
@@ -74,9 +178,13 @@ public class JankTestBase extends UiAutomatorTestCase {
         mParams = getParams();
         if (mParams != null && !mParams.isEmpty()) {
             log("mParams is not empty, get properties.");
-            String mIterationStr;
-            if ((mIterationStr = getPropertyString(mParams, "iteration")) != null) {
+            String mIterationStr = getPropertyString(mParams, "iteration");
+            if (mIterationStr != null) {
                 mIteration = Integer.valueOf(mIterationStr);
+            }
+            String mTraceTimeStr = getPropertyString(mParams, "tracetime");
+            if (mTraceTimeStr  != null) {
+                mTraceTime = Integer.valueOf(mTraceTimeStr);
             }
         }
         jankinessArray = new int[mIteration];
@@ -86,6 +194,33 @@ public class JankTestBase extends UiAutomatorTestCase {
 
         mSuccessTestRuns = 0;
         mDevice.pressHome();
+    }
+
+    /**
+     * Create a new thread for systrace and start the thread
+     *
+     * @param testCaseName
+     * @param iteration
+     */
+    protected void startTrace(String testCaseName, int iteration) {
+        if (mTraceTime > 0) {
+            String outputFile = String.format("%s_%d_trace", mTestCaseName, iteration);
+            mThread = new Thread(new SystraceTracker(mTraceTime, outputFile));
+            mThread.start();
+        }
+    }
+
+    /**
+     * Wait for the tracing thread to exit
+     */
+    protected void endTrace() {
+        if (mThread != null) {
+            try {
+                mThread.join();
+            } catch (InterruptedException e) {
+                Log.e(TAG, "wait for the trace thread to exit exception:", e);
+            }
+        }
     }
 
     /**
@@ -147,6 +282,38 @@ public class JankTestBase extends UiAutomatorTestCase {
      */
     protected void recordResults(String testCaseName, int iteration) {
         long refreshPeriod = SurfaceFlingerHelper.getRefreshPeriod();
+        // if the raw directory doesn't exit, create the directory
+        File rawDataDir = new File(RAW_DATA_DIR);
+        try {
+            if (!rawDataDir.exists()) {
+                if (!rawDataDir.mkdir()) {
+                    log(String.format("create directory %s failed, you can manually create " +
+                            "it and start the test again", rawDataDir));
+                }
+            }
+        } catch (SecurityException e) {
+            Log.e(TAG, "create directory failed: ", e);
+        }
+        String rawFileName = String.format("%s/%s_%d.txt", RAW_DATA_DIR, testCaseName, iteration);
+        // write results into a file
+        BufferedWriter fw = null;
+        try {
+            fw = new BufferedWriter(new FileWriter(new File(rawFileName), false));
+            fw.write(SurfaceFlingerHelper.getFrameBufferData());
+        } catch (IOException e) {
+            Log.e(TAG, "failed to write to file", e);
+            return;
+        } finally {
+            try {
+                if (fw != null) {
+                    fw.close();
+                }
+            }
+            catch (IOException e) {
+                    Log.e(TAG, "close file failed.", e);
+            }
+        }
+
         // get jankiness count
         int jankinessCount = SurfaceFlingerHelper.getVsyncJankiness();
         // get frame rate
@@ -302,5 +469,4 @@ public class JankTestBase extends UiAutomatorTestCase {
    protected int getIteration(){
        return mIteration;
    }
-
 }

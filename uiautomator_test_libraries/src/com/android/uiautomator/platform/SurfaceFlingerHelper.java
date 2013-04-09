@@ -37,8 +37,8 @@ public class SurfaceFlingerHelper {
     private static String TAG = "SurfaceFlingerHelper";
     private static int BUFFER_SIZE = 128;
     private static int BUFFER_NUMBER = 3;
-    private static String CLEAR_BUFFER_CMD = "dumpsys SurfaceFlinger --latency-clear %s";
-    private static String FRAME_LATENCY_CMD = "dumpsys SurfaceFlinger --latency %s";
+    private static String CLEAR_BUFFER_CMD = "dumpsys SurfaceFlinger --latency-clear";
+    private static String FRAME_LATENCY_CMD = "dumpsys SurfaceFlinger --latency";
     private final static String RAW_DATA_DIR = "UiJankinessRawData";
     private final static String LOCAL_TMP_DIR = "/data/local/tmp/";
     /* If the latency between two frames is greater than this number, it it treated as a pause
@@ -66,6 +66,8 @@ public class SurfaceFlingerHelper {
     /* Normalized data */
     private static double[] mNormalizedDelta2Vsync = new double[BUFFER_SIZE];
     private static int[] mRoundNormalizedDelta2Vsync = new int[BUFFER_SIZE];
+    // Symbol of unfinished frame time */
+    public final static String PENDING_FENCE_TIME = new Long(Long.MAX_VALUE).toString();
 
     /**
      * Run clear buffer command and clear the saved frame buffer results
@@ -87,20 +89,21 @@ public class SurfaceFlingerHelper {
 
         Process p = null;
         BufferedReader resultReader = null;
-        String command = String.format(CLEAR_BUFFER_CMD, windowName);
+        String command = CLEAR_BUFFER_CMD;
+        if (windowName != null) {
+            command = String.format("%s %s", CLEAR_BUFFER_CMD, windowName);
+        }
         try {
             p = Runtime.getRuntime().exec(command);
             int status = p.waitFor();
             if (status != 0) {
-                System.err.println(String.format("Run shell command: %s, status: %s",
+                Log.e(TAG, String.format("Run shell command: %s, status: %s",
                         command, status));
             }
         } catch (IOException e) {
-            System.err.println("// Exception from command " + command + ":");
-            System.err.println(e.toString());
+            Log.e(TAG, "// Exception from command " + command + ":", e);
         } catch (InterruptedException e) {
-            System.err.println("// Interrupted while waiting for the command to finish. ");
-            System.err.println(e.toString());
+            Log.e(TAG, "// Interrupted while waiting for the command to finish. ", e);
         } finally {
             try {
                 if (resultReader != null) {
@@ -110,80 +113,81 @@ public class SurfaceFlingerHelper {
                     p.destroy();
                 }
             } catch (IOException e) {
-                System.err.println(e.toString());
+                Log.e(TAG, "exception " + e);
             }
         }
     }
 
     /**
-     * Run frame latency command to get the raw data, save raw data on the disk
+     * Run frame latency command without ignoring pending fence time
      *
-     * @param windowName
-     * @return
+     * @param windowName the window name which SurfaceFlinger will acquire frame time for
      */
-    public static boolean dumpFrameLatency(String windowName, String fileName, int index) {
-        BufferedWriter fw = null;
+    public static boolean dumpFrameLatency(String windowName) {
+        return dumpFrameLatency(windowName, false);
+    }
+
+    /**
+     * Run frame latency command to get frame time
+     *
+     * @param windowName the window name which SurfaceFlinger will get frame time for
+     * @param ignorePendingFenceTime flag to process frames with pending fence time
+     *                              set true to ignore pending fence time
+     *                              set false to fail the test if pending fence time is not allowed
+     */
+    public static boolean dumpFrameLatency(String windowName, boolean ignorePendingFenceTime) {
         Process p = null;
         BufferedReader resultReader = null;
-        String command = String.format(FRAME_LATENCY_CMD, windowName);
-        // if the raw directory doesn't exit, create the directory
-        File rawDataDir = new File(LOCAL_TMP_DIR, RAW_DATA_DIR);
-        try {
-            if (!rawDataDir.exists()) {
-                if (!rawDataDir.mkdir()) {
-                    log(String.format("create directory %s failed, you can manually create " +
-                            "it and start the test again", rawDataDir));
-                    return false;
-                }
-            }
-        } catch (SecurityException e) {
-            System.err.println(e.toString());
+        String command = FRAME_LATENCY_CMD;
+        if (windowName != null) {
+            command = String.format("%s %s", FRAME_LATENCY_CMD, windowName);
         }
-        String rawFileName = String.format("%s/%s_%d.txt", RAW_DATA_DIR, fileName, index);
-
+        log("dump frame latency command: " + command);
         try {
             p = Runtime.getRuntime().exec(command);
             int status = p.waitFor();
             if (status != 0) {
-                System.err.println(String.format("Run shell command: %s, status: %s",
-                        command, status));
+                Log.e(TAG, String.format("Run shell command: %s, status: %s",command, status));
             }
             resultReader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            fw = new BufferedWriter(new FileWriter(new File(
-                    LOCAL_TMP_DIR, rawFileName), false));
-            // The first line will always show the refresh period
             String line = resultReader.readLine();
-            Log.v("testing", "output line = " + line);
-            fw.write(line);
-            fw.write("\n");
             mRefreshPeriod = Long.parseLong(line.trim());
-            //log("reading refresh period: " + mRefreshPeriod);
+            log("reading refresh period: " + mRefreshPeriod);
             if (mRefreshPeriod < 0) {
                 return false;
             }
-
+            boolean dataInvalidFlag = false;
             while((line = resultReader.readLine()) != null) {
-                fw.write(line);
-                fw.write("\n");
-
-                // remove the last line which is empty
+                // remove lines which are empty
                 if (line.trim().isEmpty()) {
                     break;
                 }
                 String[] bufferValues = line.split("\\s+");
                 if (bufferValues[0].trim().compareTo("0") == 0) {
                     continue;
+                } else if (bufferValues[1].trim().compareTo(PENDING_FENCE_TIME) == 0 ) {
+                    if (ignorePendingFenceTime) {
+                        log("ignore pending fence time");
+                        dataInvalidFlag = true;
+                    } else {
+                        log("the data contains unfinished frame time, please allow the animation"
+                            + " to finish in the test before calling dumpFrameLatency.");
+                        return false;
+                    }
                 }
+                // store raw data which could have both valid and invalid data
                 List<String> delayArray = Arrays.asList(bufferValues);
                 mFrameBufferData.add(delayArray);
-                ++mFrameLatencySampleSize;
+                if (!dataInvalidFlag) {
+                    // only count frames which have valid time
+                    ++mFrameLatencySampleSize;
+                }
             }
             log("frame latency sample size: " + mFrameLatencySampleSize);
         } catch (InterruptedException e) {
-            System.err.println("// Exception from command " + command + ":");
-            System.err.println(e.toString());
+            Log.e(TAG, "// Exception from command " + command + ":", e);
         } catch (IOException e) {
-            log("Open file error: " + e.toString());
+            Log.e(TAG, "Open file error: ", e);
             return false;
         }
         finally {
@@ -191,14 +195,11 @@ public class SurfaceFlingerHelper {
                 if (resultReader != null) {
                     resultReader.close();
                 }
-                if (fw != null) {
-                    fw.close();
-                }
                 if (p != null) {
                     p.destroy();
                 }
             } catch (IOException e) {
-                System.err.println(e.toString());
+                Log.e(TAG, "io exception: ", e);
             }
         }
         return true;
@@ -219,12 +220,12 @@ public class SurfaceFlingerHelper {
         }
         String rawData = String.format("%d\n", mRefreshPeriod);
         List<String> tempList = new ArrayList<String>(BUFFER_NUMBER);
-        for (int i = 0; i < mFrameLatencySampleSize; i++) {
+        for (int i = 0; i < mFrameBufferData.size(); i++) {
             tempList = mFrameBufferData.get(i);
             for (int j = 0; j < BUFFER_NUMBER; j++) {
                 rawData += String.format("%s", tempList.get(j));
-                if (j < BUFFER_NUMBER -1) {
-                    rawData += " ";
+                if (j < BUFFER_NUMBER - 1) {
+                    rawData += "\t";
                 } else {
                     rawData += "\n";
                 }
@@ -243,13 +244,12 @@ public class SurfaceFlingerHelper {
             return null;
         }
         if (mDeltaVsync[0] < 0 ) {
-            mDeltaVsync = new long[BUFFER_SIZE];
             // keep a record of the max DeltaVsync
             mMaxDeltaVsync = 0;
             // get the first frame vsync time
             long preVsyncTime = Long.parseLong(mFrameBufferData.get(0).get(1));
-            for (int i = 1; i < mFrameLatencySampleSize; i++) {
-                long curVsyncTime = Long.parseLong(mFrameBufferData.get(i).get(1));
+            for (int i = 0; i < mFrameLatencySampleSize - 1; i++) {
+                long curVsyncTime = Long.parseLong(mFrameBufferData.get(i + 1).get(1));
                 mDeltaVsync[i] = curVsyncTime - preVsyncTime;
                 preVsyncTime = curVsyncTime;
                 if (mMaxDeltaVsync < mDeltaVsync[i]) {
@@ -273,9 +273,9 @@ public class SurfaceFlingerHelper {
             getDeltaVsync();
         }
         if (mDelta2Vsync[0] < 0) {
-            mDelta2Vsync = new long[BUFFER_SIZE];
-            for (int i = 1; i < mFrameLatencySampleSize; i++) {
-                mDelta2Vsync[i] = mDeltaVsync[i] - mDeltaVsync[i - 1];
+            int numDeltaVsync = mFrameLatencySampleSize - 1;
+            for (int i = 0; i < numDeltaVsync - 1; i++) {
+                mDelta2Vsync[i] = mDeltaVsync[i + 1] - mDeltaVsync[i];
             }
         }
         return mDelta2Vsync;
@@ -294,8 +294,7 @@ public class SurfaceFlingerHelper {
             getDelta2Vsync();
         }
         if (mNormalizedDelta2Vsync[0] < 0) {
-            mNormalizedDelta2Vsync = new double[BUFFER_SIZE];
-            for (int i = 0; i < mFrameLatencySampleSize; i++) {
+            for (int i = 0; i < mFrameLatencySampleSize - 2; i++) {
                 mNormalizedDelta2Vsync[i] = (double)mDelta2Vsync[i] /mRefreshPeriod;
             }
         }
@@ -311,7 +310,7 @@ public class SurfaceFlingerHelper {
             getNormalizedDelta2Vsync();
         }
 
-        for (int i = 0; i < mFrameLatencySampleSize; i++) {
+        for (int i = 0; i < mFrameLatencySampleSize - 2; i++) {
              int value = (int)Math.round(Math.max(mNormalizedDelta2Vsync[i], 0.0));
              mRoundNormalizedDelta2Vsync[i] = value;
         }
@@ -330,7 +329,7 @@ public class SurfaceFlingerHelper {
             getRoundNormalizedDelta2Vsync();
         }
         int numberJankiness = 0;
-        for (int i = 0; i < mFrameLatencySampleSize; i++) {
+        for (int i = 0; i < mFrameLatencySampleSize - 2; i++) {
             int value = mRoundNormalizedDelta2Vsync[i];
             // ignore the latency which is too long
             if (value > 0 && value < PAUSE_LATENCY) {
@@ -376,8 +375,7 @@ public class SurfaceFlingerHelper {
         log("write raw data and process data into file: " + rawAndProcDataFileName);
         BufferedWriter fw = null;
         try {
-            fw = new BufferedWriter(new FileWriter(new File(
-                    LOCAL_TMP_DIR, rawAndProcDataFileName), false));
+            fw = new BufferedWriter(new FileWriter(new File(rawAndProcDataFileName), false));
             // Show the number of jankiness first:
             fw.write(String.format("Jankiness count: %d\n", getVsyncJankiness()));
             fw.write(String.format("Max accumulated frames: %d\n", getMaxDeltaVsync()));
@@ -408,7 +406,7 @@ public class SurfaceFlingerHelper {
                 }
             }
             catch (IOException e) {
-                System.err.println(e.toString());
+                Log.e(TAG, "close file exception: ", e);
             }
         }
     }
