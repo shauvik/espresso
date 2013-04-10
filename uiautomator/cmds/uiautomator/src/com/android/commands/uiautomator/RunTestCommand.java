@@ -51,9 +51,10 @@ public class RunTestCommand extends Command {
     private static final int ARG_FAIL_RUNNER = -4;
     private static final int ARG_FAIL_UNSUPPORTED = -99;
 
-    private Bundle mParams = new Bundle();
-    private List<String> mTestClasses = new ArrayList<String>();
+    private final Bundle mParams = new Bundle();
+    private final List<String> mTestClasses = new ArrayList<String>();
     private boolean mDebug;
+    private boolean mMonkey = false;
     private String mRunnerClassName;
     private UiAutomatorTestRunner mRunner;
 
@@ -87,7 +88,7 @@ public class RunTestCommand extends Command {
                 System.exit(ARG_FAIL_NO_CLASS);
             }
         }
-        getRunner().run(mTestClasses, mParams, mDebug);
+        getRunner().run(mTestClasses, mParams, mDebug, mMonkey);
     }
 
     private int parseArgs(String[] args) {
@@ -124,6 +125,8 @@ public class RunTestCommand extends Command {
                 } else {
                     return ARG_FAIL_INCOMPLETE_C;
                 }
+            } else if (args[i].equals("--monkey")) {
+                mMonkey = true;
             } else if (args[i].equals("-s")) {
                 mParams.putString(OUTPUT_FORMAT_KEY, OUTPUT_SIMPLE);
             } else {

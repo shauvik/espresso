@@ -5,6 +5,7 @@ import android.app.UiAutomation;
 import android.app.UiAutomation.AccessibilityEventFilter;
 import android.app.UiAutomation.OnAccessibilityEventListener;
 import android.graphics.Bitmap;
+import android.util.AndroidException;
 import android.util.Log;
 import android.view.Display;
 import android.view.InputEvent;
@@ -56,6 +57,23 @@ public abstract class UiAutomatorBridge {
 
     QueryController getQueryController() {
         return mQueryController;
+    }
+
+    /**
+     * Enable or disable monkey test run mode.
+     *
+     * Setting test as "monkey" indicates to some applications that a test framework is
+     * running and specifically as a "monkey" type. Such applications may choose
+     * then not to perform actions that do submits so to avoid allowing monkey tests
+     * from doing harm or performing annoying actions such as dialing 911 or posting messages
+     * to public forums, etc.
+     *
+     * @param b True to set as monkey test. False to set as regular functional test (default).
+     * @throws AndroidException
+     */
+
+    public void setRunAsMonkey(boolean b) throws AndroidException {
+        mUiAutomation.setRunAsMonkey(b);
     }
 
     public void setOnAccessibilityEventListener(OnAccessibilityEventListener listener) {

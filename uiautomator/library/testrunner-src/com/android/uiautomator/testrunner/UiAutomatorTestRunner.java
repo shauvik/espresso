@@ -33,6 +33,13 @@ import com.android.uiautomator.core.Tracer;
 import com.android.uiautomator.core.UiAutomationShellWrapper;
 import com.android.uiautomator.core.UiDevice;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.lang.Thread.UncaughtExceptionHandler;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -40,13 +47,6 @@ import junit.framework.TestListener;
 import junit.framework.TestResult;
 import junit.runner.BaseTestRunner;
 import junit.textui.ResultPrinter;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @hide
@@ -60,21 +60,22 @@ public class UiAutomatorTestRunner {
     private static final String HANDLER_THREAD_NAME = "UiAutomatorHandlerThread";
 
     private boolean mDebug;
+    private boolean mMonkey;
     private Bundle mParams = null;
     private UiDevice mUiDevice;
     private List<String> mTestClasses = null;
-    private FakeInstrumentationWatcher mWatcher = new FakeInstrumentationWatcher();
-    private IAutomationSupport mAutomationSupport = new IAutomationSupport() {
+    private final FakeInstrumentationWatcher mWatcher = new FakeInstrumentationWatcher();
+    private final IAutomationSupport mAutomationSupport = new IAutomationSupport() {
         @Override
         public void sendStatus(int resultCode, Bundle status) {
             mWatcher.instrumentationStatus(null, resultCode, status);
         }
     };
-    private List<TestListener> mTestListeners = new ArrayList<TestListener>();
+    private final List<TestListener> mTestListeners = new ArrayList<TestListener>();
 
     private HandlerThread mHandlerThread;
 
-    public void run(List<String> testClasses, Bundle params, boolean debug) {
+    public void run(List<String> testClasses, Bundle params, boolean debug, boolean monkey) {
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
@@ -91,6 +92,7 @@ public class UiAutomatorTestRunner {
         mTestClasses = testClasses;
         mParams = params;
         mDebug = debug;
+        mMonkey = monkey;
         start();
         System.exit(EXIT_OK);
     }
@@ -114,6 +116,7 @@ public class UiAutomatorTestRunner {
         mHandlerThread.start();
         UiAutomationShellWrapper automationWrapper = new UiAutomationShellWrapper();
         automationWrapper.connect();
+        automationWrapper.setRunAsMonkey(mMonkey);
         mUiDevice = UiDevice.getInstance();
         mUiDevice.initialize(new ShellUiAutomatorBridge(automationWrapper.getUiAutomation()));
         List<TestCase> testCases = collector.getTestCases();
@@ -163,6 +166,7 @@ public class UiAutomatorTestRunner {
             long runTime = SystemClock.uptimeMillis() - startTime;
             resultPrinter.print(testRunResult, runTime, testRunOutput);
             automationWrapper.disconnect();
+            automationWrapper.setRunAsMonkey(false);
             mHandlerThread.quit();
         }
     }
@@ -170,7 +174,7 @@ public class UiAutomatorTestRunner {
     // copy & pasted from com.android.commands.am.Am
     private class FakeInstrumentationWatcher implements IInstrumentationWatcher {
 
-        private boolean mRawMode = true;
+        private final boolean mRawMode = true;
 
         @Override
         public IBinder asBinder() {
@@ -250,9 +254,9 @@ public class UiAutomatorTestRunner {
         int mTestResultCode = 0;
         String mTestClass = null;
 
-        private SimpleResultPrinter mPrinter;
-        private ByteArrayOutputStream mStream;
-        private PrintStream mWriter;
+        private final SimpleResultPrinter mPrinter;
+        private final ByteArrayOutputStream mStream;
+        private final PrintStream mWriter;
 
         public WatcherResultPrinter(int numTests) {
             mResultTemplate = new Bundle();
@@ -340,6 +344,7 @@ public class UiAutomatorTestRunner {
             mPrinter.endTest(test);
         }
 
+        @Override
         public void print(TestResult result, long runTime, Bundle testOutput) {
             mPrinter.print(result, runTime, testOutput);
             testOutput.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
@@ -350,6 +355,7 @@ public class UiAutomatorTestRunner {
             mAutomationSupport.sendStatus(Activity.RESULT_OK, testOutput);
         }
 
+        @Override
         public void printUnexpectedError(Throwable t) {
             mWriter.println(String.format("Test run aborted due to unexpected exception: %s",
                     t.getMessage()));
@@ -362,12 +368,13 @@ public class UiAutomatorTestRunner {
      * used when default UiAutomator output is too verbose.
      */
     private class SimpleResultPrinter extends ResultPrinter implements ResultReporter {
-        private boolean mFullOutput;
+        private final boolean mFullOutput;
         public SimpleResultPrinter(PrintStream writer, boolean fullOutput) {
             super(writer);
             mFullOutput = fullOutput;
         }
 
+        @Override
         public void print(TestResult result, long runTime, Bundle testOutput) {
             printHeader(runTime);
             if (mFullOutput) {
@@ -377,6 +384,7 @@ public class UiAutomatorTestRunner {
             printFooter(result);
         }
 
+        @Override
         public void printUnexpectedError(Throwable t) {
             if (mFullOutput) {
                 getWriter().printf("Test run aborted due to unexpected exeption: %s",
