@@ -56,6 +56,15 @@ public class UiAutomatorTestCase extends InstrumentationTestCase {
      */
     void initialize(Bundle params) {
         mParams = params;
+
+        // check if this is a monkey test mode
+        String monkeyVal = mParams.getString("monkey");
+        if (monkeyVal != null) {
+            // only if the monkey key is specified, we alter the state of monkey
+            // else we should leave things as they are.
+            getInstrumentation().getUiAutomation().setRunAsMonkey(Boolean.valueOf(monkeyVal));
+        }
+
         UiDevice.getInstance().initialize(new InstrumentationUiAutomatorBridge(
                 getInstrumentation().getContext(),
                 getInstrumentation().getUiAutomation()));
