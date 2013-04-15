@@ -116,37 +116,37 @@ public class UiAutomatorTestRunner {
         mHandlerThread.start();
         UiAutomationShellWrapper automationWrapper = new UiAutomationShellWrapper();
         automationWrapper.connect();
-        automationWrapper.setRunAsMonkey(mMonkey);
-        mUiDevice = UiDevice.getInstance();
-        mUiDevice.initialize(new ShellUiAutomatorBridge(automationWrapper.getUiAutomation()));
-        List<TestCase> testCases = collector.getTestCases();
-        Bundle testRunOutput = new Bundle();
 
-        String traceType = mParams.getString("traceOutputMode");
-        if(traceType != null) {
-            Tracer.Mode mode = Tracer.Mode.valueOf(Tracer.Mode.class, traceType);
-            if (mode == Tracer.Mode.FILE || mode == Tracer.Mode.ALL) {
-                String filename = mParams.getString("traceLogFilename");
-                if (filename == null) {
-                    throw new RuntimeException("Name of log file not specified. " +
-                            "Please specify it using traceLogFilename parameter");
-                }
-                Tracer.getInstance().setOutputFilename(filename);
-            }
-            Tracer.getInstance().setOutputMode(mode);
-        }
-
+        long startTime = SystemClock.uptimeMillis();
         TestResult testRunResult = new TestResult();
         ResultReporter resultPrinter;
         String outputFormat = mParams.getString("outputFormat");
+        List<TestCase> testCases = collector.getTestCases();
+        Bundle testRunOutput = new Bundle();
         if ("simple".equals(outputFormat)) {
             resultPrinter = new SimpleResultPrinter(System.out, true);
         } else {
             resultPrinter = new WatcherResultPrinter(testCases.size());
         }
-
-        long startTime = SystemClock.uptimeMillis();
         try {
+            automationWrapper.setRunAsMonkey(mMonkey);
+            mUiDevice = UiDevice.getInstance();
+            mUiDevice.initialize(new ShellUiAutomatorBridge(automationWrapper.getUiAutomation()));
+
+            String traceType = mParams.getString("traceOutputMode");
+            if(traceType != null) {
+                Tracer.Mode mode = Tracer.Mode.valueOf(Tracer.Mode.class, traceType);
+                if (mode == Tracer.Mode.FILE || mode == Tracer.Mode.ALL) {
+                    String filename = mParams.getString("traceLogFilename");
+                    if (filename == null) {
+                        throw new RuntimeException("Name of log file not specified. " +
+                                "Please specify it using traceLogFilename parameter");
+                    }
+                    Tracer.getInstance().setOutputFilename(filename);
+                }
+                Tracer.getInstance().setOutputMode(mode);
+            }
+
             // add test listeners
             testRunResult.addListener(resultPrinter);
             // add all custom listeners
