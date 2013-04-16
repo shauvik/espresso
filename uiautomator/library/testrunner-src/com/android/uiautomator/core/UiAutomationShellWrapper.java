@@ -2,9 +2,14 @@ package com.android.uiautomator.core;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
+import android.app.IActivityController;
+import android.app.IActivityManager;
 import android.app.UiAutomation;
 import android.app.UiAutomationConnection;
+import android.content.Intent;
 import android.os.HandlerThread;
+import android.os.RemoteException;
 
 /**
  * @hide
@@ -39,7 +44,19 @@ public class UiAutomationShellWrapper {
      * @see {@link ActivityManager#isUserAMonkey()}
      */
     public void setRunAsMonkey(boolean isSet) {
-        mUiAutomation.setRunAsMonkey(isSet);
+        IActivityManager am = ActivityManagerNative.getDefault();
+        if (am == null) {
+            throw new RuntimeException("Can't manage monkey status; is the system running?");
+        }
+        try {
+            if (isSet) {
+                am.setActivityController(new DummyActivityController());
+            } else {
+                am.setActivityController(null);
+            }
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void disconnect() {
@@ -61,5 +78,43 @@ public class UiAutomationShellWrapper {
         else
             info.flags |= AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
         mUiAutomation.setServiceInfo(info);
+    }
+
+    /**
+     * Dummy, no interference, activity controller.
+     */
+    private class DummyActivityController extends IActivityController.Stub {
+        @Override
+        public boolean activityStarting(Intent intent, String pkg) throws RemoteException {
+            /* do nothing and let activity proceed normally */
+            return true;
+        }
+
+        @Override
+        public boolean activityResuming(String pkg) throws RemoteException {
+            /* do nothing and let activity proceed normally */
+            return true;
+        }
+
+        @Override
+        public boolean appCrashed(String processName, int pid, String shortMsg, String longMsg,
+                long timeMillis, String stackTrace) throws RemoteException {
+            /* do nothing and let activity proceed normally */
+            return true;
+        }
+
+        @Override
+        public int appEarlyNotResponding(String processName, int pid, String annotation)
+                throws RemoteException {
+            /* do nothing and let activity proceed normally */
+            return 0;
+        }
+
+        @Override
+        public int appNotResponding(String processName, int pid, String processStats)
+                throws RemoteException {
+            /* do nothing and let activity proceed normally */
+            return 0;
+        }
     }
 }
