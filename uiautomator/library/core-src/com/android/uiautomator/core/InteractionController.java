@@ -16,6 +16,7 @@
 
 package com.android.uiautomator.core;
 
+import android.accessibilityservice.AccessibilityService;
 import android.app.UiAutomation;
 import android.app.UiAutomation.AccessibilityEventFilter;
 import android.graphics.Point;
@@ -753,5 +754,9 @@ class InteractionController {
         event = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(), MotionEvent.ACTION_UP, 1,
                 properties, pointerCoords, 0, 0, 1, 1, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
         injectEventSync(event);
+    }
+
+    public boolean toggleRecentApps() {
+        return mUiAutomatorBridge.performGlobalAction(AccessibilityService.GLOBAL_ACTION_RECENTS);
     }
 }
