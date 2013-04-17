@@ -23,7 +23,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, testrunner-src) \
     $(call all-java-files-under, ../library/core-src)
 LOCAL_JAVA_LIBRARIES := android.test.runner
 LOCAL_MODULE := uiautomator-instrumentation
-# below to be uncommented once core-src is using public API only
-#LOCAL_SDK_VERSION := current
+# TODO: change this to 18 when it's available
+LOCAL_SDK_VERSION := current
 
 include $(BUILD_STATIC_JAVA_LIBRARY)

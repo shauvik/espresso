@@ -18,12 +18,10 @@ package com.android.uiautomator.core;
 
 import android.app.UiAutomation;
 import android.app.UiAutomation.AccessibilityEventFilter;
-import android.content.Context;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Environment;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -32,8 +30,6 @@ import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-
-import com.android.internal.statusbar.IStatusBarService;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -340,14 +336,7 @@ public class UiDevice {
     public boolean pressRecentApps() throws RemoteException {
         Tracer.trace();
         waitForIdle();
-        final IStatusBarService statusBar = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-
-        if (statusBar != null) {
-            statusBar.toggleRecentApps();
-            return true;
-        }
-        return false;
+        return getAutomatorBridge().getInteractionController().toggleRecentApps();
     }
 
     /**
