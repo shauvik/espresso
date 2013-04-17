@@ -133,6 +133,10 @@ public abstract class UiAutomatorBridge {
         return true;
     }
 
+    public boolean performGlobalAction(int action) {
+        return mUiAutomation.performGlobalAction(action);
+    }
+
     public abstract Display getDefaultDisplay();
 
     public abstract long getSystemLongPressTime();
