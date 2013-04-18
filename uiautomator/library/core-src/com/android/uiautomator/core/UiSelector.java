@@ -787,13 +787,13 @@ public class UiSelector {
         int currentSelectorInstance = 0;
 
         // matched attributes - now check for matching instance number
-        if(mSelectorAttributes.indexOfKey(UiSelector.SELECTOR_INSTANCE) > 0) {
+        if(mSelectorAttributes.indexOfKey(UiSelector.SELECTOR_INSTANCE) >= 0) {
             currentSelectorInstance =
                     (Integer)mSelectorAttributes.get(UiSelector.SELECTOR_INSTANCE);
         }
 
         // instance is required. Add count if not already counting
-        if(mSelectorAttributes.indexOfKey(UiSelector.SELECTOR_COUNT) > 0) {
+        if(mSelectorAttributes.indexOfKey(UiSelector.SELECTOR_COUNT) >= 0) {
             currentSelectorCounter = (Integer)mSelectorAttributes.get(UiSelector.SELECTOR_COUNT);
         }
 
