@@ -186,10 +186,11 @@ public class UiDevice {
      */
     public boolean pressMenu() {
         Tracer.trace();
-        waitForIdle();
-        return mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
+        boolean ret = mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
                 KeyEvent.KEYCODE_MENU, 0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
                 KEY_PRESS_EVENT_TIMEOUT);
+        waitForIdle();
+        return ret;
     }
 
     /**
@@ -199,10 +200,11 @@ public class UiDevice {
      */
     public boolean pressBack() {
         Tracer.trace();
-        waitForIdle();
-        return mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
+        boolean ret = mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
                 KeyEvent.KEYCODE_BACK, 0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
                 KEY_PRESS_EVENT_TIMEOUT);
+        waitForIdle();
+        return ret;
     }
 
     /**
@@ -212,10 +214,11 @@ public class UiDevice {
      */
     public boolean pressHome() {
         Tracer.trace();
-        waitForIdle();
-        return mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
+        boolean ret = mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
                 KeyEvent.KEYCODE_HOME, 0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
                 KEY_PRESS_EVENT_TIMEOUT);
+        waitForIdle();
+        return ret;
     }
 
     /**
@@ -307,8 +310,9 @@ public class UiDevice {
      */
     public boolean pressKeyCode(int keyCode) {
         Tracer.trace(keyCode);
+        boolean ret = mUiAutomationBridge.getInteractionController().sendKey(keyCode, 0);
         waitForIdle();
-        return mUiAutomationBridge.getInteractionController().sendKey(keyCode, 0);
+        return ret;
     }
 
     /**
@@ -322,8 +326,9 @@ public class UiDevice {
      */
     public boolean pressKeyCode(int keyCode, int metaState) {
         Tracer.trace(keyCode, metaState);
+        boolean ret = mUiAutomationBridge.getInteractionController().sendKey(keyCode, metaState);
         waitForIdle();
-        return mUiAutomationBridge.getInteractionController().sendKey(keyCode, metaState);
+        return ret;
     }
 
     /**
@@ -335,8 +340,35 @@ public class UiDevice {
      */
     public boolean pressRecentApps() throws RemoteException {
         Tracer.trace();
+        boolean ret = getAutomatorBridge().getInteractionController().toggleRecentApps();
         waitForIdle();
-        return getAutomatorBridge().getInteractionController().toggleRecentApps();
+        return ret;
+    }
+
+    /**
+     * Opens the notification shade
+     *
+     * @return true if successful, else return false
+     * @since API Level 18
+     */
+    public boolean openNotification() {
+        Tracer.trace();
+        boolean ret =  getAutomatorBridge().getInteractionController().openNotification();
+        waitForIdle();
+        return ret;
+    }
+
+    /**
+     * Opens the quick settings shade
+     *
+     * @return true if successful, else return false
+     * @since API Level 18
+     */
+    public boolean openQuickSettings() {
+        Tracer.trace();
+        boolean ret = getAutomatorBridge().getInteractionController().openQuickSettings();
+        waitForIdle();
+        return ret;
     }
 
     /**
@@ -644,6 +676,7 @@ public class UiDevice {
     public void setOrientationLeft() throws RemoteException {
         Tracer.trace();
         getAutomatorBridge().getInteractionController().setRotationLeft();
+        waitForIdle();
     }
 
     /**
@@ -658,6 +691,7 @@ public class UiDevice {
     public void setOrientationRight() throws RemoteException {
         Tracer.trace();
         getAutomatorBridge().getInteractionController().setRotationRight();
+        waitForIdle();
     }
 
     /**
@@ -672,6 +706,7 @@ public class UiDevice {
     public void setOrientationNatural() throws RemoteException {
         Tracer.trace();
         getAutomatorBridge().getInteractionController().setRotationNatural();
+        waitForIdle();
     }
 
     /**
