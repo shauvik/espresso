@@ -43,7 +43,7 @@ import java.util.Properties;
  * All jank test needs to extend JankTestBase
  */
 public class JankTestBase extends UiAutomatorTestCase {
-    private final static String TAG = JankTestBase.class.getSimpleName();
+    private static final String TAG = JankTestBase.class.getSimpleName();
 
     protected UiDevice mDevice;
     protected TestWatchers mTestWatchers = null;
@@ -58,22 +58,22 @@ public class JankTestBase extends UiAutomatorTestCase {
     protected Thread mThread = null;
 
     // holds all params for the derived tests
-    private final static String PROPERTY_FILE_NAME = "UiJankinessTests.conf";
-    private final static String PARAM_CONFIG = "conf";
-    private final static String LOCAL_TMP_DIR = "/data/local/tmp/";
+    private static final String PROPERTY_FILE_NAME = "UiJankinessTests.conf";
+    private static final String PARAM_CONFIG = "conf";
+    private static final String LOCAL_TMP_DIR = "/data/local/tmp/";
     // File that hold the test results
     private static String OUTPUT_FILE_NAME = LOCAL_TMP_DIR + "UiJankinessTestsOutput.txt";
     // File that hold test status, e.g successful test iterations
     private static String STATUS_FILE_NAME = LOCAL_TMP_DIR + "UiJankinessTestsStatus.txt";
-    private final static String RAW_DATA_DIR = LOCAL_TMP_DIR + "UiJankinessRawData";
+    private static final String RAW_DATA_DIR = LOCAL_TMP_DIR + "UiJankinessRawData";
 
     private static int SUCCESS_THRESHOLD = 80;
     private static boolean DEBUG = false;
 
     /* default animation time is set to 2 seconds */
-    protected final static long DEFAULT_ANIMATION_TIME = 2 * 1000;
+    protected static final long DEFAULT_ANIMATION_TIME = 2 * 1000;
     /* default swipe steps for fling animation */
-    protected final static int DEFAULT_FLING_STEPS = 8;
+    protected static final int DEFAULT_FLING_STEPS = 8;
 
     /* Array to record jankiness data in each test iteration */
     private int[] jankinessArray;
@@ -82,13 +82,13 @@ public class JankTestBase extends UiAutomatorTestCase {
     /* Array to save max accumulated frame number in each test iteration */
     private int[] maxDeltaVsyncArray;
     /* Default file to store the systrace */
-    private final static File SYSTRACE_DIR = new File(LOCAL_TMP_DIR, "systrace");
+    private static final File SYSTRACE_DIR = new File(LOCAL_TMP_DIR, "systrace");
     /* Default trace file name */
-    private final static String TRACE_FILE_NAME = "trace.txt";
+    private static final String TRACE_FILE_NAME = "trace.txt";
     /* Default tracing time is 5 seconds */
-    private final static int DEFAULT_TRACE_TIME = 5; // 5 seconds
+    private static final int DEFAULT_TRACE_TIME = 5; // 5 seconds
     // Command to dump compressed trace data
-    private final static String ATRACE_COMMAND = "atrace -z -t %d gfx input view sched freq";
+    private static final String ATRACE_COMMAND = "atrace -z -t %d gfx input view sched freq";
 
     /**
      * Thread to capture systrace log from the test
@@ -273,6 +273,15 @@ public class JankTestBase extends UiAutomatorTestCase {
         if (value != null && !value.trim().isEmpty())
             return Long.valueOf(value.trim());
         return 0;
+    }
+
+    /**
+     * Verify the test result by comparing data sample size with expected value
+     * @param expectedDataSize the expected data size
+     */
+    protected boolean validateResults(int expectedDataSize) {
+        int receivedDataSize = SurfaceFlingerHelper.getDataSampleSize();
+        return ((expectedDataSize > 0) && (receivedDataSize >= expectedDataSize));
     }
 
     /**
