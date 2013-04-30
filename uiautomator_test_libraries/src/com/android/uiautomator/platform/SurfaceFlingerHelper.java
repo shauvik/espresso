@@ -39,11 +39,11 @@ public class SurfaceFlingerHelper {
     private static int BUFFER_NUMBER = 3;
     private static String CLEAR_BUFFER_CMD = "dumpsys SurfaceFlinger --latency-clear";
     private static String FRAME_LATENCY_CMD = "dumpsys SurfaceFlinger --latency";
-    private final static String RAW_DATA_DIR = "UiJankinessRawData";
-    private final static String LOCAL_TMP_DIR = "/data/local/tmp/";
+    private static final String RAW_DATA_DIR = "UiJankinessRawData";
+    private static final String LOCAL_TMP_DIR = "/data/local/tmp/";
     /* If the latency between two frames is greater than this number, it it treated as a pause
      * not a jankiness */
-    private final static int PAUSE_LATENCY = 20;
+    private static final int PAUSE_LATENCY = 20;
 
     /* An array list which includes the raw buffer information from frame latency tool */
     private static List<List<String>> mFrameBufferData = new ArrayList<List<String>>(BUFFER_SIZE);
@@ -67,7 +67,7 @@ public class SurfaceFlingerHelper {
     private static double[] mNormalizedDelta2Vsync = new double[BUFFER_SIZE];
     private static int[] mRoundNormalizedDelta2Vsync = new int[BUFFER_SIZE];
     // Symbol of unfinished frame time */
-    public final static String PENDING_FENCE_TIME = new Long(Long.MAX_VALUE).toString();
+    public static final String PENDING_FENCE_TIME = new Long(Long.MAX_VALUE).toString();
 
     /**
      * Run clear buffer command and clear the saved frame buffer results
@@ -203,6 +203,10 @@ public class SurfaceFlingerHelper {
             }
         }
         return true;
+    }
+
+    public static int getDataSampleSize() {
+        return mFrameLatencySampleSize;
     }
 
     public static long getRefreshPeriod() {
