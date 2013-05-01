@@ -756,7 +756,36 @@ class InteractionController {
         injectEventSync(event);
     }
 
+    /**
+     * Simulates a short press on the Recent Apps button.
+     *
+     * @return true if successful, else return false
+     * @since API Level 18
+     */
     public boolean toggleRecentApps() {
-        return mUiAutomatorBridge.performGlobalAction(AccessibilityService.GLOBAL_ACTION_RECENTS);
+        return mUiAutomatorBridge.performGlobalAction(
+                AccessibilityService.GLOBAL_ACTION_RECENTS);
+    }
+
+    /**
+     * Opens the notification shade
+     *
+     * @return true if successful, else return false
+     * @since API Level 18
+     */
+    public boolean openNotification() {
+        return mUiAutomatorBridge.performGlobalAction(
+                AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS);
+    }
+
+    /**
+     * Opens the quick settings shade
+     *
+     * @return true if successful, else return false
+     * @since API Level 18
+     */
+    public boolean openQuickSettings() {
+        return mUiAutomatorBridge.performGlobalAction(
+                AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS);
     }
 }
