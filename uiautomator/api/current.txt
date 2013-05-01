@@ -41,6 +41,8 @@ package com.android.uiautomator.core {
     method public boolean hasWatcherTriggered(java.lang.String);
     method public boolean isNaturalOrientation();
     method public boolean isScreenOn() throws android.os.RemoteException;
+    method public boolean openNotification();
+    method public boolean openQuickSettings();
     method public boolean pressBack();
     method public boolean pressDPadCenter();
     method public boolean pressDPadDown();
