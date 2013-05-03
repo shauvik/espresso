@@ -16,6 +16,7 @@
 
 package com.android.uiautomator.testrunner;
 
+import android.app.Instrumentation;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.test.InstrumentationTestCase;
@@ -29,6 +30,7 @@ import com.android.uiautomator.core.UiDevice;
 public class UiAutomatorTestCase extends InstrumentationTestCase {
 
     private Bundle mParams;
+    private IAutomationSupport mAutomationSupport;
 
     /**
      * Get current instance of {@link UiDevice}. Works similar to calling the static
@@ -47,6 +49,24 @@ public class UiAutomatorTestCase extends InstrumentationTestCase {
      */
     public Bundle getParams() {
         return mParams;
+    }
+
+    void setAutomationSupport(IAutomationSupport automationSupport) {
+        mAutomationSupport = automationSupport;
+    }
+
+    /**
+     * Provides support for running tests to report interim status
+     *
+     * @return IAutomationSupport
+     * @since API Level 16
+     * @deprecated Use {@link Instrumentation#sendStatus(int, Bundle)} instead
+     */
+    public IAutomationSupport getAutomationSupport() {
+        if (mAutomationSupport == null) {
+            mAutomationSupport = new InstrumentationAutomationSupport(getInstrumentation());
+        }
+        return mAutomationSupport;
     }
 
     /**
