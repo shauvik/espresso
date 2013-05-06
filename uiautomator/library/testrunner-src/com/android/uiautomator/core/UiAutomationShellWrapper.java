@@ -116,5 +116,12 @@ public class UiAutomationShellWrapper {
             /* do nothing and let activity proceed normally */
             return 0;
         }
+
+        @Override
+        public int systemNotResponding(String message)
+                throws RemoteException {
+            /* do nothing and let system proceed normally */
+            return 0;
+        }
     }
 }
