@@ -42,8 +42,7 @@ LOCAL_DROIDDOC_HTML_DIR :=
 LOCAL_DROIDDOC_OPTIONS:= \
     -stubs $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_uiautomator_intermediates/src \
     -stubpackages com.android.uiautomator.core:com.android.uiautomator.testrunner \
-    -api $(uiautomator_internal_api_file) \
-    -nodocs
+    -api $(uiautomator_internal_api_file)
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR := build/tools/droiddoc/templates-sdk
 LOCAL_UNINSTALLABLE_MODULE := true
