@@ -189,6 +189,7 @@ package com.android.uiautomator.core {
     method public com.android.uiautomator.core.UiSelector packageName(java.lang.String);
     method public com.android.uiautomator.core.UiSelector packageNameMatches(java.lang.String);
     method public com.android.uiautomator.core.UiSelector resourceId(java.lang.String);
+    method public com.android.uiautomator.core.UiSelector resourceIdMatches(java.lang.String);
     method public com.android.uiautomator.core.UiSelector scrollable(boolean);
     method public com.android.uiautomator.core.UiSelector selected(boolean);
     method public com.android.uiautomator.core.UiSelector text(java.lang.String);
