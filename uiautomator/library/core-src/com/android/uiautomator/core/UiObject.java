@@ -899,10 +899,12 @@ public class UiObject {
      * @param percent of the object's diagonal length to use for the pinch
      * @param steps indicates the number of injected move steps into the system. Steps are
      * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
+     * @return <code>true</code> if all touch events for this gesture are injected successfully,
+     *          <code>false</code> otherwise
      * @throws UiObjectNotFoundException
      * @since API Level 18
      */
-    public void pinchOut(int percent, int steps) throws UiObjectNotFoundException {
+    public boolean pinchOut(int percent, int steps) throws UiObjectNotFoundException {
         // make value between 1 and 100
         percent = (percent < 0) ? 1 : (percent > 100) ? 100 : percent;
         float percentage = percent / 100f;
@@ -926,7 +928,7 @@ public class UiObject {
         Point endPoint2 = new Point(rect.centerX() + (int)((rect.width()/2) * percentage),
                 rect.centerY());
 
-        twoPointerGesture(startPoint1, startPoint2, endPoint1, endPoint2, steps);
+        return performTwoPointerGesture(startPoint1, startPoint2, endPoint1, endPoint2, steps);
     }
 
     /**
@@ -936,10 +938,12 @@ public class UiObject {
      * @param percent of the object's diagonal length to use for the pinch
      * @param steps indicates the number of injected move steps into the system. Steps are
      * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
+     * @return <code>true</code> if all touch events for this gesture are injected successfully,
+     *          <code>false</code> otherwise
      * @throws UiObjectNotFoundException
      * @since API Level 18
      */
-    public void pinchIn(int percent, int steps) throws UiObjectNotFoundException {
+    public boolean pinchIn(int percent, int steps) throws UiObjectNotFoundException {
         // make value between 1 and 100
         percent = (percent < 0) ? 0 : (percent > 100) ? 100 : percent;
         float percentage = percent / 100f;
@@ -961,7 +965,7 @@ public class UiObject {
         Point endPoint1 = new Point(rect.centerX() - FINGER_TOUCH_HALF_WIDTH, rect.centerY());
         Point endPoint2 = new Point(rect.centerX() + FINGER_TOUCH_HALF_WIDTH, rect.centerY());
 
-        twoPointerGesture(startPoint1, startPoint2, endPoint1, endPoint2, steps);
+        return performTwoPointerGesture(startPoint1, startPoint2, endPoint1, endPoint2, steps);
     }
 
     /**
@@ -973,9 +977,11 @@ public class UiObject {
      * @param endPoint2 end point of pointer 2
      * @param steps indicates the number of injected move steps into the system. Steps are
      * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
+     * @return <code>true</code> if all touch events for this gesture are injected successfully,
+     *          <code>false</code> otherwise
      * @since API Level 18
      */
-    public void twoPointerGesture(Point startPoint1, Point startPoint2, Point endPoint1,
+    public boolean performTwoPointerGesture(Point startPoint1, Point startPoint2, Point endPoint1,
             Point endPoint2, int steps) {
 
         // avoid a divide by zero
@@ -1034,7 +1040,7 @@ public class UiObject {
         p2.size = 1;
         points2[steps + 1] = p2;
 
-        multiPointerGesture(points1, points2);
+        return performMultiPointerGesture(points1, points2);
     }
 
     /**
@@ -1057,9 +1063,11 @@ public class UiObject {
      * @param touches each array of {@link PointerCoords} constitute a single pointer's touch path.
      *        Multiple {@link PointerCoords} arrays constitute multiple pointers, each with its own
      *        path. Each {@link PointerCoords} in an array constitute a point on a pointer's path.
+     * @return <code>true</code> if all touch events for this gesture are injected successfully,
+     *          <code>false</code> otherwise
      * @since API Level 18
      */
-    public void multiPointerGesture(PointerCoords[] ...touches) {
-        getInteractionController().generateMultiPointerGesture(touches);
+    public boolean performMultiPointerGesture(PointerCoords[] ...touches) {
+        return getInteractionController().performMultiPointerGesture(touches);
     }
 }

@@ -679,9 +679,12 @@ class InteractionController {
      * @param touches each array of {@link PointerCoords} constitute a single pointer's touch path.
      *        Multiple {@link PointerCoords} arrays constitute multiple pointers, each with its own
      *        path. Each {@link PointerCoords} in an array constitute a point on a pointer's path.
+     * @return <code>true</code> if all points on all paths are injected successfully, <code>false
+     *        </code>otherwise
      * @since API Level 18
      */
-    public void generateMultiPointerGesture(PointerCoords[] ... touches) {
+    public boolean performMultiPointerGesture(PointerCoords[] ... touches) {
+        boolean ret = true;
         if (touches.length < 2) {
             throw new IllegalArgumentException("Must provide coordinates for at least 2 pointers");
         }
@@ -709,13 +712,13 @@ class InteractionController {
         MotionEvent event;
         event = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(), MotionEvent.ACTION_DOWN, 1,
                 properties, pointerCoords, 0, 0, 1, 1, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
-        injectEventSync(event);
+        ret &= injectEventSync(event);
 
         for (int x = 1; x < touches.length; x++) {
             event = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(),
                     getPointerAction(MotionEvent.ACTION_POINTER_DOWN, x), x + 1, properties,
                     pointerCoords, 0, 0, 1, 1, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
-            injectEventSync(event);
+            ret &= injectEventSync(event);
         }
 
         // Move all pointers
@@ -733,7 +736,7 @@ class InteractionController {
                     MotionEvent.ACTION_MOVE, touches.length, properties, pointerCoords, 0, 0, 1, 1,
                     0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
 
-            injectEventSync(event);
+            ret &= injectEventSync(event);
             SystemClock.sleep(MOTION_EVENT_INJECTION_DELAY_MILLIS);
         }
 
@@ -746,14 +749,15 @@ class InteractionController {
             event = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(),
                     getPointerAction(MotionEvent.ACTION_POINTER_UP, x), x + 1, properties,
                     pointerCoords, 0, 0, 1, 1, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
-            injectEventSync(event);
+            ret &= injectEventSync(event);
         }
 
         Log.i(LOG_TAG, "x " + pointerCoords[0].x);
         // first to touch down is last up
         event = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(), MotionEvent.ACTION_UP, 1,
                 properties, pointerCoords, 0, 0, 1, 1, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
-        injectEventSync(event);
+        ret &= injectEventSync(event);
+        return ret;
     }
 
     /**
