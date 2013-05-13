@@ -186,11 +186,10 @@ public class UiDevice {
      */
     public boolean pressMenu() {
         Tracer.trace();
-        boolean ret = mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
+        waitForIdle();
+        return mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
                 KeyEvent.KEYCODE_MENU, 0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
                 KEY_PRESS_EVENT_TIMEOUT);
-        waitForIdle();
-        return ret;
     }
 
     /**
@@ -200,11 +199,10 @@ public class UiDevice {
      */
     public boolean pressBack() {
         Tracer.trace();
-        boolean ret = mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
+        waitForIdle();
+        return mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
                 KeyEvent.KEYCODE_BACK, 0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
                 KEY_PRESS_EVENT_TIMEOUT);
-        waitForIdle();
-        return ret;
     }
 
     /**
@@ -214,11 +212,10 @@ public class UiDevice {
      */
     public boolean pressHome() {
         Tracer.trace();
-        boolean ret = mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
+        waitForIdle();
+        return mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
                 KeyEvent.KEYCODE_HOME, 0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
                 KEY_PRESS_EVENT_TIMEOUT);
-        waitForIdle();
-        return ret;
     }
 
     /**
@@ -310,9 +307,8 @@ public class UiDevice {
      */
     public boolean pressKeyCode(int keyCode) {
         Tracer.trace(keyCode);
-        boolean ret = mUiAutomationBridge.getInteractionController().sendKey(keyCode, 0);
         waitForIdle();
-        return ret;
+        return mUiAutomationBridge.getInteractionController().sendKey(keyCode, 0);
     }
 
     /**
@@ -326,9 +322,8 @@ public class UiDevice {
      */
     public boolean pressKeyCode(int keyCode, int metaState) {
         Tracer.trace(keyCode, metaState);
-        boolean ret = mUiAutomationBridge.getInteractionController().sendKey(keyCode, metaState);
         waitForIdle();
-        return ret;
+        return mUiAutomationBridge.getInteractionController().sendKey(keyCode, metaState);
     }
 
     /**
@@ -340,9 +335,8 @@ public class UiDevice {
      */
     public boolean pressRecentApps() throws RemoteException {
         Tracer.trace();
-        boolean ret = getAutomatorBridge().getInteractionController().toggleRecentApps();
         waitForIdle();
-        return ret;
+        return getAutomatorBridge().getInteractionController().toggleRecentApps();
     }
 
     /**
@@ -353,9 +347,8 @@ public class UiDevice {
      */
     public boolean openNotification() {
         Tracer.trace();
-        boolean ret =  getAutomatorBridge().getInteractionController().openNotification();
         waitForIdle();
-        return ret;
+        return  getAutomatorBridge().getInteractionController().openNotification();
     }
 
     /**
@@ -366,9 +359,8 @@ public class UiDevice {
      */
     public boolean openQuickSettings() {
         Tracer.trace();
-        boolean ret = getAutomatorBridge().getInteractionController().openQuickSettings();
         waitForIdle();
-        return ret;
+        return getAutomatorBridge().getInteractionController().openQuickSettings();
     }
 
     /**
@@ -627,6 +619,7 @@ public class UiDevice {
      */
     public boolean isNaturalOrientation() {
         Tracer.trace();
+        waitForIdle();
         int ret = mUiAutomationBridge.getRotation();
         return ret == UiAutomation.ROTATION_FREEZE_0 ||
                 ret == UiAutomation.ROTATION_FREEZE_180;
@@ -676,7 +669,7 @@ public class UiDevice {
     public void setOrientationLeft() throws RemoteException {
         Tracer.trace();
         getAutomatorBridge().getInteractionController().setRotationLeft();
-        waitForIdle();
+        waitForIdle(); // we don't need to check for idle on entry for this. We'll sync on exit
     }
 
     /**
@@ -691,7 +684,7 @@ public class UiDevice {
     public void setOrientationRight() throws RemoteException {
         Tracer.trace();
         getAutomatorBridge().getInteractionController().setRotationRight();
-        waitForIdle();
+        waitForIdle(); // we don't need to check for idle on entry for this. We'll sync on exit
     }
 
     /**
@@ -706,7 +699,7 @@ public class UiDevice {
     public void setOrientationNatural() throws RemoteException {
         Tracer.trace();
         getAutomatorBridge().getInteractionController().setRotationNatural();
-        waitForIdle();
+        waitForIdle(); // we don't need to check for idle on entry for this. We'll sync on exit
     }
 
     /**
