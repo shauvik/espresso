@@ -83,6 +83,9 @@ public class UiDevice {
      * @return {@link ShellUiAutomatorBridge}
      */
     UiAutomatorBridge getAutomatorBridge() {
+        if (mUiAutomationBridge == null) {
+            throw new RuntimeException("UiDevice not initialized");
+        }
         return mUiAutomationBridge;
     }
 
@@ -97,7 +100,7 @@ public class UiDevice {
      * @since API Level 18
      */
     public void setCompressedLayoutHeirarchy(boolean compressed) {
-        mUiAutomationBridge.setCompressedLayoutHierarchy(compressed);
+        getAutomatorBridge().setCompressedLayoutHierarchy(compressed);
     }
 
     /**
@@ -123,7 +126,7 @@ public class UiDevice {
      */
     public Point getDisplaySizeDp() {
         Tracer.trace();
-        Display display = mUiAutomationBridge.getDefaultDisplay();
+        Display display = getAutomatorBridge().getDefaultDisplay();
         Point p = new Point();
         display.getRealSize(p);
         DisplayMetrics metrics = new DisplayMetrics();
@@ -166,7 +169,7 @@ public class UiDevice {
      */
     public String getLastTraversedText() {
         Tracer.trace();
-        return mUiAutomationBridge.getQueryController().getLastTraversedText();
+        return getAutomatorBridge().getQueryController().getLastTraversedText();
     }
 
     /**
@@ -176,7 +179,7 @@ public class UiDevice {
      */
     public void clearLastTraversedText() {
         Tracer.trace();
-        mUiAutomationBridge.getQueryController().clearLastTraversedText();
+        getAutomatorBridge().getQueryController().clearLastTraversedText();
     }
 
     /**
@@ -187,7 +190,7 @@ public class UiDevice {
     public boolean pressMenu() {
         Tracer.trace();
         waitForIdle();
-        return mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
+        return getAutomatorBridge().getInteractionController().sendKeyAndWaitForEvent(
                 KeyEvent.KEYCODE_MENU, 0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
                 KEY_PRESS_EVENT_TIMEOUT);
     }
@@ -200,7 +203,7 @@ public class UiDevice {
     public boolean pressBack() {
         Tracer.trace();
         waitForIdle();
-        return mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
+        return getAutomatorBridge().getInteractionController().sendKeyAndWaitForEvent(
                 KeyEvent.KEYCODE_BACK, 0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
                 KEY_PRESS_EVENT_TIMEOUT);
     }
@@ -213,7 +216,7 @@ public class UiDevice {
     public boolean pressHome() {
         Tracer.trace();
         waitForIdle();
-        return mUiAutomationBridge.getInteractionController().sendKeyAndWaitForEvent(
+        return getAutomatorBridge().getInteractionController().sendKeyAndWaitForEvent(
                 KeyEvent.KEYCODE_HOME, 0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
                 KEY_PRESS_EVENT_TIMEOUT);
     }
@@ -308,7 +311,7 @@ public class UiDevice {
     public boolean pressKeyCode(int keyCode) {
         Tracer.trace(keyCode);
         waitForIdle();
-        return mUiAutomationBridge.getInteractionController().sendKey(keyCode, 0);
+        return getAutomatorBridge().getInteractionController().sendKey(keyCode, 0);
     }
 
     /**
@@ -323,7 +326,7 @@ public class UiDevice {
     public boolean pressKeyCode(int keyCode, int metaState) {
         Tracer.trace(keyCode, metaState);
         waitForIdle();
-        return mUiAutomationBridge.getInteractionController().sendKey(keyCode, metaState);
+        return getAutomatorBridge().getInteractionController().sendKey(keyCode, metaState);
     }
 
     /**
@@ -371,7 +374,7 @@ public class UiDevice {
      */
     public int getDisplayWidth() {
         Tracer.trace();
-        Display display = mUiAutomationBridge.getDefaultDisplay();
+        Display display = getAutomatorBridge().getDefaultDisplay();
         Point p = new Point();
         display.getSize(p);
         return p.x;
@@ -385,7 +388,7 @@ public class UiDevice {
      */
     public int getDisplayHeight() {
         Tracer.trace();
-        Display display = mUiAutomationBridge.getDefaultDisplay();
+        Display display = getAutomatorBridge().getDefaultDisplay();
         Point p = new Point();
         display.getSize(p);
         return p.y;
@@ -422,7 +425,7 @@ public class UiDevice {
      */
     public boolean swipe(int startX, int startY, int endX, int endY, int steps) {
         Tracer.trace(startX, startY, endX, endY, steps);
-        return mUiAutomationBridge.getInteractionController()
+        return getAutomatorBridge().getInteractionController()
                 .swipe(startX, startY, endX, endY, steps);
     }
 
@@ -441,7 +444,7 @@ public class UiDevice {
      */
     public boolean drag(int startX, int startY, int endX, int endY, int steps) {
         Tracer.trace(startX, startY, endX, endY, steps);
-        return mUiAutomationBridge.getInteractionController()
+        return getAutomatorBridge().getInteractionController()
                 .swipe(startX, startY, endX, endY, steps, true);
     }
 
@@ -456,7 +459,7 @@ public class UiDevice {
      */
     public boolean swipe(Point[] segments, int segmentSteps) {
         Tracer.trace(segments, segmentSteps);
-        return mUiAutomationBridge.getInteractionController().swipe(segments, segmentSteps);
+        return getAutomatorBridge().getInteractionController().swipe(segments, segmentSteps);
     }
 
     /**
@@ -476,7 +479,7 @@ public class UiDevice {
      */
     public void waitForIdle(long timeout) {
         Tracer.trace(timeout);
-        mUiAutomationBridge.waitForIdle(timeout);
+        getAutomatorBridge().waitForIdle(timeout);
     }
 
     /**
@@ -488,7 +491,7 @@ public class UiDevice {
     @Deprecated
     public String getCurrentActivityName() {
         Tracer.trace();
-        return mUiAutomationBridge.getQueryController().getCurrentActivityName();
+        return getAutomatorBridge().getQueryController().getCurrentActivityName();
     }
 
     /**
@@ -498,7 +501,7 @@ public class UiDevice {
      */
     public String getCurrentPackageName() {
         Tracer.trace();
-        return mUiAutomationBridge.getQueryController().getCurrentPackageName();
+        return getAutomatorBridge().getQueryController().getCurrentPackageName();
     }
 
     /**
@@ -620,7 +623,7 @@ public class UiDevice {
     public boolean isNaturalOrientation() {
         Tracer.trace();
         waitForIdle();
-        int ret = mUiAutomationBridge.getRotation();
+        int ret = getAutomatorBridge().getRotation();
         return ret == UiAutomation.ROTATION_FREEZE_0 ||
                 ret == UiAutomation.ROTATION_FREEZE_180;
     }
@@ -632,7 +635,7 @@ public class UiDevice {
     public int getDisplayRotation() {
         Tracer.trace();
         waitForIdle();
-        return mUiAutomationBridge.getRotation();
+        return getAutomatorBridge().getRotation();
     }
 
     /**
@@ -756,7 +759,7 @@ public class UiDevice {
         AccessibilityNodeInfo root =
                 getAutomatorBridge().getQueryController().getAccessibilityRootNode();
         if(root != null) {
-            Display display = mUiAutomationBridge.getDefaultDisplay();
+            Display display = getAutomatorBridge().getDefaultDisplay();
             Point size = new Point();
             display.getSize(size);
             AccessibilityNodeInfoDumper.dumpWindowToFile(root,
@@ -840,6 +843,6 @@ public class UiDevice {
      */
     public boolean takeScreenshot(File storePath, float scale, int quality) {
         Tracer.trace(storePath, scale, quality);
-        return mUiAutomationBridge.takeScreenshot(storePath, quality);
+        return getAutomatorBridge().takeScreenshot(storePath, quality);
     }
 }
