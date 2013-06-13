@@ -25,11 +25,11 @@ import android.view.MotionEvent.PointerCoords;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
- * A UiObject is a representation of a UI element. It is not in any way directly bound to a
- * UI element as an object reference. A UiObject holds information to help it
- * locate a matching UI element at runtime based on the {@link UiSelector} properties specified in
- * its constructor. Since a UiObject is a representative for a UI element, it can
- * be reused for different views with matching UI elements.
+ * A UiObject is a representation of a view. It is not in any way directly bound to a
+ * view as an object reference. A UiObject contains information to help it
+ * locate a matching view at runtime based on the {@link UiSelector} properties specified in
+ * its constructor. Once you create an instance of a UiObject, it can
+ * be reused for different views that match the selector criteria.
  * @since API Level 16
  */
 public class UiObject {
@@ -70,8 +70,8 @@ public class UiObject {
     private final Configurator mConfig = Configurator.getInstance();
 
     /**
-     * Constructs a UiObject to represent a specific UI element matched by the specified
-     * {@link UiSelector} selector properties.
+     * Constructs a UiObject to represent a view that matches the specified
+     * selector criteria.
      * @param selector
      * @since API Level 16
      */
@@ -104,7 +104,7 @@ public class UiObject {
 
     /**
      * Retrieves the {@link InteractionController} to perform finger actions such as tapping,
-     * swiping or entering text.
+     * swiping, or entering text.
      *
      * @return {@link InteractionController}
      */
@@ -113,11 +113,10 @@ public class UiObject {
     }
 
     /**
-     * Creates a new UiObject representing a child UI element of the element currently represented
-     * by this UiObject.
+     * Creates a new UiObject for a child view that is under the present UiObject.
      *
-     * @param selector for UI element to match
-     * @return a new UiObject representing the matched UI element
+     * @param selector for child view to match
+     * @return a new UiObject representing the child view
      * @since API Level 16
      */
     public UiObject getChild(UiSelector selector) throws UiObjectNotFoundException {
@@ -126,13 +125,11 @@ public class UiObject {
     }
 
     /**
-     * Creates a new UiObject representing a child UI element from the parent element currently
-     * represented by this object. Essentially this is starting the search from the parent
-     * element and can also be used to find sibling UI elements to the one currently represented
-     * by this UiObject.
+     * Creates a new UiObject for a sibling view or a child of the sibling view, 
+     * relative to the present UiObject.
      *
-     * @param selector for the UI element to match
-     * @return a new UiObject representing the matched UI element
+     * @param selector for a sibling view or children of the sibling view
+     * @return a new UiObject representing the matched view
      * @throws UiObjectNotFoundException
      * @since API Level 16
      */
@@ -142,10 +139,9 @@ public class UiObject {
     }
 
     /**
-     * Counts the child UI elements immediately under the UI element currently represented by
-     * this UiObject.
+     * Counts the child views immediately under the present UiObject.
      *
-     * @return the count of child UI elements.
+     * @return the count of child views.
      * @throws UiObjectNotFoundException
      * @since API Level 16
      */
@@ -159,8 +155,8 @@ public class UiObject {
     }
 
     /**
-     * Uses the member UiSelector properties to find a matching UI element reported in
-     * the accessibility hierarchy.
+     * Finds a matching UI element in the accessibility hierarchy, by
+     * using the selector for this UiObject.
      *
      * @param timeout in milliseconds
      * @return AccessibilityNodeInfo if found else null
@@ -187,13 +183,14 @@ public class UiObject {
     }
 
     /**
-     * Performs a drag of this object to a destination UiObject. Note that the number of steps
-     * used can influence the drag speed and varying speeds may impact the results. Consider
-     * evaluating different speeds when testing this method.
+     * Drags this object to a destination UiObject.
+     * The number of steps specified in your input parameter can influence the
+     * drag speed, and varying speeds may impact the results. Consider
+     * evaluating different speeds when using this method in your tests.
      *
-     * @param destObj
-     * @param steps usually 40 steps. More or less to change the speed.
-     * @return true of successful
+     * @param destObj the destination UiObject.
+     * @param steps usually 40 steps. You can increase or decrease the steps to change the speed.
+     * @return true if successful
      * @throws UiObjectNotFoundException
      * @since API Level 18
      */
@@ -205,14 +202,15 @@ public class UiObject {
     }
 
     /**
-     * Performs a drag of this object to arbitrary coordinates. Note that the number of steps
-     * used will influence the drag speed and varying speeds may impact the results. Consider
-     * evaluating different speeds when testing this method.
+     * Drags this object to arbitrary coordinates.
+     * The number of steps specified in your input parameter can influence the
+     * drag speed, and varying speeds may impact the results. Consider
+     * evaluating different speeds when using this method in your tests.
      *
-     * @param destX
-     * @param destY
-     * @param steps
-     * @return true of successful
+     * @param destX the X-axis coordinate.
+     * @param destY the Y-axis coordinate.
+     * @param steps usually 40 steps. You can increase or decrease the steps to change the speed.
+     * @return true if successful
      * @throws UiObjectNotFoundException
      * @since API Level 18
      */
@@ -223,9 +221,14 @@ public class UiObject {
     }
 
     /**
-     * Perform the action on the UI element that is represented by this UiObject. Also see
-     * {@link UiScrollable#scrollToBeginning(int)}, {@link UiScrollable#scrollToEnd(int)},
-     * {@link UiScrollable#scrollBackward()}, {@link UiScrollable#scrollForward()}.
+     * Performs the swipe up action on the UiObject. 
+     * See also:
+     * <ul>
+     * <li>{@link UiScrollable#scrollToBeginning(int)}</li>
+     * <li>{@link UiScrollable#scrollToEnd(int)}</li>
+     * <li>{@link UiScrollable#scrollBackward()}</li>
+     * <li>{@link UiScrollable#scrollForward()}</li>
+     * </ul>
      *
      * @param steps indicates the number of injected move steps into the system. Steps are
      * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
@@ -244,12 +247,16 @@ public class UiObject {
     }
 
     /**
-     * Perform the action on the UI element that is represented by this object, Also see
-     * {@link UiScrollable#scrollToBeginning(int)}, {@link UiScrollable#scrollToEnd(int)},
-     * {@link UiScrollable#scrollBackward()}, {@link UiScrollable#scrollForward()}. This method will
-     * perform the swipe gesture over any surface.  The targeted UI element does not need to have
-     * the attribute <code>scrollable</code> set to <code>true</code> for this operation to be
-     * performed.
+     * Performs the swipe down action on the UiObject. 
+     * The swipe gesture can be performed over any surface. The targeted
+     * UI element does not need to be scrollable.
+     * See also:
+     * <ul>
+     * <li>{@link UiScrollable#scrollToBeginning(int)}</li>
+     * <li>{@link UiScrollable#scrollToEnd(int)}</li>
+     * <li>{@link UiScrollable#scrollBackward()}</li>
+     * <li>{@link UiScrollable#scrollForward()}</li>
+     * </ul>
      *
      * @param steps indicates the number of injected move steps into the system. Steps are
      * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
@@ -268,12 +275,16 @@ public class UiObject {
     }
 
     /**
-     * Perform the action on the UI element that is represented by this object. Also see
-     * {@link UiScrollable#scrollToBeginning(int)}, {@link UiScrollable#scrollToEnd(int)},
-     * {@link UiScrollable#scrollBackward()}, {@link UiScrollable#scrollForward()}. This method will
-     * perform the swipe gesture over any surface. The targeted UI element does not need to have the
-     * attribute <code>scrollable</code> set to <code>true</code> for this operation to be
-     * performed.
+     * Performs the swipe left action on the UiObject. 
+     * The swipe gesture can be performed over any surface. The targeted
+     * UI element does not need to be scrollable.
+     * See also:
+     * <ul>
+     * <li>{@link UiScrollable#scrollToBeginning(int)}</li>
+     * <li>{@link UiScrollable#scrollToEnd(int)}</li>
+     * <li>{@link UiScrollable#scrollBackward()}</li>
+     * <li>{@link UiScrollable#scrollForward()}</li>
+     * </ul>
      *
      * @param steps indicates the number of injected move steps into the system. Steps are
      * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
@@ -291,12 +302,16 @@ public class UiObject {
     }
 
     /**
-     * Perform the action on the UI element that is represented by this object. Also see
-     * {@link UiScrollable#scrollToBeginning(int)}, {@link UiScrollable#scrollToEnd(int)},
-     * {@link UiScrollable#scrollBackward()}, {@link UiScrollable#scrollForward()}. This method will
-     * perform the swipe gesture over any surface. The targeted UI element does not need to have the
-     * attribute <code>scrollable</code> set to <code>true</code> for this operation to be
-     * performed.
+     * Performs the swipe right action on the UiObject. 
+     * The swipe gesture can be performed over any surface. The targeted
+     * UI element does not need to be scrollable.
+     * See also:
+     * <ul>
+     * <li>{@link UiScrollable#scrollToBeginning(int)}</li>
+     * <li>{@link UiScrollable#scrollToEnd(int)}</li>
+     * <li>{@link UiScrollable#scrollBackward()}</li>
+     * <li>{@link UiScrollable#scrollForward()}</li>
+     * </ul>
      *
      * @param steps indicates the number of injected move steps into the system. Steps are
      * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
@@ -345,10 +360,10 @@ public class UiObject {
     }
 
     /**
-     * Walk the hierarchy up to find a scrollable parent. A scrollable parent
-     * indicates that this node may be in a content where it is partially
-     * visible due to scrolling. its clickable center maybe invisible and
-     * adjustments should be made to the click coordinates.
+     * Walks up the layout hierarchy to find a scrollable parent. A scrollable parent
+     * indicates that this node might be in a container where it is partially
+     * visible due to scrolling. In this case, its clickable center might not be visible and
+     * the click coordinates should be adjusted.
      *
      * @param node
      * @return The accessibility node info.
@@ -384,9 +399,9 @@ public class UiObject {
     }
 
     /**
+     * Waits for window transitions that would typically take longer than the
+     * usual default timeouts.
      * See {@link #clickAndWaitForNewWindow(long)}
-     * This method is intended to reliably wait for window transitions that would typically take
-     * longer than the usual default timeouts.
      *
      * @return true if the event was triggered, else false
      * @throws UiObjectNotFoundException
@@ -527,10 +542,10 @@ public class UiObject {
     }
 
     /**
-     * Reads the <code>className</code> property of the UI element
+     * Retrieves the <code>className</code> property of the UI element.
      *
      * @return class name of the current node represented by this UiObject
-     * @throws UiObjectNotFoundException if no match could be found
+     * @throws UiObjectNotFoundException if no match was found
      * @since API Level 18
      */
     public String getClassName() throws UiObjectNotFoundException {
@@ -637,7 +652,7 @@ public class UiObject {
     }
 
     /**
-     * Check if the UI element's <code>selected</code> property is currently true
+     * Checks if the UI element's <code>selected</code> property is currently true.
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
@@ -653,7 +668,7 @@ public class UiObject {
     }
 
     /**
-     * Check if the UI element's <code>checkable</code> property is currently true
+     * Checks if the UI element's <code>checkable</code> property is currently true.
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
@@ -669,7 +684,7 @@ public class UiObject {
     }
 
     /**
-     * Check if the UI element's <code>enabled</code> property is currently true
+     * Checks if the UI element's <code>enabled</code> property is currently true.
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
@@ -685,7 +700,7 @@ public class UiObject {
     }
 
     /**
-     * Check if the UI element's <code>clickable</code> property is currently true
+     * Checks if the UI element's <code>clickable</code> property is currently true.
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
@@ -717,7 +732,7 @@ public class UiObject {
     }
 
     /**
-     * Check if the UI element's <code>focusable</code> property is currently true
+     * Check if the UI element's <code>focusable</code> property is currently true.
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
@@ -733,7 +748,7 @@ public class UiObject {
     }
 
     /**
-     * Check if the UI element's <code>scrollable</code> property is currently true
+     * Check if the view's <code>scrollable</code> property is currently true
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
@@ -749,7 +764,7 @@ public class UiObject {
     }
 
     /**
-     * Check if the UI element's <code>long-clickable</code> property is currently true
+     * Check if the view's <code>long-clickable</code> property is currently true
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
@@ -765,7 +780,7 @@ public class UiObject {
     }
 
     /**
-     * Reads the UI element's <code>package</code> property
+     * Reads the view's <code>package</code> property
      *
      * @return true if it is else false
      * @throws UiObjectNotFoundException
@@ -781,9 +796,9 @@ public class UiObject {
     }
 
     /**
-     * Returns the visible bounds of the UI element.
+     * Returns the visible bounds of the view.
      *
-     * If a portion of the UI element is visible, only the bounds of the visible portion are
+     * If a portion of the view is visible, only the bounds of the visible portion are
      * reported.
      *
      * @return Rect
@@ -801,7 +816,7 @@ public class UiObject {
     }
 
     /**
-     * Returns the UI element's <code>bounds</code> property. See {@link #getVisibleBounds()}
+     * Returns the view's <code>bounds</code> property. See {@link #getVisibleBounds()}
      *
      * @return Rect
      * @throws UiObjectNotFoundException
@@ -820,14 +835,14 @@ public class UiObject {
     }
 
     /**
-     * Waits a specified length of time for a UI element to become visible.
+     * Waits a specified length of time for a view to become visible.
      *
-     * This method waits until the UI element becomes visible on the display, or
+     * This method waits until the view becomes visible on the display, or
      * until the timeout has elapsed. You can use this method in situations where
      * the content that you want to select is not immediately displayed.
      *
      * @param timeout the amount of time to wait (in milliseconds)
-     * @return true if the UI element is displayed, else false if timeout elapsed while waiting
+     * @return true if the view is displayed, else false if timeout elapsed while waiting
      * @since API Level 16
      */
     public boolean waitForExists(long timeout) {
@@ -839,12 +854,12 @@ public class UiObject {
     }
 
     /**
-     * Waits a specified length of time for a UI element to become undetectable.
+     * Waits a specified length of time for a view to become undetectable.
      *
-     * This method waits until a UI element is no longer matchable, or until the
+     * This method waits until a view is no longer matchable, or until the
      * timeout has elapsed.
      *
-     * A UI element becomes undetectable when the {@link UiSelector} of the object is
+     * A view becomes undetectable when the {@link UiSelector} of the object is
      * unable to find a match because the element has either changed its state or is no
      * longer displayed.
      *
@@ -871,14 +886,14 @@ public class UiObject {
     }
 
     /**
-     * Check if UI element exists.
+     * Check if view exists.
      *
      * This methods performs a {@link #waitForExists(long)} with zero timeout. This
-     * basically returns immediately whether the UI element represented by this UiObject
-     * exists or not. If you need to wait longer for this UI element, then see
+     * basically returns immediately whether the view represented by this UiObject
+     * exists or not. If you need to wait longer for this view, then see
      * {@link #waitForExists(long)}.
      *
-     * @return true if the UI element represented by this UiObject does exist
+     * @return true if the view represented by this UiObject does exist
      * @since API Level 16
      */
     public boolean exists() {
@@ -893,14 +908,14 @@ public class UiObject {
     }
 
     /**
-     * PinchOut generates a 2 pointer gesture where each pointer is moving from the center out
-     * away from each other diagonally towards the edges of the current UI element represented by
+     * Performs a two-pointer gesture, where each pointer moves diagonally
+     * opposite across the other, from the center out towards the edges of the
      * this UiObject.
-     * @param percent of the object's diagonal length to use for the pinch
-     * @param steps indicates the number of injected move steps into the system. Steps are
-     * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
+     * @param percent percentage of the object's diagonal length for the pinch gesture
+     * @param steps the number of steps for the gesture. Steps are injected 
+     * about 5 milliseconds apart, so 100 steps may take around 0.5 seconds to complete.
      * @return <code>true</code> if all touch events for this gesture are injected successfully,
-     *          <code>false</code> otherwise
+     *         <code>false</code> otherwise
      * @throws UiObjectNotFoundException
      * @since API Level 18
      */
@@ -932,14 +947,13 @@ public class UiObject {
     }
 
     /**
-     * PinchIn generates a 2 pointer gesture where each pointer is moving towards the other
-     * diagonally from the edges of the current UI element represented by this UiObject, until the
-     * center.
-     * @param percent of the object's diagonal length to use for the pinch
-     * @param steps indicates the number of injected move steps into the system. Steps are
-     * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
+     * Performs a two-pointer gesture, where each pointer moves diagonally
+     * toward the other, from the edges to the center of this UiObject .
+     * @param percent percentage of the object's diagonal length for the pinch gesture
+     * @param steps the number of steps for the gesture. Steps are injected 
+     * about 5 milliseconds apart, so 100 steps may take around 0.5 seconds to complete.
      * @return <code>true</code> if all touch events for this gesture are injected successfully,
-     *          <code>false</code> otherwise
+     *         <code>false</code> otherwise
      * @throws UiObjectNotFoundException
      * @since API Level 18
      */
@@ -969,16 +983,16 @@ public class UiObject {
     }
 
     /**
-     * Generates a 2 pointer gesture from an arbitrary starting and ending points.
+     * Generates a two-pointer gesture with arbitrary starting and ending points.
      *
      * @param startPoint1 start point of pointer 1
      * @param startPoint2 start point of pointer 2
      * @param endPoint1 end point of pointer 1
      * @param endPoint2 end point of pointer 2
-     * @param steps indicates the number of injected move steps into the system. Steps are
-     * injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
+     * @param steps the number of steps for the gesture. Steps are injected 
+     * about 5 milliseconds apart, so 100 steps may take around 0.5 seconds to complete.
      * @return <code>true</code> if all touch events for this gesture are injected successfully,
-     *          <code>false</code> otherwise
+     *         <code>false</code> otherwise
      * @since API Level 18
      */
     public boolean performTwoPointerGesture(Point startPoint1, Point startPoint2, Point endPoint1,
@@ -1044,15 +1058,13 @@ public class UiObject {
     }
 
     /**
-     * Performs a multi-touch gesture
+     * Performs a multi-touch gesture. You must specify touch coordinates for
+     * at least 2 pointers. Each pointer must have all of its touch steps
+     * defined in an array of {@link PointerCoords}. You can use this method to
+     * specify complex gestures, like circles and irregular shapes, where each
+     * pointer may take a different path.
      *
-     * Takes a series of touch coordinates for at least 2 pointers. Each pointer must have
-     * all of its touch steps defined in an array of {@link PointerCoords}. By having the ability
-     * to specify the touch points along the path of a pointer, the caller is able to specify
-     * complex gestures like circles, irregular shapes etc, where each pointer may take a
-     * different path.
-     *
-     * To create a single point on a pointer's touch path
+     * To create a single point on a pointer's touch path:
      * <code>
      *       PointerCoords p = new PointerCoords();
      *       p.x = stepX;
@@ -1060,14 +1072,14 @@ public class UiObject {
      *       p.pressure = 1;
      *       p.size = 1;
      * </code>
-     * @param touches each array of {@link PointerCoords} constitute a single pointer's touch path.
-     *        Multiple {@link PointerCoords} arrays constitute multiple pointers, each with its own
-     *        path. Each {@link PointerCoords} in an array constitute a point on a pointer's path.
+     * @param touches represents the pointers' paths. Each {@link PointerCoords} 
+     * array represents a different pointer. Each {@link PointerCoords} in an 
+     * array element represents a touch point on a pointer's path.
      * @return <code>true</code> if all touch events for this gesture are injected successfully,
-     *          <code>false</code> otherwise
+     *         <code>false</code> otherwise
      * @since API Level 18
      */
     public boolean performMultiPointerGesture(PointerCoords[] ...touches) {
         return getInteractionController().performMultiPointerGesture(touches);
     }
-}
+

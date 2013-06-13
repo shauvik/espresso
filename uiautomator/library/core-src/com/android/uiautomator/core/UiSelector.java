@@ -22,12 +22,10 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import java.util.regex.Pattern;
 
 /**
- * This class provides the mechanism for tests to describe the UI elements they
- * intend to target. A UI element has many properties associated with it such as
- * text value, content-description, class name and multiple state information like
- * selected, enabled, checked etc. Additionally UiSelector allows targeting of UI
- * elements within a specific display hierarchies to distinguish similar elements
- * based in the hierarchies they're in.
+ * Specifies the elements in the layout hierarchy for tests to target, filtered
+ * by properties such as text value, content-description, class name, and state
+ * information. You can also target an element by its location in a layout
+ * hierarchy.
  * @since API Level 16
  */
 public class UiSelector {
@@ -105,11 +103,10 @@ public class UiSelector {
 
     /**
      * Set the search criteria to match the visible text displayed
-     * for a widget (for example, the text label to launch an app).
+     * in a widget (for example, the text label to launch an app).
      *
-     * The text for the widget must match exactly
-     * with the string in your input argument.
-     * Matching is case-sensitive.
+     * The text for the element must match exactly with the string in your input
+     * argument. Matching is case-sensitive.
      *
      * @param text Value to match
      * @return UiSelector with the specified search criteria
@@ -120,11 +117,11 @@ public class UiSelector {
     }
 
     /**
-     * Set the search criteria to match the visible text displayed
-     * for a widget (for example, the text label to launch an app).
+     * Set the search criteria to match the visible text displayed in a layout
+     * element, using a regular expression.
      *
-     * The text for the widget must match exactly
-     * with the string in your input argument.
+     * The text in the widget must match exactly with the string in your
+     * input argument.
      *
      * @param regex a regular expression
      * @return UiSelector with the specified search criteria
@@ -135,15 +132,13 @@ public class UiSelector {
     }
 
     /**
-     * Text property is usually the widget's visible text on the display.
+     * Set the search criteria to match visible text in a widget that is
+     * prefixed by the text parameter.
      *
-     * Adding this to the search criteria indicates that the search performed
-     * should match a widget with text value starting with the text parameter.
+     * The matching is case-insensitive.
      *
-     * The matching will be case-insensitive.
-     *
-     * @param text
-     * @return UiSelector with this added search criterion
+     * @param text Value to match
+     * @return UiSelector with the specified search criteria
      * @since API Level 16
      */
     public UiSelector textStartsWith(String text) {
@@ -151,11 +146,10 @@ public class UiSelector {
     }
 
     /**
-     * Set the search criteria to match the visible text displayed
-     * for a widget (for example, the text label to launch an app).
+     * Set the search criteria to match the visible text in a widget
+     * where the visible text must contain the string in your input argument.
      *
-     * The text for the widget must contain the string in
-     * your input argument. Matching is case-sensitive.
+     * The matching is case-sensitive.
      *
      * @param text Value to match
      * @return UiSelector with the specified search criteria
@@ -179,7 +173,7 @@ public class UiSelector {
 
     /**
      * Set the search criteria to match the class property
-     * for a widget (for example, "android.widget.Button").
+     * for a widget, using a regular expression.
      *
      * @param regex a regular expression
      * @return UiSelector with the specified search criteria
@@ -284,9 +278,9 @@ public class UiSelector {
     }
 
     /**
-     * Set the search criteria to match the given resource id.
+     * Set the search criteria to match the given resource ID.
      *
-     * @param id value to match
+     * @param id Value to match
      * @return UiSelector with the specified search criteria
      * @since API Level 18
      */
@@ -295,8 +289,8 @@ public class UiSelector {
     }
 
     /**
-     * Set the search criteria to match the resourceId
-     * of the widget
+     * Set the search criteria to match the resource ID
+     * of the widget, using a regular expression.http://blog.bettersoftwaretesting.com/
      *
      * @param regex a regular expression
      * @return UiSelector with the specified search criteria
@@ -1025,4 +1019,4 @@ public class UiSelector {
         builder.append("]");
         return builder.toString();
     }
-}
+
