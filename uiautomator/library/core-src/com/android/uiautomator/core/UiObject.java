@@ -65,7 +65,6 @@ public class UiObject {
     protected static final int FINGER_TOUCH_HALF_WIDTH = 20;
 
     private final UiSelector mSelector;
-    private final UiAutomatorBridge mUiAutomationBridge;
 
     private final Configurator mConfig = Configurator.getInstance();
 
@@ -76,7 +75,6 @@ public class UiObject {
      * @since API Level 16
      */
     public UiObject(UiSelector selector) {
-        mUiAutomationBridge = UiDevice.getInstance().getAutomatorBridge();
         mSelector = selector;
     }
 
@@ -99,7 +97,7 @@ public class UiObject {
      * @return {@link QueryController}
      */
     QueryController getQueryController() {
-        return mUiAutomationBridge.getQueryController();
+        return UiDevice.getInstance().getAutomatorBridge().getQueryController();
     }
 
     /**
@@ -109,7 +107,7 @@ public class UiObject {
      * @return {@link InteractionController}
      */
     InteractionController getInteractionController() {
-        return mUiAutomationBridge.getInteractionController();
+        return UiDevice.getInstance().getAutomatorBridge().getInteractionController();
     }
 
     /**
