@@ -52,7 +52,7 @@ public class DumpCommand extends Command {
     @Override
     public String detailedOptions() {
         return "    dump [--verbose][file]\n"
-            + "      [--verbose]: dumps all layout information.\n"
+            + "      [--compressed]: dumps compressed layout information.\n"
             + "      [file]: the location where the dumped XML should be stored, default is\n      "
             + DEFAULT_DUMP_FILE.getAbsolutePath() + "\n";
     }
@@ -60,11 +60,11 @@ public class DumpCommand extends Command {
     @Override
     public void run(String[] args) {
         File dumpFile = DEFAULT_DUMP_FILE;
-        boolean verboseMode = false;
+        boolean verboseMode = true;
 
         for (String arg : args) {
-            if (arg.equals("--verbose"))
-                verboseMode = true;
+            if (arg.equals("--compressed"))
+                verboseMode = false;
             else if (!arg.startsWith("-")) {
                 dumpFile = new File(arg);
             }
@@ -73,9 +73,9 @@ public class DumpCommand extends Command {
         UiAutomationShellWrapper automationWrapper = new UiAutomationShellWrapper();
         automationWrapper.connect();
         if (verboseMode) {
+            // default
             automationWrapper.setCompressedLayoutHierarchy(false);
         } else {
-            // default
             automationWrapper.setCompressedLayoutHierarchy(true);
         }
 
