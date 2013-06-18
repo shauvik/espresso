@@ -1070,8 +1070,8 @@ public class UiObject {
      *       p.pressure = 1;
      *       p.size = 1;
      * </code>
-     * @param touches represents the pointers' paths. Each {@link PointerCoords} 
-     * array represents a different pointer. Each {@link PointerCoords} in an 
+     * @param touches represents the pointers' paths. Each {@link PointerCoords}
+     * array represents a different pointer. Each {@link PointerCoords} in an
      * array element represents a touch point on a pointer's path.
      * @return <code>true</code> if all touch events for this gesture are injected successfully,
      *         <code>false</code> otherwise
@@ -1080,4 +1080,4 @@ public class UiObject {
     public boolean performMultiPointerGesture(PointerCoords[] ...touches) {
         return getInteractionController().performMultiPointerGesture(touches);
     }
-
+}

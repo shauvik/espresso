@@ -848,4 +848,4 @@ public class UiDevice {
         Tracer.trace(storePath, scale, quality);
         return getAutomatorBridge().takeScreenshot(storePath, quality);
     }
-
+}
