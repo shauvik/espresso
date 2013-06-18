@@ -662,4 +662,4 @@ public class UiScrollable extends UiCollection {
         mSwipeDeadZonePercentage = swipeDeadZonePercentage;
         return this;
     }
-
+}
