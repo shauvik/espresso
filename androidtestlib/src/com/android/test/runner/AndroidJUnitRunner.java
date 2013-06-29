@@ -76,6 +76,9 @@ import java.util.List;
  * -e class com.android.foo.FooTest,com.android.foo.TooTest
  * com.android.foo/com.android.test.runner.AndroidJUnitRunner
  * <p/>
+ * <b>Running all tests in a java package:</b> adb shell am instrument -w
+ * -e package com.android.foo.bar
+ * com.android.foo/com.android.test.runner.AndroidJUnitRunner
  * <b>To debug your tests, set a break point in your code and pass:</b>
  * -e debug true
  * <p/>
@@ -134,6 +137,7 @@ public class AndroidJUnitRunner extends Instrumentation {
     private static final String ARGUMENT_SUITE_ASSIGNMENT = "suiteAssignment";
     private static final String ARGUMENT_DEBUG = "debug";
     private static final String ARGUMENT_EXTRA_LISTENER = "extraListener";
+    private static final String ARGUMENT_TEST_PACKAGE = "package";
     // TODO: consider supporting 'count' from InstrumentationTestRunner
 
     private static final String LOG_TAG = "AndroidJUnitRunner";
@@ -340,6 +344,11 @@ public class AndroidJUnitRunner extends Instrumentation {
             for (String className : testClassName.split(",")) {
                 parseTestClass(className, builder);
             }
+        }
+
+        String testPackage = arguments.getString(ARGUMENT_TEST_PACKAGE);
+        if (testPackage != null) {
+            builder.addTestPackageFilter(testPackage);
         }
 
         String testSize = arguments.getString(ARGUMENT_TEST_SIZE);

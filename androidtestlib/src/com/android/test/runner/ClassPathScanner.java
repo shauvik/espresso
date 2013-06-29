@@ -19,9 +19,12 @@ package com.android.test.runner;
 import dalvik.system.DexFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -65,10 +68,14 @@ class ClassPathScanner {
      * A {@link ClassNameFilter} that chains one or more filters together
      */
     public static class ChainedClassNameFilter implements ClassNameFilter {
-        private final ClassNameFilter[] mFilters;
+        private final List<ClassNameFilter> mFilters = new ArrayList<ClassNameFilter>();
 
-        public ChainedClassNameFilter(ClassNameFilter... filters) {
-            mFilters = filters;
+        public void add(ClassNameFilter filter) {
+            mFilters.add(filter);
+        }
+
+        public void addAll(ClassNameFilter... filters) {
+            mFilters.addAll(Arrays.asList(filters));
         }
 
         /**
