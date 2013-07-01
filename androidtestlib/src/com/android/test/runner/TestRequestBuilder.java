@@ -26,6 +26,7 @@ import android.util.Log;
 import com.android.test.runner.ClassPathScanner.ChainedClassNameFilter;
 import com.android.test.runner.ClassPathScanner.ExcludePackageNameFilter;
 import com.android.test.runner.ClassPathScanner.ExternalClassNameFilter;
+import com.android.test.runner.ClassPathScanner.InclusivePackageNameFilter;
 
 import org.junit.runner.Computer;
 import org.junit.runner.Description;
@@ -59,6 +60,7 @@ public class TestRequestBuilder {
     private Filter mFilter = new AnnotationExclusionFilter(Suppress.class);
     private PrintStream mWriter;
     private boolean mSkipExecution = false;
+    private String mTestPackageName = null;
 
     /**
      * Filter that only runs tests whose method or class has been annotated with given filter.
@@ -207,6 +209,14 @@ public class TestRequestBuilder {
     }
 
     /**
+     * Run only tests within given java package
+     * @param testPackage
+     */
+    public void addTestPackageFilter(String testPackage) {
+        mTestPackageName = testPackage;
+    }
+
+    /**
      * Run only tests with given size
      * @param testSize
      */
@@ -306,17 +316,23 @@ public class TestRequestBuilder {
         Log.i(LOG_TAG, String.format("Scanning classpath to find tests in apks %s",
                 Arrays.toString(mApkPaths)));
         ClassPathScanner scanner = new ClassPathScanner(mApkPaths);
-        try {
-            // exclude inner classes, and classes from junit and this lib namespace
-            return scanner.getClassPathEntries(new ChainedClassNameFilter(
-                    new ExcludePackageNameFilter("junit"),
+
+        ChainedClassNameFilter filter =   new ChainedClassNameFilter();
+         // exclude inner classes
+        filter.add(new ExternalClassNameFilter());
+        if (mTestPackageName != null) {
+            // request to run only a specific java package, honor that
+            filter.add(new InclusivePackageNameFilter(mTestPackageName));
+        } else {
+            // scan all packages, but exclude junit packages
+            filter.addAll(new ExcludePackageNameFilter("junit"),
                     new ExcludePackageNameFilter("org.junit"),
                     new ExcludePackageNameFilter("org.hamcrest"),
-                    new ExcludePackageNameFilter("org.mockito"),
-                    new ExcludePackageNameFilter("com.android.dx"),
-                    new ExcludePackageNameFilter("com.google.dexmaker"),
-                    new ExternalClassNameFilter(),
-                    new ExcludePackageNameFilter("com.android.test.runner.junit3")));
+                    new ExcludePackageNameFilter("com.android.test.runner.junit3"));
+        }
+
+        try {
+            return scanner.getClassPathEntries(filter);
         } catch (IOException e) {
             mWriter.println("failed to scan classes");
             Log.e(LOG_TAG, "Failed to scan classes", e);
