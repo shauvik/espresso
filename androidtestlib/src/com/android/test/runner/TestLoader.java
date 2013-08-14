@@ -67,7 +67,12 @@ public class TestLoader {
 
     private Class<?> doLoadClass(String className) {
         try {
-            return Class.forName(className);
+            // TODO: InstrumentationTestRunner uses Class.forName(className, false,
+            // getTargetContext().getClassLoader()
+            // Evaluate if that is needed. Initial testing indicates
+            // getTargetContext().getClassLoader() == this.getClass().getClassLoader()
+            ClassLoader myClassLoader = this.getClass().getClassLoader();
+            return Class.forName(className, false, myClassLoader);
         } catch (ClassNotFoundException e) {
             String errMsg = String.format("Could not find class: %s", className);
             Log.e(LOG_TAG, errMsg);
