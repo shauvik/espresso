@@ -110,7 +110,10 @@ public class TestRequestBuilderTest {
         @Suppress
         public void testSuppressed() {
         }
+    }
 
+    // test fixtures for super-class annotation processing
+    public static class InheritedAnnnotation extends SampleJUnit3Test {
     }
 
     @InjectInstrumentation
@@ -242,5 +245,21 @@ public class TestRequestBuilderTest {
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(1, result.getRunCount());
+    }
+
+    /**
+     * Test that annotation filtering by class works when methods are from superclass.
+     *
+     * TODO: add a similiar test to upstream junit.
+     */
+    @Test
+    public void testAddAnnotationInclusionFilter_super() {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addAnnotationInclusionFilter(SmallTest.class.getName());
+        b.addTestClass(InheritedAnnnotation.class.getName());
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        Result result = testRunner.run(request.getRequest());
+        Assert.assertEquals(2, result.getRunCount());
     }
 }
