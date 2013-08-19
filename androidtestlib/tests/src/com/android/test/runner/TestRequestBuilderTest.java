@@ -17,6 +17,7 @@ package com.android.test.runner;
 
 import android.app.Instrumentation;
 import android.os.Bundle;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.test.suitebuilder.annotation.Suppress;
 
@@ -97,6 +98,29 @@ public class TestRequestBuilderTest {
         public void testSmall2() {
         }
 
+    }
+
+    @SmallTest
+    public static class SampleOverrideSize extends TestCase {
+
+        public void testSmall() {
+        }
+
+        @MediumTest
+        public void testMedium() {
+        }
+    }
+
+    @SmallTest
+    public static class SampleSameSize extends TestCase {
+
+        @SmallTest
+        public void testSmall() {
+        }
+
+        @MediumTest
+        public void testMedium() {
+        }
     }
 
     public static class SampleJUnit3Suppressed extends TestCase {
@@ -184,6 +208,7 @@ public class TestRequestBuilderTest {
     private static class MyRunListener extends RunListener {
         private int mTestCount = -1;
 
+        @Override
         public void testRunStarted(Description description) throws Exception {
             mTestCount = description.testCount();
         }
@@ -261,5 +286,42 @@ public class TestRequestBuilderTest {
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(2, result.getRunCount());
+    }
+
+    /**
+     * Test that a method size annotation overrides a class size annotation.
+     */
+    @Test
+    public void testTestSizeFilter_override() {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
+        b.addTestClass(SampleOverrideSize.class.getName());
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        Result result = testRunner.run(request.getRequest());
+        Assert.assertEquals(1, result.getRunCount());
+
+        b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addTestSizeFilter(TestRequestBuilder.MEDIUM_SIZE);
+        b.addTestClass(SampleOverrideSize.class.getName());
+        request = b.build(mInstr, mBundle);
+        testRunner = new JUnitCore();
+        result = testRunner.run(request.getRequest());
+        Assert.assertEquals(1, result.getRunCount());
+    }
+
+    /**
+     * Test that a method size annotation of same type as class level annotation is correctly
+     * filtered.
+     */
+    @Test
+    public void testTestSizeFilter_sameAnnotation() {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
+        b.addTestClass(SampleSameSize.class.getName());
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        Result result = testRunner.run(request.getRequest());
+        Assert.assertEquals(1, result.getRunCount());
     }
 }
