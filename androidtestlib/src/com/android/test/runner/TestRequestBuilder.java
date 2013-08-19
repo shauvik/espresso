@@ -41,6 +41,8 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -79,8 +81,7 @@ public class TestRequestBuilder {
         @Override
         public boolean shouldRun(Description description) {
             if (description.isTest()) {
-                return description.getAnnotation(mAnnotationClass) != null ||
-                        description.getTestClass().isAnnotationPresent(mAnnotationClass);
+                return evaluateTest(description);
             } else {
                 // the entire test class/suite should be filtered out if all its methods are
                 // filtered
@@ -98,11 +99,61 @@ public class TestRequestBuilder {
         }
 
         /**
+         * Determine if given test description matches filter.
+         *
+         * @param description the {@link Description} describing the test
+         * @return <code>true</code> if matched
+         */
+        protected boolean evaluateTest(Description description) {
+            return description.getAnnotation(mAnnotationClass) != null ||
+                    description.getTestClass().isAnnotationPresent(mAnnotationClass);
+        }
+
+        protected Class<? extends Annotation> getAnnotationClass() {
+            return mAnnotationClass;
+        }
+
+        /**
          * {@inheritDoc}
          */
         @Override
         public String describe() {
             return String.format("annotation %s", mAnnotationClass.getName());
+        }
+    }
+
+    /**
+     * A filter for test sizes.
+     * <p/>
+     * Will match if test method has given size annotation, or class does, but only if method does
+     * not have any other size annotations. ie method size annotation overrides class size
+     * annotation.
+     */
+    private static class SizeFilter extends AnnotationInclusionFilter {
+        @SuppressWarnings("unchecked")
+        private static final Set<Class<?>> ALL_SIZES = Collections.unmodifiableSet(new
+                HashSet<Class<?>>(Arrays.asList(SmallTest.class, MediumTest.class,
+                        LargeTest.class)));
+
+        SizeFilter(Class<? extends Annotation> annotation) {
+            super(annotation);
+        }
+
+        @Override
+        protected boolean evaluateTest(Description description) {
+            if (description.getAnnotation(getAnnotationClass()) != null) {
+                return true;
+            } else if (description.getTestClass().isAnnotationPresent(getAnnotationClass())) {
+                // size annotation matched at class level. Make sure method doesn't have any other
+                // size annotations
+                for (Annotation a : description.getAnnotations()) {
+                    if (ALL_SIZES.contains(a.annotationType())) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
         }
     }
 
@@ -222,11 +273,11 @@ public class TestRequestBuilder {
      */
     public void addTestSizeFilter(String testSize) {
         if (SMALL_SIZE.equals(testSize)) {
-            mFilter = mFilter.intersect(new AnnotationInclusionFilter(SmallTest.class));
+            mFilter = mFilter.intersect(new SizeFilter(SmallTest.class));
         } else if (MEDIUM_SIZE.equals(testSize)) {
-            mFilter = mFilter.intersect(new AnnotationInclusionFilter(MediumTest.class));
+            mFilter = mFilter.intersect(new SizeFilter(MediumTest.class));
         } else if (LARGE_SIZE.equals(testSize)) {
-            mFilter = mFilter.intersect(new AnnotationInclusionFilter(LargeTest.class));
+            mFilter = mFilter.intersect(new SizeFilter(LargeTest.class));
         } else {
             Log.e(LOG_TAG, String.format("Unrecognized test size '%s'", testSize));
         }
@@ -318,7 +369,7 @@ public class TestRequestBuilder {
         ClassPathScanner scanner = new ClassPathScanner(mApkPaths);
 
         ChainedClassNameFilter filter =   new ChainedClassNameFilter();
-         // exclude inner classes
+        // exclude inner classes
         filter.add(new ExternalClassNameFilter());
         if (mTestPackageName != null) {
             // request to run only a specific java package, honor that
