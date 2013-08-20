@@ -82,20 +82,15 @@ public class TestRequestBuilder {
         public boolean shouldRun(Description description) {
             if (description.isTest()) {
                 return evaluateTest(description);
-            } else {
-                // the entire test class/suite should be filtered out if all its methods are
-                // filtered
-                // TODO: This is not efficient since some children may end up being evaluated more
-                // than once. This logic seems to be only necessary for JUnit3 tests. Look into
-                // fixing in upstream
-                for (Description child : description.getChildren()) {
-                    if (shouldRun(child)) {
-                        return true;
-                    }
-                }
-                // no children to run, filter this out
-                return false;
             }
+            // this is a suite, explicitly check if any children should run
+            for (Description each : description.getChildren()) {
+                if (shouldRun(each)) {
+                    return true;
+                }
+            }
+            // no children to run, filter this out
+            return false;
         }
 
         /**
@@ -174,18 +169,21 @@ public class TestRequestBuilder {
         @Override
         public boolean shouldRun(Description description) {
             final Class<?> testClass = description.getTestClass();
-
-            /* Parameterized tests have no test classes. */
-            if (testClass == null) {
-                return true;
-            }
-
-            if (testClass.isAnnotationPresent(mAnnotationClass) ||
-                    description.getAnnotation(mAnnotationClass) != null) {
+            if ((testClass != null && testClass.isAnnotationPresent(mAnnotationClass))
+                    || (description.getAnnotation(mAnnotationClass) != null)) {
                 return false;
-            } else {
+            }
+            if (description.isTest() ) {
                 return true;
             }
+            // this is a suite, explicitly check if any children want to run
+            for (Description each : description.getChildren()) {
+                if (shouldRun(each)) {
+                    return true;
+                }
+            }
+            // no children to run, filter this out
+            return false;
         }
 
         /**

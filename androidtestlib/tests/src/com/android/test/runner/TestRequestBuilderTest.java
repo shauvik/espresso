@@ -127,7 +127,61 @@ public class TestRequestBuilderTest {
 
         public void testRun() {
         }
+        public void testRun2() {
+        }
 
+        @Suppress
+        public void testSuppressed() {
+        }
+    }
+
+    public static class SampleAllSuppressed extends TestCase {
+
+        @Suppress
+        public void testSuppressed2() {
+        }
+
+        @Suppress
+        public void testSuppressed() {
+        }
+    }
+
+    public static class SampleSizeAndSuppress extends TestCase {
+
+        @MediumTest
+        public void testMedium() {
+        }
+
+        @Suppress
+        public void testSuppressed() {
+        }
+    }
+
+    public static class SampleSizeWithSuppress extends TestCase {
+
+        public void testNoSize() {
+        }
+
+        @SmallTest
+        @Suppress
+        public void testSmallAndSuppressed() {
+        }
+
+        @Suppress
+        public void testSuppressed() {
+        }
+    }
+
+    public static class SampleJUnit3 extends TestCase {
+        public void testFromSuper() {
+
+        }
+    }
+
+    public static class SampleJUnit3SuppressedWithSuper extends SampleJUnit3 {
+
+        public void testRun() {
+        }
         public void testRun2() {
         }
 
@@ -240,6 +294,97 @@ public class TestRequestBuilderTest {
         JUnitCore testRunner = new JUnitCore();
         Result r = testRunner.run(request.getRequest());
         Assert.assertEquals(2, r.getRunCount());
+    }
+
+    /**
+     * Test @Suppress in combination with size that filters out all methods
+     */
+    @Test
+    public void testSuppress_withSize() {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addTestClass(SampleJUnit3Suppressed.class.getName());
+        b.addTestClass(SampleJUnit3Test.class.getName());
+        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        MyRunListener l = new MyRunListener();
+        testRunner.addListener(l);
+        Result r = testRunner.run(request.getRequest());
+        Assert.assertEquals(2, r.getRunCount());
+        Assert.assertEquals(2, l.mTestCount);
+    }
+
+    /**
+     * Test @Suppress in combination with size that filters out all methods, with super class.
+     */
+    @Test
+    public void testSuppress_withSizeAndSuper() {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addTestClass(SampleJUnit3SuppressedWithSuper.class.getName());
+        b.addTestClass(SampleJUnit3Test.class.getName());
+        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        MyRunListener l = new MyRunListener();
+        testRunner.addListener(l);
+        Result r = testRunner.run(request.getRequest());
+        Assert.assertEquals(2, r.getRunCount());
+        Assert.assertEquals(2, l.mTestCount);
+    }
+
+    /**
+     * Test @Suppress when all methods have been filtered
+     */
+    @Test
+    public void testSuppress_all() {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addTestClass(SampleAllSuppressed.class.getName());
+        b.addTestClass(SampleJUnit3Suppressed.class.getName());
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        MyRunListener l = new MyRunListener();
+        testRunner.addListener(l);
+        Result r = testRunner.run(request.getRequest());
+        Assert.assertEquals(2, r.getRunCount());
+        Assert.assertEquals(2, l.mTestCount);
+    }
+
+    /**
+     * Test case where all methods are filtered out by combination of @Suppress and size when all
+     * methods have been filtered.
+     */
+    @Test
+    public void testSizeAndSuppress() {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addTestClass(SampleSizeAndSuppress.class.getName());
+        b.addTestClass(SampleJUnit3Test.class.getName());
+        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        MyRunListener l = new MyRunListener();
+        testRunner.addListener(l);
+        Result r = testRunner.run(request.getRequest());
+        Assert.assertEquals(2, r.getRunCount());
+        Assert.assertEquals(2, l.mTestCount);
+    }
+
+    /**
+     * Test case where method has both a size annotation and suppress annotation. Expect suppress
+     * to overrule the size.
+     */
+    @Test
+    public void testSizeWithSuppress() {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addTestClass(SampleSizeWithSuppress.class.getName());
+        b.addTestClass(SampleJUnit3Test.class.getName());
+        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        MyRunListener l = new MyRunListener();
+        testRunner.addListener(l);
+        Result r = testRunner.run(request.getRequest());
+        Assert.assertEquals(2, r.getRunCount());
+        Assert.assertEquals(2, l.mTestCount);
     }
 
     /**
