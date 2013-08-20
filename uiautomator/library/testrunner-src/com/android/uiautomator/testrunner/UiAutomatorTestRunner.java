@@ -162,6 +162,7 @@ public class UiAutomatorTestRunner {
         } catch (Throwable t) {
             // catch all exceptions so a more verbose error message can be outputted
             resultPrinter.printUnexpectedError(t);
+            testRunOutput.putString("shortMsg", t.getMessage());
         } finally {
             long runTime = SystemClock.uptimeMillis() - startTime;
             resultPrinter.print(testRunResult, runTime, testRunOutput);
