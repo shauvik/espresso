@@ -132,25 +132,32 @@ public class TestLoader {
      * @return <code>true</code> if loadedClass is a test
      */
     private boolean isTestClass(Class<?> loadedClass) {
-        if (Modifier.isAbstract(loadedClass.getModifiers())) {
-            Log.v(LOG_TAG, String.format("Skipping abstract class %s: not a test",
+        try {
+            if (Modifier.isAbstract(loadedClass.getModifiers())) {
+                Log.v(LOG_TAG, String.format("Skipping abstract class %s: not a test",
+                        loadedClass.getName()));
+                return false;
+            }
+            // TODO: try to find upstream junit calls to replace these checks
+            if (junit.framework.Test.class.isAssignableFrom(loadedClass)) {
+                return true;
+            }
+            // TODO: look for a 'suite' method?
+            if (loadedClass.isAnnotationPresent(org.junit.runner.RunWith.class)) {
+                return true;
+            }
+            for (Method testMethod : loadedClass.getMethods()) {
+                if (testMethod.isAnnotationPresent(org.junit.Test.class)) {
+                    return true;
+                }
+            }
+            Log.v(LOG_TAG, String.format("Skipping class %s: not a test", loadedClass.getName()));
+            return false;
+        } catch (NoClassDefFoundError e) {
+            // defensively catch this - can occur if cannot load methods
+            Log.w(LOG_TAG, String.format("%s in isTestClass for %s", e.toString(),
                     loadedClass.getName()));
             return false;
         }
-        // TODO: try to find upstream junit calls to replace these checks
-        if (junit.framework.Test.class.isAssignableFrom(loadedClass)) {
-            return true;
-        }
-        // TODO: look for a 'suite' method?
-        if (loadedClass.isAnnotationPresent(org.junit.runner.RunWith.class)) {
-            return true;
-        }
-        for (Method testMethod : loadedClass.getMethods()) {
-            if (testMethod.isAnnotationPresent(org.junit.Test.class)) {
-                return true;
-            }
-        }
-        Log.v(LOG_TAG, String.format("Skipping class %s: not a test", loadedClass.getName()));
-        return false;
     }
 }
