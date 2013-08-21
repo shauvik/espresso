@@ -28,6 +28,7 @@ import com.android.test.runner.listener.CoverageListener;
 import com.android.test.runner.listener.DelayInjector;
 import com.android.test.runner.listener.InstrumentationResultPrinter;
 import com.android.test.runner.listener.InstrumentationRunListener;
+import com.android.test.runner.listener.LogRunListener;
 import com.android.test.runner.listener.SuiteAssignmentPrinter;
 
 import org.junit.internal.TextListener;
@@ -206,8 +207,6 @@ public class AndroidJUnitRunner extends Instrumentation {
             TestRequest testRequest = buildRequest(getArguments(), writer);
             Result result = testRunner.run(testRequest.getRequest());
             result.getFailures().addAll(testRequest.getFailures());
-            Log.i(LOG_TAG, String.format("Test run complete. %d tests, %d failed, %d ignored",
-                    result.getRunCount(), result.getFailureCount(), result.getIgnoreCount()));
         } catch (Throwable t) {
             // catch all exceptions so a more verbose error message can be displayed
             writer.println(String.format(
@@ -233,6 +232,7 @@ public class AndroidJUnitRunner extends Instrumentation {
             addListener(listeners, testRunner, new SuiteAssignmentPrinter(writer));
         } else {
             addListener(listeners, testRunner, new TextListener(writer));
+            addListener(listeners, testRunner, new LogRunListener());
             addListener(listeners, testRunner, new InstrumentationResultPrinter(this));
             addDelayListener(listeners, testRunner);
             addCoverageListener(listeners, testRunner);
