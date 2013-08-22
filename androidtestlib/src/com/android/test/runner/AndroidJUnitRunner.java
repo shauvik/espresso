@@ -405,5 +405,13 @@ public class AndroidJUnitRunner extends Instrumentation {
         String dexCache = getTargetContext().getCacheDir().getPath();
         Log.i(LOG_TAG, "Setting dexmaker.dexcache to " + dexCache);
         System.setProperty("dexmaker.dexcache", getTargetContext().getCacheDir().getPath());
+
+        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+        // must set the context classloader for apps that use a shared uid, see
+        // frameworks/base/core/java/android/app/LoadedApk.java
+        ClassLoader newClassLoader = this.getClass().getClassLoader();
+        Log.i(LOG_TAG, String.format("Setting context classloader to '%s', Original: '%s'",
+                newClassLoader.toString(), originalClassLoader.toString()));
+        Thread.currentThread().setContextClassLoader(newClassLoader);
     }
 }
