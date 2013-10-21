@@ -44,6 +44,51 @@ LOCAL_JAVA_LIBRARIES := junit4-target
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # -----------------------------------------------
+# build a droiddoc package for integration in d.android.com 
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := $(call all-java-files-under, src) \
+  $(call junit4_to_document, ../../../external/junit/src/org) \
+  $(call all-java-files-under, ../../../external/hamcrest/src)
+
+LOCAL_MODULE := android-test-lib-docs
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_CLASS := JAVA_LIBRARIES
+LOCAL_JAVA_LIBRARIES := android-test-lib
+LOCAL_SDK_VERSION := 8
+LOCAL_IS_HOST_MODULE := false
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR := build/tools/droiddoc/templates-sdk
+
+LOCAL_DROIDDOC_OPTIONS := \
+        -hdf android.whichdoc online \
+        -hdf template.showLanguageMenu true
+
+include $(BUILD_DROIDDOC)
+
+# ----------------------------------------------
+# build a offline droiddoc package
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := $(call all-java-files-under, src) \
+  $(call all-java-files-under, ../../../external/junit/src/org) \
+  $(call all-java-files-under, ../../../external/hamcrest/src)
+
+LOCAL_MODULE := android-test-lib-offline-docs
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_CLASS := JAVA_LIBRARIES
+LOCAL_JAVA_LIBRARIES := android-test-lib
+LOCAL_SDK_VERSION := 8
+LOCAL_IS_HOST_MODULE := false
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR := build/tools/droiddoc/templates-sdk
+
+LOCAL_DROIDDOC_OPTIONS := \
+        -offlinemode \
+        -hdf android.whichdoc offline \
+        -hdf template.showLanguageMenu true
+
+include $(BUILD_DROIDDOC)
+
+# ----------------------------------------------
 
 # Use the following include to make our test apk.
 include $(call all-makefiles-under,$(LOCAL_PATH))
