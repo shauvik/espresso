@@ -136,9 +136,10 @@ public class TestRequestBuilder {
 
         @Override
         protected boolean evaluateTest(Description description) {
+            final Class<?> testClass = description.getTestClass();
             if (description.getAnnotation(getAnnotationClass()) != null) {
                 return true;
-            } else if (description.getTestClass().isAnnotationPresent(getAnnotationClass())) {
+            } else if (testClass != null && testClass.isAnnotationPresent(getAnnotationClass())) {
                 // size annotation matched at class level. Make sure method doesn't have any other
                 // size annotations
                 for (Annotation a : description.getAnnotations()) {
