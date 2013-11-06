@@ -153,8 +153,13 @@ public class TestLoader {
             }
             Log.v(LOG_TAG, String.format("Skipping class %s: not a test", loadedClass.getName()));
             return false;
-        } catch (NoClassDefFoundError e) {
-            // defensively catch this - can occur if cannot load methods
+        } catch (Exception e) {
+            // Defensively catch exceptions - Will throw runtime exception if it cannot load methods.
+            // For earlier versions of Android (Pre-ICS), Dalvik might try to initialize a class
+            // during getMethods(), fail to do so, hide the error and throw a NoSuchMethodException.
+            // Since the java.lang.Class.getMethods does not declare such an exception, resort to a
+            // generic catch all.
+            // For ICS+, Dalvik will throw a NoClassDefFoundException.
             Log.w(LOG_TAG, String.format("%s in isTestClass for %s", e.toString(),
                     loadedClass.getName()));
             return false;
