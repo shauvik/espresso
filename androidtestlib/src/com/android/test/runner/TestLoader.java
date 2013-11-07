@@ -136,6 +136,11 @@ public class TestLoader {
             Log.v(LOG_TAG, String.format("Skipping abstract class %s: not a test",
                     loadedClass.getName()));
             return false;
+        } catch (Error e) {
+            // defensively catch Errors too
+            Log.w(LOG_TAG, String.format("%s in isTestClass for %s", e.toString(),
+                    loadedClass.getName()));
+            return false;
         }
         // TODO: try to find upstream junit calls to replace these checks
         if (junit.framework.Test.class.isAssignableFrom(loadedClass)) {
