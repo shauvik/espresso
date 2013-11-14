@@ -188,6 +188,9 @@ public class AndroidJUnitRunner extends Instrumentation {
 
     @Override
     public void onStart() {
+        // Wait for target context to finish.
+        waitForIdleSync();
+
         prepareLooper();
 
         if (getBooleanArgument(ARGUMENT_DEBUG)) {
