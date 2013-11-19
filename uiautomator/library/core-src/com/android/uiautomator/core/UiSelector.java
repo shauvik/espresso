@@ -290,7 +290,7 @@ public class UiSelector {
 
     /**
      * Set the search criteria to match the resource ID
-     * of the widget, using a regular expression.http://blog.bettersoftwaretesting.com/
+     * of the widget, using a regular expression.
      *
      * @param regex a regular expression
      * @return UiSelector with the specified search criteria
