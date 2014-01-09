@@ -378,7 +378,8 @@ public class TestRequestBuilder {
             filter.addAll(new ExcludePackageNameFilter("junit"),
                     new ExcludePackageNameFilter("org.junit"),
                     new ExcludePackageNameFilter("org.hamcrest"),
-                    new ExcludePackageNameFilter("com.android.test.runner.junit3"));
+                    // always skip AndroidTestSuite
+                    new ExcludePackageNameFilter("android.support.test.internal.runner.junit3"));
         }
 
         try {
