@@ -20,55 +20,31 @@ import android.os.Bundle;
 import android.support.test.InjectContext;
 import android.support.test.InjectInstrumentation;
 
-
+import org.junit.internal.builders.JUnit4Builder;
 import org.junit.runner.Runner;
 import org.junit.runners.model.RunnerBuilder;
-
-import java.lang.reflect.Field;
 
 /**
  * A {@link RunnerBuilder} that will build customized runners needed to handle {@link InjectContext}
  * and {@link InjectInstrumentation}.
  */
-public class AndroidJUnit4Builder extends RunnerBuilder {
+public class AndroidJUnit4Builder extends JUnit4Builder {
 
-    private final Instrumentation mInstrumentation;
-    private final Bundle mBundle;
-    private boolean mSkipExecution;
+   private final Instrumentation mInstrumentation;
+   private final Bundle mBundle;
+   private boolean mSkipExecution;
 
-    public AndroidJUnit4Builder(Instrumentation instr, Bundle bundle, boolean skipExecution) {
-        mInstrumentation = instr;
-        mBundle = bundle;
-        mSkipExecution = skipExecution;
-    }
+   public AndroidJUnit4Builder(Instrumentation instr, Bundle bundle, boolean skipExecution) {
+      mInstrumentation = instr;
+      mBundle = bundle;
+      mSkipExecution = skipExecution;
+   }
 
-    @Override
-    public Runner runnerForClass(Class<?> testClass) throws Throwable {
-        if (mSkipExecution) {
-            return new NonExecutingJUnit4ClassRunner(testClass);
-        }
-        if (hasInjectedFields(testClass)) {
-            return new AndroidJUnit4ClassRunner(testClass, mInstrumentation, mBundle);
-        }
-        return null;
-    }
-
-    private boolean hasInjectedFields(Class<?> testClass) {
-        // TODO: evaluate performance of this method, would be nice to utilize the annotation
-        // caching mechanism of ParentRunner
-        Class<?> superClass = testClass;
-        while (superClass != null) {
-            for (Field field : superClass.getDeclaredFields()) {
-                if (field.isAnnotationPresent(InjectInstrumentation.class)) {
-                    return true;
-                }
-                if (field.isAnnotationPresent(InjectContext.class)) {
-                    return true;
-                }
-            }
-            superClass = superClass.getSuperclass();
-        }
-        return false;
-    }
-
+   @Override
+   public Runner runnerForClass(Class<?> testClass) throws Throwable {
+      if (mSkipExecution) {
+         return new NonExecutingJUnit4ClassRunner(testClass);
+      }
+      return new AndroidJUnit4ClassRunner(testClass, mInstrumentation, mBundle);
+   }
 }

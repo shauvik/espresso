@@ -19,12 +19,9 @@ import android.app.Instrumentation;
 import android.os.Bundle;
 import android.support.test.InjectBundle;
 import android.support.test.InjectInstrumentation;
-import android.support.test.internal.runner.TestRequest;
-import android.support.test.internal.runner.TestRequestBuilder;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.test.suitebuilder.annotation.Suppress;
-
 
 import junit.framework.TestCase;
 
@@ -205,270 +202,270 @@ public class TestRequestBuilderTest {
     /**
      * Test initial condition for size filtering - that all tests run when no filter is attached
      */
-    @Test
-    public void testNoSize() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleTest.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
-        JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
-        Assert.assertEquals(2, result.getRunCount());
-    }
+     @Test
+     public void testNoSize() {
+         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addTestClass(SampleTest.class.getName());
+         TestRequest request = b.build(mInstr, mBundle);
+         JUnitCore testRunner = new JUnitCore();
+         Result result = testRunner.run(request.getRequest());
+         Assert.assertEquals(2, result.getRunCount());
+     }
 
-    /**
-     * Test that size annotation filtering works
-     */
-    @Test
-    public void testSize() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleTest.class.getName());
-        b.addTestSizeFilter("small");
-        TestRequest request = b.build(mInstr, mBundle);
-        JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
-        Assert.assertEquals(1, result.getRunCount());
-    }
+     /**
+      * Test that size annotation filtering works
+      */
+     @Test
+     public void testSize() {
+         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addTestClass(SampleTest.class.getName());
+         b.addTestSizeFilter("small");
+         TestRequest request = b.build(mInstr, mBundle);
+         JUnitCore testRunner = new JUnitCore();
+         Result result = testRunner.run(request.getRequest());
+         Assert.assertEquals(1, result.getRunCount());
+     }
 
-    /**
-     * Test that size annotation filtering by class works
-     */
-    @Test
-    public void testSize_class() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleTest.class.getName());
-        b.addTestClass(SampleClassSize.class.getName());
-        b.addTestSizeFilter("small");
-        TestRequest request = b.build(mInstr, mBundle);
-        JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
-        Assert.assertEquals(3, result.getRunCount());
-    }
+     /**
+      * Test that size annotation filtering by class works
+      */
+     @Test
+     public void testSize_class() {
+         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addTestClass(SampleTest.class.getName());
+         b.addTestClass(SampleClassSize.class.getName());
+         b.addTestSizeFilter("small");
+         TestRequest request = b.build(mInstr, mBundle);
+         JUnitCore testRunner = new JUnitCore();
+         Result result = testRunner.run(request.getRequest());
+         Assert.assertEquals(3, result.getRunCount());
+     }
 
-    /**
-     * Test case where entire JUnit3 test class has been filtered out
-     */
-    @Test
-    public void testSize_classFiltered() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleTest.class.getName());
-        b.addTestClass(SampleNoSize.class.getName());
-        b.addTestSizeFilter("small");
-        TestRequest request = b.build(mInstr, mBundle);
-        MyRunListener l = new MyRunListener();
-        JUnitCore testRunner = new JUnitCore();
-        testRunner.addListener(l);
-        testRunner.run(request.getRequest());
-        Assert.assertEquals(1, l.mTestCount);
-    }
+     /**
+      * Test case where entire JUnit3 test class has been filtered out
+      */
+     @Test
+     public void testSize_classFiltered() {
+         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addTestClass(SampleTest.class.getName());
+         b.addTestClass(SampleNoSize.class.getName());
+         b.addTestSizeFilter("small");
+         TestRequest request = b.build(mInstr, mBundle);
+         MyRunListener l = new MyRunListener();
+         JUnitCore testRunner = new JUnitCore();
+         testRunner.addListener(l);
+         testRunner.run(request.getRequest());
+         Assert.assertEquals(1, l.mTestCount);
+     }
 
-    private static class MyRunListener extends RunListener {
-        private int mTestCount = -1;
+     private static class MyRunListener extends RunListener {
+         private int mTestCount = -1;
 
-        @Override
-        public void testRunStarted(Description description) throws Exception {
-            mTestCount = description.testCount();
-        }
-    }
+         @Override
+         public void testRunStarted(Description description) throws Exception {
+             mTestCount = description.testCount();
+         }
+     }
 
-    /**
-     * Test size annotations with JUnit3 test methods
-     */
-    @Test
-    public void testSize_junit3Method() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleJUnit3Test.class.getName());
-        b.addTestClass(SampleNoSize.class.getName());
-        b.addTestSizeFilter("small");
-        TestRequest request = b.build(mInstr, mBundle);
-        JUnitCore testRunner = new JUnitCore();
-        Result r = testRunner.run(request.getRequest());
-        Assert.assertEquals(2, r.getRunCount());
-    }
+     /**
+      * Test size annotations with JUnit3 test methods
+      */
+     @Test
+     public void testSize_junit3Method() {
+         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addTestClass(SampleJUnit3Test.class.getName());
+         b.addTestClass(SampleNoSize.class.getName());
+         b.addTestSizeFilter("small");
+         TestRequest request = b.build(mInstr, mBundle);
+         JUnitCore testRunner = new JUnitCore();
+         Result r = testRunner.run(request.getRequest());
+         Assert.assertEquals(2, r.getRunCount());
+     }
 
-    /**
-     * Test @Suppress with JUnit3 tests
-     */
-    @Test
-    public void testSuppress_junit3Method() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleJUnit3Suppressed.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
-        JUnitCore testRunner = new JUnitCore();
-        Result r = testRunner.run(request.getRequest());
-        Assert.assertEquals(2, r.getRunCount());
-    }
+     /**
+      * Test @Suppress with JUnit3 tests
+      */
+     @Test
+     public void testSuppress_junit3Method() {
+         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addTestClass(SampleJUnit3Suppressed.class.getName());
+         TestRequest request = b.build(mInstr, mBundle);
+         JUnitCore testRunner = new JUnitCore();
+         Result r = testRunner.run(request.getRequest());
+         Assert.assertEquals(2, r.getRunCount());
+     }
 
-    /**
-     * Test @Suppress in combination with size that filters out all methods
-     */
-    @Test
-    public void testSuppress_withSize() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleJUnit3Suppressed.class.getName());
-        b.addTestClass(SampleJUnit3Test.class.getName());
-        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
-        TestRequest request = b.build(mInstr, mBundle);
-        JUnitCore testRunner = new JUnitCore();
-        MyRunListener l = new MyRunListener();
-        testRunner.addListener(l);
-        Result r = testRunner.run(request.getRequest());
-        Assert.assertEquals(2, r.getRunCount());
-        Assert.assertEquals(2, l.mTestCount);
-    }
+     /**
+      * Test @Suppress in combination with size that filters out all methods
+      */
+     @Test
+     public void testSuppress_withSize() {
+         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addTestClass(SampleJUnit3Suppressed.class.getName());
+         b.addTestClass(SampleJUnit3Test.class.getName());
+         b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
+         TestRequest request = b.build(mInstr, mBundle);
+         JUnitCore testRunner = new JUnitCore();
+         MyRunListener l = new MyRunListener();
+         testRunner.addListener(l);
+         Result r = testRunner.run(request.getRequest());
+         Assert.assertEquals(2, r.getRunCount());
+         Assert.assertEquals(2, l.mTestCount);
+     }
 
-    /**
-     * Test @Suppress in combination with size that filters out all methods, with super class.
-     */
-    @Test
-    public void testSuppress_withSizeAndSuper() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleJUnit3SuppressedWithSuper.class.getName());
-        b.addTestClass(SampleJUnit3Test.class.getName());
-        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
-        TestRequest request = b.build(mInstr, mBundle);
-        JUnitCore testRunner = new JUnitCore();
-        MyRunListener l = new MyRunListener();
-        testRunner.addListener(l);
-        Result r = testRunner.run(request.getRequest());
-        Assert.assertEquals(2, r.getRunCount());
-        Assert.assertEquals(2, l.mTestCount);
-    }
+     /**
+      * Test @Suppress in combination with size that filters out all methods, with super class.
+      */
+     @Test
+     public void testSuppress_withSizeAndSuper() {
+         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addTestClass(SampleJUnit3SuppressedWithSuper.class.getName());
+         b.addTestClass(SampleJUnit3Test.class.getName());
+         b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
+         TestRequest request = b.build(mInstr, mBundle);
+         JUnitCore testRunner = new JUnitCore();
+         MyRunListener l = new MyRunListener();
+         testRunner.addListener(l);
+         Result r = testRunner.run(request.getRequest());
+         Assert.assertEquals(2, r.getRunCount());
+         Assert.assertEquals(2, l.mTestCount);
+     }
 
-    /**
-     * Test @Suppress when all methods have been filtered
-     */
-    @Test
-    public void testSuppress_all() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleAllSuppressed.class.getName());
-        b.addTestClass(SampleJUnit3Suppressed.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
-        JUnitCore testRunner = new JUnitCore();
-        MyRunListener l = new MyRunListener();
-        testRunner.addListener(l);
-        Result r = testRunner.run(request.getRequest());
-        Assert.assertEquals(2, r.getRunCount());
-        Assert.assertEquals(2, l.mTestCount);
-    }
+     /**
+      * Test @Suppress when all methods have been filtered
+      */
+     @Test
+     public void testSuppress_all() {
+         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addTestClass(SampleAllSuppressed.class.getName());
+         b.addTestClass(SampleJUnit3Suppressed.class.getName());
+         TestRequest request = b.build(mInstr, mBundle);
+         JUnitCore testRunner = new JUnitCore();
+         MyRunListener l = new MyRunListener();
+         testRunner.addListener(l);
+         Result r = testRunner.run(request.getRequest());
+         Assert.assertEquals(2, r.getRunCount());
+         Assert.assertEquals(2, l.mTestCount);
+     }
 
-    /**
-     * Test case where all methods are filtered out by combination of @Suppress and size when all
-     * methods have been filtered.
-     */
-    @Test
-    public void testSizeAndSuppress() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleSizeAndSuppress.class.getName());
-        b.addTestClass(SampleJUnit3Test.class.getName());
-        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
-        TestRequest request = b.build(mInstr, mBundle);
-        JUnitCore testRunner = new JUnitCore();
-        MyRunListener l = new MyRunListener();
-        testRunner.addListener(l);
-        Result r = testRunner.run(request.getRequest());
-        Assert.assertEquals(2, r.getRunCount());
-        Assert.assertEquals(2, l.mTestCount);
-    }
+     /**
+      * Test case where all methods are filtered out by combination of @Suppress and size when all
+      * methods have been filtered.
+      */
+     @Test
+     public void testSizeAndSuppress() {
+         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addTestClass(SampleSizeAndSuppress.class.getName());
+         b.addTestClass(SampleJUnit3Test.class.getName());
+         b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
+         TestRequest request = b.build(mInstr, mBundle);
+         JUnitCore testRunner = new JUnitCore();
+         MyRunListener l = new MyRunListener();
+         testRunner.addListener(l);
+         Result r = testRunner.run(request.getRequest());
+         Assert.assertEquals(2, r.getRunCount());
+         Assert.assertEquals(2, l.mTestCount);
+     }
 
-    /**
-     * Test case where method has both a size annotation and suppress annotation. Expect suppress
-     * to overrule the size.
-     */
-    @Test
-    public void testSizeWithSuppress() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleSizeWithSuppress.class.getName());
-        b.addTestClass(SampleJUnit3Test.class.getName());
-        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
-        TestRequest request = b.build(mInstr, mBundle);
-        JUnitCore testRunner = new JUnitCore();
-        MyRunListener l = new MyRunListener();
-        testRunner.addListener(l);
-        Result r = testRunner.run(request.getRequest());
-        Assert.assertEquals(2, r.getRunCount());
-        Assert.assertEquals(2, l.mTestCount);
-    }
+     /**
+      * Test case where method has both a size annotation and suppress annotation. Expect suppress
+      * to overrule the size.
+      */
+     @Test
+     public void testSizeWithSuppress() {
+         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addTestClass(SampleSizeWithSuppress.class.getName());
+         b.addTestClass(SampleJUnit3Test.class.getName());
+         b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
+         TestRequest request = b.build(mInstr, mBundle);
+         JUnitCore testRunner = new JUnitCore();
+         MyRunListener l = new MyRunListener();
+         testRunner.addListener(l);
+         Result r = testRunner.run(request.getRequest());
+         Assert.assertEquals(2, r.getRunCount());
+         Assert.assertEquals(2, l.mTestCount);
+     }
 
-    /**
-     * Test that annotation filtering by class works
-     */
-    @Test
-    public void testAddAnnotationInclusionFilter() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addAnnotationInclusionFilter(SmallTest.class.getName());
-        b.addTestClass(SampleTest.class.getName());
-        b.addTestClass(SampleClassSize.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
-        JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
-        Assert.assertEquals(3, result.getRunCount());
-    }
+     /**
+      * Test that annotation filtering by class works
+      */
+     @Test
+     public void testAddAnnotationInclusionFilter() {
+         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addAnnotationInclusionFilter(SmallTest.class.getName());
+         b.addTestClass(SampleTest.class.getName());
+         b.addTestClass(SampleClassSize.class.getName());
+         TestRequest request = b.build(mInstr, mBundle);
+         JUnitCore testRunner = new JUnitCore();
+         Result result = testRunner.run(request.getRequest());
+         Assert.assertEquals(3, result.getRunCount());
+     }
 
-    /**
-     * Test that annotation filtering by class works
-     */
-    @Test
-    public void testAddAnnotationExclusionFilter() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addAnnotationExclusionFilter(SmallTest.class.getName());
-        b.addTestClass(SampleTest.class.getName());
-        b.addTestClass(SampleClassSize.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
-        JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
-        Assert.assertEquals(1, result.getRunCount());
-    }
+     /**
+      * Test that annotation filtering by class works
+      */
+     @Test
+     public void testAddAnnotationExclusionFilter() {
+         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addAnnotationExclusionFilter(SmallTest.class.getName());
+         b.addTestClass(SampleTest.class.getName());
+         b.addTestClass(SampleClassSize.class.getName());
+         TestRequest request = b.build(mInstr, mBundle);
+         JUnitCore testRunner = new JUnitCore();
+         Result result = testRunner.run(request.getRequest());
+         Assert.assertEquals(1, result.getRunCount());
+     }
 
-    /**
-     * Test that annotation filtering by class works when methods are from superclass.
-     *
-     * TODO: add a similiar test to upstream junit.
-     */
-    @Test
-    public void testAddAnnotationInclusionFilter_super() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addAnnotationInclusionFilter(SmallTest.class.getName());
-        b.addTestClass(InheritedAnnnotation.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
-        JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
-        Assert.assertEquals(2, result.getRunCount());
-    }
+     /**
+      * Test that annotation filtering by class works when methods are from superclass.
+      *
+      * TODO: add a similiar test to upstream junit.
+      */
+     @Test
+     public void testAddAnnotationInclusionFilter_super() {
+         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addAnnotationInclusionFilter(SmallTest.class.getName());
+         b.addTestClass(InheritedAnnnotation.class.getName());
+         TestRequest request = b.build(mInstr, mBundle);
+         JUnitCore testRunner = new JUnitCore();
+         Result result = testRunner.run(request.getRequest());
+         Assert.assertEquals(2, result.getRunCount());
+     }
 
-    /**
-     * Test that a method size annotation overrides a class size annotation.
-     */
-    @Test
-    public void testTestSizeFilter_override() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
-        b.addTestClass(SampleOverrideSize.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
-        JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
-        Assert.assertEquals(1, result.getRunCount());
+     /**
+      * Test that a method size annotation overrides a class size annotation.
+      */
+     @Test
+     public void testTestSizeFilter_override() {
+         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
+         b.addTestClass(SampleOverrideSize.class.getName());
+         TestRequest request = b.build(mInstr, mBundle);
+         JUnitCore testRunner = new JUnitCore();
+         Result result = testRunner.run(request.getRequest());
+         Assert.assertEquals(1, result.getRunCount());
 
-        b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestSizeFilter(TestRequestBuilder.MEDIUM_SIZE);
-        b.addTestClass(SampleOverrideSize.class.getName());
-        request = b.build(mInstr, mBundle);
-        testRunner = new JUnitCore();
-        result = testRunner.run(request.getRequest());
-        Assert.assertEquals(1, result.getRunCount());
-    }
+         b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addTestSizeFilter(TestRequestBuilder.MEDIUM_SIZE);
+         b.addTestClass(SampleOverrideSize.class.getName());
+         request = b.build(mInstr, mBundle);
+         testRunner = new JUnitCore();
+         result = testRunner.run(request.getRequest());
+         Assert.assertEquals(1, result.getRunCount());
+     }
 
-    /**
-     * Test that a method size annotation of same type as class level annotation is correctly
-     * filtered.
-     */
-    @Test
-    public void testTestSizeFilter_sameAnnotation() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
-        b.addTestClass(SampleSameSize.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
-        JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
-        Assert.assertEquals(1, result.getRunCount());
-    }
+     /**
+      * Test that a method size annotation of same type as class level annotation is correctly
+      * filtered.
+      */
+     @Test
+     public void testTestSizeFilter_sameAnnotation() {
+         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+         b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
+         b.addTestClass(SampleSameSize.class.getName());
+         TestRequest request = b.build(mInstr, mBundle);
+         JUnitCore testRunner = new JUnitCore();
+         Result result = testRunner.run(request.getRequest());
+         Assert.assertEquals(1, result.getRunCount());
+     }
 }

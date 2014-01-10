@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.support.test.internal.runner.junit3;
 
-import junit.framework.TestCase;
 import junit.framework.TestResult;
+import junit.framework.TestSuite;
+
+import org.junit.Ignore;
 
 /**
- * A benign test result that does no actually test execution, just runs
- * through the motions
+ * A benign {@link TestSuite} that skips test execution.
  */
-class NoExecTestResult extends DelegatingTestResult {
+@Ignore
+class NoExecTestSuite extends DelegatingFilterableTestSuite {
 
-    NoExecTestResult(TestResult wrappedResult) {
-        super(wrappedResult);
+    public NoExecTestSuite(Class<?> testClass) {
+        this(new TestSuite(testClass));
     }
 
-    /**
-     * Override parent to just inform listeners of test,
-     * and skip test execution.
-     */
+    public NoExecTestSuite(TestSuite s) {
+        super(s);
+    }
+
     @Override
-    protected void run(final TestCase test) {
-        startTest(test);
-        endTest(test);
+    public void run(TestResult result) {
+        // wraps the parent result with a container that skips execution
+        super.run(new NoExecTestResult(result));
     }
 }

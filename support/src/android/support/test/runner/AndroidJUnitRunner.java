@@ -244,7 +244,7 @@ public class AndroidJUnitRunner extends Instrumentation {
             addCoverageListener(listeners, testRunner);
         }
 
-        addExtraListeners(listeners, testRunner, writer);
+        addExtraListenersFromArg(listeners, testRunner, writer);
     }
 
     private void addListener(List<RunListener> list, JUnitCore testRunner, RunListener listener) {
@@ -275,7 +275,7 @@ public class AndroidJUnitRunner extends Instrumentation {
         }
     }
 
-    private void addExtraListeners(List<RunListener> listeners, JUnitCore testRunner,
+    private void addExtraListenersFromArg(List<RunListener> listeners, JUnitCore testRunner,
             PrintStream writer) {
         String extraListenerList = getArguments().getString(ARGUMENT_EXTRA_LISTENER);
         if (extraListenerList == null) {

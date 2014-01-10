@@ -15,61 +15,39 @@
  */
 package android.support.test.internal.runner.junit3;
 
-import junit.framework.Test;
+import android.app.Instrumentation;
+import android.os.Bundle;
+
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
 import org.junit.Ignore;
 
-import android.app.Instrumentation;
-import android.content.Context;
-import android.os.Bundle;
-import android.support.test.BundleTest;
-import android.test.AndroidTestCase;
-import android.test.InstrumentationTestCase;
-
 
 /**
- * A {@link TestSuite} used to pass {@link Context} and {@link Instrumentation} references to child
- * tests.
+ * An extension of {@link TestSuite} that supports Android construct injection into test cases,
+ * and properly supports annotation filtering of test cases
  */
 @Ignore
-class AndroidTestSuite extends TestSuite {
+class AndroidTestSuite extends DelegatingFilterableTestSuite {
 
-    private final Instrumentation mInstr;
     private final Bundle mBundle;
+    private final Instrumentation mInstr;
 
-    AndroidTestSuite(Class<?> clazz, Bundle bundle, Instrumentation instrumentation) {
-        super(clazz);
-        mBundle = bundle;
-        mInstr = instrumentation;
+    public AndroidTestSuite(Class<?> testClass,
+            Bundle bundle, Instrumentation instr) {
+        this(new TestSuite(testClass), bundle, instr);
     }
 
-    AndroidTestSuite(String name, Bundle bundle, Instrumentation instrumentation) {
-        super(name);
+    public AndroidTestSuite(TestSuite s, Bundle bundle, Instrumentation instr) {
+        super(s);
         mBundle = bundle;
-        mInstr = instrumentation;
+        mInstr = instr;
     }
 
     @Override
-    public void runTest(Test test, TestResult result) {
-        if (test instanceof AndroidTestCase) {
-            ((AndroidTestCase)test).setContext(mInstr.getTargetContext());
-        }
-        if (test instanceof InstrumentationTestCase) {
-            ((InstrumentationTestCase)test).injectInstrumentation(mInstr);
-        }
-        if (test instanceof BundleTest) {
-            ((BundleTest)test).injectBundle(mBundle);
-        }
-        super.runTest(test, result);
-    }
-
-    Instrumentation getInstrumentation() {
-        return mInstr;
-    }
-
-    Bundle getBundle() {
-        return mBundle;
+    public void run(TestResult result) {
+        // wrap the result in a new AndroidTestResult to do the bundle and instrumentation injection
+        mWrappedSuite.run(new AndroidTestResult(mBundle, mInstr, result));
     }
 }

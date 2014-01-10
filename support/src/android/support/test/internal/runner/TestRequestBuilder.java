@@ -27,7 +27,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
-
 import org.junit.runner.Computer;
 import org.junit.runner.Description;
 import org.junit.runner.Request;
@@ -345,8 +344,7 @@ public class TestRequestBuilder {
     private static Request classes(Instrumentation instr, Bundle bundle, boolean skipExecution,
             Computer computer, Class<?>... classes) {
         try {
-            AndroidRunnerBuilder builder = new AndroidRunnerBuilder(true, instr, bundle,
-                    skipExecution);
+            AndroidRunnerBuilder builder = new AndroidRunnerBuilder(instr, bundle, skipExecution);
             Runner suite = computer.getSuite(builder, classes);
             return Request.runner(suite);
         } catch (InitializationError e) {

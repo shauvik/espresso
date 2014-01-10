@@ -18,11 +18,14 @@ package android.support.test.internal.runner;
 import android.app.Instrumentation;
 import android.os.Bundle;
 import android.support.test.internal.runner.junit3.AndroidJUnit3Builder;
+import android.support.test.internal.runner.junit3.AndroidSuiteBuilder;
 import android.support.test.internal.runner.junit4.AndroidJUnit4Builder;
 
-
 import org.junit.internal.builders.AllDefaultPossibilitiesBuilder;
-import org.junit.runner.Runner;
+import org.junit.internal.builders.AnnotatedBuilder;
+import org.junit.internal.builders.IgnoredBuilder;
+import org.junit.internal.builders.JUnit3Builder;
+import org.junit.internal.builders.JUnit4Builder;
 import org.junit.runners.model.RunnerBuilder;
 
 /**
@@ -32,25 +35,44 @@ class AndroidRunnerBuilder extends AllDefaultPossibilitiesBuilder {
 
     private final AndroidJUnit3Builder mAndroidJUnit3Builder;
     private final AndroidJUnit4Builder mAndroidJUnit4Builder;
+    private final AndroidSuiteBuilder mAndroidSuiteBuilder;
+    // TODO: customize for Android ?
+    private final AnnotatedBuilder mAndroidAnnotatedBuilder;
+    // TODO: customize for Android ?
+    private final IgnoredBuilder mIgnoredBuilder;
 
-    public AndroidRunnerBuilder(boolean canUseSuiteMethod, Instrumentation instr, Bundle bundle,
+    public AndroidRunnerBuilder(Instrumentation instr, Bundle bundle,
             boolean skipExecution) {
-        super(canUseSuiteMethod);
+        super(true);
         mAndroidJUnit3Builder = new AndroidJUnit3Builder(instr, bundle, skipExecution);
         mAndroidJUnit4Builder = new AndroidJUnit4Builder(instr, bundle, skipExecution);
+        mAndroidSuiteBuilder = new AndroidSuiteBuilder(instr, bundle, skipExecution);
+        mAndroidAnnotatedBuilder = new AnnotatedBuilder(this);
+        mIgnoredBuilder = new IgnoredBuilder();
     }
 
     @Override
-    public Runner runnerForClass(Class<?> testClass) throws Throwable {
-        Runner runner = mAndroidJUnit3Builder.safeRunnerForClass(testClass);
-        if (runner != null) {
-            return runner;
-        }
-        runner = mAndroidJUnit4Builder.safeRunnerForClass(testClass);
-        if (runner != null) {
-            return runner;
-        }
-        return super.runnerForClass(testClass);
+    protected JUnit4Builder junit4Builder() {
+        return mAndroidJUnit4Builder;
     }
 
+    @Override
+    protected JUnit3Builder junit3Builder() {
+        return mAndroidJUnit3Builder;
+    }
+
+    @Override
+    protected AnnotatedBuilder annotatedBuilder() {
+        return mAndroidAnnotatedBuilder;
+    }
+
+    @Override
+    protected IgnoredBuilder ignoredBuilder() {
+        return mIgnoredBuilder;
+    }
+
+    @Override
+    protected RunnerBuilder suiteMethodBuilder() {
+        return mAndroidSuiteBuilder;
+    }
 }
