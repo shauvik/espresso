@@ -168,11 +168,6 @@ public class TestLoader {
             Log.w(LOG_TAG, String.format("%s in isTestClass for %s", e.toString(),
                     loadedClass.getName()));
             return false;
-        } catch (Error e) {
-            // defensively catch Errors too
-            Log.w(LOG_TAG, String.format("%s in isTestClass for %s", e.toString(),
-                    loadedClass.getName()));
-            return false;
-        }
+        } 
     }
 }
