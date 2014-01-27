@@ -32,7 +32,6 @@ import android.support.test.internal.runner.listener.SuiteAssignmentPrinter;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
-
 import org.junit.internal.TextListener;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -113,7 +112,7 @@ import java.util.List;
  * <p/>
  * <b>Filter test run to tests <i>without any</i> of a list of annotations:</b> adb shell am
  * instrument -w -e notAnnotation com.android.foo.MyAnnotation,com.android.foo.AnotherAnnotation
- * com.android.foo/com.android.test.runner.AndroidJUnitRunner
+ * com.android.foo/android.support.test.runner.AndroidJUnitRunner
  * <p/>
  * <b>To run in 'log only' mode</b>
  * -e log true
