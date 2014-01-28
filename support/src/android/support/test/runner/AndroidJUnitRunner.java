@@ -111,6 +111,10 @@ import java.util.List;
  * e.g. "-e size large -e notAnnotation com.android.foo.MyAnnotation" will run tests with
  * the {@link LargeTest} annotation that do NOT have the "com.android.foo.MyAnnotation" annotations.
  * <p/>
+ * <b>Filter test run to tests <i>without any</i> of a list of annotations:</b> adb shell am
+ * instrument -w -e notAnnotation com.android.foo.MyAnnotation,com.android.foo.AnotherAnnotation
+ * com.android.foo/com.android.test.runner.AndroidJUnitRunner
+ * <p/>
  * <b>To run in 'log only' mode</b>
  * -e log true
  * This option will load and iterate through all test classes and methods, but will bypass actual
@@ -364,9 +368,11 @@ public class AndroidJUnitRunner extends Instrumentation {
             builder.addAnnotationInclusionFilter(annotation);
         }
 
-        String notAnnotation = arguments.getString(ARGUMENT_NOT_ANNOTATION);
-        if (notAnnotation != null) {
-            builder.addAnnotationExclusionFilter(notAnnotation);
+        String notAnnotations = arguments.getString(ARGUMENT_NOT_ANNOTATION);
+        if (notAnnotations != null) {
+            for (String notAnnotation : notAnnotations.split(",")) {
+                builder.addAnnotationExclusionFilter(notAnnotation);
+            }
         }
 
         if (getBooleanArgument(ARGUMENT_LOG_ONLY)) {
