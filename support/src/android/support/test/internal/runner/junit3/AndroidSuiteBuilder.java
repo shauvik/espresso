@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,24 @@ package android.support.test.internal.runner.junit3;
 import android.app.Instrumentation;
 import android.os.Bundle;
 
-import junit.framework.TestCase;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
-import org.junit.internal.builders.JUnit3Builder;
+import org.junit.internal.builders.SuiteMethodBuilder;
+import org.junit.internal.runners.SuiteMethod;
 import org.junit.runner.Runner;
 import org.junit.runners.model.RunnerBuilder;
 
 /**
- * A {@link RunnerBuilder} that will build customized runners needed for specialized Android
- * {@link TestCase}s and to support {@link android.test.suitebuilder.annotation}s.
+ * A {@link RunnerBuilder} that properly injects Android constructs into
+ * classes with suite() methods.
  */
-public class AndroidJUnit3Builder extends JUnit3Builder {
-
+public class AndroidSuiteBuilder extends SuiteMethodBuilder {
     private Instrumentation mInstr;
     private boolean mSkipExecution;
     private final Bundle mBundle;
 
-    public AndroidJUnit3Builder(Instrumentation instr, Bundle bundle, boolean skipExecution) {
+    public AndroidSuiteBuilder(Instrumentation instr, Bundle bundle, boolean skipExecution) {
         mInstr = instr;
         mBundle = bundle;
         mSkipExecution = skipExecution;
@@ -42,17 +43,20 @@ public class AndroidJUnit3Builder extends JUnit3Builder {
 
     @Override
     public Runner runnerForClass(Class<?> testClass) throws Throwable {
-        if (isJUnit3Test(testClass)) {
+        if (hasSuiteMethod(testClass)) {
+            Test t = SuiteMethod.testFromSuiteMethod(testClass);
+            if (!(t instanceof TestSuite)) {
+                // this should not be possible
+                throw new IllegalArgumentException(testClass.getName() +
+                        "#suite() did not return a TestSuite");
+            }
             if (mSkipExecution) {
-                return new JUnit38ClassRunner(new NoExecTestSuite(testClass));
+                return new JUnit38ClassRunner(new NoExecTestSuite((TestSuite)t));
             } else {
-                return new JUnit38ClassRunner(new AndroidTestSuite(testClass, mBundle, mInstr));
+                return new JUnit38ClassRunner(new AndroidTestSuite((TestSuite)t,
+                        mBundle, mInstr));
             }
         }
         return null;
-    }
-
-    boolean isJUnit3Test(Class<?> testClass) {
-        return junit.framework.TestCase.class.isAssignableFrom(testClass);
     }
 }

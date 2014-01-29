@@ -15,14 +15,14 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-   package="com.android.testlib.tests">
+   package="android.support.test.tests">
 
     <application>
     </application>
 
     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
-                     android:targetPackage="com.android.testlib.tests"
-                     android:label="Unit Tests for testlib."/>
+                     android:targetPackage="android.support.test.tests"
+                     android:label="Unit Tests for android.support.test."/>
 
     <uses-sdk android:minSdkVersion="8"/>
 
