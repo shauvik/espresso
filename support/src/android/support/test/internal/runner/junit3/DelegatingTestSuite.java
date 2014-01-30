@@ -30,11 +30,18 @@ import java.util.Enumeration;
 @Ignore
 class DelegatingTestSuite extends TestSuite {
 
-    protected TestSuite mWrappedSuite;
+    private TestSuite mWrappedSuite;
 
     public DelegatingTestSuite(TestSuite suiteDelegate) {
         super();
         mWrappedSuite = suiteDelegate;
+    }
+
+    /**
+     * Return the suite to delegate to
+     */
+    public TestSuite getDelegateSuite() {
+        return mWrappedSuite;
     }
 
     /**
@@ -89,5 +96,10 @@ class DelegatingTestSuite extends TestSuite {
     @Override
     public String toString() {
         return mWrappedSuite.toString();
+    }
+
+    @Override
+    public void run(TestResult result) {
+        mWrappedSuite.run(result);
     }
 }

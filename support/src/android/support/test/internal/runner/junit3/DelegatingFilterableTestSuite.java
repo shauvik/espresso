@@ -36,7 +36,7 @@ class DelegatingFilterableTestSuite extends DelegatingTestSuite implements Filte
 
     @Override
     public void filter(Filter filter) throws NoTestsRemainException {
-        TestSuite suite = mWrappedSuite;
+        TestSuite suite = getDelegateSuite();
         TestSuite filtered = new TestSuite(suite.getName());
         int n = suite.testCount();
         for (int i = 0; i < n; i++) {
@@ -45,7 +45,7 @@ class DelegatingFilterableTestSuite extends DelegatingTestSuite implements Filte
                 filtered.addTest(test);
             }
         }
-        mWrappedSuite = filtered;
+        setDelegateSuite(filtered);
         if (filtered.testCount() == 0) {
             throw new NoTestsRemainException();
         }
@@ -55,5 +55,4 @@ class DelegatingFilterableTestSuite extends DelegatingTestSuite implements Filte
         // delegate to JUnit38ClassRunner copy.
         return JUnit38ClassRunner.makeDescription(test);
     }
-
 }

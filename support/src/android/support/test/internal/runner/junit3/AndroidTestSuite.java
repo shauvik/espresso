@@ -48,6 +48,6 @@ class AndroidTestSuite extends DelegatingFilterableTestSuite {
     @Override
     public void run(TestResult result) {
         // wrap the result in a new AndroidTestResult to do the bundle and instrumentation injection
-        mWrappedSuite.run(new AndroidTestResult(mBundle, mInstr, result));
+        super.run(new AndroidTestResult(mBundle, mInstr, result));
     }
 }
