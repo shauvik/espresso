@@ -22,8 +22,11 @@
 
     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
                      android:targetPackage="android.support.test.tests"
-                     android:label="Unit Tests for android.support.test."/>
+                     android:label="Unit Tests for android.support.test.">
+        <meta-data android:name="listener"
+            android:value="android.support.test.internal.runner.listener.ManifestListener" />
+    </instrumentation>
 
-    <uses-sdk android:minSdkVersion="8"/>
+    <uses-sdk android:minSdkVersion="8" />
 
 </manifest>

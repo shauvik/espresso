@@ -18,6 +18,9 @@ package android.support.test.runner;
 
 import android.app.Activity;
 import android.app.Instrumentation;
+import android.content.pm.InstrumentationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Looper;
@@ -129,6 +132,13 @@ import java.util.List;
  * <b> To specify EMMA code coverage results file path:</b>
  * -e coverageFile /sdcard/myFile.ec
  * <p/>
+ * <b> To specify one or more {@link RunListener}s to observe the test run:</b>
+ * -e listener com.foo.Listener,com.foo.Listener2
+ * <p/>
+ * <b/>OR, specify the multiple listeners in the AndroidManifest via a meta-data tag:</b>
+ * instrumentation android:name="android.support.test.runner.AndroidJUnitRunner" ...
+ *    meta-data android:name="listener"
+ *              android:value="com.foo.Listener,com.foo.Listener2"
  */
 public class AndroidJUnitRunner extends Instrumentation {
 
@@ -143,7 +153,7 @@ public class AndroidJUnitRunner extends Instrumentation {
     private static final String ARGUMENT_COVERAGE_PATH = "coverageFile";
     private static final String ARGUMENT_SUITE_ASSIGNMENT = "suiteAssignment";
     private static final String ARGUMENT_DEBUG = "debug";
-    private static final String ARGUMENT_EXTRA_LISTENER = "extraListener";
+    private static final String ARGUMENT_LISTENER = "listener";
     private static final String ARGUMENT_TEST_PACKAGE = "package";
     // TODO: consider supporting 'count' from InstrumentationTestRunner
 
@@ -238,59 +248,94 @@ public class AndroidJUnitRunner extends Instrumentation {
     private void addListeners(List<RunListener> listeners, JUnitCore testRunner,
             PrintStream writer) {
         if (getBooleanArgument(ARGUMENT_SUITE_ASSIGNMENT)) {
-            addListener(listeners, testRunner, new SuiteAssignmentPrinter(this));
+            listeners.add(new SuiteAssignmentPrinter(this));
         } else {
-            addListener(listeners, testRunner, new TextListener(writer));
-            addListener(listeners, testRunner, new LogRunListener());
-            addListener(listeners, testRunner, new InstrumentationResultPrinter(this));
-            addDelayListener(listeners, testRunner);
-            addCoverageListener(listeners, testRunner);
+            listeners.add(new TextListener(writer));
+            listeners.add(new LogRunListener());
+            listeners.add(new InstrumentationResultPrinter(this));
+            addDelayListener(listeners);
+            addCoverageListener(listeners);
         }
 
-        addExtraListenersFromArg(listeners, testRunner, writer);
+        addListenersFromArg(listeners, writer);
+        addListenersFromManifest(listeners, writer);
+
+        for (RunListener listener : listeners) {
+            testRunner.addListener(listener);
+        }
     }
 
-    private void addListener(List<RunListener> list, JUnitCore testRunner, RunListener listener) {
-        list.add(listener);
-        testRunner.addListener(listener);
-    }
-
-    private void addCoverageListener(List<RunListener> list, JUnitCore testRunner) {
+    private void addCoverageListener(List<RunListener> list) {
         if (getBooleanArgument(ARGUMENT_COVERAGE)) {
             String coverageFilePath = getArguments().getString(ARGUMENT_COVERAGE_PATH);
-            addListener(list, testRunner, new CoverageListener(this, coverageFilePath));
+            list.add(new CoverageListener(this, coverageFilePath));
         }
     }
 
     /**
      * Sets up listener to inject {@link #ARGUMENT_DELAY_MSEC}, if specified.
-     * @param testRunner
      */
-    private void addDelayListener(List<RunListener> list, JUnitCore testRunner) {
+    private void addDelayListener(List<RunListener> list) {
         try {
             Object delay = getArguments().get(ARGUMENT_DELAY_MSEC);  // Accept either string or int
             if (delay != null) {
                 int delayMsec = Integer.parseInt(delay.toString());
-                addListener(list, testRunner, new DelayInjector(delayMsec));
+                list.add(new DelayInjector(delayMsec));
             }
         } catch (NumberFormatException e) {
             Log.e(LOG_TAG, "Invalid delay_msec parameter", e);
         }
     }
 
-    private void addExtraListenersFromArg(List<RunListener> listeners, JUnitCore testRunner,
+    /**
+     * Add extra {@link RunListener}s specified via command line
+     */
+    private void addListenersFromArg(List<RunListener> listeners,
             PrintStream writer) {
-        String extraListenerList = getArguments().getString(ARGUMENT_EXTRA_LISTENER);
+        addListenersFromClassString(getArguments().getString(ARGUMENT_LISTENER),
+                listeners, writer);
+    }
+
+    /**
+     * Load the listeners specified via meta-data name="listener" in the AndroidManifest.
+     */
+    private void addListenersFromManifest(List<RunListener> listeners,
+            PrintStream writer) {
+        PackageManager pm = getContext().getPackageManager();
+        try {
+            InstrumentationInfo instrInfo = pm.getInstrumentationInfo(getComponentName(),
+                    PackageManager.GET_META_DATA);
+            Bundle b = instrInfo.metaData;
+            if (b == null) {
+                return;
+            }
+            String extraListenerList = b.getString(ARGUMENT_LISTENER);
+            addListenersFromClassString(extraListenerList, listeners, writer);
+        } catch (NameNotFoundException e) {
+            // should never happen
+            Log.wtf(LOG_TAG, String.format("Could not find component %s", getComponentName()));
+        }
+    }
+
+    /**
+     * Add extra {@link RunListener}s to the testRunner as given in the csv class name list
+     *
+     * @param extraListenerList the CSV class name of {@link RunListener}s to add
+     * @param writer the {@link PrintStream} to dump errors to
+     * @param listeners the {@link List} to add listeners to
+     */
+    private void addListenersFromClassString(String extraListenerList,
+            List<RunListener> listeners, PrintStream writer) {
         if (extraListenerList == null) {
             return;
         }
 
         for (String listenerName : extraListenerList.split(",")) {
-            addExtraListener(listeners, testRunner, writer, listenerName);
+            addListenerByClassName(listeners, writer, listenerName);
         }
     }
 
-    private void addExtraListener(List<RunListener> listeners, JUnitCore testRunner,
+    private void addListenerByClassName(List<RunListener> listeners,
             PrintStream writer, String extraListener) {
         if (extraListener == null || extraListener.length() == 0) {
             return;
@@ -325,7 +370,7 @@ public class AndroidJUnitRunner extends Instrumentation {
             return;
         }
 
-        addListener(listeners, testRunner, l);
+        listeners.add(l);
     }
 
     private void reportRunEnded(List<RunListener> listeners, PrintStream writer, Bundle results) {
