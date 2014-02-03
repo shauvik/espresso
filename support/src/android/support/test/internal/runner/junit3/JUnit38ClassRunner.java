@@ -56,19 +56,14 @@ public class JUnit38ClassRunner extends Runner implements Filterable, Sortable {
                 Describable facade = (Describable) test;
                 return facade.getDescription();
             }
-            return Description.createTestDescription(getEffectiveClass(test), getName(test));
+            if (test instanceof TestCase) {
+                return makeDescription(test);
+            }
+            return Description.createTestDescription(getEffectiveClass(test), test.toString());
         }
 
         private Class<? extends Test> getEffectiveClass(Test test) {
             return test.getClass();
-        }
-
-        private String getName(Test test) {
-            if (test instanceof TestCase) {
-                return ((TestCase) test).getName();
-            } else {
-                return test.toString();
-            }
         }
 
         @Override

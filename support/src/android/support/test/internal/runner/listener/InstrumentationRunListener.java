@@ -46,6 +46,15 @@ public abstract class InstrumentationRunListener extends RunListener {
     }
 
     /**
+     * Convenience method to output a string on instrumentation output
+     */
+    public void sendString(String msg) {
+        Bundle b = new Bundle();
+        b.putString(Instrumentation.REPORT_KEY_STREAMRESULT, msg);
+        sendStatus(0, b);
+    }
+
+    /**
      * Optional callback subclasses can implement. Will be called when instrumentation run
      * completes.
      *

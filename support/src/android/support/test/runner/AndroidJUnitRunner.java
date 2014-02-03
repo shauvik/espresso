@@ -238,7 +238,7 @@ public class AndroidJUnitRunner extends Instrumentation {
     private void addListeners(List<RunListener> listeners, JUnitCore testRunner,
             PrintStream writer) {
         if (getBooleanArgument(ARGUMENT_SUITE_ASSIGNMENT)) {
-            addListener(listeners, testRunner, new SuiteAssignmentPrinter(writer));
+            addListener(listeners, testRunner, new SuiteAssignmentPrinter(this));
         } else {
             addListener(listeners, testRunner, new TextListener(writer));
             addListener(listeners, testRunner, new LogRunListener());

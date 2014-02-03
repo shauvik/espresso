@@ -16,20 +16,22 @@
 
 package android.support.test.internal.runner.listener;
 
+import android.app.Instrumentation;
 import android.support.test.internal.runner.TestRequestBuilder;
+import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Log;
 
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
-import org.junit.runner.notification.RunListener;
-
-import java.io.PrintStream;
 
 /**
  * This class measures the elapsed run time of each test, and used it to report back to the user
  * which suite ({@link SmallSuite}, {@link MediumSuite}, {@link LargeSuite}) the test should belong
  * to.
  */
-public class SuiteAssignmentPrinter extends RunListener {
+public class SuiteAssignmentPrinter extends InstrumentationRunListener {
     /**
      * This constant defines the maximum allowed runtime (in ms) for a test included in the "small"
      * suite. It is used to make an educated guess at what suite an unlabeled test belongs to.
@@ -42,10 +44,8 @@ public class SuiteAssignmentPrinter extends RunListener {
      */
     private static final float MEDIUM_SUITE_MAX_RUNTIME = 1000;
 
-    private final PrintStream mWriter;
-
-    public SuiteAssignmentPrinter(PrintStream writer) {
-        mWriter = writer;
+    public SuiteAssignmentPrinter(Instrumentation i) {
+        super(i);
     }
 
     private long mStartTime;
@@ -79,9 +79,54 @@ public class SuiteAssignmentPrinter extends RunListener {
         // Clear mStartTime so that we can verify that it gets set next time.
         mStartTime = -1;
 
-        mWriter.printf("%s#%s\n" + "in %s suite\n" + "runTime: %d ms\n",
-                        description.getClassName(), description.getMethodName(), assignmentSuite,
-                        runTime);
+        String currentSize = getTestSize(description);
+        if (!assignmentSuite.equals(currentSize)) {
+            // test size != runtime
+            sendString(String.format("\n%s#%s: current size: %s. suggested: %s runTime: %d ms\n",
+                    description.getClassName(), description.getMethodName(), currentSize,
+                    assignmentSuite, runTime));
+        } else {
+            sendString(".");
+            Log.d("SuiteAssignmentPrinter", String.format(
+                    "%s#%s assigned correctly as %s. runTime: %d ms\n", description.getClassName(),
+                    description.getMethodName(), assignmentSuite, runTime));
+        }
+
+    }
+
+    private String getTestSize(Description description) {
+        String testSize = getTestSizeFromMethod(description);
+        if (testSize != null) {
+            return testSize;
+        }
+        return getTestSizeFromClass(description);
+    }
+
+    String getTestSizeFromMethod(Description desc) {
+        if (desc.getAnnotation(SmallTest.class) != null) {
+            return TestRequestBuilder.SMALL_SIZE;
+        } else if (desc.getAnnotation(MediumTest.class) != null) {
+            return TestRequestBuilder.MEDIUM_SIZE;
+        } else if (desc.getAnnotation(LargeTest.class) != null) {
+            return TestRequestBuilder.LARGE_SIZE;
+        }
+        return null;
+
+    }
+
+    String getTestSizeFromClass(Description desc) {
+        Class<?> testClass = desc.getTestClass();
+        if (testClass == null) {
+            return null;
+        }
+        if (testClass.isAnnotationPresent(SmallTest.class)) {
+            return TestRequestBuilder.SMALL_SIZE;
+        } else if (testClass.isAnnotationPresent(MediumTest.class)) {
+            return TestRequestBuilder.MEDIUM_SIZE;
+        } else if (testClass.isAnnotationPresent(LargeTest.class)) {
+            return TestRequestBuilder.LARGE_SIZE;
+        }
+        return null;
     }
 
     @Override
