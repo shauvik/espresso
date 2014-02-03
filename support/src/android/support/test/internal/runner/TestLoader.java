@@ -134,7 +134,7 @@ public class TestLoader {
     private boolean isTestClass(Class<?> loadedClass) {
         try {
             if (Modifier.isAbstract(loadedClass.getModifiers())) {
-                Log.v(LOG_TAG, String.format("Skipping abstract class %s: not a test",
+                logDebug(String.format("Skipping abstract class %s: not a test",
                         loadedClass.getName()));
                 return false;
             }
@@ -151,7 +151,7 @@ public class TestLoader {
                     return true;
                 }
             }
-            Log.v(LOG_TAG, String.format("Skipping class %s: not a test", loadedClass.getName()));
+            logDebug(String.format("Skipping class %s: not a test", loadedClass.getName()));
             return false;
         } catch (Exception e) {
             // Defensively catch exceptions - Will throw runtime exception if it cannot load methods.
@@ -168,6 +168,16 @@ public class TestLoader {
             Log.w(LOG_TAG, String.format("%s in isTestClass for %s", e.toString(),
                     loadedClass.getName()));
             return false;
-        } 
+        }
+    }
+
+    /**
+     * Utility method for logging debug messages. Only actually logs a message if LOG_TAG is marked
+     * as loggable to limit log spam during normal use.
+     */
+    private void logDebug(String msg) {
+        if (Log.isLoggable(LOG_TAG, Log.DEBUG)) {
+            Log.d(LOG_TAG, msg);
+        }
     }
 }
