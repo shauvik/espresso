@@ -19,6 +19,9 @@ import android.app.Instrumentation;
 import android.os.Bundle;
 import android.support.test.InjectBundle;
 import android.support.test.InjectInstrumentation;
+import android.support.test.filters.RequiresDevice;
+import android.support.test.filters.SdkSuppress;
+import android.support.test.internal.runner.TestRequestBuilder.DeviceBuild;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.test.suitebuilder.annotation.Suppress;
@@ -31,6 +34,9 @@ import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.RunListener;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -134,6 +140,21 @@ public class TestRequestBuilderTest {
         }
     }
 
+    public static class SampleSizeWithSuppress extends TestCase {
+
+        public void testNoSize() {
+        }
+
+        @SmallTest
+        @Suppress
+        public void testSmallAndSuppressed() {
+        }
+
+        @Suppress
+        public void testSuppressed() {
+        }
+    }
+
     public static class SampleAllSuppressed extends TestCase {
 
         @Suppress
@@ -149,21 +170,6 @@ public class TestRequestBuilderTest {
 
         @MediumTest
         public void testMedium() {
-        }
-
-        @Suppress
-        public void testSuppressed() {
-        }
-    }
-
-    public static class SampleSizeWithSuppress extends TestCase {
-
-        public void testNoSize() {
-        }
-
-        @SmallTest
-        @Suppress
-        public void testSmallAndSuppressed() {
         }
 
         @Suppress
@@ -214,11 +220,40 @@ public class TestRequestBuilderTest {
         }
     }
 
+    public static class SampleRequiresDevice {
+        @RequiresDevice
+        @Test
+        public void skipThis() {}
+
+        @Test
+        public void runMe() {}
+
+        @Test
+        public void runMe2() {}
+    }
+
+    public static class SampleSdkSuppress {
+        @SdkSuppress(minSdkVersion=15)
+        @Test
+        public void skipThis() {}
+
+        @SdkSuppress(minSdkVersion=16)
+        @Test
+        public void runMe() {}
+
+        @SdkSuppress(minSdkVersion=17)
+        @Test
+        public void runMe2() {}
+    }
+
     @InjectInstrumentation
     public Instrumentation mInstr;
 
     @InjectBundle
     public Bundle mBundle;
+
+    @Mock
+    private DeviceBuild mMockDeviceBuild;
 
     /**
      * Test initial condition for size filtering - that all tests run when no filter is attached
@@ -562,5 +597,38 @@ public class TestRequestBuilderTest {
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(0, result.getRunCount());
+    }
+
+    /**
+     * Test that {@link SdkSuppress} filters tests as appropriate
+     */
+    @Test
+    public void testSdkSuppress() {
+        MockitoAnnotations.initMocks(this);
+        TestRequestBuilder b = new TestRequestBuilder(mMockDeviceBuild,
+                new PrintStream(new ByteArrayOutputStream()));
+        Mockito.when(mMockDeviceBuild.getSdkVersionInt()).thenReturn(16);
+        b.addTestClass(SampleSdkSuppress.class.getName());
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        Result result = testRunner.run(request.getRequest());
+        Assert.assertEquals(2, result.getRunCount());
+    }
+
+    /**
+     * Test that {@link RequiresDevuce} filters tests as appropriate
+     */
+    @Test
+    public void testRequiresDevice() {
+        MockitoAnnotations.initMocks(this);
+        TestRequestBuilder b = new TestRequestBuilder(mMockDeviceBuild,
+                new PrintStream(new ByteArrayOutputStream()));
+        Mockito.when(mMockDeviceBuild.getHardware()).thenReturn(
+                TestRequestBuilder.EMULATOR_HARDWARE);
+        b.addTestClass(SampleRequiresDevice.class.getName());
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        Result result = testRunner.run(request.getRequest());
+        Assert.assertEquals(2, result.getRunCount());
     }
 }

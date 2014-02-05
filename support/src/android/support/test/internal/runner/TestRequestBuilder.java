@@ -17,6 +17,8 @@ package android.support.test.internal.runner;
 
 import android.app.Instrumentation;
 import android.os.Bundle;
+import android.support.test.filters.RequiresDevice;
+import android.support.test.filters.SdkSuppress;
 import android.support.test.internal.runner.ClassPathScanner.ChainedClassNameFilter;
 import android.support.test.internal.runner.ClassPathScanner.ExcludePackageNameFilter;
 import android.support.test.internal.runner.ClassPathScanner.ExternalClassNameFilter;
@@ -58,24 +60,51 @@ public class TestRequestBuilder {
     public static final String MEDIUM_SIZE = "medium";
     public static final String SMALL_SIZE = "small";
 
+    static final String EMULATOR_HARDWARE = "goldfish";
+
     private String[] mApkPaths;
     private TestLoader mTestLoader;
-    private Filter mFilter = new AnnotationExclusionFilter(Suppress.class);
+    private Filter mFilter = new AnnotationExclusionFilter(Suppress.class).intersect(
+            new SdkSuppressFilter()).intersect(new RequiresDeviceFilter());
+
     private PrintStream mWriter;
     private boolean mSkipExecution = false;
     private String mTestPackageName = null;
+    private final DeviceBuild mDeviceBuild;
 
     /**
-     * Filter that only runs tests whose method or class has been annotated with given filter.
+     * Accessor interface for retrieving device build properties.
+     * <p/>
+     * Used so unit tests can mock calls
      */
-    private static class AnnotationInclusionFilter extends Filter {
+    static interface DeviceBuild {
+        /**
+         * Returns the SDK API level for current device.
+         */
+        int getSdkVersionInt();
 
-        private final Class<? extends Annotation> mAnnotationClass;
+        /**
+         * Returns the hardware type of the current device.
+         */
+        String getHardware();
+    }
 
-        AnnotationInclusionFilter(Class<? extends Annotation> annotation) {
-            mAnnotationClass = annotation;
+    private static class DeviceBuildImpl implements DeviceBuild {
+        @Override
+        public int getSdkVersionInt() {
+            return android.os.Build.VERSION.SDK_INT;
         }
 
+        @Override
+        public String getHardware() {
+            return android.os.Build.HARDWARE;
+        }
+    }
+
+    /**
+     * Helper parent class for {@link Filter} that allows suites to run if any child matches.
+     */
+    private abstract static class ParentFilter extends Filter {
         /**
          * {@inheritDoc}
          */
@@ -100,6 +129,27 @@ public class TestRequestBuilder {
          * @param description the {@link Description} describing the test
          * @return <code>true</code> if matched
          */
+        protected abstract boolean evaluateTest(Description description);
+    }
+
+    /**
+     * Filter that only runs tests whose method or class has been annotated with given filter.
+     */
+    private static class AnnotationInclusionFilter extends ParentFilter {
+
+        private final Class<? extends Annotation> mAnnotationClass;
+
+        AnnotationInclusionFilter(Class<? extends Annotation> annotation) {
+            mAnnotationClass = annotation;
+        }
+
+        /**
+         * Determine if given test description matches filter.
+         *
+         * @param description the {@link Description} describing the test
+         * @return <code>true</code> if matched
+         */
+        @Override
         protected boolean evaluateTest(Description description) {
             return description.getAnnotation(mAnnotationClass) != null ||
                     description.getTestClass().isAnnotationPresent(mAnnotationClass);
@@ -157,7 +207,7 @@ public class TestRequestBuilder {
     /**
      * Filter out tests whose method or class has been annotated with given filter.
      */
-    private static class AnnotationExclusionFilter extends Filter {
+    private static class AnnotationExclusionFilter extends ParentFilter {
 
         private final Class<? extends Annotation> mAnnotationClass;
 
@@ -165,27 +215,14 @@ public class TestRequestBuilder {
             mAnnotationClass = annotation;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
-        public boolean shouldRun(Description description) {
+        protected boolean evaluateTest(Description description) {
             final Class<?> testClass = description.getTestClass();
             if ((testClass != null && testClass.isAnnotationPresent(mAnnotationClass))
                     || (description.getAnnotation(mAnnotationClass) != null)) {
                 return false;
             }
-            if (description.isTest() ) {
-                return true;
-            }
-            // this is a suite, explicitly check if any children want to run
-            for (Description each : description.getChildren()) {
-                if (shouldRun(each)) {
-                    return true;
-                }
-            }
-            // no children to run, filter this out
-            return false;
+            return true;
         }
 
         /**
@@ -194,6 +231,65 @@ public class TestRequestBuilder {
         @Override
         public String describe() {
             return String.format("not annotation %s", mAnnotationClass.getName());
+        }
+    }
+
+    private class SdkSuppressFilter extends ParentFilter {
+
+        @Override
+        protected boolean evaluateTest(Description description) {
+            final SdkSuppress s = getAnnotationForTest(description);
+            if (s != null && getDeviceSdkInt() < s.minSdkVersion()) {
+                return false;
+            }
+            return true;
+        }
+
+        private SdkSuppress getAnnotationForTest(Description description) {
+            final SdkSuppress s = description.getAnnotation(SdkSuppress.class);
+            if (s != null) {
+                return s;
+            }
+            final Class<?> testClass = description.getTestClass();
+            if (testClass != null) {
+                return testClass.getAnnotation(SdkSuppress.class);
+            }
+            return null;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String describe() {
+            return String.format("skip tests annotated with SdkSuppress if necessary");
+        }
+    }
+
+    /**
+     * Class that filters out tests annotated with {@link RequestDevice} when running on emulator
+     */
+    private class RequiresDeviceFilter extends AnnotationExclusionFilter {
+
+        RequiresDeviceFilter() {
+            super(RequiresDevice.class);
+        }
+
+        @Override
+        protected boolean evaluateTest(Description description) {
+            if (!super.evaluateTest(description)) {
+                // annotation is present - check if device is an emulator
+                return !EMULATOR_HARDWARE.equals(getDeviceHardware());
+            }
+            return true;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String describe() {
+            return String.format("skip tests annotated with RequiresDevice if necessary");
         }
     }
 
@@ -272,6 +368,11 @@ public class TestRequestBuilder {
     }
 
     public TestRequestBuilder(PrintStream writer, String... apkPaths) {
+        this(new DeviceBuildImpl(), writer, apkPaths);
+    }
+
+    TestRequestBuilder(DeviceBuild deviceBuildAccessor, PrintStream writer, String... apkPaths) {
+        mDeviceBuild = deviceBuildAccessor;
         mApkPaths = apkPaths;
         mTestLoader = new TestLoader(writer);
     }
@@ -489,5 +590,13 @@ public class TestRequestBuilder {
             Log.e(LOG_TAG, String.format("Class %s is not an annotation", className));
         }
         return null;
+    }
+
+    private int getDeviceSdkInt() {
+        return mDeviceBuild.getSdkVersionInt();
+    }
+
+    private String getDeviceHardware() {
+        return mDeviceBuild.getHardware();
     }
 }
