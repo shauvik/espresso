@@ -15,12 +15,19 @@
  */
 package android.support.test.filters;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
  * Designates a test as being flaky (non-deterministic).
  * <p/>
- * Can then be used to filter tests as appropriate using -e annotation or -e notAnnotation as
+ * Can then be used to filter tests on execution using -e annotation or -e notAnnotation as
  * desired.
  */
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
 public @interface FlakyTest {
     /**
      * An optional bug number associated with the test. -1 Means that no bug number
