@@ -32,6 +32,8 @@ import org.junit.runner.Description;
 import org.junit.runner.Request;
 import org.junit.runner.Runner;
 import org.junit.runner.manipulation.Filter;
+import org.junit.runner.manipulation.NoTestsRemainException;
+import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.model.InitializationError;
 
 import java.io.IOException;
@@ -228,6 +230,47 @@ public class TestRequestBuilder {
         }
     }
 
+    /**
+     * A {@link Request} that doesn't report an error if all tests are filtered out. Done for
+     * consistency with InstrumentationTestRunner.
+     */
+    private static class LenientFilterRequest extends Request {
+        private final Request mRequest;
+        private final Filter mFilter;
+
+        public LenientFilterRequest(Request classRequest, Filter filter) {
+            mRequest = classRequest;
+            mFilter = filter;
+        }
+
+        @Override
+        public Runner getRunner() {
+            try {
+                Runner runner = mRequest.getRunner();
+                mFilter.apply(runner);
+                return runner;
+            } catch (NoTestsRemainException e) {
+                // don't treat filtering out all tests as an error
+                return new BlankRunner();
+            }
+        }
+    }
+
+    /**
+     * A {@link Runner} that doesn't do anything
+     */
+    private static class BlankRunner extends Runner {
+        @Override
+        public Description getDescription() {
+            return Description.createSuiteDescription("no tests found");
+        }
+
+        @Override
+        public void run(RunNotifier notifier) {
+            // do nothing
+        }
+    }
+
     public TestRequestBuilder(PrintStream writer, String... apkPaths) {
         mApkPaths = apkPaths;
         mTestLoader = new TestLoader(writer);
@@ -364,7 +407,7 @@ public class TestRequestBuilder {
 
         Request request = classes(instr, bundle, mSkipExecution, new Computer(),
                 mTestLoader.getLoadedClasses().toArray(new Class[0]));
-        return new TestRequest(mTestLoader.getLoadFailures(), request.filterWith(mFilter));
+        return new TestRequest(mTestLoader.getLoadFailures(), new LenientFilterRequest(request, mFilter));
     }
 
     /**

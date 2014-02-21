@@ -521,8 +521,8 @@ public class TestRequestBuilderTest {
         // The last iteration through the loop doesn't add a ShardingFilter - it runs all the
         // tests to establish a baseline for the total number that should have been run.
         for (int i = 0; i < 5; i++) {
-            TestRequestBuilder b
-                    = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+            TestRequestBuilder b = new TestRequestBuilder(new PrintStream(
+                    new ByteArrayOutputStream()));
             if (i < 4) {
                 b.addShardingFilter(4, i);
             }
@@ -548,5 +548,19 @@ public class TestRequestBuilderTest {
             // the implementation of hashCode() is random enough to avoid that.
             Assert.assertTrue(results[i].getRunCount() < totalRun);
         }
+    }
+
+    /**
+     * Verify that filtering out all tests is not treated as an error
+     */
+    @Test
+    public void testNoTests() {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addTestClass(SampleTest.class.getName());
+        b.addTestSizeFilter("medium");
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        Result result = testRunner.run(request.getRequest());
+        Assert.assertEquals(0, result.getRunCount());
     }
 }
