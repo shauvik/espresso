@@ -507,4 +507,46 @@ public class TestRequestBuilderTest {
         Assert.assertEquals("testRunThis",
                 result.getFailures().get(0).getDescription().getMethodName());
     }
+
+    /**
+     * Test the sharding filter.
+     */
+    @Test
+    public void testShardingFilter() {
+        JUnitCore testRunner = new JUnitCore();
+
+        TestRequestBuilder[] builders = new TestRequestBuilder[5];
+        Result[] results = new Result[4];
+        int totalRun = 0;
+        // The last iteration through the loop doesn't add a ShardingFilter - it runs all the
+        // tests to establish a baseline for the total number that should have been run.
+        for (int i = 0; i < 5; i++) {
+            TestRequestBuilder b
+                    = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+            if (i < 4) {
+                b.addShardingFilter(4, i);
+            }
+            builders[i] = b;
+            b.addTestClass(SampleTest.class.getName());
+            b.addTestClass(SampleNoSize.class.getName());
+            b.addTestClass(SampleClassSize.class.getName());
+            b.addTestClass(SampleJUnit3Test.class.getName());
+            b.addTestClass(SampleOverrideSize.class.getName());
+            b.addTestClass(SampleJUnit3ClassSize.class.getName());
+            b.addTestClass(SampleMultipleAnnotation.class.getName());
+            TestRequest request = b.build(mInstr, mBundle);
+            Result result = testRunner.run(request.getRequest());
+            if (i == 4) {
+                Assert.assertEquals(result.getRunCount(), totalRun);
+            } else {
+                totalRun += result.getRunCount();
+                results[i] = result;
+            }
+        }
+        for (int i = 0; i < 4; i++) {
+            // Theoretically everything could collide into one shard, but, we'll trust that
+            // the implementation of hashCode() is random enough to avoid that.
+            Assert.assertTrue(results[i].getRunCount() < totalRun);
+        }
+    }
 }

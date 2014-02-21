@@ -195,6 +195,39 @@ public class TestRequestBuilder {
         }
     }
 
+    private static class ShardingFilter extends Filter {
+        private final int mNumShards;
+        private final int mShardIndex;
+
+        ShardingFilter(int numShards, int shardIndex) {
+            mNumShards = numShards;
+            mShardIndex = shardIndex;
+        }
+
+        @Override
+        public boolean shouldRun(Description description) {
+            if (description.isTest()) {
+                return (Math.abs(description.hashCode()) % mNumShards) == mShardIndex;
+            }
+            // this is a suite, explicitly check if any children should run
+            for (Description each : description.getChildren()) {
+                if (shouldRun(each)) {
+                    return true;
+                }
+            }
+            // no children to run, filter this out
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String describe() {
+            return String.format("Shard %s of %s shards", mShardIndex, mNumShards);
+        }
+    }
+
     public TestRequestBuilder(PrintStream writer, String... apkPaths) {
         mApkPaths = apkPaths;
         mTestLoader = new TestLoader(writer);
@@ -303,6 +336,10 @@ public class TestRequestBuilder {
         if (annotationClass != null) {
             mFilter = mFilter.intersect(new AnnotationExclusionFilter(annotationClass));
         }
+    }
+
+    public void addShardingFilter(int numShards, int shardIndex) {
+        mFilter = mFilter.intersect(new ShardingFilter(numShards, shardIndex));
     }
 
     /**

@@ -117,6 +117,11 @@ import java.util.List;
  * instrument -w -e notAnnotation com.android.foo.MyAnnotation,com.android.foo.AnotherAnnotation
  * com.android.foo/android.support.test.runner.AndroidJUnitRunner
  * <p/>
+ * <b>Filter test run to a shard of all tests, where numShards is an integer greater than 0 and
+ * shardIndex is an integer between 0 (inclusive) and numShards (exclusive):</b> adb shell am
+ * instrument -w -e numShards 4 -e shardIndex 1
+ * com.android.foo/android.support.test.runner.AndroidJUnitRunner
+ * <p/>
  * <b>To run in 'log only' mode</b>
  * -e log true
  * This option will load and iterate through all test classes and methods, but will bypass actual
@@ -148,6 +153,8 @@ public class AndroidJUnitRunner extends Instrumentation {
     private static final String ARGUMENT_LOG_ONLY = "log";
     private static final String ARGUMENT_ANNOTATION = "annotation";
     private static final String ARGUMENT_NOT_ANNOTATION = "notAnnotation";
+    private static final String ARGUMENT_NUM_SHARDS = "numShards";
+    private static final String ARGUMENT_SHARD_INDEX = "shardIndex";
     private static final String ARGUMENT_DELAY_MSEC = "delay_msec";
     private static final String ARGUMENT_COVERAGE = "coverage";
     private static final String ARGUMENT_COVERAGE_PATH = "coverageFile";
@@ -419,6 +426,23 @@ public class AndroidJUnitRunner extends Instrumentation {
         if (notAnnotations != null) {
             for (String notAnnotation : notAnnotations.split(",")) {
                 builder.addAnnotationExclusionFilter(notAnnotation);
+            }
+        }
+
+        // Accept either string or int.
+        Object numShardsObj = arguments.get(ARGUMENT_NUM_SHARDS);
+        Object shardIndexObj = arguments.get(ARGUMENT_SHARD_INDEX);
+        if (numShardsObj != null && shardIndexObj != null) {
+            int numShards = -1;
+            int shardIndex = -1;
+            try {
+                numShards = Integer.parseInt(numShardsObj.toString());
+                shardIndex = Integer.parseInt(shardIndexObj.toString());
+            } catch(NumberFormatException e) {
+                Log.e(LOG_TAG, "Invalid sharding parameter", e);
+            }
+            if (numShards > 0 && shardIndex >= 0 && shardIndex < numShards) {
+                builder.addShardingFilter(numShards, shardIndex);
             }
         }
 
