@@ -1,0 +1,14 @@
+apply plugin: 'java'
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+    }
+}
+
+dependencies {
+    compile getAndroidPrebuilt('8')
+    compile project(':external:junit')
+}
