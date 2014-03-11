@@ -21,6 +21,8 @@ uiautomator.core_src_files := $(call all-java-files-under, core-src) \
 uiautomator.core_java_libraries := android.test.runner core-junit
 
 uiautomator_internal_api_file := $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/uiautomator_api.txt
+uiautomator_internal_removed_api_file := \
+    $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/uiautomator_removed_api.txt
 
 ###############################################
 include $(CLEAR_VARS)
@@ -42,7 +44,8 @@ LOCAL_DROIDDOC_HTML_DIR :=
 LOCAL_DROIDDOC_OPTIONS:= \
     -stubs $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_uiautomator_intermediates/src \
     -stubpackages com.android.uiautomator.core:com.android.uiautomator.testrunner \
-    -api $(uiautomator_internal_api_file)
+    -api $(uiautomator_internal_api_file) \
+    -removedApi $(uiautomator_internal_removed_api_file)
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR := build/tools/droiddoc/templates-sdk
 LOCAL_UNINSTALLABLE_MODULE := true
@@ -83,6 +86,8 @@ $(eval $(call check-api, \
     uiautomator-checkapi-last, \
     $(uiautomator_api_dir)/$(last_released_sdk_version).txt, \
     $(uiautomator_internal_api_file), \
+    $(uiautomator_api_dir)/removed.txt, \
+    $(uiautomator_internal_removed_api_file), \
     $(checkapi_last_error_level_flags), \
     cat $(LOCAL_PATH)/apicheck_msg_last.txt, \
     $(uiautomator_stubs_jar), \
@@ -100,6 +105,8 @@ $(eval $(call check-api, \
     uiautomator-checkapi-current, \
     $(uiautomator_api_dir)/current.txt, \
     $(uiautomator_internal_api_file), \
+    $(uiautomator_api_dir)/removed.txt, \
+    $(uiautomator_internal_removed_api_file), \
     $(checkapi_current_error_level_flags), \
     cat $(LOCAL_PATH)/apicheck_msg_current.txt, \
     $(uiautomator_stubs_jar), \
@@ -109,8 +116,9 @@ $(eval $(call check-api, \
 update-uiautomator-api: PRIVATE_API_DIR := $(uiautomator_api_dir)
 update-uiautomator-api: $(uiautomator_internal_api_file) | $(ACP)
 	@echo Copying uiautomator current.txt
-	$(hide) $(ACP) $< $(PRIVATE_API_DIR)/current.txt
-
+	$(hide) $(ACP) $(uiautomator_internal_api_file) $(PRIVATE_API_DIR)/current.txt
+	@echo Copying uiautomator removed.txt
+	$(hide) $(ACP) $(uiautomator_internal_removed_api_file) $(PRIVATE_API_DIR)/removed.txt
 ###############################################
 # clean up temp vars
 uiautomator.core_src_files :=
