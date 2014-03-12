@@ -28,14 +28,14 @@ import java.io.PrintStream;
  */
 public abstract class InstrumentationRunListener extends RunListener {
 
-    private final Instrumentation mInstr;
-
-    public InstrumentationRunListener(Instrumentation instr) {
-        mInstr = instr;
-    }
+    private Instrumentation mInstr;
 
     public Instrumentation getInstrumentation() {
         return mInstr;
+    }
+    
+    public void setInstrumentation(Instrumentation instr) {
+        mInstr = instr;
     }
 
     /**

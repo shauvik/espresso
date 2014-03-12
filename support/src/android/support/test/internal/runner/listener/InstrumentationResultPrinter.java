@@ -92,8 +92,7 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
     int mTestResultCode = 0;
     String mTestClass = null;
 
-    public InstrumentationResultPrinter(Instrumentation i) {
-        super(i);
+    public InstrumentationResultPrinter() {
         mResultTemplate = new Bundle();
     }
 

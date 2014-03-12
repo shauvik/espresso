@@ -16,7 +16,6 @@
 
 package android.support.test.internal.runner.listener;
 
-import android.app.Instrumentation;
 import android.support.test.internal.runner.TestRequestBuilder;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
@@ -43,10 +42,6 @@ public class SuiteAssignmentPrinter extends InstrumentationRunListener {
      * suite. It is used to make an educated guess at what suite an unlabeled test belongs to.
      */
     private static final float MEDIUM_SUITE_MAX_RUNTIME = 1000;
-
-    public SuiteAssignmentPrinter(Instrumentation i) {
-        super(i);
-    }
 
     private long mStartTime;
     private boolean mTimingValid;

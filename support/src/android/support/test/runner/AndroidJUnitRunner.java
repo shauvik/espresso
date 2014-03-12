@@ -255,11 +255,11 @@ public class AndroidJUnitRunner extends Instrumentation {
     private void addListeners(List<RunListener> listeners, JUnitCore testRunner,
             PrintStream writer) {
         if (getBooleanArgument(ARGUMENT_SUITE_ASSIGNMENT)) {
-            listeners.add(new SuiteAssignmentPrinter(this));
+            listeners.add(new SuiteAssignmentPrinter());
         } else {
             listeners.add(new TextListener(writer));
             listeners.add(new LogRunListener());
-            listeners.add(new InstrumentationResultPrinter(this));
+            listeners.add(new InstrumentationResultPrinter());
             addDelayListener(listeners);
             addCoverageListener(listeners);
         }
@@ -269,13 +269,16 @@ public class AndroidJUnitRunner extends Instrumentation {
 
         for (RunListener listener : listeners) {
             testRunner.addListener(listener);
+            if (listener instanceof InstrumentationRunListener) {
+                ((InstrumentationRunListener)listener).setInstrumentation(this);
+            }
         }
     }
 
     private void addCoverageListener(List<RunListener> list) {
         if (getBooleanArgument(ARGUMENT_COVERAGE)) {
             String coverageFilePath = getArguments().getString(ARGUMENT_COVERAGE_PATH);
-            list.add(new CoverageListener(this, coverageFilePath));
+            list.add(new CoverageListener(coverageFilePath));
         }
     }
 

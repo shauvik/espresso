@@ -44,13 +44,16 @@ public class CoverageListener extends InstrumentationRunListener {
     /**
      * Creates a {@link CoverageListener).
      *
-     * @param instr the {@link Instrumentation} that the test is running under
      * @param customCoverageFilePath an optional user specified path for the coverage file
      *         If null, file will be generated in test app's file directory.
      */
-    public CoverageListener(Instrumentation instr, String customCoverageFilePath) {
-        super(instr);
+    public CoverageListener(String customCoverageFilePath) {
         mCoverageFilePath = customCoverageFilePath;
+    }
+    
+    @Override 
+    public void setInstrumentation(Instrumentation instr) {
+        super.setInstrumentation(instr);
         if (mCoverageFilePath == null) {
             mCoverageFilePath = instr.getTargetContext().getFilesDir().getAbsolutePath() +
                     File.separator + DEFAULT_COVERAGE_FILE_NAME;
