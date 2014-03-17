@@ -10,5 +10,5 @@ sourceSets {
 
 dependencies {
     compile getAndroidPrebuilt('8')
-    compile project(':external:junit')
+    compile project(':junit')
 }
