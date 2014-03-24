@@ -246,6 +246,17 @@ public class TestRequestBuilderTest {
         public void runMe2() {}
     }
 
+    public static class DollarMethod {
+
+        @Test
+        public void testWith$() {
+        }
+
+        @Test
+        public void testSkipped() {
+        }
+    }
+
     @InjectInstrumentation
     public Instrumentation mInstr;
 
@@ -630,5 +641,19 @@ public class TestRequestBuilderTest {
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(2, result.getRunCount());
+    }
+
+    /**
+     * Test method filters with dollar signs are allowed
+     */
+    @Test
+    public void testMethodFilterWithDollar() {
+        TestRequestBuilder b = new TestRequestBuilder(mMockDeviceBuild,
+                new PrintStream(new ByteArrayOutputStream()));
+        b.addTestMethod(DollarMethod.class.getName(), "testWith$");
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        Result result = testRunner.run(request.getRequest());
+        Assert.assertEquals(1, result.getRunCount());
     }
 }

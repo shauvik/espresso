@@ -406,7 +406,7 @@ public class TestRequestBuilder {
      */
     private static Filter matchParameterizedMethod(final Description target) {
         return new Filter() {
-            Pattern pat = Pattern.compile(target.getMethodName() + "(\\[[0-9]+\\])?");
+            Pattern pat = Pattern.compile(Pattern.quote(target.getMethodName()) + "(\\[[0-9]+\\])?");
 
             @Override
             public boolean shouldRun(Description desc) {
