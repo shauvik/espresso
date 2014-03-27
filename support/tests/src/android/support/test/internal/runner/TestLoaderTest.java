@@ -15,8 +15,6 @@
  */
 package android.support.test.internal.runner;
 
-import android.support.test.internal.runner.TestLoader;
-
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
@@ -34,15 +32,27 @@ import java.io.PrintStream;
 public class TestLoaderTest {
 
     public static class JUnit3Test extends TestCase {
+        public void testFoo() {}
     }
 
+    public static class EmptyJUnit3Test extends TestCase {
+    }
+
+
     public static abstract class AbstractTest extends TestCase {
+        public void testFoo() {}
+    }
+
+    public static class SubClassAbstractTest extends AbstractTest {
     }
 
     public static class JUnit4Test {
         @Test
         public void thisIsATest() {
         }
+    }
+
+    public static class SubClassJUnit4Test extends JUnit4Test {
     }
 
     @RunWith(value = Parameterized.class)
@@ -66,6 +76,11 @@ public class TestLoaderTest {
     @Test
     public void testLoadTests_junit3() {
         assertLoadTestSuccess(JUnit3Test.class);
+    }
+
+    @Test
+    public void testLoadTests_emptyjunit3() {
+        Assert.assertNull(mLoader.loadIfTest(EmptyJUnit3Test.class.getName()));
     }
 
     @Test
@@ -104,5 +119,15 @@ public class TestLoaderTest {
         Assert.assertNull(mLoader.loadIfTest(AbstractTest.class.getName()));
         Assert.assertEquals(0, mLoader.getLoadedClasses().size());
         Assert.assertEquals(0, mLoader.getLoadFailures().size());
+    }
+
+    @Test
+    public void testLoadTests_junit4SubclassAbstract() {
+        assertLoadTestSuccess(SubClassJUnit4Test.class);
+    }
+
+    @Test
+    public void testLoadTests_junit3SubclassAbstract() {
+        assertLoadTestSuccess(SubClassAbstractTest.class);
     }
 }
