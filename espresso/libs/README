@@ -1,0 +1,18 @@
+The following outlines the license and the download location of the binary files
+present in this "libs" folder.
+
+dagger-1.2.1:
+jar: http://mvnrepository.com/artifact/com.squareup.dagger/dagger/1.2.1
+license: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+dagger-compiler-1.2.1:
+jar: http://mvnrepository.com/artifact/com.squareup.dagger/dagger-compiler/1.2.1
+license: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+guava-14.0.1
+jar: http://mvnrepository.com/artifact/com.google.guava/guava/14.0.1
+license: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+jarjar-1.4
+jar: https://code.google.com/p/jarjar
+license: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
