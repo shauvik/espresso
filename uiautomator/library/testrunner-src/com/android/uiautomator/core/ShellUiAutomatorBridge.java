@@ -112,7 +112,7 @@ public class ShellUiAutomatorBridge extends UiAutomatorBridge {
                 IPowerManager.Stub.asInterface(ServiceManager.getService(Context.POWER_SERVICE));
         boolean ret = false;
         try {
-            ret = pm.isScreenOn();
+            ret = pm.isInteractive();
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Error getting screen status", e);
             throw new RuntimeException(e);
