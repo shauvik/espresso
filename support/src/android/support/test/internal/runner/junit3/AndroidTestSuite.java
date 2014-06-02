@@ -26,7 +26,9 @@ import org.junit.Ignore;
 
 /**
  * An extension of {@link TestSuite} that supports Android construct injection into test cases,
- * and properly supports annotation filtering of test cases
+ * and properly supports annotation filtering of test cases.
+ * <p/>
+ * Also tries to use {@link NonLeakyTestSuite} where possible to save memory.
  */
 @Ignore
 class AndroidTestSuite extends DelegatingFilterableTestSuite {
@@ -34,9 +36,8 @@ class AndroidTestSuite extends DelegatingFilterableTestSuite {
     private final Bundle mBundle;
     private final Instrumentation mInstr;
 
-    public AndroidTestSuite(Class<?> testClass,
-            Bundle bundle, Instrumentation instr) {
-        this(new TestSuite(testClass), bundle, instr);
+    public AndroidTestSuite(Class<?> testClass, Bundle bundle, Instrumentation instr) {
+        this(new NonLeakyTestSuite(testClass), bundle, instr);
     }
 
     public AndroidTestSuite(TestSuite s, Bundle bundle, Instrumentation instr) {
@@ -50,4 +51,5 @@ class AndroidTestSuite extends DelegatingFilterableTestSuite {
         // wrap the result in a new AndroidTestResult to do the bundle and instrumentation injection
         super.run(new AndroidTestResult(mBundle, mInstr, result));
     }
+
 }
