@@ -28,7 +28,7 @@ LOCAL_MODULE_TAGS := tests
 # SDK 10 needed for mockito/objnesis. Otherwise 8 would work
 LOCAL_SDK_VERSION := 10
 
-LOCAL_STATIC_JAVA_LIBRARIES := android-support-test mockito-target dexmaker
+LOCAL_STATIC_JAVA_LIBRARIES := android-support-test mockito-target dexmaker hamcrest-library hamcrest-integration
 
 LOCAL_PROGUARD_ENABLED := disabled
 

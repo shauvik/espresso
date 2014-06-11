@@ -8,6 +8,8 @@
 	<classpathentry kind="src" path="mockito-src"/>
 	<classpathentry kind="src" path="dexmaker-mockito"/>
 	<classpathentry kind="src" path="android-support-test-src"/>
+	<classpathentry kind="src" path="hamcrest-library-src"/>
+	<classpathentry kind="src" path="hamcrest-integration-src"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
