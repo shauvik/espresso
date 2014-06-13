@@ -35,7 +35,7 @@ public class SuiteAssignmentPrinter extends InstrumentationRunListener {
      * This constant defines the maximum allowed runtime (in ms) for a test included in the "small"
      * suite. It is used to make an educated guess at what suite an unlabeled test belongs to.
      */
-    private static final float SMALL_SUITE_MAX_RUNTIME = 100;
+    private static final float SMALL_SUITE_MAX_RUNTIME = 200;
 
     /**
      * This constant defines the maximum allowed runtime (in ms) for a test included in the "medium"
@@ -61,6 +61,10 @@ public class SuiteAssignmentPrinter extends InstrumentationRunListener {
         if (!mTimingValid || mStartTime < 0) {
             assignmentSuite = "NA";
             runTime = -1;
+            sendString("F");
+            Log.d("SuiteAssignmentPrinter", String.format(
+                    "%s#%s: skipping suite assignment due to test failure\n", description.getClassName(),
+                    description.getMethodName()));
         } else {
             runTime = endTime - mStartTime;
             if (runTime < SMALL_SUITE_MAX_RUNTIME) {
@@ -70,22 +74,22 @@ public class SuiteAssignmentPrinter extends InstrumentationRunListener {
             } else {
                 assignmentSuite = TestRequestBuilder.LARGE_SIZE;
             }
+
+            String currentSize = getTestSize(description);
+            if (!assignmentSuite.equals(currentSize)) {
+                // test size != runtime
+                sendString(String.format("\n%s#%s: current size: %s. suggested: %s runTime: %d ms\n",
+                        description.getClassName(), description.getMethodName(), currentSize,
+                        assignmentSuite, runTime));
+            } else {
+                sendString(".");
+                Log.d("SuiteAssignmentPrinter", String.format(
+                        "%s#%s assigned correctly as %s. runTime: %d ms\n", description.getClassName(),
+                        description.getMethodName(), assignmentSuite, runTime));
+            }
         }
         // Clear mStartTime so that we can verify that it gets set next time.
         mStartTime = -1;
-
-        String currentSize = getTestSize(description);
-        if (!assignmentSuite.equals(currentSize)) {
-            // test size != runtime
-            sendString(String.format("\n%s#%s: current size: %s. suggested: %s runTime: %d ms\n",
-                    description.getClassName(), description.getMethodName(), currentSize,
-                    assignmentSuite, runTime));
-        } else {
-            sendString(".");
-            Log.d("SuiteAssignmentPrinter", String.format(
-                    "%s#%s assigned correctly as %s. runTime: %d ms\n", description.getClassName(),
-                    description.getMethodName(), assignmentSuite, runTime));
-        }
 
     }
 
