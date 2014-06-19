@@ -15,3 +15,12 @@
  */
 
 apply plugin: 'java'
+
+task androidJavadocs(type: Javadoc) {
+    source = sourceSets.main.allJava
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}

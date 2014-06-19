@@ -45,3 +45,5 @@ dependencies {
     compile project(':idling-resource-interface')
     androidTestCompile project(':espresso-contrib')
 }
+
+apply from: "$rootDir/javadoc.gradle"

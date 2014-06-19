@@ -52,3 +52,5 @@ dependencies {
 
     androidTestCompile project(':espresso-contrib')
 }
+
+apply from: "$rootDir/javadoc.gradle"

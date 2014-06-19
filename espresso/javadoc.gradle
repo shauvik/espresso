@@ -14,32 +14,11 @@
  * limitations under the License.
  */
 
-apply plugin: 'android-library'
-
-sourceCompatibility = JavaVersion.VERSION_1_5
-targetCompatibility = JavaVersion.VERSION_1_5
-
-repositories {
-    maven { url '../../../../prebuilts/tools/common/m2/repository' }
-    maven { url '../../../../prebuilts/tools/common/m2/internal' }
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.allJava
 }
 
-android {
-    compileSdkVersion 19
-    buildToolsVersion "19.0.3"
-
-    packagingOptions {
-        exclude 'LICENSE.txt'
-    }
-
-    lintOptions {
-        abortOnError false
-    }
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.allSource
 }
-
-dependencies {
-    compile project(':espresso-lib')
-    compile 'com.android.support:support-v4:19.1.+'
-}
-
-apply from: "$rootDir/javadoc.gradle"

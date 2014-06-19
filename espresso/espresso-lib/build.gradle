@@ -109,4 +109,5 @@ android.libraryVariants.all { variant ->
     variant.packageLibrary.dependsOn "$jarJarTaskName"
 }
 
-apply from: '../publishLocal.gradle'
+apply from: "$rootDir/javadoc.gradle"
+apply from: "$rootDir/publishLocal.gradle"
