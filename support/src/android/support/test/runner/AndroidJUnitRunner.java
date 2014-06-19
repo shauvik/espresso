@@ -17,12 +17,18 @@
 package android.support.test.runner;
 
 import android.app.Activity;
+import android.app.Application;
 import android.app.Instrumentation;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Debug;
+import android.os.IBinder;
 import android.os.Looper;
 import android.support.test.internal.runner.TestRequest;
 import android.support.test.internal.runner.TestRequestBuilder;
@@ -145,7 +151,7 @@ import java.util.List;
  *    meta-data android:name="listener"
  *              android:value="com.foo.Listener,com.foo.Listener2"
  */
-public class AndroidJUnitRunner extends Instrumentation {
+public class AndroidJUnitRunner extends MonitoringInstrumentation {
 
     // constants for supported instrumentation arguments
     public static final String ARGUMENT_TEST_CLASS = "class";
@@ -172,6 +178,7 @@ public class AndroidJUnitRunner extends Instrumentation {
     public void onCreate(Bundle arguments) {
         super.onCreate(arguments);
         mArguments = arguments;
+        specifyDexMakerCacheProperty();
 
         start();
     }
@@ -211,8 +218,7 @@ public class AndroidJUnitRunner extends Instrumentation {
 
     @Override
     public void onStart() {
-        // Wait for target context to finish.
-        waitForIdleSync();
+        super.onStart();
 
         prepareLooper();
 
@@ -220,7 +226,7 @@ public class AndroidJUnitRunner extends Instrumentation {
             Debug.waitForDebugger();
         }
 
-        setupDexmaker();
+        setupDexmakerClassloader();
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         PrintStream writer = new PrintStream(byteArrayOutputStream);
@@ -483,12 +489,7 @@ public class AndroidJUnitRunner extends Instrumentation {
         }
     }
 
-    private void setupDexmaker() {
-        // Explicitly set the Dexmaker cache, so tests that use mocking frameworks work
-        String dexCache = getTargetContext().getCacheDir().getPath();
-        Log.i(LOG_TAG, "Setting dexmaker.dexcache to " + dexCache);
-        System.setProperty("dexmaker.dexcache", getTargetContext().getCacheDir().getPath());
-
+    private void setupDexmakerClassloader() {
         ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
         // must set the context classloader for apps that use a shared uid, see
         // frameworks/base/core/java/android/app/LoadedApk.java
@@ -496,5 +497,42 @@ public class AndroidJUnitRunner extends Instrumentation {
         Log.i(LOG_TAG, String.format("Setting context classloader to '%s', Original: '%s'",
                 newClassLoader.toString(), originalClassLoader.toString()));
         Thread.currentThread().setContextClassLoader(newClassLoader);
+    }
+
+    // ActivityUnitTestCase defaults to building the ComponentName via
+    // Activity.getClass().getPackage().getName(). This will cause a problem if the Java Package of
+    // the Activity is not the Android Package of the application, specifically
+    // Activity.getPackageName() will return an incorrect value.
+    // @see b/14561718
+    @Override
+    public Activity newActivity(Class<?> clazz,
+            Context context,
+            IBinder token,
+            Application application,
+            Intent intent,
+            ActivityInfo info,
+            CharSequence title,
+            Activity parent,
+            String id,
+            Object lastNonConfigurationInstance) throws InstantiationException, IllegalAccessException {
+        String activityClassPackageName = clazz.getPackage().getName();
+        String contextPackageName = context.getPackageName();
+        ComponentName intentComponentName = intent.getComponent();
+        if (!contextPackageName.equals(intentComponentName.getPackageName())) {
+            if (activityClassPackageName.equals(intentComponentName.getPackageName())) {
+                intent.setComponent(
+                        new ComponentName(contextPackageName, intentComponentName.getClassName()));
+            }
+        }
+        return super.newActivity(clazz,
+                context,
+                token,
+                application,
+                intent,
+                info,
+                title,
+                parent,
+                id,
+                lastNonConfigurationInstance);
     }
 }

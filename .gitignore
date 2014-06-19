@@ -6,4 +6,4 @@ bin/
 *.cproject
 *.settings
 *.pyc
-
+.DS_Store

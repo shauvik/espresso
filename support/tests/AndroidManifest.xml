@@ -18,6 +18,7 @@
    package="android.support.test.tests">
 
     <application>
+        <uses-library android:name="android.test.runner" />
     </application>
 
     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
