@@ -627,7 +627,7 @@ public class TestRequestBuilderTest {
     }
 
     /**
-     * Test that {@link RequiresDevuce} filters tests as appropriate
+     * Test that {@link RequiresDevice} filters tests as appropriate
      */
     @Test
     public void testRequiresDevice() {

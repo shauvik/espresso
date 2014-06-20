@@ -46,7 +46,12 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.RunListener;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,6 +92,11 @@ import java.util.List;
  * <b>Running all tests in multiple classes:</b> adb shell am instrument -w
  * -e class com.android.foo.FooTest,com.android.foo.TooTest
  * com.android.foo/android.support.test.runner.AndroidJUnitRunner
+ * <p/>
+ * <b>Running all tests listed in a file:</b> adb shell am instrument -w
+ * -e testFile /sdcard/tmp/testFile.txt com.android.foo/com.android.test.runner.AndroidJUnitRunner
+ * The file should contain a list of line separated test classes and optionally methods (expected
+ * format: com.android.foo.FooClassName#testMethodName).
  * <p/>
  * <b>Running all tests in a java package:</b> adb shell am instrument -w
  * -e package com.android.foo.bar
@@ -168,16 +178,22 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
     private static final String ARGUMENT_DEBUG = "debug";
     private static final String ARGUMENT_LISTENER = "listener";
     private static final String ARGUMENT_TEST_PACKAGE = "package";
+    static final String ARGUMENT_TEST_FILE = "testFile";
     // TODO: consider supporting 'count' from InstrumentationTestRunner
 
     private static final String LOG_TAG = "AndroidJUnitRunner";
+
+    // used to separate multiple fully-qualified test case class names
+    private static final char CLASS_SEPARATOR = ',';
+    // used to separate fully-qualified test case class name, and one of its methods
+    private static final char METHOD_SEPARATOR = '#';
 
     private Bundle mArguments;
 
     @Override
     public void onCreate(Bundle arguments) {
         super.onCreate(arguments);
-        mArguments = arguments;
+        setArguments(arguments);
         specifyDexMakerCacheProperty();
 
         start();
@@ -411,9 +427,14 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
 
         String testClassName = arguments.getString(ARGUMENT_TEST_CLASS);
         if (testClassName != null) {
-            for (String className : testClassName.split(",")) {
+            for (String className : testClassName.split(String.valueOf(CLASS_SEPARATOR))) {
                 parseTestClass(className, builder);
             }
+        }
+
+        String testFilePath = arguments.getString(ARGUMENT_TEST_FILE);
+        if (testFilePath != null) {
+            parseTestClassesFromFile(testFilePath, builder);
         }
 
         String testPackage = arguments.getString(ARGUMENT_TEST_PACKAGE);
@@ -475,10 +496,10 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
      *
      * @param testClassName - full package name of test class and optionally method to add.
      *        Expected format: com.android.TestClass#testMethod
-     * @param testSuiteBuilder - builder to add tests to
+     * @param testRequestBuilder - builder to add tests to
      */
     private void parseTestClass(String testClassName, TestRequestBuilder testRequestBuilder) {
-        int methodSeparatorIndex = testClassName.indexOf('#');
+        int methodSeparatorIndex = testClassName.indexOf(METHOD_SEPARATOR);
 
         if (methodSeparatorIndex > 0) {
             String testMethodName = testClassName.substring(methodSeparatorIndex + 1);
@@ -486,6 +507,38 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
             testRequestBuilder.addTestMethod(testClassName, testMethodName);
         } else {
             testRequestBuilder.addTestClass(testClassName);
+        }
+    }
+
+    /**
+     * Parse and load the content of a test file
+     *
+     * @param filePath  path to test file contaitnig full package names of test classes and
+     *                  optionally methods to add.
+     * @param testRequestBuilder - builder to add tests to
+     */
+    private void parseTestClassesFromFile(String filePath, TestRequestBuilder testRequestBuilder) {
+        List<String> classes = new ArrayList<String>();
+        BufferedReader br = null;
+        String line;
+        try {
+            br = new BufferedReader(new FileReader(new File(filePath)));
+            while ((line = br.readLine()) != null) {
+                classes.add(line);
+            }
+        } catch (FileNotFoundException e) {
+            Log.e(LOG_TAG, String.format("File not found: %s", filePath), e);
+        } catch (IOException e) {
+            Log.e(LOG_TAG,
+                    String.format("Something went wrong reading %s, ignoring file", filePath), e);
+        } finally {
+            if (br != null) {
+                try { br.close(); } catch (IOException e) { /* ignore */ }
+            }
+        }
+
+        for (String className : classes) {
+            parseTestClass(className, testRequestBuilder);
         }
     }
 

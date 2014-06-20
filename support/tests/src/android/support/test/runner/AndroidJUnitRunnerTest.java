@@ -18,17 +18,25 @@ package android.support.test.runner;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.test.internal.runner.TestRequestBuilder;
-import android.support.test.runner.AndroidJUnitRunner;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.Reader;
+import java.io.StringReader;
 
 /**
  * Unit tests for {@link AndroidJUnitRunner}.
@@ -98,5 +106,46 @@ public class AndroidJUnitRunnerTest {
         b.putString(AndroidJUnitRunner.ARGUMENT_TEST_CLASS, "ClassName1#method");
         mAndroidJUnitRunner.buildRequest(b, mStubStream);
         Mockito.verify(mMockBuilder).addTestMethod("ClassName1", "method");
+    }
+
+    /**
+     * Test {@link AndroidJUnitRunner#buildRequest(Bundle, PrintStream)} when
+     * class name and method name is provided along with an additional class name.
+     */
+    @Test
+    public void testBuildRequest_classAndMethodCombo() {
+        Bundle b = new Bundle();
+        b.putString(AndroidJUnitRunner.ARGUMENT_TEST_CLASS, "ClassName1#method,ClassName2");
+        mAndroidJUnitRunner.buildRequest(b, mStubStream);
+        Mockito.verify(mMockBuilder).addTestMethod("ClassName1", "method");
+        Mockito.verify(mMockBuilder).addTestClass("ClassName2");
+    }
+
+    /**
+     * Temp file used for testing
+     */
+    @Rule
+    public TemporaryFolder mTmpFolder = new TemporaryFolder();
+
+    /**
+     * Test {@link AndroidJUnitRunner#buildRequest(Bundle, PrintStream)} when
+     * multiple class and method names are provided within a test file
+     */
+    @Test
+    public void testBuildRequest_testFile() throws IOException {
+        final File file = mTmpFolder.newFile("myTestFile.txt");
+        BufferedWriter out = new BufferedWriter(new FileWriter(file));
+        out.write("ClassName3\n");
+        out.write("ClassName4#method2\n");
+        out.close();
+
+        Bundle b = new Bundle();
+        b.putString(AndroidJUnitRunner.ARGUMENT_TEST_FILE, file.getPath());
+        b.putString(AndroidJUnitRunner.ARGUMENT_TEST_CLASS, "ClassName1#method1,ClassName2");
+        mAndroidJUnitRunner.buildRequest(b, mStubStream);
+        Mockito.verify(mMockBuilder).addTestMethod("ClassName1", "method1");
+        Mockito.verify(mMockBuilder).addTestClass("ClassName2");
+        Mockito.verify(mMockBuilder).addTestClass("ClassName3");
+        Mockito.verify(mMockBuilder).addTestMethod("ClassName4", "method2");
     }
 }
