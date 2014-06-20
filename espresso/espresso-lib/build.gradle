@@ -19,17 +19,9 @@ apply plugin: 'android-library'
 sourceCompatibility = JavaVersion.VERSION_1_5
 targetCompatibility = JavaVersion.VERSION_1_5
 
-repositories {
-    maven { url '../../../../prebuilts/tools/common/m2/repository' }
-    maven { url '../../../../prebuilts/tools/common/m2/internal' }
-}
-
 android {
     compileSdkVersion 19
-    buildToolsVersion '19.0.3'
-
-    // to overwrite debug variant
-    publishNonDefault true
+    buildToolsVersion "20"
 
     lintOptions {
         abortOnError false
@@ -38,6 +30,9 @@ android {
     packagingOptions {
         exclude 'LICENSE.txt'
     }
+
+    // to overwrite debug variant
+    publishNonDefault true
 }
 
 // create separate scope for jarjar
@@ -51,7 +46,7 @@ dependencies {
     provided files('../libs/dagger-compiler-1.2.1.jar')
     provided files('../libs/guava-14.0.1.jar')
 
-    compile project(':idling-resource-interface')
+    compile project(':espresso:idling-resource-interface')
     compile 'javax.annotation:javax.annotation-api:1.2'
     compile 'javax.inject:javax.inject:1'
     compile 'com.google.code.findbugs:jsr305:2.0.1'
@@ -109,5 +104,4 @@ android.libraryVariants.all { variant ->
     variant.packageLibrary.dependsOn "$jarJarTaskName"
 }
 
-apply from: "$rootDir/javadoc.gradle"
-apply from: "$rootDir/publishLocal.gradle"
+apply from: "$rootDir/espresso/publishEspresso.gradle"

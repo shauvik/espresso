@@ -19,14 +19,9 @@ apply plugin: 'android-library'
 sourceCompatibility = JavaVersion.VERSION_1_5
 targetCompatibility = JavaVersion.VERSION_1_5
 
-repositories {
-    maven { url '../../../../prebuilts/tools/common/m2/repository' }
-    maven { url '../../../../prebuilts/tools/common/m2/internal' }
-}
-
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.3"
+    buildToolsVersion "20"
 
     packagingOptions {
         exclude 'LICENSE.txt'
@@ -38,8 +33,8 @@ android {
 }
 
 dependencies {
-    compile project(':espresso-lib')
-    compile 'com.android.support:support-v4:19.1.+'
+    compile project(':espresso:espresso-lib')
+    compile 'com.android.support:support-v4:20.0.+'
 }
 
-apply from: "$rootDir/javadoc.gradle"
+apply from: "$rootDir/espresso/publishEspresso.gradle"

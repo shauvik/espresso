@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-include ':espresso-lib'
-include ':espresso-lib-tests'
+include ':espresso'
+include ':espresso:espresso-lib'
+include ':espresso:espresso-lib-tests'
 
-include ':espresso-contrib'
-include ':espresso-contrib-tests'
+include ':espresso:espresso-contrib'
+include ':espresso:espresso-contrib-tests'
 
-include ':espresso-sample'
+include ':espresso:espresso-sample'
 
-include ':idling-resource-interface'
+include ':espresso:idling-resource-interface'

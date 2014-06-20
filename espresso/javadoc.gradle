@@ -18,7 +18,7 @@ task androidJavadocs(type: Javadoc) {
     source = android.sourceSets.main.allJava
 }
 
-task androidSourcesJar(type: Jar) {
-    classifier = 'sources'
-    from android.sourceSets.main.allSource
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
 }

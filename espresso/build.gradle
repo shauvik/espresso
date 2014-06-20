@@ -26,16 +26,11 @@ buildscript {
 }
 
 subprojects {
-    project.ext {
-        androidSdkPath = getAndroidSdkPath()
-        println 'Using Android SDK at: ' + androidSdkPath
+    repositories {
+        maven { url '../../../../prebuilts/tools/common/m2/repository' }
+        maven { url '../../../../prebuilts/tools/common/m2/internal' }
     }
-}
 
-def getAndroidSdkPath() {
-    if (project.has("androidCustomSdkPath")) {
-        project.androidCustomSdkPath
-    } else {
-        System.getenv("ANDROID_HOME")
-    }
+    version = VERSION
+    group = GROUP_ID
 }

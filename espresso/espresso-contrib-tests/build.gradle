@@ -16,14 +16,9 @@
 
 apply plugin: 'android'
 
-repositories {
-    maven { url '../../../../prebuilts/tools/common/m2/repository' }
-    maven { url '../../../../prebuilts/tools/common/m2/internal' }
-}
-
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.3"
+    buildToolsVersion "20"
 
     packagingOptions {
         exclude 'LICENSE.txt'
@@ -34,7 +29,8 @@ android {
     }
 
     defaultConfig {
-        testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
+        testInstrumentationRunner
+            "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
     }
 
     sourceSets {
@@ -47,10 +43,10 @@ android {
 
 dependencies {
     compile files('../libs/guava-14.0.1.jar')
-    compile 'com.android.support:support-v4:19.1.+'
-    compile 'com.android.support:appcompat-v7:19.1.+'
+    compile 'com.android.support:support-v4:20.0.+'
+    compile 'com.android.support:appcompat-v7:20.0.+'
 
-    androidTestCompile project(':espresso-contrib')
+    androidTestCompile project(':espresso:espresso-contrib')
 }
 
-apply from: "$rootDir/javadoc.gradle"
+apply from: "$rootDir/espresso/javadoc.gradle"
