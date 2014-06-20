@@ -267,7 +267,7 @@ public class TestRequestBuilder {
     }
 
     /**
-     * Class that filters out tests annotated with {@link RequestDevice} when running on emulator
+     * Class that filters out tests annotated with {@link RequiresDevice} when running on emulator
      */
     private class RequiresDeviceFilter extends AnnotationExclusionFilter {
 
@@ -518,6 +518,7 @@ public class TestRequestBuilder {
      * @param instr the {@link Instrumentation} to inject into any tests that require it
      * @param bundle the {@link Bundle} of command line args to inject into any tests that require
      *         it
+     * @param skipExecution whether or not to skip actual test execution
      * @param computer Helps construct Runners from classes
      * @param classes the classes containing the tests
      * @return a <code>Request</code> that will cause all tests in the classes to be run

@@ -44,7 +44,7 @@ class ClassPathScanner {
          * Tests whether or not the specified abstract pathname should be included in a class path
          * entry list.
          *
-         * @param pathName the relative path of the class path entry
+         * @param className the relative path of the class path entry
          */
         boolean accept(String className);
     }
