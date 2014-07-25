@@ -130,4 +130,14 @@ public class TestLoaderTest {
     public void testLoadTests_junit3SubclassAbstract() {
         assertLoadTestSuccess(SubClassAbstractTest.class);
     }
+
+    /**
+     *  Verify loading a class that has already been loaded
+     */
+    @Test
+    public void testLoadTests_loadAlreadyLoadedClass() {
+        Class<?> clazz = SubClassAbstractTest.class;
+        assertLoadTestSuccess(clazz);
+        assertLoadTestSuccess(clazz);
+    }
 }
