@@ -24,8 +24,10 @@ import org.junit.runner.notification.Failure;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.LinkedList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A class for loading JUnit3 and JUnit4 test classes given a set of potential class names.
@@ -34,8 +36,8 @@ public class TestLoader {
 
     private static final String LOG_TAG = "TestLoader";
 
-    private  List<Class<?>> mLoadedClasses = new LinkedList<Class<?>>();
-    private  List<Failure> mLoadFailures = new LinkedList<Failure>();
+    private Map<String, Class<?>> mLoadedClassesMap = new LinkedHashMap<String, Class<?>>();
+    private Map<String, Failure> mLoadFailuresMap = new LinkedHashMap<String, Failure>();
 
     private PrintStream mWriter;
 
@@ -49,7 +51,7 @@ public class TestLoader {
     }
 
     /**
-     * Loads the test class from the given class name.
+     * Loads the test class from a given class name if its not already loaded.
      * <p/>
      * Will store the result internally. Successfully loaded classes can be retrieved via
      * {@link #getLoadedClasses()}, failures via {@link #getLoadFailures()}.
@@ -60,15 +62,23 @@ public class TestLoader {
     public Class<?> loadClass(String className) {
         Class<?> loadedClass = doLoadClass(className);
         if (loadedClass != null) {
-            mLoadedClasses.add(loadedClass);
+            mLoadedClassesMap.put(className, loadedClass);
         }
         return loadedClass;
     }
 
     private Class<?> doLoadClass(String className) {
+        if (mLoadFailuresMap.containsKey(className)) {
+            // Don't load classes that already failed to load
+            return null;
+        } else if (mLoadedClassesMap.containsKey(className)) {
+            // Class with the same name was already loaded, return it
+            return mLoadedClassesMap.get(className);
+        }
+
         try {
-            // TODO: InstrumentationTestRunner uses Class.forName(className, false,
-            // getTargetContext().getClassLoader()
+            // TODO: InstrumentationTestRunner uses
+            // Class.forName(className, false, getTargetContext().getClassLoader());
             // Evaluate if that is needed. Initial testing indicates
             // getTargetContext().getClassLoader() == this.getClass().getClassLoader()
             ClassLoader myClassLoader = this.getClass().getClassLoader();
@@ -79,7 +89,7 @@ public class TestLoader {
             mWriter.println(errMsg);
             Description description = Description.createSuiteDescription(className);
             Failure failure = new Failure(description, e);
-            mLoadFailures.add(failure);
+            mLoadFailuresMap.put(className, failure);
         }
         return null;
     }
@@ -87,7 +97,7 @@ public class TestLoader {
     /**
      * Loads the test class from the given class name.
      * <p/>
-     * Similar to {@link #loadClass(String, PrintStream))}, but will ignore classes that are
+     * Similar to {@link #loadClass(String)}, but will ignore classes that are
      * not tests.
      *
      * @param className the class name to attempt to load
@@ -96,7 +106,7 @@ public class TestLoader {
     public Class<?> loadIfTest(String className) {
         Class<?> loadedClass = doLoadClass(className);
         if (loadedClass != null && isTestClass(loadedClass)) {
-            mLoadedClasses.add(loadedClass);
+            mLoadedClassesMap.put(className, loadedClass);
             return loadedClass;
         }
         return null;
@@ -106,23 +116,23 @@ public class TestLoader {
      * @return whether this {@link TestLoader} contains any loaded classes or load failures.
      */
     public boolean isEmpty() {
-        return mLoadedClasses.isEmpty() && mLoadFailures.isEmpty();
+        return mLoadedClassesMap.isEmpty() && mLoadFailuresMap.isEmpty();
     }
 
     /**
-     * Get the {@link List) of classes successfully loaded via
-     * {@link #loadTest(String, PrintStream)} calls.
+     * Get the {@link Collection) of classes successfully loaded via
+     * {@link #loadIfTest(String)} calls.
      */
-    public List<Class<?>> getLoadedClasses() {
-        return mLoadedClasses;
+    public Collection<Class<?>> getLoadedClasses() {
+        return mLoadedClassesMap.values();
     }
 
     /**
      * Get the {@link List) of {@link Failure} that occurred during
-     * {@link #loadTest(String, PrintStream)} calls.
+     * {@link #loadIfTest(String)} calls.
      */
-    public List<Failure> getLoadFailures() {
-        return mLoadFailures;
+    public Collection<Failure> getLoadFailures() {
+        return mLoadFailuresMap.values();
     }
 
     /**
