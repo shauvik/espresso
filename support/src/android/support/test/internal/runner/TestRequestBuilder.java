@@ -567,8 +567,8 @@ public class TestRequestBuilder {
         }
 
         Request request = classes(instr, bundle, mSkipExecution, new Computer(),
-                mTestLoader.getLoadedClassesMap().toArray(new Class[0]));
-        return new TestRequest(mTestLoader.getLoadFailuresMap(), new LenientFilterRequest(request, mFilter));
+                mTestLoader.getLoadedClasses().toArray(new Class[0]));
+        return new TestRequest(mTestLoader.getLoadFailures(), new LenientFilterRequest(request, mFilter));
     }
 
     /**
