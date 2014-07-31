@@ -65,6 +65,7 @@ cd "`dirname \"$PRG\"`/" >&-
 APP_HOME="`pwd -P`"
 cd "$SAVED" >&-
 
+# Set the location of the Gradle Jar
 CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
 # Determine the Java command to use to start the JVM.
@@ -161,4 +162,36 @@ function splitJvmOpts() {
 eval splitJvmOpts $DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS
 JVM_OPTS[${#JVM_OPTS[*]}]="-Dorg.gradle.appname=$APP_BASE_NAME"
 
-exec "$JAVACMD" "${JVM_OPTS[@]}" -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
+# For reproducible builds, always use the SDKs stored in source control
+if $darwin; then
+    ANDROID_HOME="$APP_HOME/../../prebuilts/sdk/tools/darwin"
+else
+    ANDROID_HOME="$APP_HOME/../../prebuilts/sdk/tools/linux"
+fi
+export ANDROID_HOME
+
+# Change the project's .gradle to the android out dir.
+ANDROID_OUT_ROOT="$APP_HOME/../../out"
+if [[ -n "$OUT_DIR" ]]; then
+    ANDROID_OUT_ROOT="$OUT_DIR"
+fi
+
+ANDROID_CACHE_DIR="$ANDROID_OUT_ROOT/gradle/.gradle"
+
+# Prevent excess parallelization on the build servers, as it slows the
+# build to a crawl
+if [[ "$1" == --parallel-threads=* ]] && [[ "$2" == buildForBuildServer* ]]; then
+    set -- "--parallel-threads=4" "$2"
+fi
+
+# Change the local user directories to be under the android out dir
+export GRADLE_USER_HOME="$ANDROID_OUT_ROOT/gradle/.gradle"
+export M2_HOME="$ANDROID_OUT_ROOT/gradle/.m2"
+
+exec "$JAVACMD" "${JVM_OPTS[@]}" \
+    -classpath "$CLASSPATH" \
+    org.gradle.wrapper.GradleWrapperMain \
+    --project-cache-dir=$ANDROID_CACHE_DIR \
+    -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxPermSize=1024m" \
+    --configure-on-demand \
+    "$@"

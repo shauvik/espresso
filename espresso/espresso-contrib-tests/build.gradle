@@ -36,7 +36,7 @@ android {
     sourceSets {
         // Setting espresso-sample as the main root of this project to avoid source code duplication.
         // Temporary workaround until Android Gradle plugin supports settings custom target package
-        // for Android Tests.
+        // for Android Tests (Bug: https://code.google.com/p/android/issues/detail?id=69211).
         main.setRoot("../espresso-sample/src/main")
     }
 }
