@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
+include (':lib')
+include (':tests')
 
-apply plugin: 'java'
+include(':junit')
+project(':junit').projectDir = new File(rootDir, '../../../external/junit')
+project(':junit').buildFileName = "build-prebuilts.gradle"
 
-sourceSets {
-    main {
-        java {
-            srcDirs = ['lib/src']
-        }
-    }
-}
-
-dependencies {
-    compile getAndroidPrebuilt('8')
-    compile project(path: ':junit', configuration: 'target')
-}
+rootProject.buildFileName = "build-prebuilts.gradle"

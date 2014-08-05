@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
-
-apply plugin: 'java'
-
-sourceSets {
-    main {
-        java {
-            srcDirs = ['lib/src']
-        }
-    }
-}
+apply plugin: 'android-library'
 
 dependencies {
-    compile getAndroidPrebuilt('8')
     compile project(path: ':junit', configuration: 'target')
+}
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion '20'
+
+    lintOptions {
+        abortOnError false
+    }
+
+    sourceSets {
+        main.manifest.srcFile file('AndroidManifest.xml')
+        main {
+            java {
+                srcDirs = ['src']
+            }
+        }
+    }
 }

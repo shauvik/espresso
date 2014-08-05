@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
+buildscript {
+    repositories {
+        maven { url "$rootDir/../../../prebuilts/gradle-plugin" }
+        maven { url "$rootDir/../../../prebuilts/tools/common/m2/repository" }
+    }
 
-apply plugin: 'java'
-
-sourceSets {
-    main {
-        java {
-            srcDirs = ['lib/src']
-        }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.10.+'
     }
 }
 
-dependencies {
-    compile getAndroidPrebuilt('8')
-    compile project(path: ':junit', configuration: 'target')
+subprojects {
+    repositories {
+        maven { url "$rootDir/../../../prebuilts/tools/common/m2/repository" }
+    }
+}
+
+FileCollection getAndroidPrebuilt(String apiLevel) {
+    files("$rootDir/../../../prebuilts/sdk/$apiLevel/android.jar")
 }
