@@ -26,6 +26,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
@@ -313,6 +314,11 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
             if (delay != null) {
                 int delayMsec = Integer.parseInt(delay.toString());
                 list.add(new DelayInjector(delayMsec));
+            } else if (getBooleanArgument(ARGUMENT_LOG_ONLY)
+                    && Build.VERSION.SDK_INT < 16) {
+                // On older platforms, collecting tests can fail for large volume of tests.
+                // Insert a small delay between each test to prevent this
+                list.add(new DelayInjector(15 /* msec */));
             }
         } catch (NumberFormatException e) {
             Log.e(LOG_TAG, "Invalid delay_msec parameter", e);
