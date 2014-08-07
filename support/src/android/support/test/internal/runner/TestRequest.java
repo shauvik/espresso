@@ -18,22 +18,22 @@ package android.support.test.internal.runner;
 import org.junit.runner.Request;
 import org.junit.runner.notification.Failure;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * A data structure for holding a {@link Request} and the {@link Failure}s that occurred during its
  * creation.
  */
 public class TestRequest {
-     private final List<Failure> mFailures;
+     private final Collection<Failure> mFailures;
      private final Request mRequest;
 
-     public TestRequest(List<Failure> requestBuildFailures, Request request) {
+     public TestRequest(Collection<Failure> requestBuildFailures, Request request) {
          mRequest = request;
          mFailures = requestBuildFailures;
      }
 
-     public List<Failure> getFailures() {
+     public Collection<Failure> getFailures() {
          return mFailures;
      }
 

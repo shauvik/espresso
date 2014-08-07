@@ -44,7 +44,9 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -64,10 +66,11 @@ public class TestRequestBuilder {
 
     private String[] mApkPaths;
     private TestLoader mTestLoader;
-    private Filter mFilter = new AnnotationExclusionFilter(Suppress.class).intersect(
-            new SdkSuppressFilter()).intersect(new RequiresDeviceFilter());
-
-    private PrintStream mWriter;
+    private ClassAndMethodFilter mClassMethodFilter = new ClassAndMethodFilter();
+    private Filter mFilter = new AnnotationExclusionFilter(Suppress.class)
+            .intersect(new SdkSuppressFilter())
+            .intersect(new RequiresDeviceFilter())
+            .intersect(mClassMethodFilter);
     private boolean mSkipExecution = false;
     private String mTestPackageName = null;
     private final DeviceBuild mDeviceBuild;
@@ -394,44 +397,101 @@ public class TestRequestBuilder {
     public void addTestMethod(String testClassName, String testMethodName) {
         Class<?> clazz = mTestLoader.loadClass(testClassName);
         if (clazz != null) {
-            mFilter = mFilter.intersect(matchParameterizedMethod(
-                    Description.createTestDescription(clazz, testMethodName)));
+            mClassMethodFilter.add(testClassName, testMethodName);
         }
     }
 
     /**
-     * A filter to get around the fact that parameterized tests append "[#]" at
-     * the end of the method names. For instance, "getFoo" would become
-     * "getFoo[0]".
+     * A {@link Filter} to support the ability to filter out multiple classes#methodes combinations.
      */
-    private static Filter matchParameterizedMethod(final Description target) {
-        return new Filter() {
-            Pattern pat = Pattern.compile(Pattern.quote(target.getMethodName()) + "(\\[[0-9]+\\])?");
+    private static class ClassAndMethodFilter extends Filter {
 
-            @Override
-            public boolean shouldRun(Description desc) {
-                if (desc.isTest()) {
-                    return target.getClassName().equals(desc.getClassName())
-                            && isMatch(desc.getMethodName());
+        private Map<String, MethodFilter> mClassMethodFilterMap
+                = new HashMap<String, MethodFilter>();
+
+        @Override
+        public boolean shouldRun(Description description) {
+            if (mClassMethodFilterMap.isEmpty()) {
+                return true;
+            }
+            if (description.isTest()) {
+                MethodFilter mf = mClassMethodFilterMap.get(description.getClassName());
+                if (mf != null) {
+                    return mf.shouldRun(description);
                 }
-
-                for (Description child : desc.getChildren()) {
+            } else {
+                // Check all children, if any
+                for (Description child : description.getChildren()) {
                     if (shouldRun(child)) {
                         return true;
                     }
                 }
-                return false;
             }
+            return false;
+        }
 
-            private boolean isMatch(String first) {
-                return pat.matcher(first).matches();
-            }
+        @Override
+        public String describe() {
+            return "Class and method filter";
+        }
 
-            @Override
-            public String describe() {
-                return String.format("Method %s", target.getDisplayName());
+        public void add(String className, String methodName) {
+            MethodFilter mf = mClassMethodFilterMap.get(className);
+            if (mf == null) {
+                mf = new MethodFilter(className);
+                mClassMethodFilterMap.put(className, mf);
             }
-        };
+            mf.add(methodName);
+        }
+    }
+
+    /**
+     * A {@link Filter} used to filter out desired test methods from a given class
+     */
+    private static class MethodFilter extends Filter {
+
+        private final String mClassName;
+        private Set<String> mMethodNames = new HashSet<String>();
+
+        /**
+         * Constructs a method filter for a given class
+         * @param className  name of the class the method belongs to
+         */
+        public MethodFilter(String className) {
+            mClassName = className;
+        }
+
+        @Override
+        public String describe() {
+            return "Method filter for " + mClassName + " class";
+        }
+
+        @Override
+        public boolean shouldRun(Description description) {
+            if (description.isTest()) {
+                String methodName = description.getMethodName();
+                // Parameterized tests append "[#]" at the end of the method names.
+                // For instance, "getFoo" would become "getFoo[0]".
+                methodName = stripParameterizedSuffix(methodName);
+                return mMethodNames.contains(methodName);
+            }
+            // At this point, this could only be a description of this filter
+            return true;
+
+        }
+
+        // Strips out the parameterized suffix if it exists
+        private String stripParameterizedSuffix(String name) {
+            Pattern suffixPattern = Pattern.compile(".+(\\[[0-9]+\\])$");
+            if (suffixPattern.matcher(name).matches()) {
+                name = name.substring(0, name.lastIndexOf('['));
+            }
+            return name;
+        }
+
+        public void add(String methodName) {
+            mMethodNames.add(methodName);
+        }
     }
 
     /**
@@ -565,7 +625,6 @@ public class TestRequestBuilder {
         try {
             return scanner.getClassPathEntries(filter);
         } catch (IOException e) {
-            mWriter.println("failed to scan classes");
             Log.e(LOG_TAG, "Failed to scan classes", e);
         }
         return Collections.emptyList();

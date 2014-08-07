@@ -33,13 +33,17 @@ import org.junit.Test;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
+import org.junit.runner.RunWith;
 import org.junit.runner.notification.RunListener;
+import org.junit.runners.Parameterized;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * Unit tests for {@link TestRequestBuilder}.
@@ -256,6 +260,25 @@ public class TestRequestBuilderTest {
         public void testSkipped() {
         }
     }
+
+    @RunWith(value = Parameterized.class)
+    public static class ParameterizedTest {
+
+        public ParameterizedTest(int data) {
+        }
+
+        @Parameterized.Parameters
+        public static Collection<Object[]> data() {
+            Object[][] data = new Object[][]{{1}, {2}, {3}};
+            return Arrays.asList(data);
+        }
+
+        @Test
+        public void testParameterized() {
+
+        }
+    }
+
 
     @InjectInstrumentation
     public Instrumentation mInstr;
@@ -655,5 +678,46 @@ public class TestRequestBuilderTest {
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(1, result.getRunCount());
+    }
+
+    /**
+     * Test filtering by two methods in single class
+     */
+    @Test
+    public void testMultipleMethodsFilter() {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addTestMethod(SampleJUnit3Test.class.getName(), "testSmall");
+        b.addTestMethod(SampleJUnit3Test.class.getName(), "testSmall2");
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        Result result = testRunner.run(request.getRequest());
+        Assert.assertEquals(2, result.getRunCount());
+    }
+
+    /**
+     * Test filtering by two methods in separate classes
+     */
+    @Test
+    public void testTwoMethodsDiffClassFilter() {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addTestMethod(SampleJUnit3Test.class.getName(), "testSmall");
+        b.addTestMethod(SampleTest.class.getName(), "testOther");
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        Result result = testRunner.run(request.getRequest());
+        Assert.assertEquals(2, result.getRunCount());
+    }
+
+    /**
+     * Test filtering a parameterized method
+     */
+    @Test
+    public void testParameterizedMethods() throws Exception {
+        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
+        b.addTestMethod(ParameterizedTest.class.getName(), "testParameterized");
+        TestRequest request = b.build(mInstr, mBundle);
+        JUnitCore testRunner = new JUnitCore();
+        Result result = testRunner.run(request.getRequest());
+        Assert.assertEquals(3, result.getRunCount());
     }
 }
