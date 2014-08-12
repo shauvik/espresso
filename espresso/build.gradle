@@ -16,9 +16,8 @@
 
 buildscript {
     repositories {
-        maven { url '../../../prebuilts/gradle-plugin' }
-        maven { url '../../../prebuilts/tools/common/m2/repository' }
-        maven { url '../../../prebuilts/tools/common/m2/internal' }
+        maven { url "$rootDir/../../prebuilts/gradle-plugin" }
+        maven { url "$rootDir/../../prebuilts/tools/common/m2/repository" }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:0.10.+'
@@ -27,8 +26,8 @@ buildscript {
 
 subprojects {
     repositories {
-        maven { url '../../../../prebuilts/tools/common/m2/repository' }
-        maven { url '../../../../prebuilts/tools/common/m2/internal' }
+        maven { url "$rootDir/../../prebuilts/tools/common/m2/repository" }
+        maven { url "$rootDir/../../prebuilts/maven_repo/android" }
     }
 
     version = VERSION
