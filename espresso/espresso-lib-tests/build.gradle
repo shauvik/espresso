@@ -29,15 +29,16 @@ android {
     }
 
     defaultConfig {
-        testInstrumentationRunner
-            "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
+        testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
     }
 
     sourceSets {
         // Setting espresso-sample as the main root of this project to avoid source code duplication.
         // Temporary workaround until Android Gradle plugin supports settings custom target package
         // for Android Tests (Bug: https://code.google.com/p/android/issues/detail?id=69211).
-        main.setRoot("../espresso-sample/src/main")
+        main.manifest.srcFile file("../espresso-sample/src/main/AndroidManifest.xml")
+        main.java.srcDirs = ['../espresso-sample/src/main/java']
+        main.res.srcDirs = ['../espresso-sample/src/main/res']
     }
 }
 
@@ -53,4 +54,4 @@ dependencies {
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
 }
 
-apply from: "$rootDir/espresso/javadoc.gradle"
+apply from: "$rootDir/publish.gradle"

@@ -24,3 +24,11 @@ include ':espresso:espresso-contrib-tests'
 include ':espresso:espresso-sample'
 
 include ':espresso:idling-resource-interface'
+
+// External
+include(':doclava')
+project(':doclava').projectDir = new File(rootDir, '../../external/doclava')
+
+// Required for Doclava dep
+include(':tagsoup')
+project(':tagsoup').projectDir = new File(rootDir, '../../external/tagsoup')

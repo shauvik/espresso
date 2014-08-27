@@ -20,13 +20,17 @@ buildscript {
         maven { url "$rootDir/../../prebuilts/tools/common/m2/repository" }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.10.+'
+        classpath 'com.android.tools.build:gradle:0.12.+'
     }
 }
 
 ext.extraVersion = 6
 ext.supportRepoOut = ''
 ext.buildToolsVersion = '20'
+
+// define extra property to enforce the use of prebuilt dependencies in all sub-projects.
+project.ext.usePrebuilts = "true"
+
 
 /*
  * With the build server you are given two env variables.
@@ -39,93 +43,16 @@ if (System.env.DIST_DIR != null && System.env.OUT_DIR != null) {
     buildDir = file(System.env.OUT_DIR + '/gradle/frameworks/testing/build')
     project.ext.distDir = file(System.env.DIST_DIR)
 } else {
-    buildDir = file('../../out/host/gradle/frameworks/testing/build')
-    project.ext.distDir = file('../../out/dist')
+    buildDir = file("$rootDir/../../out/gradle/frameworks/testing/build")
+    project.ext.distDir = file("$rootDir/../../out/dist")
 }
 
-ext.supportRepoOut = new File(buildDir, 'testing_repo')
+ext.supportRepoOut = new File(buildDir, 'support_repo')
 
-// Main task called by the build server.
-task(createArchive) << {
-}
-
-
-// upload anchor for subprojects to upload their artifacts
-// to the local repo.
-task(mainUpload) << {
-}
-
-// repository creation task
-task createRepository(type: Zip, dependsOn: mainUpload) {
-    from project.ext.supportRepoOut
-    destinationDir project.ext.distDir
-    into 'm2repository'
-    baseName = String.format("android_m2repository_r%02d", project.ext.extraVersion)
-}
-createArchive.dependsOn createRepository
-
-// prepare repository with older versions
-task unzipRepo(type: Copy) {
-    from "$rootDir/../../prebuilts/maven_repo/android"
-    into project.ext.supportRepoOut
-}
-
-unzipRepo.doFirst {
-    project.ext.supportRepoOut.deleteDir()
-    project.ext.supportRepoOut.mkdirs()
-}
-
-// anchor for prepare repo. This is post unzip + sourceProp.
-task(prepareRepo) << {
-}
 
 import com.google.common.io.Files
 import com.google.common.base.Charsets
 
-task(createXml) << {
-    def repoArchive = createRepository.archivePath
-    def repoArchiveName = createRepository.archiveName
-    def size = repoArchive.length()
-    def sha1 = getSha1(repoArchive)
-
-    def xml =
-"<sdk:sdk-addon xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:sdk=\"http://schemas.android.com/sdk/android/addon/6\">\n\
-  <sdk:extra>\n\
-    <sdk:revision>\n\
-      <sdk:major>${project.ext.extraVersion}</sdk:major>\n\
-    </sdk:revision>\n\
-    <sdk:vendor-display>Android</sdk:vendor-display>\n\
-    <sdk:vendor-id>android</sdk:vendor-id>\n\
-    <sdk:name-display>Local Maven repository for Support Libraries</sdk:name-display>\n\
-    <sdk:path>m2repository</sdk:path>\n\
-    <sdk:archives>\n\
-      <sdk:archive os=\"any\" arch=\"any\">\n\
-       <sdk:size>${size}</sdk:size>\n\
-       <sdk:checksum type=\"sha1\">${sha1}</sdk:checksum>\n\
-       <sdk:url>${repoArchiveName}</sdk:url>\n\
-      </sdk:archive>\n\
-    </sdk:archives>\n\
-  </sdk:extra>\n\
-</sdk:sdk-addon>"
-
-    Files.write(xml, new File(project.ext.distDir, 'repo-extras.xml'), Charsets.UTF_8)
-}
-createArchive.dependsOn createXml
-
-task(createSourceProp) << {
-    def sourceProp =
-"Extra.VendorDisplay=Android\n\
-Extra.Path=m2repository\n\
-Archive.Arch=ANY\n\
-Extra.NameDisplay=Android Support Repository\n\
-Archive.Os=ANY\n\
-Pkg.Revision=${project.ext.extraVersion}.0.0\n\
-Extra.VendorId=android"
-
-    Files.write(sourceProp, new File(project.ext.supportRepoOut, 'source.properties'), Charsets.UTF_8)
-}
-createSourceProp.dependsOn unzipRepo
-prepareRepo.dependsOn createSourceProp
 
 import com.google.common.hash.HashCode
 import com.google.common.hash.HashFunction
@@ -137,7 +64,109 @@ def getSha1(File inputFile) {
     return hashCode.toString()
 }
 
+boolean isAndroidLibrary(Plugin plugin) {
+    switch (plugin.class.name) {
+        case 'com.android.build.gradle.LibraryPlugin':
+            true
+            break
+        case 'com.android.build.gradle.AppPlugin':
+            false
+            break
+    }
+}
+
 subprojects {
+
+    repositories {
+        maven { url "$rootDir/../../prebuilts/tools/common/m2/repository" }
+        maven { url "$rootDir/../../prebuilts/maven_repo/android" }
+    }
+
+
+    project.plugins.whenPluginAdded { plugin ->
+        project.ext.isLibrary = isAndroidLibrary(plugin)
+    }
+
+    // Main task called by the build server.
+    task(createArchive) << {
+    }
+
+    // Upload anchor for subprojects to upload their artifacts
+    // to the local repo.
+    task(mainUpload) << {
+    }
+
+    // Repository creation task
+    task createRepository(type: Zip, dependsOn: mainUpload) {
+        from project.supportRepoOut
+        destinationDir project.distDir
+        into 'm2repository'
+        baseName = String.format("android_m2repository_r%02d", project.extraVersion)
+        appendix = project.name
+    }
+    createArchive.dependsOn createRepository
+
+    // prepare repository with older versions
+    task unzipRepo(type: Copy) {
+        from "$rootDir/../../prebuilts/maven_repo/android"
+        into project.supportRepoOut
+    }
+
+    unzipRepo.doFirst {
+        project.supportRepoOut.deleteDir()
+        project.supportRepoOut.mkdirs()
+    }
+
+    // anchor for prepare repo. This is post unzip + sourceProp.
+    task(prepareRepo) << {
+    }
+
+    task(createXml) << {
+        def repoArchive = createRepository.archivePath
+        def repoArchiveName = createRepository.archiveName
+        def size = repoArchive.length()
+        def sha1 = getSha1(repoArchive)
+
+        def xml =
+    "<sdk:sdk-addon xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:sdk=\"http://schemas.android.com/sdk/android/addon/6\">\n\
+      <sdk:extra>\n\
+        <sdk:revision>\n\
+          <sdk:major>${project.extraVersion}</sdk:major>\n\
+        </sdk:revision>\n\
+        <sdk:vendor-display>Android</sdk:vendor-display>\n\
+        <sdk:vendor-id>android</sdk:vendor-id>\n\
+        <sdk:name-display>Local Maven repository for Support Libraries</sdk:name-display>\n\
+        <sdk:path>m2repository</sdk:path>\n\
+        <sdk:archives>\n\
+          <sdk:archive os=\"any\" arch=\"any\">\n\
+           <sdk:size>${size}</sdk:size>\n\
+           <sdk:checksum type=\"sha1\">${sha1}</sdk:checksum>\n\
+           <sdk:url>${repoArchiveName}</sdk:url>\n\
+          </sdk:archive>\n\
+        </sdk:archives>\n\
+      </sdk:extra>\n\
+    </sdk:sdk-addon>"
+
+        Files.write(xml, new File(project.distDir, 'repo-extras.xml'), Charsets.UTF_8)
+    }
+    createArchive.dependsOn createXml
+
+    task(createSourceProp) << {
+        def sourceProp =
+    "Extra.VendorDisplay=Android\n\
+    Extra.Path=m2repository\n\
+    Archive.Arch=ANY\n\
+    Extra.NameDisplay=Android Support Repository\n\
+    Archive.Os=ANY\n\
+    Pkg.Revision=${project.extraVersion}.0.0\n\
+    Extra.VendorId=android"
+
+        Files.write(sourceProp, new File(project.supportRepoOut, 'source.properties'), Charsets.UTF_8)
+    }
+    createSourceProp.dependsOn unzipRepo
+    prepareRepo.dependsOn createSourceProp
+
+
     // Change buildDir first so that all plugins pick up the new value.
     project.buildDir = project.file("$project.parent.buildDir/../$project.name/build")
 
@@ -149,13 +178,21 @@ subprojects {
         configuration = configurations.archives
         repositories {
             mavenDeployer {
-                repository(url: uri("$rootProject.ext.supportRepoOut"))
+                repository(url: uri("$rootProject.supportRepoOut"))
             }
         }
     }
 
-    // before the upload, make sure the repo is ready.
-    release.dependsOn rootProject.tasks.prepareRepo
-    // make the mainUpload depend on this one.
+    // Before the upload, make sure the repo is ready.
+    release.dependsOn prepareRepo
+    // Make the mainUpload depend on this one.
     mainUpload.dependsOn release
+}
+
+FileCollection getAndroidPrebuilt(String apiLevel) {
+    // Remove "android-" prefix if it exist
+    if(apiLevel.contains("android-")) {
+        apiLevel = apiLevel.replaceAll("android-","")
+    }
+    files("$rootDir/../../prebuilts/sdk/$apiLevel/android.jar")
 }

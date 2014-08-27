@@ -33,6 +33,11 @@ android {
 
     // to overwrite debug variant
     publishNonDefault true
+
+    // Required due to a conflict due to easy and jmock required for doclava
+    packagingOptions {
+        exclude 'META-INF/INDEX.LIST'
+    }
 }
 
 // create separate scope for jarjar
@@ -61,17 +66,21 @@ dependencies {
     // until it's merged with the Android one.
     compile files('../libs/testrunner-runtime-1.1.jar')
     compile files('../libs/testrunner-1.1.jar')
+
+    // Required only for Javadoc generation
+    provided "org.easymock:easymock:2.4"
+    provided files("${rootDir}/espresso/libs/jmock-1.1.0.jar") // TODO add to prebuilts
 }
 
 android.libraryVariants.all { variant ->
 
     // To run unit tests against un-jarjar version of the lib.
-    if (variant.buildType.name.equals(com.android.builder.BuilderConstants.DEBUG)) {
+    if (variant.buildType.name.equals("debug")) {
         println "Skipping debug build type."
         return;
     }
 
-    def classesJar = "$project.buildDir/bundles/$variant.dirName/classes.jar"
+    def classesJar = "$project.buildDir/intermediates/bundles/$variant.dirName/classes.jar"
     def tmpClassesJarDir = "$project.buildDir/pre-jarjar/$variant.dirName"
     def tmpClassesJar = "$tmpClassesJarDir/classes.jar"
 
@@ -104,4 +113,4 @@ android.libraryVariants.all { variant ->
     variant.packageLibrary.dependsOn "$jarJarTaskName"
 }
 
-apply from: "$rootDir/espresso/publishEspresso.gradle"
+apply from: "$rootDir/publish.gradle"

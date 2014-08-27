@@ -29,8 +29,7 @@ android {
     }
 
     defaultConfig {
-        testInstrumentationRunner
-            "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
+        testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
     }
 }
 
@@ -42,4 +41,4 @@ dependencies {
     androidTestCompile project(':espresso:espresso-contrib')
 }
 
-apply from: "$rootDir/espresso/javadoc.gradle"
+apply from: "$rootDir/publish.gradle"

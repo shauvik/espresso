@@ -37,4 +37,4 @@ dependencies {
     compile 'com.android.support:support-v4:20.0.+'
 }
 
-apply from: "$rootDir/espresso/publishEspresso.gradle"
+apply from: "$rootDir/publish.gradle"

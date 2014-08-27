@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-buildscript {
-    repositories {
-        maven { url "$rootDir/../../prebuilts/gradle-plugin" }
-        maven { url "$rootDir/../../prebuilts/tools/common/m2/repository" }
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:0.10.+'
-    }
-}
-
 subprojects {
+
     repositories {
         maven { url "$rootDir/../../prebuilts/tools/common/m2/repository" }
         maven { url "$rootDir/../../prebuilts/maven_repo/android" }
