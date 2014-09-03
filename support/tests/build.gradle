@@ -16,8 +16,11 @@
 
 apply plugin: 'android'
 
+version = '0.1'
+group = 'android.support.test'
+
 dependencies {
-    androidTestCompile project(':lib')
+    androidTestCompile project(':support:lib')
     androidTestCompile project(path: ':junit', configuration: 'target')
     androidTestCompile 'org.hamcrest:hamcrest-library:1.1'
     androidTestCompile 'org.hamcrest:hamcrest-integration:1.1'
@@ -38,7 +41,7 @@ android {
     }
 
     defaultConfig {
-        testPackageName "android.support.test.tests"
+        testApplicationId "android.support.test.tests"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -52,3 +55,5 @@ android {
         }
     }
 }
+
+apply from: "$rootDir/publish.gradle"

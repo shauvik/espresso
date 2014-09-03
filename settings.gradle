@@ -17,13 +17,14 @@
 include ':espresso'
 include ':espresso:espresso-lib'
 include ':espresso:espresso-lib-tests'
-
 include ':espresso:espresso-contrib'
 include ':espresso:espresso-contrib-tests'
-
 include ':espresso:espresso-sample'
-
 include ':espresso:idling-resource-interface'
+
+include ('support:lib')
+include ('support:tests')
+
 
 // External
 include(':doclava')
@@ -32,3 +33,6 @@ project(':doclava').projectDir = new File(rootDir, '../../external/doclava')
 // Required for Doclava dep
 include(':tagsoup')
 project(':tagsoup').projectDir = new File(rootDir, '../../external/tagsoup')
+
+include(':junit')
+project(':junit').projectDir = new File(rootDir, '../../external/junit')
