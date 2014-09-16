@@ -17,6 +17,7 @@ package android.support.test.internal.runner.listener;
 
 import android.app.Instrumentation;
 import android.os.Bundle;
+import android.util.Log;
 
 import org.junit.runner.Description;
 import org.junit.runner.Result;
@@ -27,6 +28,8 @@ import org.junit.runner.notification.Failure;
  * bundles. This output appears when running the instrumentation in '-r' or raw mode.
  */
 public class InstrumentationResultPrinter extends InstrumentationRunListener {
+
+    private static final String LOG_TAG = "InstrumentationResultPrinter";
 
     /**
      * This value, if stored with key {@link android.app.Instrumentation#REPORT_KEY_IDENTIFIER},
@@ -69,6 +72,8 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
     public static final int REPORT_VALUE_RESULT_OK = 0;
     /**
      * The test completed with an error.
+     *
+     * @deprecated  not supported in JUnit4, use REPORT_VALUE_RESULT_FAILURE instead
      */
     public static final int REPORT_VALUE_RESULT_ERROR = -1;
     /**
@@ -91,6 +96,7 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
     int mTestNum = 0;
     int mTestResultCode = 0;
     String mTestClass = null;
+    private Description mDescription = Description.EMPTY;
 
     public InstrumentationResultPrinter() {
         mResultTemplate = new Bundle();
@@ -112,9 +118,10 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
      */
     @Override
     public void testStarted(Description description) throws Exception {
+        mDescription = description; // cache Description in case of a crash
         String testClass = description.getClassName();
         String testName = description.getMethodName();
-        mTestResult = new Bundle(mResultTemplate);
+        mTestResult = getTestResult();
         mTestResult.putString(REPORT_KEY_NAME_CLASS, testClass);
         mTestResult.putString(REPORT_KEY_NAME_TEST, testName);
         mTestResult.putInt(REPORT_KEY_NUM_CURRENT, ++mTestNum);
@@ -128,12 +135,20 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
         }
 
         sendStatus(REPORT_VALUE_RESULT_START, mTestResult);
-        mTestResultCode = 0;
+        mTestResultCode = REPORT_VALUE_RESULT_OK;
+    }
+
+    // Exposed for unit testing
+    Bundle getTestResult() {
+        if (mTestResult == null) {
+            mTestResult = new Bundle(mResultTemplate);
+        }
+        return mTestResult;
     }
 
     @Override
     public void testFinished(Description description) throws Exception {
-        if (mTestResultCode == 0) {
+        if (mTestResultCode == REPORT_VALUE_RESULT_OK) {
             mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT, ".");
         }
         sendStatus(mTestResultCode, mTestResult);
@@ -165,5 +180,26 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
         testStarted(description);
         mTestResultCode = REPORT_VALUE_RESULT_IGNORED;
         testFinished(description);
+    }
+
+    /**
+     * Produce a more meaningful crash report including stack trace and report it back to
+     * Instrumentation results.
+     */
+    public void reportProcessCrash(Throwable t) {
+        mTestResultCode = REPORT_VALUE_RESULT_FAILURE;
+        Failure failure = new Failure(mDescription, t);
+        mTestResult.putString(REPORT_KEY_STACK, failure.getTrace());
+        // pretty printing
+        mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
+                String.format("\nProcess crashed while executing %s:\n%s",
+                        mDescription.getDisplayName(), failure.getTrace()));
+        try {
+            testFinished(mDescription);
+        } catch (Exception e) {
+            // ignore, about to crash anyway
+            Log.e(LOG_TAG, "Failed to mark test " + mDescription.getDisplayName() +
+                    " as finished after process crash");
+        }
     }
 }

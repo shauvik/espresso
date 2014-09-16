@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.test.internal.runner.TestRequestBuilder;
+import android.support.test.internal.runner.listener.InstrumentationResultPrinter;
 
 import junit.framework.Assert;
 
@@ -54,6 +55,8 @@ public class AndroidJUnitRunnerTest {
     private TestRequestBuilder mMockBuilder;
     @Mock
     private Context mMockContext;
+    @Mock
+    private InstrumentationResultPrinter mInstrumentationResultPrinter;
 
     @Before
     public void setUp() throws Exception {
@@ -68,6 +71,11 @@ public class AndroidJUnitRunnerTest {
             @Override
             public Context getContext() {
                 return mMockContext;
+            }
+
+            @Override
+            InstrumentationResultPrinter getInstrumentationResultPrinter() {
+                return mInstrumentationResultPrinter;
             }
         };
         mAndroidJUnitRunner.setArguments(new Bundle());
@@ -195,5 +203,17 @@ public class AndroidJUnitRunnerTest {
     @Test
     public void testTestRunsOnSameThreadAsInstantiation() {
         Assert.assertEquals(Thread.currentThread(), mInstantiationThread);
+    }
+
+    /**
+     * Ensure the correct exception is passed to
+     * {@link InstrumentationResultPrinter#reportProcessCrash(Throwable)}
+     */
+    @Test
+    public void testInstrResultPrinter_reportProcessCrash() {
+        Throwable e = new RuntimeException();
+        mAndroidJUnitRunner.getInstrumentationResultPrinter();
+        mAndroidJUnitRunner.onException(this, e);
+        Mockito.verify(mInstrumentationResultPrinter).reportProcessCrash(e);
     }
 }

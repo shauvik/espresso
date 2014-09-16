@@ -190,6 +190,7 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
     private static final char METHOD_SEPARATOR = '#';
 
     private Bundle mArguments;
+    private InstrumentationResultPrinter mInstrumentationResultPrinter = null;
 
     @Override
     public void onCreate(Bundle arguments) {
@@ -222,6 +223,13 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
     private boolean getBooleanArgument(String tag) {
         String tagString = getArguments().getString(tag);
         return tagString != null && Boolean.parseBoolean(tagString);
+    }
+
+    /**
+     * Exposed for unit testing
+     */
+    InstrumentationResultPrinter getInstrumentationResultPrinter() {
+        return mInstrumentationResultPrinter;
     }
 
     @Override
@@ -271,7 +279,8 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
         } else {
             listeners.add(new TextListener(writer));
             listeners.add(new LogRunListener());
-            listeners.add(new InstrumentationResultPrinter());
+            mInstrumentationResultPrinter = new InstrumentationResultPrinter();
+            listeners.add(mInstrumentationResultPrinter);
             addDelayListener(listeners);
             addCoverageListener(listeners);
         }
@@ -398,6 +407,16 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
         }
 
         listeners.add(l);
+    }
+
+    @Override
+    public boolean onException(Object obj, Throwable e) {
+        InstrumentationResultPrinter instResultPrinter = getInstrumentationResultPrinter();
+        if (instResultPrinter != null) {
+            // report better error message back to Instrumentation results.
+            instResultPrinter.reportProcessCrash(e);
+        }
+        return super.onException(obj, e);
     }
 
     private void reportRunEnded(List<RunListener> listeners, PrintStream writer, Bundle results) {
