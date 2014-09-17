@@ -223,20 +223,9 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
         return tagString != null && Boolean.parseBoolean(tagString);
     }
 
-    /**
-     * Initialize the current thread as a looper.
-     * <p/>
-     * Exposed for unit testing.
-     */
-    void prepareLooper() {
-        Looper.prepare();
-    }
-
     @Override
     public void onStart() {
         super.onStart();
-
-        prepareLooper();
 
         if (getBooleanArgument(ARGUMENT_DEBUG)) {
             Debug.waitForDebugger();
