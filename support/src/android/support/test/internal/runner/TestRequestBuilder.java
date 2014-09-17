@@ -154,8 +154,9 @@ public class TestRequestBuilder {
          */
         @Override
         protected boolean evaluateTest(Description description) {
+            final Class<?> testClass = description.getTestClass();
             return description.getAnnotation(mAnnotationClass) != null ||
-                    description.getTestClass().isAnnotationPresent(mAnnotationClass);
+                    (testClass != null && testClass.isAnnotationPresent(mAnnotationClass));
         }
 
         protected Class<? extends Annotation> getAnnotationClass() {
