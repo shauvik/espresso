@@ -39,6 +39,9 @@ import java.lang.annotation.Target;
  * <p/>
  * Declaring this in a JUnit3 test (ie a class that is a {@link Test}) will have no effect.
  * Use {@link BundleTest} instead.
+ *
+ * @deprecated use {@link InstrumentationRegistry#getArguments()} instead
+ * @hide
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

@@ -30,7 +30,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
-import android.os.Looper;
 import android.support.test.internal.runner.TestRequest;
 import android.support.test.internal.runner.TestRequestBuilder;
 import android.support.test.internal.runner.listener.CoverageListener;

@@ -23,7 +23,7 @@ import static org.mockito.Mockito.inOrder;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.test.internal.runner.InstrumentationArgumentsRegistry;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.runner.lifecycle.ActivityLifecycleCallback;
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitor;
@@ -81,7 +81,7 @@ extends ActivityUnitTestCase<AndroidJUnitRunnerLifeCycleTest.PublicLifecycleMeth
     }
 
     public void testInstrumentationArgumentsRegistryGetsPopulated() {
-        assertNotNull(InstrumentationArgumentsRegistry.getInstance());
+        assertNotNull(InstrumentationRegistry.getArguments());
     }
 
     @UiThreadTest

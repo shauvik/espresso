@@ -24,8 +24,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue.IdleHandler;
-import android.support.test.internal.runner.InstrumentationArgumentsRegistry;
-import android.support.test.internal.runner.InstrumentationRegistry;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorImpl;
 import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.runner.lifecycle.Stage;
@@ -106,10 +105,8 @@ public class MonitoringInstrumentation extends Instrumentation {
         Log.i(LOG_TAG, "Instrumentation Started!");
         logUncaughtExceptions();
 
-        InstrumentationRegistry.registerInstance(this);
+        InstrumentationRegistry.registerInstance(this, arguments);
         ActivityLifecycleMonitorRegistry.registerInstance(mLifecycleMonitor);
-
-        InstrumentationArgumentsRegistry.registerInstance(arguments);
 
         mHandlerForMainLooper = new Handler(Looper.getMainLooper());
         mMainThread = Thread.currentThread();

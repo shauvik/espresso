@@ -13,48 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.support.test.internal.runner;
+package android.support.test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 
 import android.os.Bundle;
-import android.support.test.internal.runner.InstrumentationArgumentsRegistry;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import junit.framework.TestCase;
 
 /**
- * InstrumentationArgumentsRegistry tests.
+ * InstrumentationRegistry tests.
  */
 @SmallTest
-public class InstrumentationArgumentsRegistryTest extends TestCase {
+public class InstrumentationRegistryTest extends TestCase {
 
     public void testArgumentsArePopulated() {
-        assertNotNull(InstrumentationArgumentsRegistry.getInstance());
+        assertNotNull(InstrumentationRegistry.getArguments());
     }
 
-    public void testModifyingReadBundleShouldNotAffectFutureReads() {
-        Bundle readArguments = InstrumentationArgumentsRegistry.getInstance();
+    public void testInstrumentationRegistered() {
+        assertNotNull(InstrumentationRegistry.getInstrumentation());
+    }
+
+    public void testGetArgumentsReturnsIndependentCopies() {
+        Bundle readArguments = InstrumentationRegistry.getArguments();
         int originalSize = readArguments.size();
 
         readArguments.putString("mykey", "myvalue");
 
         assertThat(originalSize, lessThan(readArguments.size()));
         // Subsequent reads should not be affected by the local modifications.
-        assertEquals(originalSize, InstrumentationArgumentsRegistry.getInstance().size());
+        assertEquals(originalSize, InstrumentationRegistry.getArguments().size());
     }
 
-    public void testModifyingSetBundleShouldNotAffectFutureReads() {
+    public void testRegisterInstanceCopiesArguments() {
         Bundle setArguments = new Bundle();
         int originalSize = setArguments.size();
-        InstrumentationArgumentsRegistry.registerInstance(setArguments);
-        Bundle readArguments = InstrumentationArgumentsRegistry.getInstance();
+        InstrumentationRegistry.registerInstance(InstrumentationRegistry.getInstrumentation(), setArguments);
+        Bundle readArguments = InstrumentationRegistry.getArguments();
         assertEquals(originalSize, readArguments.size());
 
         readArguments.putString("mykey", "myvalue");
 
         // Subsequent reads should not be affected by the local modifications.
-        assertEquals(originalSize, InstrumentationArgumentsRegistry.getInstance().size());
+        assertEquals(originalSize, InstrumentationRegistry.getArguments().size());
     }
 }

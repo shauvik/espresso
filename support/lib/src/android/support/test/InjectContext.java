@@ -41,6 +41,9 @@ import java.lang.annotation.Target;
  * <p/>
  * Declaring this in a JUnit3 test (ie a class that is a {@link Test}) will have no effect.
  * Use {@link AndroidTestCase} instead for JUnit3 style tests.
+ *
+ * @deprecated use {@link InstrumentationRegistry#getTargetContext()} instead
+ * @hide
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

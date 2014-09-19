@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,26 @@
  */
 package android.support.test;
 
-import android.app.Instrumentation;
 import android.util.Log;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
- * Placeholder test to verify {@link InjectInstrumentation}.
+ * Placeholder test to verify {@link InstrumentationRegistry#getArguments()}.
  */
-public class InstrumentationJUnit4Test {
+@RunWith(JUnit4.class)
+public class BundleJUnit4Test {
 
-    @InjectInstrumentation
-    public Instrumentation mInstrumentation;
-
-    public InstrumentationJUnit4Test() {
-        Log.d("InstrumentationJUnit4Test", "I'm created");
+    public BundleJUnit4Test() {
+        Log.d("BundleJUnit4Test", "I'm created");
     }
 
     @Test
-    public void verifyInstrumentationInjected() {
-        Assert.assertNotNull(mInstrumentation);
-        Assert.assertNotNull(InstrumentationRegistry.getInstrumentation());
+    public void verifyBundleInjected() {
+        Assert.assertNotNull(InstrumentationRegistry.getArguments());
     }
-
 }
