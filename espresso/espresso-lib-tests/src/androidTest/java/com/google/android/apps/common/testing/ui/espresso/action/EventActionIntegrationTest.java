@@ -28,7 +28,8 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
-import com.google.android.apps.common.testing.testrunner.annotations.SdkSuppress;
+import android.support.test.filters.SdkSuppress;
+
 import com.google.android.apps.common.testing.ui.espresso.UiController;
 import com.google.android.apps.common.testing.ui.espresso.ViewAction;
 import com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers;
@@ -95,7 +96,7 @@ public class EventActionIntegrationTest extends ActivityInstrumentationTestCase2
         .check(matches(isDisplayed()));
   }
 
-  @SdkSuppress(bugId = -1, versions = {7, 8, 13})
+  @SdkSuppress(minSdkVersion = 14)
   public void testLongClick() {
     onView(withText(is(getActivity().getString(R.string.text_long_click))))
         .check(matches(not(isDisplayed())));
@@ -105,7 +106,7 @@ public class EventActionIntegrationTest extends ActivityInstrumentationTestCase2
         .check(matches(isDisplayed()));
   }
 
-  @SdkSuppress(bugId = -1, versions = {7, 8, 13})
+    @SdkSuppress(minSdkVersion = 14)
   public void testDoubleClick() {
     onView(withText(is(getActivity().getString(R.string.text_double_click))))
         .check(matches(not(ViewMatchers.isDisplayed())));

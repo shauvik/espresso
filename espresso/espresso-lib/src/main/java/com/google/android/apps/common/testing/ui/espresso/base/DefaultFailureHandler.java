@@ -19,7 +19,6 @@ package com.google.android.apps.common.testing.ui.espresso.base;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 
-import com.google.android.apps.common.testing.testrunner.inject.TargetContext;
 import com.google.android.apps.common.testing.ui.espresso.EspressoException;
 import com.google.android.apps.common.testing.ui.espresso.FailureHandler;
 import com.google.android.apps.common.testing.ui.espresso.PerformException;
@@ -33,7 +32,6 @@ import org.hamcrest.Matcher;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.inject.Inject;
 
 /**
  * Espresso's default {@link FailureHandler}. If this does not fit your needs, feel free to provide
@@ -44,8 +42,7 @@ public final class DefaultFailureHandler implements FailureHandler {
   private static final AtomicInteger failureCount = new AtomicInteger(0);
   private final Context appContext;
 
-  @Inject
-  public DefaultFailureHandler(@TargetContext Context appContext) {
+  public DefaultFailureHandler(Context appContext) {
     this.appContext = checkNotNull(appContext);
   }
 

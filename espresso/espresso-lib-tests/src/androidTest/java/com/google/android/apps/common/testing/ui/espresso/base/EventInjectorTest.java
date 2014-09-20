@@ -16,9 +16,9 @@
 
 package com.google.android.apps.common.testing.ui.espresso.base;
 
-import com.google.android.apps.common.testing.testrunner.ActivityLifecycleCallback;
-import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitorRegistry;
-import com.google.android.apps.common.testing.testrunner.Stage;
+import android.support.test.runner.lifecycle.ActivityLifecycleCallback;
+import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.Stage;
 import com.google.android.apps.common.testing.ui.espresso.InjectEventSecurityException;
 import com.google.android.apps.common.testing.ui.testapp.R;
 import com.google.android.apps.common.testing.ui.testapp.SendActivity;

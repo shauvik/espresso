@@ -18,13 +18,13 @@ package com.google.android.apps.common.testing.ui.espresso.action;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.android.apps.common.testing.testrunner.UsageTrackerRegistry;
 import com.google.android.apps.common.testing.ui.espresso.InjectEventSecurityException;
 import com.google.android.apps.common.testing.ui.espresso.PerformException;
 import com.google.android.apps.common.testing.ui.espresso.UiController;
 import com.google.common.annotations.VisibleForTesting;
 
 import android.os.SystemClock;
+import android.support.test.internal.runner.tracker.UsageTrackerRegistry;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;

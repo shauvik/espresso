@@ -19,8 +19,8 @@ package com.google.android.apps.common.testing.ui.espresso.action;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.hamcrest.Matchers.anything;
 
-import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitorRegistry;
-import com.google.android.apps.common.testing.testrunner.Stage;
+import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.Stage;
 import com.google.android.apps.common.testing.ui.espresso.PerformException;
 import com.google.android.apps.common.testing.ui.espresso.UiController;
 import com.google.android.apps.common.testing.ui.espresso.ViewAction;

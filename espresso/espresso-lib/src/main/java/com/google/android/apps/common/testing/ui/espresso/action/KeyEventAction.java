@@ -19,8 +19,8 @@ package com.google.android.apps.common.testing.ui.espresso.action;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitorRegistry;
-import com.google.android.apps.common.testing.testrunner.Stage;
+import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.Stage;
 import com.google.android.apps.common.testing.ui.espresso.InjectEventSecurityException;
 import com.google.android.apps.common.testing.ui.espresso.NoActivityResumedException;
 import com.google.android.apps.common.testing.ui.espresso.PerformException;

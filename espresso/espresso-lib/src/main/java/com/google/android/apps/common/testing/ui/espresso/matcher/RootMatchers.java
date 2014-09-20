@@ -20,9 +20,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.anyOf;
 
-import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitor;
-import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitorRegistry;
-import com.google.android.apps.common.testing.testrunner.Stage;
+import android.support.test.runner.lifecycle.ActivityLifecycleMonitor;
+import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.Stage;
 import com.google.android.apps.common.testing.ui.espresso.NoActivityResumedException;
 import com.google.android.apps.common.testing.ui.espresso.Root;
 import com.google.common.collect.Lists;

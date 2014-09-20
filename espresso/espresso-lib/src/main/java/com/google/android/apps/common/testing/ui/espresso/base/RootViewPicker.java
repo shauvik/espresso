@@ -20,8 +20,8 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.RootMat
 import static com.google.android.apps.common.testing.ui.espresso.matcher.RootMatchers.isFocusable;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitor;
-import com.google.android.apps.common.testing.testrunner.Stage;
+import android.support.test.runner.lifecycle.ActivityLifecycleMonitor;
+import android.support.test.runner.lifecycle.Stage;
 import com.google.android.apps.common.testing.ui.espresso.NoActivityResumedException;
 import com.google.android.apps.common.testing.ui.espresso.NoMatchingRootException;
 import com.google.android.apps.common.testing.ui.espresso.Root;

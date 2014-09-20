@@ -26,8 +26,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitor;
-import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.ActivityLifecycleMonitor;
+import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import com.google.android.apps.common.testing.ui.espresso.matcher.RootMatchers;
 import com.google.common.util.concurrent.MoreExecutors;
 

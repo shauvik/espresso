@@ -403,10 +403,10 @@ public class MonitoringInstrumentation extends Instrumentation {
             for (Activity activity : activities) {
                 if (!activity.isFinishing()) {
                     try {
-                        Log.i(LOG_TAG, "Stopping activity: " + activity);
+                        Log.i(LOG_TAG, "Finishing activity: " + activity);
                         activity.finish();
                     } catch (RuntimeException e) {
-                        Log.e(LOG_TAG, "Failed to stop activity.", e);
+                        Log.e(LOG_TAG, "Failed to finish activity.", e);
                     }
                 }
             }

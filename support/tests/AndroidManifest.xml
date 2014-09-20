@@ -15,14 +15,14 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-   package="android.support.test.tests">
+   package="com.android.support.test.tests">
 
     <application>
         <uses-library android:name="android.test.runner" />
     </application>
 
     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
-                     android:targetPackage="android.support.test.tests">
+                     android:targetPackage="com.android.support.test.tests">
         <meta-data android:name="listener"
             android:value="android.support.test.internal.runner.listener.ManifestListener" />
     </instrumentation>

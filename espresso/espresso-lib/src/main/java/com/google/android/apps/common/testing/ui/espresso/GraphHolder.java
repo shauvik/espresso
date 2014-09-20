@@ -16,10 +16,11 @@
 
 package com.google.android.apps.common.testing.ui.espresso;
 
+import android.support.test.internal.runner.tracker.UsageTrackerRegistry;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.android.apps.common.testing.testrunner.UsageTrackerRegistry;
 import com.google.android.apps.common.testing.ui.espresso.base.BaseLayerModule;
 import com.google.android.apps.common.testing.ui.espresso.base.IdlingResourceRegistry;
 

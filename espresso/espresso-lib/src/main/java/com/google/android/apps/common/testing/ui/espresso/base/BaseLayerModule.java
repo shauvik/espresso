@@ -16,16 +16,14 @@
 
 package com.google.android.apps.common.testing.ui.espresso.base;
 
-import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitor;
-import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitorRegistry;
-import com.google.android.apps.common.testing.testrunner.InstrumentationRegistry;
-import com.google.android.apps.common.testing.testrunner.inject.TargetContext;
+import android.support.test.runner.lifecycle.ActivityLifecycleMonitor;
+import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.InstrumentationRegistry;
 import com.google.android.apps.common.testing.ui.espresso.FailureHandler;
 import com.google.android.apps.common.testing.ui.espresso.Root;
 import com.google.android.apps.common.testing.ui.espresso.UiController;
 import com.google.common.base.Optional;
 
-import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -55,12 +53,6 @@ public class BaseLayerModule {
     return ActivityLifecycleMonitorRegistry.getInstance();
   }
 
-  @Provides @TargetContext
-  public Context provideTargetContext() {
-    // TODO(user): replace with installation of AndroidInstrumentationModule once
-    // proguard issues resolved.
-    return InstrumentationRegistry.getInstance().getTargetContext();
-  }
 
   @Provides @Singleton
   public Looper provideMainLooper() {
@@ -160,8 +152,8 @@ public class BaseLayerModule {
 
   @Provides
   @Default
-  FailureHandler provideFailureHander(DefaultFailureHandler impl) {
-    return impl;
+  FailureHandler provideFailureHander() {
+    return new DefaultFailureHandler(InstrumentationRegistry.getTargetContext());
   }
 
 }

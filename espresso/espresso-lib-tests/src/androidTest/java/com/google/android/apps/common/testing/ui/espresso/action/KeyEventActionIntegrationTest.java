@@ -32,7 +32,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasValue;
 import static org.hamcrest.Matchers.instanceOf;
 
-import com.google.android.apps.common.testing.testrunner.annotations.SdkSuppress;
+import android.support.test.filters.SdkSuppress;
 import com.google.android.apps.common.testing.ui.espresso.NoActivityResumedException;
 import com.google.android.apps.common.testing.ui.testapp.MainActivity;
 import com.google.android.apps.common.testing.ui.testapp.R;
@@ -93,7 +93,7 @@ public class KeyEventActionIntegrationTest extends ActivityInstrumentationTestCa
   }
 
   @SuppressWarnings("unchecked")
-  @SdkSuppress(versions = {7, 8, 10}, bugId = -1) // uses native fragments.
+  @SdkSuppress(minSdkVersion = 11) // uses native fragments.
   @FlakyTest
   public void testClickOnBackFromFragment() {
     Intent fragmentStack = new Intent().setClassName(getInstrumentation().getTargetContext(),

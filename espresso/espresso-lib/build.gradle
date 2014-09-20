@@ -58,6 +58,7 @@ dependencies {
     provided files('../libs/guava-14.0.1.jar')
 
     compile project(':espresso-idling-resource-interface')
+    compile project(':testing-support-lib')
     compile 'javax.annotation:javax.annotation-api:1.2'
     compile 'javax.inject:javax.inject:1'
     compile 'com.google.code.findbugs:jsr305:2.0.1'
@@ -67,11 +68,6 @@ dependencies {
     compile 'com.squareup:javawriter:2.1.1'
 
     jarjar files('../libs/jarjar-1.4.jar')
-
-    // Temporarily include the Google3 TestRunner as a static jar
-    // until it's merged with the Android one.
-    compile files('../libs/testrunner-runtime-1.1.jar')
-    compile files('../libs/testrunner-1.1.jar')
 
     // Required only for Javadoc generation
     provided "org.easymock:easymock:2.4"

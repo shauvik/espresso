@@ -32,12 +32,16 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.support.test.internal.runner.TestRequest;
 import android.support.test.internal.runner.TestRequestBuilder;
+import android.support.test.internal.runner.listener.ActivityFinisherRunListener;
 import android.support.test.internal.runner.listener.CoverageListener;
 import android.support.test.internal.runner.listener.DelayInjector;
 import android.support.test.internal.runner.listener.InstrumentationResultPrinter;
 import android.support.test.internal.runner.listener.InstrumentationRunListener;
 import android.support.test.internal.runner.listener.LogRunListener;
 import android.support.test.internal.runner.listener.SuiteAssignmentPrinter;
+import android.support.test.internal.runner.tracker.AnalyticsBasedUsageTracker;
+import android.support.test.internal.runner.tracker.UsageTracker;
+import android.support.test.internal.runner.tracker.UsageTrackerRegistry;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
@@ -168,6 +172,9 @@ import java.util.List;
  * to specify timeouts. For JUnit4 tests, this flag overrides timeouts specified via
  * {@link org.junit.rules.Timeout}. Please note that in JUnit4 {@link org.junit.Test#timeout()}
  * annotation take precedence over both, this flag and {@link org.junit.Test#timeout()} annotation.
+ * <p/>
+ * <b>To disable Google Analytics:</b>
+ * -e disableAnalytics true
  */
 public class AndroidJUnitRunner extends MonitoringInstrumentation {
 
@@ -188,6 +195,7 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
     private static final String ARGUMENT_TEST_PACKAGE = "package";
     static final String ARGUMENT_TIMEOUT = "timeout_msec";
     static final String ARGUMENT_TEST_FILE = "testFile";
+    private static final String ARGUMENT_DISABLE_ANALYTICS = "disableAnalytics";
     // TODO: consider supporting 'count' from InstrumentationTestRunner
 
     private static final String LOG_TAG = "AndroidJUnitRunner";
@@ -280,6 +288,17 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
 
     }
 
+    @Override
+    public void finish(int resultCode, Bundle results) {
+        try {
+            UsageTrackerRegistry.getInstance().trackUsage("AndroidJUnitRunner");
+            UsageTrackerRegistry.getInstance().sendUsages();
+        } catch (RuntimeException re) {
+            Log.w(LOG_TAG, "Failed to send analytics.", re);
+        }
+        super.finish(resultCode, results);
+    }
+
     private void addListeners(List<RunListener> listeners, JUnitCore testRunner,
             PrintStream writer) {
         if (getBooleanArgument(ARGUMENT_SUITE_ASSIGNMENT)) {
@@ -289,6 +308,8 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
             listeners.add(new LogRunListener());
             mInstrumentationResultPrinter = new InstrumentationResultPrinter();
             listeners.add(mInstrumentationResultPrinter);
+            listeners.add(new ActivityFinisherRunListener(this,
+                    new MonitoringInstrumentation.ActivityFinisher()));
             addDelayListener(listeners);
             addCoverageListener(listeners);
         }
@@ -506,6 +527,18 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
         if (getBooleanArgument(ARGUMENT_LOG_ONLY)) {
             builder.setSkipExecution(true);
         }
+
+        if (!getBooleanArgument(ARGUMENT_DISABLE_ANALYTICS)) {
+            if (null != getTargetContext()) {
+                UsageTracker tracker = new AnalyticsBasedUsageTracker.Builder(
+                        getTargetContext()).buildIfPossible();
+
+                if (null != tracker) {
+                    UsageTrackerRegistry.registerInstance(tracker);
+                }
+            }
+        }
+
         return builder.build(this, arguments);
     }
 
