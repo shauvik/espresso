@@ -34,7 +34,7 @@
 		<link>
 			<name>android-support-test-src</name>
 			<type>2</type>
-			<locationURI>ANDROID_TOP/frameworks/testing/support/src</locationURI>
+			<locationURI>ANDROID_TOP/frameworks/testing/support/lib/src</locationURI>
 		</link>
 		<link>
 			<name>dexmaker-dx-src</name>
