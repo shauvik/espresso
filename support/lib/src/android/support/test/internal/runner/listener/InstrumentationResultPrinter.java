@@ -85,6 +85,11 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
      */
     public static final int REPORT_VALUE_RESULT_IGNORED = -3;
     /**
+     * The test completed with an assumption failure.
+     */
+    public static final int REPORT_VALUE_RESULT_ASSUMPTION_FAILURE = -4;
+
+    /**
      * If included in the status bundle sent to an IInstrumentationWatcher, this key
      * identifies a stack trace describing an error or failure.  This is sent with any status
      * message describing a specific test being completed.
@@ -156,14 +161,14 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
 
     @Override
     public void testFailure(Failure failure) throws Exception {
-        mTestResultCode = REPORT_VALUE_RESULT_ERROR;
+        mTestResultCode = REPORT_VALUE_RESULT_FAILURE;
         reportFailure(failure);
     }
 
 
     @Override
     public void testAssumptionFailure(Failure failure) {
-        mTestResultCode = REPORT_VALUE_RESULT_FAILURE;
+        mTestResultCode = REPORT_VALUE_RESULT_ASSUMPTION_FAILURE;
         reportFailure(failure);
     }
 
