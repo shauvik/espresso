@@ -21,12 +21,17 @@ import android.os.Bundle;
 import android.support.test.InjectBundle;
 import android.support.test.InjectContext;
 import android.support.test.InjectInstrumentation;
+import android.support.test.internal.util.AndroidRunnerParams;
 import android.util.Log;
 
 
+import org.junit.Test;
+import org.junit.internal.runners.statements.FailOnTimeout;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkField;
+import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
+import org.junit.runners.model.Statement;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -38,8 +43,7 @@ import java.util.List;
 class AndroidJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
     private static final String LOG_TAG = "AndroidJUnit4ClassRunner";
-    private final Instrumentation mInstr;
-    private final Bundle mBundle;
+    private final AndroidRunnerParams mAndroidRunnerParams;
 
     @SuppressWarnings("serial")
     private static class InvalidInjectException extends Exception {
@@ -48,11 +52,10 @@ class AndroidJUnit4ClassRunner extends BlockJUnit4ClassRunner {
         }
     }
 
-    public AndroidJUnit4ClassRunner(Class<?> klass, Instrumentation instr, Bundle bundle)
+    public AndroidJUnit4ClassRunner(Class<?> klass, AndroidRunnerParams runnerParams)
             throws InitializationError {
         super(klass);
-        mInstr = instr;
-        mBundle = bundle;
+        mAndroidRunnerParams = runnerParams;
     }
 
     @Override
@@ -67,6 +70,28 @@ class AndroidJUnit4ClassRunner extends BlockJUnit4ClassRunner {
         super.collectInitializationErrors(errors);
 
         validateInjectFields(errors);
+    }
+
+    /**
+     * Default to {@link Test} level timeout if set. Otherwise, set the timeout that was passed
+     * to the instrumentation via argument
+     */
+    @Override
+    protected Statement withPotentialTimeout(FrameworkMethod method, Object test, Statement next) {
+        long timeout = getTimeout(method.getAnnotation(Test.class));
+        if (timeout > 0) {
+            return new FailOnTimeout(next, timeout);
+        } else if (mAndroidRunnerParams.getPerTestTimeout() > 0) {
+            return new FailOnTimeout(next, mAndroidRunnerParams.getPerTestTimeout());
+        }
+        return next;
+    }
+
+    private long getTimeout(Test annotation) {
+        if (annotation == null) {
+            return 0;
+        }
+        return annotation.timeout();
     }
 
     private void validateInjectFields(List<Throwable> errors) {
@@ -103,20 +128,23 @@ class AndroidJUnit4ClassRunner extends BlockJUnit4ClassRunner {
     }
 
     private void inject(Object test) {
+        Instrumentation instr = mAndroidRunnerParams.getInstrumentation();
+        Bundle bundle = mAndroidRunnerParams.getBundle();
+
         List<FrameworkField> instrFields = getTestClass().getAnnotatedFields(
                 InjectInstrumentation.class);
         for (FrameworkField instrField : instrFields) {
-            setFieldValue(test, instrField.getField(), mInstr);
+            setFieldValue(test, instrField.getField(), instr);
         }
         List<FrameworkField> contextFields = getTestClass().getAnnotatedFields(
                 InjectContext.class);
         for (FrameworkField contextField : contextFields) {
-            setFieldValue(test, contextField.getField(), mInstr.getTargetContext());
+            setFieldValue(test, contextField.getField(), instr.getTargetContext());
         }
         List<FrameworkField> bundleFields = getTestClass().getAnnotatedFields(
                 InjectBundle.class);
         for (FrameworkField bundleField : bundleFields) {
-            setFieldValue(test, bundleField.getField(), mBundle);
+            setFieldValue(test, bundleField.getField(), bundle);
         }
     }
 

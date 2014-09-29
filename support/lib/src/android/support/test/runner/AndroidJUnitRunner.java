@@ -30,7 +30,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
-import android.os.Looper;
 import android.support.test.internal.runner.TestRequest;
 import android.support.test.internal.runner.TestRequestBuilder;
 import android.support.test.internal.runner.listener.CoverageListener;
@@ -161,6 +160,14 @@ import java.util.List;
  * instrumentation android:name="android.support.test.runner.AndroidJUnitRunner" ...
  *    meta-data android:name="listener"
  *              android:value="com.foo.Listener,com.foo.Listener2"
+ * <p/>
+ * <b>Set timeout (in milliseconds) that will be applied to each test:</b>
+ * -e timeout_msec 5000
+ * <p/>
+ * Supported for both JUnit3 and JUnit4 style tests. For JUnit3 tests, this flag is the only way
+ * to specify timeouts. For JUnit4 tests, this flag overrides timeouts specified via
+ * {@link org.junit.rules.Timeout}. Please note that in JUnit4 {@link org.junit.Test#timeout()}
+ * annotation take precedence over both, this flag and {@link org.junit.Test#timeout()} annotation.
  */
 public class AndroidJUnitRunner extends MonitoringInstrumentation {
 
@@ -179,6 +186,7 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
     private static final String ARGUMENT_DEBUG = "debug";
     private static final String ARGUMENT_LISTENER = "listener";
     private static final String ARGUMENT_TEST_PACKAGE = "package";
+    static final String ARGUMENT_TIMEOUT = "timeout_msec";
     static final String ARGUMENT_TEST_FILE = "testFile";
     // TODO: consider supporting 'count' from InstrumentationTestRunner
 
@@ -473,6 +481,11 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
             }
         }
 
+        String timeout = arguments.getString(ARGUMENT_TIMEOUT);
+        if (timeout != null) {
+            addTimeout(timeout, builder);
+        }
+
         // Accept either string or int.
         Object numShardsObj = arguments.get(ARGUMENT_NUM_SHARDS);
         Object shardIndexObj = arguments.get(ARGUMENT_SHARD_INDEX);
@@ -554,6 +567,17 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
         for (String className : classes) {
             parseTestClass(className, testRequestBuilder);
         }
+    }
+
+    /**
+     * Attempt to set test timeout if valid
+     */
+    void addTimeout(String timeout, TestRequestBuilder testRequestBuilder) {
+        long t = Long.parseLong(timeout);
+        if (t < 0) {
+            throw new NumberFormatException("Timeout can not be negative");
+        }
+        testRequestBuilder.setPerTestTimeout(t);
     }
 
     private void setupDexmakerClassloader() {

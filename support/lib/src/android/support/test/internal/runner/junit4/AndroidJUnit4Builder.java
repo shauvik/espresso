@@ -15,11 +15,10 @@
  */
 package android.support.test.internal.runner.junit4;
 
-import android.app.Instrumentation;
-import android.os.Bundle;
 import android.support.test.InjectContext;
 import android.support.test.InjectInstrumentation;
 import android.util.Log;
+import android.support.test.internal.util.AndroidRunnerParams;
 
 import org.junit.internal.builders.JUnit4Builder;
 import org.junit.runner.Runner;
@@ -32,24 +31,22 @@ import org.junit.runners.model.RunnerBuilder;
 public class AndroidJUnit4Builder extends JUnit4Builder {
 
     private static final String LOG_TAG = "AndroidJUnit4Builder";
+    private final AndroidRunnerParams mAndroidRunnerParams;
 
-    private final Instrumentation mInstrumentation;
-    private final Bundle mBundle;
-    private boolean mSkipExecution;
-
-    public AndroidJUnit4Builder(Instrumentation instr, Bundle bundle, boolean skipExecution) {
-        mInstrumentation = instr;
-        mBundle = bundle;
-        mSkipExecution = skipExecution;
+    /**
+     * @param runnerParams {@link android.support.test.internal.util.AndroidRunnerParams} that stores common runner parameters
+     */
+    public AndroidJUnit4Builder(AndroidRunnerParams runnerParams) {
+        mAndroidRunnerParams = runnerParams;
     }
 
     @Override
     public Runner runnerForClass(Class<?> testClass) throws Throwable {
         try {
-            if (mSkipExecution) {
+            if (mAndroidRunnerParams.isSkipExecution()) {
                 return new NonExecutingJUnit4ClassRunner(testClass);
             }
-            return new AndroidJUnit4ClassRunner(testClass, mInstrumentation, mBundle);
+            return new AndroidJUnit4ClassRunner(testClass, mAndroidRunnerParams);
         } catch (Throwable e) {
             // log error message including stack trace before throwing to help with debugging.
             Log.e(LOG_TAG, "Error constructing runner", e);
