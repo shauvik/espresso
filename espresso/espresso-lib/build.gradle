@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 sourceCompatibility = JavaVersion.VERSION_1_5
 targetCompatibility = JavaVersion.VERSION_1_5
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "20"
+    buildToolsVersion "21.0.0"
 
     lintOptions {
         abortOnError false
@@ -80,8 +80,16 @@ android.libraryVariants.all { variant ->
         return;
     }
 
-    def classesJar = "$project.buildDir/intermediates/bundles/$variant.dirName/classes.jar"
+    // Get the original classes.jar output folder to place the final jarjar'ed file in for the
+    // aar generation to pick up.
+    Jar classesJarTask = (Jar) project.tasks.getByName("package${variant.name.capitalize()}Jar")
+    def finalOutputJarDir = classesJarTask.destinationDir
+
+    // Place the original classes.jar in a different folder to run jarjar on it.
     def tmpClassesJarDir = "$project.buildDir/pre-jarjar/$variant.dirName"
+    classesJarTask.destinationDir = project.file("$tmpClassesJarDir")
+
+    def classesJar = "$finalOutputJarDir/classes.jar"
     def tmpClassesJar = "$tmpClassesJarDir/classes.jar"
 
     def depDaggerJar = "../libs/dagger-1.2.1.jar"
@@ -104,12 +112,8 @@ android.libraryVariants.all { variant ->
         }
     }
 
-    // get access to the normal jar class. Change its output to somewhere else, and make jarjar depend on it.
-    Jar classesJarTask = (Jar) project.tasks.getByName("package${variant.name.capitalize()}Jar")
-
-    classesJarTask.destinationDir = project.file("$tmpClassesJarDir")
+    // Fix the dependency chain so the output jars will be available at the right time.
     project.tasks.getByName("$jarJarTaskName").dependsOn classesJarTask, configurations.provided
-
     variant.packageLibrary.dependsOn "$jarJarTaskName"
 }
 

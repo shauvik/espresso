@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 sourceCompatibility = JavaVersion.VERSION_1_5
 targetCompatibility = JavaVersion.VERSION_1_5
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "20"
+    buildToolsVersion "21.0.0"
 
     packagingOptions {
         exclude 'LICENSE.txt'
