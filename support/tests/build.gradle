@@ -20,7 +20,7 @@ version = '0.1'
 group = 'android.support.test'
 
 dependencies {
-    androidTestCompile project(':support:lib')
+    androidTestCompile project(':testing-support-lib')
     androidTestCompile project(path: ':junit', configuration: 'target')
     androidTestCompile 'org.hamcrest:hamcrest-library:1.1'
     androidTestCompile 'org.hamcrest:hamcrest-integration:1.1'
@@ -29,8 +29,6 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion '20'
 
     lintOptions {
         abortOnError false
@@ -56,4 +54,4 @@ android {
     }
 }
 
-apply from: "$rootDir/publish.gradle"
+apply from: "../../publish.gradle"

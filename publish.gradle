@@ -56,19 +56,12 @@ void addJavadocTasks(Project project, Task topTask, String variantName, JavaComp
 // wait for all plugins to be installed
 afterEvaluate {
 
-    if (project.hasProperty("isLibrary") && project.isLibrary == false) {
-        android.applicationVariants.all { variant ->
+    if (!project.android.hasProperty("isLibrary")) {
+        logger.warn("${project.name}: To enable source jars and javadoc, please define project.android.isLibrary")
+        return
+    }
 
-            addJavadocTasks(project, variant.assemble, variant.name, variant.javaCompile)
-
-            task("copy${variant.name.capitalize()}Binaries", type: Copy, dependsOn: variant.assemble) {
-                description "Copies the release Apk to $project.distDir"
-                from variant.outputFile
-                into project.distDir
-                rename(variant.outputFile.name, "${project.name}-${variant.name}-${project.version}.apk")
-            }
-        }
-    } else if (project.hasProperty("isLibrary") && project.isLibrary == true) {
+    if (project.android.isLibrary) {
         android.libraryVariants.all { variant ->
 
             addJavadocTasks(project, variant.assemble, variant.name, variant.javaCompile)
@@ -78,6 +71,18 @@ afterEvaluate {
                 from packageReleaseJar.archivePath
                 into project.distDir
                 rename(packageReleaseJar.archiveName, "${project.name}-${variant.name}-${project.version}.jar")
+            }
+        }
+    } else {
+        android.applicationVariants.all { variant ->
+
+            addJavadocTasks(project, variant.assemble, variant.name, variant.javaCompile)
+
+            task("copy${variant.name.capitalize()}Binaries", type: Copy, dependsOn: variant.assemble) {
+                description "Copies the release Apk to $project.distDir"
+                from variant.outputFile
+                into project.distDir
+                rename(variant.outputFile.name, "${project.name}-${variant.name}-${project.version}.apk")
             }
         }
     }

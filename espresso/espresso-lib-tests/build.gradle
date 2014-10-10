@@ -17,8 +17,6 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "20"
 
     packagingOptions {
         exclude 'LICENSE.txt'
@@ -48,10 +46,10 @@ dependencies {
     compile 'com.android.support:appcompat-v7:20.0.+'
 
     // run test against an un-jarjared variant of the lib
-    androidTestCompile project(path: ':espresso:espresso-lib', configuration: 'debug')
+    androidTestCompile project(path: ':espresso-lib', configuration: 'debug')
 
     androidTestCompile 'org.mockito:mockito-core:1.9.5'
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
 }
 
-apply from: "$rootDir/publish.gradle"
+apply from: "../../publish.gradle"
