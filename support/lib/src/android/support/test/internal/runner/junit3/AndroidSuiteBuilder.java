@@ -17,6 +17,7 @@ package android.support.test.internal.runner.junit3;
 
 import android.app.Instrumentation;
 import android.os.Bundle;
+import android.util.Log;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -31,6 +32,9 @@ import org.junit.runners.model.RunnerBuilder;
  * classes with suite() methods.
  */
 public class AndroidSuiteBuilder extends SuiteMethodBuilder {
+
+    private static final String LOG_TAG = "AndroidSuiteBuilder";
+
     private Instrumentation mInstr;
     private boolean mSkipExecution;
     private final Bundle mBundle;
@@ -43,19 +47,25 @@ public class AndroidSuiteBuilder extends SuiteMethodBuilder {
 
     @Override
     public Runner runnerForClass(Class<?> testClass) throws Throwable {
-        if (hasSuiteMethod(testClass)) {
-            Test t = SuiteMethod.testFromSuiteMethod(testClass);
-            if (!(t instanceof TestSuite)) {
-                // this should not be possible
-                throw new IllegalArgumentException(testClass.getName() +
-                        "#suite() did not return a TestSuite");
+        try {
+            if (hasSuiteMethod(testClass)) {
+                Test t = SuiteMethod.testFromSuiteMethod(testClass);
+                if (!(t instanceof TestSuite)) {
+                    // this should not be possible
+                    throw new IllegalArgumentException(testClass.getName() +
+                            "#suite() did not return a TestSuite");
+                }
+                if (mSkipExecution) {
+                    return new JUnit38ClassRunner(new NoExecTestSuite((TestSuite) t));
+                } else {
+                    return new JUnit38ClassRunner(new AndroidTestSuite((TestSuite) t,
+                            mBundle, mInstr));
+                }
             }
-            if (mSkipExecution) {
-                return new JUnit38ClassRunner(new NoExecTestSuite((TestSuite)t));
-            } else {
-                return new JUnit38ClassRunner(new AndroidTestSuite((TestSuite)t,
-                        mBundle, mInstr));
-            }
+        } catch (Throwable e) {
+            // log error message including stack trace before throwing to help with debugging.
+            Log.e(LOG_TAG, "Error constructing runner", e);
+            throw e;
         }
         return null;
     }

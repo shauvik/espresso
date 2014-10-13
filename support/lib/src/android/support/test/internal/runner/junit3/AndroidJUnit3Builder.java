@@ -17,6 +17,7 @@ package android.support.test.internal.runner.junit3;
 
 import android.app.Instrumentation;
 import android.os.Bundle;
+import android.util.Log;
 
 import junit.framework.TestCase;
 
@@ -30,6 +31,8 @@ import org.junit.runners.model.RunnerBuilder;
  */
 public class AndroidJUnit3Builder extends JUnit3Builder {
 
+    private static final String LOG_TAG = "AndroidJUnit3Builder";
+
     private Instrumentation mInstr;
     private boolean mSkipExecution;
     private final Bundle mBundle;
@@ -42,12 +45,18 @@ public class AndroidJUnit3Builder extends JUnit3Builder {
 
     @Override
     public Runner runnerForClass(Class<?> testClass) throws Throwable {
-        if (isJUnit3Test(testClass)) {
-            if (mSkipExecution) {
-                return new JUnit38ClassRunner(new NoExecTestSuite(testClass));
-            } else {
-                return new JUnit38ClassRunner(new AndroidTestSuite(testClass, mBundle, mInstr));
+        try {
+            if (isJUnit3Test(testClass)) {
+                if (mSkipExecution) {
+                    return new JUnit38ClassRunner(new NoExecTestSuite(testClass));
+                } else {
+                    return new JUnit38ClassRunner(new AndroidTestSuite(testClass, mBundle, mInstr));
+                }
             }
+        } catch (Throwable e) {
+            // log error message including stack trace before throwing to help with debugging.
+            Log.e(LOG_TAG, "Error constructing runner", e);
+            throw e;
         }
         return null;
     }
