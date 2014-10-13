@@ -64,17 +64,6 @@ def getSha1(File inputFile) {
     return hashCode.toString()
 }
 
-boolean isAndroidLibrary(Plugin plugin) {
-    switch (plugin.class.name) {
-        case 'com.android.build.gradle.LibraryPlugin':
-            true
-            break
-        case 'com.android.build.gradle.AppPlugin':
-            false
-            break
-    }
-}
-
 subprojects {
 
     repositories {
@@ -84,7 +73,20 @@ subprojects {
 
 
     project.plugins.whenPluginAdded { plugin ->
-        project.ext.isLibrary = isAndroidLibrary(plugin)
+        boolean isAndroidLibrary = false
+        switch (plugin.class.name) {
+            case 'com.android.build.gradle.LibraryPlugin':
+                isAndroidLibrary = true
+                // fall through
+
+            case 'com.android.build.gradle.AppPlugin':
+                project.android.ext.isLibrary = isAndroidLibrary
+
+                project.android.compileSdkVersion 21
+                project.android.buildToolsVersion = '21.0.0'
+
+                break;
+        }
     }
 
     // Main task called by the build server.

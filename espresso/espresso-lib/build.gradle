@@ -19,9 +19,10 @@ apply plugin: 'com.android.library'
 sourceCompatibility = JavaVersion.VERSION_1_5
 targetCompatibility = JavaVersion.VERSION_1_5
 
+version = VERSION
+group = GROUP_ID
+
 android {
-    compileSdkVersion 19
-    buildToolsVersion "21.0.0"
 
     lintOptions {
         abortOnError false
@@ -51,7 +52,7 @@ dependencies {
     provided files('../libs/dagger-compiler-1.2.1.jar')
     provided files('../libs/guava-14.0.1.jar')
 
-    compile project(':espresso:idling-resource-interface')
+    compile project(':espresso-idling-resource-interface')
     compile 'javax.annotation:javax.annotation-api:1.2'
     compile 'javax.inject:javax.inject:1'
     compile 'com.google.code.findbugs:jsr305:2.0.1'
@@ -69,7 +70,7 @@ dependencies {
 
     // Required only for Javadoc generation
     provided "org.easymock:easymock:2.4"
-    provided files("${rootDir}/espresso/libs/jmock-1.1.0.jar") // TODO add to prebuilts
+    provided files("../libs/jmock-1.1.0.jar") // TODO add to prebuilts
 }
 
 android.libraryVariants.all { variant ->
@@ -117,4 +118,4 @@ android.libraryVariants.all { variant ->
     variant.packageLibrary.dependsOn "$jarJarTaskName"
 }
 
-apply from: "$rootDir/publish.gradle"
+apply from: "../../publish.gradle"

@@ -17,8 +17,6 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "21.0.0"
 
     packagingOptions {
         exclude 'LICENSE.txt'
@@ -47,7 +45,7 @@ dependencies {
     compile 'com.android.support:support-v4:20.0.+'
     compile 'com.android.support:appcompat-v7:20.0.+'
 
-    androidTestCompile project(':espresso:espresso-contrib')
+    androidTestCompile project(':espresso-contrib')
 }
 
-apply from: "$rootDir/publish.gradle"
+apply from: "../../publish.gradle"

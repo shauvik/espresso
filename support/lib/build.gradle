@@ -24,8 +24,6 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion '20'
 
     lintOptions {
         abortOnError false
@@ -41,4 +39,4 @@ android {
     }
 }
 
-apply from: "$rootDir/publish.gradle"
+apply from: "../../publish.gradle"

@@ -19,9 +19,10 @@ apply plugin: 'com.android.library'
 sourceCompatibility = JavaVersion.VERSION_1_5
 targetCompatibility = JavaVersion.VERSION_1_5
 
+version = VERSION
+group = GROUP_ID
+
 android {
-    compileSdkVersion 19
-    buildToolsVersion "21.0.0"
 
     packagingOptions {
         exclude 'LICENSE.txt'
@@ -33,8 +34,8 @@ android {
 }
 
 dependencies {
-    compile project(':espresso:espresso-lib')
+    compile project(':espresso-lib')
     compile 'com.android.support:support-v4:20.0.+'
 }
 
-apply from: "$rootDir/publish.gradle"
+apply from: "../../publish.gradle"

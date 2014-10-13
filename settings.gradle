@@ -14,16 +14,24 @@
  * limitations under the License.
  */
 
-include ':espresso'
-include ':espresso:espresso-lib'
-include ':espresso:espresso-lib-tests'
-include ':espresso:espresso-contrib'
-include ':espresso:espresso-contrib-tests'
-include ':espresso:espresso-sample'
-include ':espresso:idling-resource-interface'
+include(':espresso-contrib')
+project(':espresso-contrib').projectDir = new File(rootDir, 'espresso/espresso-contrib')
+include(':espresso-contrib-tests')
+project(':espresso-contrib-tests').projectDir = new File(rootDir, 'espresso/espresso-contrib-tests')
+include(':espresso-lib')
+project(':espresso-lib').projectDir = new File(rootDir, 'espresso/espresso-lib')
+include(':espresso-lib-tests')
+project(':espresso-lib-tests').projectDir = new File(rootDir, 'espresso/espresso-lib-tests')
+include(':espresso-sample')
+project(':espresso-sample').projectDir = new File(rootDir, 'espresso/espresso-sample')
+include(':espresso-idling-resource-interface')
+project(':espresso-idling-resource-interface').projectDir = new File(rootDir, 'espresso/idling-resource-interface')
 
-include ('support:lib')
-include ('support:tests')
+
+include(':testing-support-lib')
+project(':testing-support-lib').projectDir = new File(rootDir, 'support/lib')
+include(':testing-support-tests')
+project(':testing-support-tests').projectDir = new File(rootDir, 'support/tests')
 
 
 // External
