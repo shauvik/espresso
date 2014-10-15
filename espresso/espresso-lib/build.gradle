@@ -33,7 +33,12 @@ android {
     }
 
     // to overwrite debug variant
-    publishNonDefault true
+    if (project.hasProperty("buildFromServer") && project.buildFromServer == "true") {
+        println "Server build, publishing defaults only"
+        publishNonDefault false
+    } else {
+        publishNonDefault true
+    }
 
     // Required due to a conflict due to easy and jmock required for doclava
     packagingOptions {
