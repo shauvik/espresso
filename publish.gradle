@@ -87,13 +87,12 @@ afterEvaluate {
         }
     }
 
-    task("androidSourcesJar", type: Jar, dependsOn: copyReleaseBinaries) {
-        classifier = 'sources'
-        from android.sourceSets.main.java.srcDirs
+    task("androidJar", type: Jar, dependsOn: copyReleaseBinaries) {
+        // Just a hook to copy generated Jars to build destination folder
     }
 
     artifacts {
-        archives androidSourcesJar
+        archives androidJar
         archives packageReleaseJavadoc
     }
 }

@@ -31,10 +31,10 @@ public class JUnit3HogTest extends TestCase {
 
     @Override
     public void setUp() {
-        mByteBuffer = new byte[20 * 1024 * 1024];
+        mByteBuffer = new byte[19 * 1024 * 1024];
     }
 
-    // have 10 sample tests - means 200MB total mem if mByteBuffer not freed
+    // have 10 sample tests - means 190MB total mem if mByteBuffer not freed
 
     public void test1() {
     }
@@ -61,5 +61,8 @@ public class JUnit3HogTest extends TestCase {
     }
 
     public void test9() {
+    }
+
+    public void test10() {
     }
 }

@@ -21,7 +21,7 @@ group = 'android.support.test'
 
 dependencies {
     androidTestCompile project(':testing-support-lib')
-    androidTestCompile project(path: ':junit', configuration: 'target')
+    compile 'junit:junit-dep:4.10'
     androidTestCompile 'org.hamcrest:hamcrest-library:1.1'
     androidTestCompile 'org.hamcrest:hamcrest-integration:1.1'
     androidTestCompile 'org.mockito:mockito-core:1.9.5'
