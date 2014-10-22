@@ -162,6 +162,42 @@ public class AndroidJUnitRunnerTest {
     }
 
     /**
+     * Test {@link AndroidJUnitRunner#buildRequest(Bundle, PrintStream)} when
+     * a valid {@link AndroidJUnitRunner#ARGUMENT_TIMEOUT} is passed as an argument
+     */
+    @Test
+    public void testBuildRequest_timeout() {
+        Bundle b = new Bundle();
+        b.putString(AndroidJUnitRunner.ARGUMENT_TIMEOUT, "5000"); //5 seconds
+        mAndroidJUnitRunner.buildRequest(b, mStubStream);
+        Mockito.verify(mMockBuilder).setPerTestTimeout(5000);
+    }
+
+    /**
+     * Test {@link AndroidJUnitRunner#buildRequest(Bundle, PrintStream)} when
+     * an invalid {@link AndroidJUnitRunner#ARGUMENT_TIMEOUT} is passed as an argument
+     */
+    @Test(expected = NumberFormatException.class)
+    public void testBuildRequest_timeoutWithWrongFormat() {
+        Bundle b = new Bundle();
+        b.putString(AndroidJUnitRunner.ARGUMENT_TIMEOUT, "not a long");
+        mAndroidJUnitRunner.buildRequest(b, mStubStream);
+        Mockito.verify(mMockBuilder, Mockito.times(0)).setPerTestTimeout(1);
+    }
+
+    /**
+     * Test {@link AndroidJUnitRunner#buildRequest(Bundle, PrintStream)} when
+     * a negative value {@link AndroidJUnitRunner#ARGUMENT_TIMEOUT} is passed as an argument
+     */
+    @Test(expected = NumberFormatException.class)
+    public void testBuildRequest_timeoutWithNegativeValue() {
+        Bundle b = new Bundle();
+        b.putString(AndroidJUnitRunner.ARGUMENT_TIMEOUT, "-500");
+        mAndroidJUnitRunner.buildRequest(b, mStubStream);
+        Mockito.verify(mMockBuilder, Mockito.times(0)).setPerTestTimeout(1);
+    }
+
+    /**
      * Ensures that the main looper is not blocked and can process
      * messages during test execution.
      */
@@ -190,19 +226,6 @@ public class AndroidJUnitRunnerTest {
     @Test
     public void testTestThreadIsNotALooper() {
         Assert.assertNull(Looper.myLooper());
-    }
-
-    /**
-     * Ensures that tests run on the same thread they were
-     * instantiated on.  This is needed to ensure that
-     * objects created by the test don't accidentally bind
-     * to thread-local state belonging to other threads.
-     * In particular, this ensures that the test cannot
-     * create Handlers that are bound to the wrong thread.
-     */
-    @Test
-    public void testTestRunsOnSameThreadAsInstantiation() {
-        Assert.assertEquals(Thread.currentThread(), mInstantiationThread);
     }
 
     /**

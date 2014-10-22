@@ -15,9 +15,8 @@
  */
 package android.support.test.internal.runner.junit3;
 
-import android.app.Instrumentation;
-import android.os.Bundle;
 import android.util.Log;
+import android.support.test.internal.util.AndroidRunnerParams;
 
 import junit.framework.TestCase;
 
@@ -32,25 +31,25 @@ import org.junit.runners.model.RunnerBuilder;
 public class AndroidJUnit3Builder extends JUnit3Builder {
 
     private static final String LOG_TAG = "AndroidJUnit3Builder";
+    private final AndroidRunnerParams mAndroidRunnerParams;
 
-    private Instrumentation mInstr;
-    private boolean mSkipExecution;
-    private final Bundle mBundle;
-
-    public AndroidJUnit3Builder(Instrumentation instr, Bundle bundle, boolean skipExecution) {
-        mInstr = instr;
-        mBundle = bundle;
-        mSkipExecution = skipExecution;
+    /**
+     * @param runnerParams {@link AndroidRunnerParams} that stores common runner parameters
+     */
+    public AndroidJUnit3Builder(AndroidRunnerParams runnerParams) {
+        mAndroidRunnerParams = runnerParams;
     }
 
     @Override
     public Runner runnerForClass(Class<?> testClass) throws Throwable {
         try {
             if (isJUnit3Test(testClass)) {
-                if (mSkipExecution) {
+                if (mAndroidRunnerParams.isSkipExecution()) {
                     return new JUnit38ClassRunner(new NoExecTestSuite(testClass));
                 } else {
-                    return new JUnit38ClassRunner(new AndroidTestSuite(testClass, mBundle, mInstr));
+                    JUnit38ClassRunner runner = new JUnit38ClassRunner(
+                            new AndroidTestSuite(testClass, mAndroidRunnerParams));
+                    return runner;
                 }
             }
         } catch (Throwable e) {

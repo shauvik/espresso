@@ -23,6 +23,7 @@ import android.support.test.internal.runner.ClassPathScanner.ChainedClassNameFil
 import android.support.test.internal.runner.ClassPathScanner.ExcludePackageNameFilter;
 import android.support.test.internal.runner.ClassPathScanner.ExternalClassNameFilter;
 import android.support.test.internal.runner.ClassPathScanner.InclusivePackageNameFilter;
+import android.support.test.internal.util.AndroidRunnerParams;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -74,6 +75,7 @@ public class TestRequestBuilder {
     private boolean mSkipExecution = false;
     private String mTestPackageName = null;
     private final DeviceBuild mDeviceBuild;
+    private long mPerTestTimeout = 0;
 
     /**
      * Accessor interface for retrieving device build properties.
@@ -556,10 +558,16 @@ public class TestRequestBuilder {
     }
 
     /**
+     * Sets milliseconds timeout value applied to each test where 0 means no timeout
+     */
+    public void setPerTestTimeout(long millis) {
+        mPerTestTimeout = millis;
+    }
+
+    /**
      * Builds the {@link TestRequest} based on current contents of added classes and methods.
      * <p/>
      * If no classes have been explicitly added, will scan the classpath for all tests.
-     *
      */
     public TestRequest build(Instrumentation instr, Bundle bundle) {
         if (mTestLoader.isEmpty()) {
@@ -567,28 +575,27 @@ public class TestRequestBuilder {
             loadClassesFromClassPath();
         }
 
-        Request request = classes(instr, bundle, mSkipExecution, new Computer(),
+        Request request = classes(
+                new AndroidRunnerParams(instr, bundle, mSkipExecution, mPerTestTimeout),
+                new Computer(),
                 mTestLoader.getLoadedClasses().toArray(new Class[0]));
-        return new TestRequest(mTestLoader.getLoadFailures(), new LenientFilterRequest(request, mFilter));
+        return new TestRequest(mTestLoader.getLoadFailures(),
+                new LenientFilterRequest(request, mFilter));
     }
 
     /**
      * Create a <code>Request</code> that, when processed, will run all the tests
      * in a set of classes.
      *
-     * @param instr the {@link Instrumentation} to inject into any tests that require it
-     * @param bundle the {@link Bundle} of command line args to inject into any tests that require
-     *         it
-     * @param skipExecution whether or not to skip actual test execution
+     * @param runnerParams {@link AndroidRunnerParams} that stores common runner parameters
      * @param computer Helps construct Runners from classes
      * @param classes the classes containing the tests
      * @return a <code>Request</code> that will cause all tests in the classes to be run
      */
-    private static Request classes(Instrumentation instr, Bundle bundle, boolean skipExecution,
-            Computer computer, Class<?>... classes) {
+    private static Request classes(AndroidRunnerParams runnerParams, Computer computer,
+                                   Class<?>... classes) {
         try {
-            AndroidRunnerBuilder builder = new AndroidRunnerBuilder(instr, bundle, skipExecution);
-            Runner suite = computer.getSuite(builder, classes);
+            Runner suite = computer.getSuite(new AndroidRunnerBuilder(runnerParams), classes);
             return Request.runner(suite);
         } catch (InitializationError e) {
             throw new RuntimeException(

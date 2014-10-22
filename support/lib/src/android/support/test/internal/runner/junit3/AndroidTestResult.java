@@ -23,6 +23,7 @@ import android.test.InstrumentationTestCase;
 
 import junit.framework.TestCase;
 import junit.framework.TestResult;
+import junit.framework.Test;
 
 /**
  * A specialized {@link TestResult} that injects Android constructs into the test if necessary.
@@ -50,5 +51,14 @@ class AndroidTestResult extends DelegatingTestResult {
             ((BundleTest)test).injectBundle(mBundle);
         }
         super.run(test);
+    }
+
+    /**
+     * Notify of test failure and finish execution to successfully report back to
+     * instrumentation results
+     */
+    void notifyFailureAndFinish(Test test, Throwable throwable) {
+        addError(test, throwable);
+        endTest(test);
     }
 }

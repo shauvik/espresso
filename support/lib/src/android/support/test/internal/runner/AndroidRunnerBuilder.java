@@ -15,11 +15,10 @@
  */
 package android.support.test.internal.runner;
 
-import android.app.Instrumentation;
-import android.os.Bundle;
 import android.support.test.internal.runner.junit3.AndroidJUnit3Builder;
 import android.support.test.internal.runner.junit3.AndroidSuiteBuilder;
 import android.support.test.internal.runner.junit4.AndroidJUnit4Builder;
+import android.support.test.internal.util.AndroidRunnerParams;
 
 import org.junit.internal.builders.AllDefaultPossibilitiesBuilder;
 import org.junit.internal.builders.AnnotatedBuilder;
@@ -41,12 +40,14 @@ class AndroidRunnerBuilder extends AllDefaultPossibilitiesBuilder {
     // TODO: customize for Android ?
     private final IgnoredBuilder mIgnoredBuilder;
 
-    public AndroidRunnerBuilder(Instrumentation instr, Bundle bundle,
-            boolean skipExecution) {
+    /**
+     * @param runnerParams {@link AndroidRunnerParams} that stores common runner parameters
+     */
+    public AndroidRunnerBuilder(AndroidRunnerParams runnerParams) {
         super(true);
-        mAndroidJUnit3Builder = new AndroidJUnit3Builder(instr, bundle, skipExecution);
-        mAndroidJUnit4Builder = new AndroidJUnit4Builder(instr, bundle, skipExecution);
-        mAndroidSuiteBuilder = new AndroidSuiteBuilder(instr, bundle, skipExecution);
+        mAndroidJUnit3Builder = new AndroidJUnit3Builder(runnerParams);
+        mAndroidJUnit4Builder = new AndroidJUnit4Builder(runnerParams);
+        mAndroidSuiteBuilder = new AndroidSuiteBuilder(runnerParams);
         mAndroidAnnotatedBuilder = new AnnotatedBuilder(this);
         mIgnoredBuilder = new IgnoredBuilder();
     }

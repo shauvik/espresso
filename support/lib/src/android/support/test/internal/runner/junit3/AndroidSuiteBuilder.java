@@ -15,9 +15,8 @@
  */
 package android.support.test.internal.runner.junit3;
 
-import android.app.Instrumentation;
-import android.os.Bundle;
 import android.util.Log;
+import android.support.test.internal.util.AndroidRunnerParams;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -34,15 +33,13 @@ import org.junit.runners.model.RunnerBuilder;
 public class AndroidSuiteBuilder extends SuiteMethodBuilder {
 
     private static final String LOG_TAG = "AndroidSuiteBuilder";
+    private final AndroidRunnerParams mAndroidRunnerParams;
 
-    private Instrumentation mInstr;
-    private boolean mSkipExecution;
-    private final Bundle mBundle;
-
-    public AndroidSuiteBuilder(Instrumentation instr, Bundle bundle, boolean skipExecution) {
-        mInstr = instr;
-        mBundle = bundle;
-        mSkipExecution = skipExecution;
+    /**
+     * @param runnerParams {@link AndroidRunnerParams} that stores common runner parameters
+     */
+    public AndroidSuiteBuilder(AndroidRunnerParams runnerParams) {
+        mAndroidRunnerParams = runnerParams;
     }
 
     @Override
@@ -55,11 +52,11 @@ public class AndroidSuiteBuilder extends SuiteMethodBuilder {
                     throw new IllegalArgumentException(testClass.getName() +
                             "#suite() did not return a TestSuite");
                 }
-                if (mSkipExecution) {
+                if (mAndroidRunnerParams.isSkipExecution()) {
                     return new JUnit38ClassRunner(new NoExecTestSuite((TestSuite) t));
                 } else {
                     return new JUnit38ClassRunner(new AndroidTestSuite((TestSuite) t,
-                            mBundle, mInstr));
+                            mAndroidRunnerParams));
                 }
             }
         } catch (Throwable e) {
