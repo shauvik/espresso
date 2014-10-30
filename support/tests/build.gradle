@@ -45,6 +45,7 @@ android {
 
     sourceSets {
         main.manifest.srcFile file('AndroidManifest.xml')
+        androidTest.manifest.srcFile file('AndroidManifest.xml')
         androidTest
         {
             java {
