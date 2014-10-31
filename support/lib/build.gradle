@@ -20,7 +20,7 @@ version = '0.1'
 group = 'android.support.test'
 
 dependencies {
-    compile project(path: ':junit', configuration: 'target')
+    compile 'junit:junit-dep:4.10'
 }
 
 android {
