@@ -19,8 +19,8 @@ apply plugin: 'com.android.library'
 sourceCompatibility = JavaVersion.VERSION_1_5
 targetCompatibility = JavaVersion.VERSION_1_5
 
-version = VERSION
-group = GROUP_ID
+version = '1.2'
+group = 'com.android.support.test.espresso'
 
 android {
 

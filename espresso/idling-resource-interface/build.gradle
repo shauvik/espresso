@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-apply plugin: 'java'
+apply plugin: 'com.android.library'
 
-task androidJavadocs(type: Javadoc) {
-    source = sourceSets.main.allJava
-}
+version = '1.2'
+group = 'com.android.support.test.espresso'
 
-task androidSourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
+apply from: "../../publish.gradle"

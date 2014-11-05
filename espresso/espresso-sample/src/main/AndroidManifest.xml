@@ -18,7 +18,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.google.android.apps.common.testing.ui.testapp">
 
-    <uses-sdk android:minSdkVersion = "7" android:targetSdkVersion= "16"/>
+    <uses-sdk android:minSdkVersion = "8" android:targetSdkVersion= "16"/>
 
     <application android:label="UI Test App" android:icon="@drawable/ic_launcher" >
         <activity android:name="MainActivity" android:label="UI Test App">
