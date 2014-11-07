@@ -35,8 +35,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     espresso-javawriter-2.1.1 \
     espresso-javax-inject-1 \
     jsr305 \
-    espresso-testrunner-1.1 \
-    espresso-testrunner-runtime-1.1
+    android-support-test
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
@@ -53,9 +52,7 @@ LOCAL_PREBUILT_STATIC_JAVA_LIBRARIES := \
     espresso-dagger-compiler-1.2.1:../libs/dagger-compiler-1.2.1.jar \
     espresso-guava:$(repo_prebuilts_dir)/tools/common/m2/repository/com/google/guava/guava/15.0/guava-15.0.jar \
     espresso-javawriter-2.1.1:$(repo_prebuilts_dir)/tools/common/m2/repository/com/squareup/javawriter/2.1.1/javawriter-2.1.1.jar \
-    espresso-javax-inject-1:$(repo_prebuilts_dir)/tools/common/m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar \
-    espresso-testrunner-1.1:../libs/testrunner-1.1.jar \
-    espresso-testrunner-runtime-1.1:../libs/testrunner-runtime-1.1.jar
+    espresso-javax-inject-1:$(repo_prebuilts_dir)/tools/common/m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar
 
 include $(BUILD_MULTI_PREBUILT)
 
