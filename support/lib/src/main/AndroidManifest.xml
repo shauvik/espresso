@@ -15,12 +15,13 @@
   ~ limitations under the License.
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.support.test" >
+<manifest
+    package="com.android.support.test"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-sdk
         android:minSdkVersion="8"/>
 
-    <application />
+    <application/>
 
 </manifest>

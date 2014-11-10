@@ -20,7 +20,7 @@ apply plugin: 'java'
 sourceSets {
     main {
         java {
-            srcDirs = ['lib/src']
+            srcDirs = ['lib/src/main/java']
         }
     }
 }

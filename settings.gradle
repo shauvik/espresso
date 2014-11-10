@@ -30,8 +30,6 @@ project(':espresso-idling-resource-interface').projectDir = new File(rootDir, 'e
 
 include(':testing-support-lib')
 project(':testing-support-lib').projectDir = new File(rootDir, 'support/lib')
-include(':testing-support-tests')
-project(':testing-support-tests').projectDir = new File(rootDir, 'support/tests')
 
 
 // External

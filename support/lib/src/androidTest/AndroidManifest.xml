@@ -14,19 +14,22 @@
      limitations under the License.
 -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-   package="com.android.support.test.tests">
+<manifest
+    package="com.android.support.test.tests"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
-        <uses-library android:name="android.test.runner" />
+        <uses-library android:name="android.test.runner"/>
     </application>
 
-    <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
-                     android:targetPackage="com.android.support.test.tests">
-        <meta-data android:name="listener"
-            android:value="android.support.test.internal.runner.listener.ManifestListener" />
+    <instrumentation
+        android:name="android.support.test.runner.AndroidJUnitRunner"
+        android:targetPackage="com.android.support.test.tests">
+        <meta-data
+            android:name="listener"
+            android:value="android.support.test.internal.runner.listener.ManifestListener"/>
     </instrumentation>
 
-    <uses-sdk android:minSdkVersion="8" />
+    <uses-sdk android:minSdkVersion="8"/>
 
 </manifest>
