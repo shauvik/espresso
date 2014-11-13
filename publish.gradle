@@ -66,7 +66,7 @@ afterEvaluate {
 
             addJavadocTasks(project, variant.assemble, variant.name, variant.javaCompile)
 
-            task("copy${variant.name.capitalize()}Binaries", type: Copy, dependsOn: packageReleaseJar) {
+            task("copy${variant.name.capitalize()}BinaryJars", type: Copy, dependsOn: variant.assemble) {
                 description "Copies the release Jar to $project.distDir"
                 from packageReleaseJar.archivePath
                 into project.distDir
@@ -78,7 +78,7 @@ afterEvaluate {
 
             addJavadocTasks(project, variant.assemble, variant.name, variant.javaCompile)
 
-            task("copy${variant.name.capitalize()}Binaries", type: Copy, dependsOn: variant.assemble) {
+            task("copy${variant.name.capitalize()}BinaryJars", type: Copy, dependsOn: variant.assemble) {
                 description "Copies the release Apk to $project.distDir"
                 from variant.outputFile
                 into project.distDir
@@ -87,12 +87,10 @@ afterEvaluate {
         }
     }
 
-    task("androidJar", type: Jar, dependsOn: copyReleaseBinaries) {
-        // Just a hook to copy generated Jars to build destination folder
-    }
+    // Use mainUpload anchor task to copy binary jars to disDir
+    mainUpload.dependsOn copyReleaseBinaryJars
 
     artifacts {
-        archives androidJar
         archives packageReleaseJavadoc
     }
 }
