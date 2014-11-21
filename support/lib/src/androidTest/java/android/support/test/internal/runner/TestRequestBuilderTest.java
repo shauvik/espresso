@@ -17,8 +17,7 @@ package android.support.test.internal.runner;
 
 import android.app.Instrumentation;
 import android.os.Bundle;
-import android.support.test.InjectBundle;
-import android.support.test.InjectInstrumentation;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.RequiresDevice;
 import android.support.test.filters.SdkSuppress;
 import android.support.test.internal.runner.TestRequestBuilder.DeviceBuild;
@@ -44,6 +43,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Collection;
+
+import static android.support.test.InstrumentationRegistry.getArguments;
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 /**
  * Unit tests for {@link TestRequestBuilder}.
@@ -280,12 +282,6 @@ public class TestRequestBuilderTest {
     }
 
 
-    @InjectInstrumentation
-    public Instrumentation mInstr;
-
-    @InjectBundle
-    public Bundle mBundle;
-
     @Mock
     private DeviceBuild mMockDeviceBuild;
 
@@ -296,7 +292,7 @@ public class TestRequestBuilderTest {
     public void testNoSize() {
         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
         b.addTestClass(SampleTest.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(2, result.getRunCount());
@@ -310,7 +306,7 @@ public class TestRequestBuilderTest {
         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
         b.addTestClass(SampleTest.class.getName());
         b.addTestSizeFilter("small");
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(1, result.getRunCount());
@@ -325,7 +321,7 @@ public class TestRequestBuilderTest {
         b.addTestClass(SampleTest.class.getName());
         b.addTestClass(SampleClassSize.class.getName());
         b.addTestSizeFilter("small");
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(3, result.getRunCount());
@@ -340,7 +336,7 @@ public class TestRequestBuilderTest {
         b.addTestClass(SampleTest.class.getName());
         b.addTestClass(SampleNoSize.class.getName());
         b.addTestSizeFilter("small");
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         MyRunListener l = new MyRunListener();
         JUnitCore testRunner = new JUnitCore();
         testRunner.addListener(l);
@@ -366,7 +362,7 @@ public class TestRequestBuilderTest {
         b.addTestClass(SampleJUnit3Test.class.getName());
         b.addTestClass(SampleNoSize.class.getName());
         b.addTestSizeFilter("small");
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result r = testRunner.run(request.getRequest());
         Assert.assertEquals(2, r.getRunCount());
@@ -379,7 +375,7 @@ public class TestRequestBuilderTest {
     public void testSuppress_junit3Method() {
         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
         b.addTestClass(SampleJUnit3Suppressed.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result r = testRunner.run(request.getRequest());
         Assert.assertEquals(2, r.getRunCount());
@@ -394,7 +390,7 @@ public class TestRequestBuilderTest {
         b.addTestClass(SampleJUnit3Suppressed.class.getName());
         b.addTestClass(SampleJUnit3Test.class.getName());
         b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         MyRunListener l = new MyRunListener();
         testRunner.addListener(l);
@@ -412,7 +408,7 @@ public class TestRequestBuilderTest {
         b.addTestClass(SampleJUnit3SuppressedWithSuper.class.getName());
         b.addTestClass(SampleJUnit3Test.class.getName());
         b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         MyRunListener l = new MyRunListener();
         testRunner.addListener(l);
@@ -429,7 +425,7 @@ public class TestRequestBuilderTest {
         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
         b.addTestClass(SampleAllSuppressed.class.getName());
         b.addTestClass(SampleJUnit3Suppressed.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         MyRunListener l = new MyRunListener();
         testRunner.addListener(l);
@@ -448,7 +444,7 @@ public class TestRequestBuilderTest {
         b.addTestClass(SampleSizeAndSuppress.class.getName());
         b.addTestClass(SampleJUnit3Test.class.getName());
         b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         MyRunListener l = new MyRunListener();
         testRunner.addListener(l);
@@ -467,7 +463,7 @@ public class TestRequestBuilderTest {
         b.addTestClass(SampleSizeWithSuppress.class.getName());
         b.addTestClass(SampleJUnit3Test.class.getName());
         b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         MyRunListener l = new MyRunListener();
         testRunner.addListener(l);
@@ -485,7 +481,7 @@ public class TestRequestBuilderTest {
         b.addAnnotationInclusionFilter(SmallTest.class.getName());
         b.addTestClass(SampleTest.class.getName());
         b.addTestClass(SampleClassSize.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(3, result.getRunCount());
@@ -500,7 +496,7 @@ public class TestRequestBuilderTest {
         b.addAnnotationExclusionFilter(SmallTest.class.getName());
         b.addTestClass(SampleTest.class.getName());
         b.addTestClass(SampleClassSize.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(1, result.getRunCount());
@@ -516,7 +512,7 @@ public class TestRequestBuilderTest {
         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
         b.addAnnotationInclusionFilter(SmallTest.class.getName());
         b.addTestClass(InheritedAnnnotation.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(2, result.getRunCount());
@@ -530,7 +526,7 @@ public class TestRequestBuilderTest {
         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
         b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
         b.addTestClass(SampleOverrideSize.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(1, result.getRunCount());
@@ -538,7 +534,7 @@ public class TestRequestBuilderTest {
         b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
         b.addTestSizeFilter(TestRequestBuilder.MEDIUM_SIZE);
         b.addTestClass(SampleOverrideSize.class.getName());
-        request = b.build(mInstr, mBundle);
+        request = b.build(getInstrumentation(), getArguments());
         testRunner = new JUnitCore();
         result = testRunner.run(request.getRequest());
         Assert.assertEquals(1, result.getRunCount());
@@ -553,7 +549,7 @@ public class TestRequestBuilderTest {
         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
         b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
         b.addTestClass(SampleSameSize.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(1, result.getRunCount());
@@ -568,7 +564,7 @@ public class TestRequestBuilderTest {
         b.addAnnotationExclusionFilter(SmallTest.class.getName());
         b.addAnnotationExclusionFilter(MediumTest.class.getName());
         b.addTestClass(SampleMultipleAnnotation.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         // expect 1 test that failed
@@ -603,7 +599,7 @@ public class TestRequestBuilderTest {
             b.addTestClass(SampleOverrideSize.class.getName());
             b.addTestClass(SampleJUnit3ClassSize.class.getName());
             b.addTestClass(SampleMultipleAnnotation.class.getName());
-            TestRequest request = b.build(mInstr, mBundle);
+            TestRequest request = b.build(getInstrumentation(), getArguments());
             Result result = testRunner.run(request.getRequest());
             if (i == 4) {
                 Assert.assertEquals(result.getRunCount(), totalRun);
@@ -627,7 +623,7 @@ public class TestRequestBuilderTest {
         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
         b.addTestClass(SampleTest.class.getName());
         b.addTestSizeFilter("medium");
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(0, result.getRunCount());
@@ -643,7 +639,7 @@ public class TestRequestBuilderTest {
                 new PrintStream(new ByteArrayOutputStream()));
         Mockito.when(mMockDeviceBuild.getSdkVersionInt()).thenReturn(16);
         b.addTestClass(SampleSdkSuppress.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(2, result.getRunCount());
@@ -660,7 +656,7 @@ public class TestRequestBuilderTest {
         Mockito.when(mMockDeviceBuild.getHardware()).thenReturn(
                 TestRequestBuilder.EMULATOR_HARDWARE);
         b.addTestClass(SampleRequiresDevice.class.getName());
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(2, result.getRunCount());
@@ -674,7 +670,7 @@ public class TestRequestBuilderTest {
         TestRequestBuilder b = new TestRequestBuilder(mMockDeviceBuild,
                 new PrintStream(new ByteArrayOutputStream()));
         b.addTestMethod(DollarMethod.class.getName(), "testWith$");
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(1, result.getRunCount());
@@ -688,7 +684,7 @@ public class TestRequestBuilderTest {
         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
         b.addTestMethod(SampleJUnit3Test.class.getName(), "testSmall");
         b.addTestMethod(SampleJUnit3Test.class.getName(), "testSmall2");
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(2, result.getRunCount());
@@ -702,7 +698,7 @@ public class TestRequestBuilderTest {
         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
         b.addTestMethod(SampleJUnit3Test.class.getName(), "testSmall");
         b.addTestMethod(SampleTest.class.getName(), "testOther");
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(2, result.getRunCount());
@@ -715,7 +711,7 @@ public class TestRequestBuilderTest {
     public void testParameterizedMethods() throws Exception {
         TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
         b.addTestMethod(ParameterizedTest.class.getName(), "testParameterized");
-        TestRequest request = b.build(mInstr, mBundle);
+        TestRequest request = b.build(getInstrumentation(), getArguments());
         JUnitCore testRunner = new JUnitCore();
         Result result = testRunner.run(request.getRequest());
         Assert.assertEquals(3, result.getRunCount());

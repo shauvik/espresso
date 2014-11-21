@@ -34,7 +34,6 @@ public class MyTestSuiteBuilder {
         TestSuite ts = new TestSuite();
         ts.addTestSuite(MyAndroidTestCase.class);
         ts.addTestSuite(MyInstrumentationTestCase.class);
-        ts.addTestSuite(MyBundleTestCase.class);
         return ts;
     }
 }

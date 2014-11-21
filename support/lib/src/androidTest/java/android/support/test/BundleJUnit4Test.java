@@ -15,18 +15,18 @@
  */
 package android.support.test;
 
+import android.support.test.internal.runner.junit4.AndroidJUnit4;
 import android.util.Log;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /**
  * Placeholder test to verify {@link InstrumentationRegistry#getArguments()}.
  */
-@RunWith(JUnit4.class)
+@RunWith(AndroidJUnit4.class)
 public class BundleJUnit4Test {
 
     public BundleJUnit4Test() {

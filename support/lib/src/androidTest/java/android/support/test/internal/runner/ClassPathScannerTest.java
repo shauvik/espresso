@@ -15,13 +15,10 @@
  */
 package android.support.test.internal.runner;
 
-import android.content.Context;
-import android.support.test.InjectContext;
-import android.support.test.internal.runner.ClassPathScanner;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.internal.runner.ClassPathScanner.ExcludePackageNameFilter;
 import android.support.test.internal.runner.ClassPathScanner.ExternalClassNameFilter;
 import android.support.test.internal.runner.ClassPathScanner.InclusivePackageNameFilter;
-
 
 import dalvik.system.DexFile;
 
@@ -43,12 +40,10 @@ public class ClassPathScannerTest {
     private ClassPathScanner mClassPathScanner;
     private Enumeration<String> mDexEntries;
 
-    @InjectContext
-    public Context mContext;
-
     @Before
     public void setUp() throws Exception {
-        mClassPathScanner = new ClassPathScanner(mContext.getPackageCodePath()) {
+        mClassPathScanner = new ClassPathScanner(
+                InstrumentationRegistry.getTargetContext().getPackageCodePath()) {
             @Override
             Enumeration<String> getDexEntries(DexFile dexFile) {
                 return mDexEntries;

@@ -15,8 +15,6 @@
  */
 package android.support.test.internal.runner.junit4;
 
-import android.support.test.InjectContext;
-import android.support.test.InjectInstrumentation;
 import android.util.Log;
 import android.support.test.internal.util.AndroidRunnerParams;
 
@@ -25,8 +23,8 @@ import org.junit.runner.Runner;
 import org.junit.runners.model.RunnerBuilder;
 
 /**
- * A {@link RunnerBuilder} that will build customized runners needed to handle {@link InjectContext}
- * and {@link InjectInstrumentation}.
+ * A {@link RunnerBuilder} that will build customized runners needed to handle the ability to skip
+ * test execution if needed.
  */
 public class AndroidJUnit4Builder extends JUnit4Builder {
 
@@ -34,7 +32,7 @@ public class AndroidJUnit4Builder extends JUnit4Builder {
     private final AndroidRunnerParams mAndroidRunnerParams;
 
     /**
-     * @param runnerParams {@link android.support.test.internal.util.AndroidRunnerParams} that stores common runner parameters
+     * @param runnerParams {@link AndroidRunnerParams} that stores common runner parameters
      */
     public AndroidJUnit4Builder(AndroidRunnerParams runnerParams) {
         mAndroidRunnerParams = runnerParams;

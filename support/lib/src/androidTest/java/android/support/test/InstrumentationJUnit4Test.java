@@ -15,7 +15,6 @@
  */
 package android.support.test;
 
-import android.app.Instrumentation;
 import android.util.Log;
 
 import junit.framework.Assert;
@@ -23,12 +22,9 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 /**
- * Placeholder test to verify {@link InjectInstrumentation}.
+ * Placeholder test to verify {@link InstrumentationRegistry#getInstrumentation()}.
  */
 public class InstrumentationJUnit4Test {
-
-    @InjectInstrumentation
-    public Instrumentation mInstrumentation;
 
     public InstrumentationJUnit4Test() {
         Log.d("InstrumentationJUnit4Test", "I'm created");
@@ -36,7 +32,6 @@ public class InstrumentationJUnit4Test {
 
     @Test
     public void verifyInstrumentationInjected() {
-        Assert.assertNotNull(mInstrumentation);
         Assert.assertNotNull(InstrumentationRegistry.getInstrumentation());
     }
 
