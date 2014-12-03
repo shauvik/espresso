@@ -17,6 +17,7 @@ package android.support.test.internal.runner;
 
 import android.support.test.internal.runner.junit3.AndroidJUnit3Builder;
 import android.support.test.internal.runner.junit3.AndroidSuiteBuilder;
+import android.support.test.internal.runner.junit4.AndroidAnnotatedBuilder;
 import android.support.test.internal.runner.junit4.AndroidJUnit4Builder;
 import android.support.test.internal.util.AndroidRunnerParams;
 
@@ -35,8 +36,7 @@ class AndroidRunnerBuilder extends AllDefaultPossibilitiesBuilder {
     private final AndroidJUnit3Builder mAndroidJUnit3Builder;
     private final AndroidJUnit4Builder mAndroidJUnit4Builder;
     private final AndroidSuiteBuilder mAndroidSuiteBuilder;
-    // TODO: customize for Android ?
-    private final AnnotatedBuilder mAndroidAnnotatedBuilder;
+    private final AndroidAnnotatedBuilder mAndroidAnnotatedBuilder;
     // TODO: customize for Android ?
     private final IgnoredBuilder mIgnoredBuilder;
 
@@ -48,7 +48,7 @@ class AndroidRunnerBuilder extends AllDefaultPossibilitiesBuilder {
         mAndroidJUnit3Builder = new AndroidJUnit3Builder(runnerParams);
         mAndroidJUnit4Builder = new AndroidJUnit4Builder(runnerParams);
         mAndroidSuiteBuilder = new AndroidSuiteBuilder(runnerParams);
-        mAndroidAnnotatedBuilder = new AnnotatedBuilder(this);
+        mAndroidAnnotatedBuilder = new AndroidAnnotatedBuilder(this, runnerParams);
         mIgnoredBuilder = new IgnoredBuilder();
     }
 
