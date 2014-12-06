@@ -20,17 +20,16 @@ buildscript {
         maven { url "$rootDir/../../prebuilts/tools/common/m2/repository" }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.13.4'
+        classpath 'com.android.tools.build:gradle:1.0.0'
     }
 }
 
-ext.extraVersion = 6
+ext.extraVersion = 10
 ext.supportRepoOut = ''
-ext.buildToolsVersion = '20'
+ext.buildToolsVersion = '24.0.1'
 
 // define extra property to enforce the use of prebuilt dependencies in all sub-projects.
 project.ext.usePrebuilts = "true"
-
 
 /*
  * With the build server you are given two env variables.
@@ -52,17 +51,7 @@ ext.supportRepoOut = new File(buildDir, 'support_repo')
 
 import com.google.common.io.Files
 import com.google.common.base.Charsets
-
-
-import com.google.common.hash.HashCode
-import com.google.common.hash.HashFunction
 import com.google.common.hash.Hashing
-
-def getSha1(File inputFile) {
-    HashFunction hashFunction = Hashing.sha1()
-    HashCode hashCode = hashFunction.hashString(inputFile.getAbsolutePath())
-    return hashCode.toString()
-}
 
 subprojects {
 
@@ -82,8 +71,8 @@ subprojects {
             case 'com.android.build.gradle.AppPlugin':
                 project.android.ext.isLibrary = isAndroidLibrary
 
-                project.android.compileSdkVersion 20
-                project.android.buildToolsVersion = '21.0.0'
+                project.android.compileSdkVersion 21
+                project.android.buildToolsVersion = buildToolsVersion
 
                 break;
         }
@@ -127,27 +116,27 @@ subprojects {
         def repoArchive = createRepository.archivePath
         def repoArchiveName = createRepository.archiveName
         def size = repoArchive.length()
-        def sha1 = getSha1(repoArchive)
+        def sha1 = Hashing.sha1().hashUnencodedChars(repoArchive.getAbsolutePath()).toString()
 
         def xml =
-    "<sdk:sdk-addon xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:sdk=\"http://schemas.android.com/sdk/android/addon/6\">\n\
-      <sdk:extra>\n\
-        <sdk:revision>\n\
-          <sdk:major>${project.extraVersion}</sdk:major>\n\
-        </sdk:revision>\n\
-        <sdk:vendor-display>Android</sdk:vendor-display>\n\
-        <sdk:vendor-id>android</sdk:vendor-id>\n\
-        <sdk:name-display>Local Maven repository for Support Libraries</sdk:name-display>\n\
-        <sdk:path>m2repository</sdk:path>\n\
-        <sdk:archives>\n\
-          <sdk:archive os=\"any\" arch=\"any\">\n\
-           <sdk:size>${size}</sdk:size>\n\
-           <sdk:checksum type=\"sha1\">${sha1}</sdk:checksum>\n\
-           <sdk:url>${repoArchiveName}</sdk:url>\n\
-          </sdk:archive>\n\
-        </sdk:archives>\n\
-      </sdk:extra>\n\
-    </sdk:sdk-addon>"
+                "<sdk:sdk-addon xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:sdk=\"http://schemas.android.com/sdk/android/addon/6\">\n\
+                  <sdk:extra>\n\
+                    <sdk:revision>\n\
+                      <sdk:major>${project.extraVersion}</sdk:major>\n\
+                    </sdk:revision>\n\
+                    <sdk:vendor-display>Android</sdk:vendor-display>\n\
+                    <sdk:vendor-id>android</sdk:vendor-id>\n\
+                    <sdk:name-display>Local Maven repository for Support Libraries</sdk:name-display>\n\
+                    <sdk:path>m2repository</sdk:path>\n\
+                    <sdk:archives>\n\
+                      <sdk:archive os=\"any\" arch=\"any\">\n\
+                       <sdk:size>${size}</sdk:size>\n\
+                       <sdk:checksum type=\"sha1\">${sha1}</sdk:checksum>\n\
+                       <sdk:url>${repoArchiveName}</sdk:url>\n\
+                      </sdk:archive>\n\
+                    </sdk:archives>\n\
+                  </sdk:extra>\n\
+                </sdk:sdk-addon>"
 
         Files.write(xml, new File(project.distDir, 'repo-extras.xml'), Charsets.UTF_8)
     }
@@ -155,19 +144,18 @@ subprojects {
 
     task(createSourceProp) << {
         def sourceProp =
-    "Extra.VendorDisplay=Android\n\
-    Extra.Path=m2repository\n\
-    Archive.Arch=ANY\n\
-    Extra.NameDisplay=Android Support Repository\n\
-    Archive.Os=ANY\n\
-    Pkg.Revision=${project.extraVersion}.0.0\n\
-    Extra.VendorId=android"
+                "Extra.VendorDisplay=Android\n\
+                Extra.Path=m2repository\n\
+                Archive.Arch=ANY\n\
+                Extra.NameDisplay=Android Support Repository\n\
+                Archive.Os=ANY\n\
+                Pkg.Revision=${project.extraVersion}.0.0\n\
+                Extra.VendorId=android"
 
         Files.write(sourceProp, new File(project.supportRepoOut, 'source.properties'), Charsets.UTF_8)
     }
     createSourceProp.dependsOn unzipRepo
     prepareRepo.dependsOn createSourceProp
-
 
     // Change buildDir first so that all plugins pick up the new value.
     project.buildDir = project.file("$project.parent.buildDir/../$project.name/build")
@@ -193,8 +181,8 @@ subprojects {
 
 FileCollection getAndroidPrebuilt(String apiLevel) {
     // Remove "android-" prefix if it exist
-    if(apiLevel.contains("android-")) {
-        apiLevel = apiLevel.replaceAll("android-","")
+    if (apiLevel.contains("android-")) {
+        apiLevel = apiLevel.replaceAll("android-", "")
     }
     files("$rootDir/../../prebuilts/sdk/$apiLevel/android.jar")
 }

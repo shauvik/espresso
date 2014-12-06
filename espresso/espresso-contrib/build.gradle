@@ -19,7 +19,7 @@ apply plugin: 'com.android.library'
 sourceCompatibility = JavaVersion.VERSION_1_5
 targetCompatibility = JavaVersion.VERSION_1_5
 
-version = '1.2'
+version = '2.0'
 group = 'com.android.support.test.espresso'
 
 android {
@@ -35,7 +35,7 @@ android {
 
 dependencies {
     compile project(':espresso-lib')
-    compile 'com.android.support:support-v4:20.0.+'
+    compile 'com.android.support:support-v4:21.0.2'
 }
 
 apply from: "../../publish.gradle"
