@@ -217,7 +217,7 @@
             android:text="Delegating Edit Text"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <com.google.android.apps.common.testing.ui.testapp.DelegatingEditText
+        <android.support.test.testapp.DelegatingEditText
             android:id="@+id/delegating_edit_text"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
