@@ -119,6 +119,8 @@ final class ThreadPoolExecutorExtractor {
             return Optional.of((ThreadPoolExecutor) executorField.get(null));
           } catch (ClassNotFoundException cnfe) {
             return Optional.<ThreadPoolExecutor>absent();
+          } catch (NoSuchFieldException nsfe) {
+            return Optional.<ThreadPoolExecutor>absent();
           }
         }
       };
@@ -135,10 +137,16 @@ final class ThreadPoolExecutorExtractor {
       new Callable<Optional<ThreadPoolExecutor>>() {
         @Override
         public Optional<ThreadPoolExecutor> call() throws Exception {
-          Field executorField = LOAD_ASYNC_TASK_CLASS.call()
-              .getDeclaredField(LEGACY_ASYNC_TASK_FIELD_NAME);
-          executorField.setAccessible(true);
-          return Optional.of((ThreadPoolExecutor) executorField.get(null));
+          try {
+            Field executorField = LOAD_ASYNC_TASK_CLASS.call()
+                .getDeclaredField(LEGACY_ASYNC_TASK_FIELD_NAME);
+            executorField.setAccessible(true);
+            return Optional.of((ThreadPoolExecutor) executorField.get(null));
+          } catch (ClassNotFoundException cnfe) {
+            return Optional.<ThreadPoolExecutor>absent();
+          } catch (NoSuchFieldException nsfe) {
+            return Optional.<ThreadPoolExecutor>absent();
+          }
         }
       };
 
@@ -146,9 +154,15 @@ final class ThreadPoolExecutorExtractor {
       new Callable<Optional<ThreadPoolExecutor>>() {
         @Override
         public Optional<ThreadPoolExecutor> call() throws Exception {
-          Field executorField = LOAD_ASYNC_TASK_CLASS.call()
-              .getField(MODERN_ASYNC_TASK_FIELD_NAME);
-          return Optional.of((ThreadPoolExecutor) executorField.get(null));
+          try {
+            Field executorField = LOAD_ASYNC_TASK_CLASS.call()
+                .getField(MODERN_ASYNC_TASK_FIELD_NAME);
+            return Optional.of((ThreadPoolExecutor) executorField.get(null));
+          } catch (ClassNotFoundException cnfe) {
+            return Optional.<ThreadPoolExecutor>absent();
+          } catch (NoSuchFieldException nsfe) {
+            return Optional.<ThreadPoolExecutor>absent();
+          }
         }
       };
 }

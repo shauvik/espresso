@@ -30,9 +30,7 @@ public class ViewPagerActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.pager_activity);
 
-    final ViewPager pager = (ViewPager) findViewById(R.id.pager_layout);
-    pager.setAdapter(new SimplePagerAdapter());
+    ((ViewPager) findViewById(R.id.pager_layout)).setAdapter(new SimplePagerAdapter());
   }
-
 }
 

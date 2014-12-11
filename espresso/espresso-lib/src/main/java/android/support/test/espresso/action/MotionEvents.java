@@ -24,7 +24,6 @@ import android.support.test.espresso.UiController;
 import com.google.common.annotations.VisibleForTesting;
 
 import android.os.SystemClock;
-import android.support.test.internal.runner.tracker.UsageTrackerRegistry;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -92,7 +91,6 @@ final class MotionEvents {
         if (SystemClock.uptimeMillis() > (downTime + ViewConfiguration.getLongPressTimeout())) {
           longPress = true;
           Log.e(TAG, "Overslept and turned a tap into a long press");
-          UsageTrackerRegistry.getInstance().trackUsage("Espresso.Tap.Error.tapToLongPress");
         }
 
         if (!injectEventSucceeded) {
@@ -173,11 +171,10 @@ final class MotionEvents {
       boolean injectEventSucceeded = uiController.injectMotionEvent(motionEvent);
 
       if (!injectEventSucceeded) {
-        throw new PerformException.Builder()
-          .withActionDescription(String.format(
-            "inject cancel event (corresponding down event: %s)", downEvent.toString()))
-          .withViewDescription("unknown") // likely to be replaced by FailureHandler
-          .build();
+        Log.e(TAG, String.format(
+            "Injection of cancel event failed (corresponding down event: %s)",
+            downEvent.toString()));
+        return;
       }
     } catch (InjectEventSecurityException e) {
       throw new PerformException.Builder()

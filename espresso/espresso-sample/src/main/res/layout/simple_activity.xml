@@ -58,20 +58,27 @@
         android:layout_width="1dp"
         android:layout_height="30dp" />
 
-    <EditText
-        android:id="@+id/sendtext_simple"
+     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:ems="10"
-        android:hint="@string/send_hint" />
+        android:layout_gravity="center_horizontal" >
 
-    <Button
-        android:id="@+id/send_simple"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:onClick="sendButtonClicked"
-        android:text="@string/button_send" />
+        <EditText
+            android:id="@+id/sendtext_simple"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:ems="10"
+            android:hint="@string/send_hint" />
 
+        <Button
+            android:id="@+id/send_simple"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:onClick="sendButtonClicked"
+            android:text="@string/button_send"
+            android:layout_marginLeft="2dp" />
+
+    </LinearLayout>
 </LinearLayout>

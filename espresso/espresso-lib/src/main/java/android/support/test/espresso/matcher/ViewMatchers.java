@@ -25,14 +25,20 @@ import android.support.test.espresso.util.HumanReadables;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.webkit.WebView;
 import android.widget.Checkable;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import junit.framework.AssertionFailedError;
@@ -108,8 +114,8 @@ public final class ViewMatchers {
 
       @Override
       public boolean matchesSafely(View view) {
-        return view.getGlobalVisibleRect(new Rect()) &&
-            withEffectiveVisibility(Visibility.VISIBLE).matches(view);
+        return view.getGlobalVisibleRect(new Rect())
+            && withEffectiveVisibility(Visibility.VISIBLE).matches(view);
       }
     };
   }
@@ -149,17 +155,40 @@ public final class ViewMatchers {
         if (!visibleAtAll) {
           return false;
         }
-        double maxArea = view.getHeight() * view.getWidth();
+
+        Rect screen = getScreenWithoutStatusBarActionBar(view);
+        int viewHeight = (view.getHeight() > screen.height()) ? screen.height() : view.getHeight();
+        int viewWidth = (view.getWidth() > screen.width()) ? screen.width() : view.getWidth();
+
+        double maxArea = viewHeight * viewWidth;
         double visibleArea = visibleParts.height() * visibleParts.width();
         int displayedPercentage = (int) ((visibleArea / maxArea) * 100);
 
         return displayedPercentage >= areaPercentage
             && withEffectiveVisibility(Visibility.VISIBLE).matches(view);
       }
+
+      private Rect getScreenWithoutStatusBarActionBar(View view) {
+        DisplayMetrics m = new DisplayMetrics();
+        ((WindowManager) view.getContext().getSystemService(Context.WINDOW_SERVICE))
+            .getDefaultDisplay().getMetrics(m);
+
+        // Get status bar height
+        int resourceId = view.getContext().getResources()
+            .getIdentifier("status_bar_height", "dimen", "android");
+        int statusBarHeight = (resourceId > 0) ? view.getContext().getResources()
+            .getDimensionPixelSize(resourceId) : 0;
+
+        // Get action bar height
+        TypedValue tv = new TypedValue();
+        int actionBarHeight = (view.getContext().getTheme().resolveAttribute(
+            android.R.attr.actionBarSize, tv, true)) ? TypedValue.complexToDimensionPixelSize(
+            tv.data, view.getContext().getResources().getDisplayMetrics()) : 0;
+
+        return new Rect(0, 0, m.widthPixels, m.heightPixels - (statusBarHeight + actionBarHeight));
+      }
     };
   }
-
-
 
   /**
    * Returns a matcher that matches {@link View}s that are enabled.
@@ -208,6 +237,23 @@ public final class ViewMatchers {
       @Override
       public boolean matchesSafely(View view) {
         return view.hasFocus();
+      }
+    };
+  }
+
+  /**
+   * Returns a matcher that matches {@link View}s that are selected.
+   */
+  public static Matcher<View> isSelected() {
+    return new TypeSafeMatcher<View>() {
+      @Override
+      public void describeTo(Description description) {
+        description.appendText("is selected");
+      }
+
+      @Override
+      public boolean matchesSafely(View view) {
+        return view.isSelected();
       }
     };
   }
@@ -282,12 +328,37 @@ public final class ViewMatchers {
   }
 
   /**
-   * Sugar for withId(is(int)).
+   * Same as withId(is(int)), but attempts to look up resource name of the given id and use an
+   * R.id.myView style description with describeTo. If resource lookup is unavailable, at the time
+   * describeTo is invoked, this will print out a simple "with id: %d". If resource lookup is
+   * available, but looking up the name for the given id, fails, "with id: %d (resource name not
+   * found)" will be returned as the description.
    *
    * @param id the resource id.
    */
-  public static Matcher<View> withId(int id) {
-    return withId(is(id));
+  public static Matcher<View> withId(final int id) {
+    return new TypeSafeMatcher<View>() {
+      Resources resources = null;
+      @Override
+      public void describeTo(Description description) {
+        String idDescription = Integer.toString(id);
+        if (resources != null) {
+          try {
+            idDescription = resources.getResourceName(id);
+          } catch (Resources.NotFoundException e) {
+            // No big deal, will just use the int value.
+            idDescription = String.format("%s (resource name not found)", id);
+          }
+        }
+        description.appendText("with id: " + idDescription);
+      }
+
+      @Override
+      public boolean matchesSafely(View view) {
+        resources = view.getResources();
+        return id == view.getId();
+      }
+    };
   }
 
   /**
@@ -366,8 +437,10 @@ public final class ViewMatchers {
   }
 
   /**
-   * Returns a matcher that matches {@link TextView} based on it's text property value. Note: View's
+   * Returns a matcher that matches {@link TextView} based on its text property value. Note: View's
    * Sugar for withText(is("string")).
+   *
+   * @param {@link String} with the text to match
    */
   public static Matcher<View> withText(String text) {
     return withText(is(text));
@@ -402,7 +475,10 @@ public final class ViewMatchers {
    * @param resourceId the string resource the text view is expected to hold.
    */
   public static Matcher<View> withText(final int resourceId) {
+    return withCharSequence(resourceId, TextViewMethod.GET_TEXT);
+  }
 
+  private static Matcher<View> withCharSequence(final int resourceId, final TextViewMethod method) {
     return new BoundedMatcher<View, TextView>(TextView.class) {
       private String resourceName = null;
       private String expectedText = null;
@@ -432,13 +508,70 @@ public final class ViewMatchers {
             /* view could be from a context unaware of the resource id. */
           }
         }
-        if (null != expectedText) {
-          return expectedText.equals(textView.getText());
+        CharSequence actualText = null;
+        switch (method) {
+          case GET_TEXT:
+            actualText = textView.getText();
+            break;
+          case GET_HINT:
+            actualText = textView.getHint();
+            break;
+          default:
+            throw new IllegalStateException("Unexpected TextView method: " + method.toString());
+        }
+        if (null != expectedText && null != actualText) {
+          // FYI: actualText may not be string ... its just a char sequence convert to string.
+          return expectedText.equals(actualText.toString());
         } else {
           return false;
         }
       }
     };
+  }
+
+  private enum TextViewMethod { GET_TEXT, GET_HINT }
+
+  /**
+   * Returns a matcher that matches {@link TextView} based on it's hint property value. Note: View's
+   * Sugar for withHint(is("string")).
+   *
+   * @param {@link String} with the hint text to match
+   */
+  public static Matcher<View> withHint(String hintText) {
+    checkNotNull(hintText);
+    return withHint(is(hintText));
+  }
+
+  /**
+   * Returns a matcher that matches {@link TextView}s based on hint property value. Note: View's
+   * hint property can be null.
+   *
+   * @param stringMatcher {@link Matcher} of {@link String} with text to match
+   */
+  public static Matcher<View> withHint(final Matcher<String> stringMatcher) {
+    checkNotNull(stringMatcher);
+    return new BoundedMatcher<View, TextView>(TextView.class) {
+      @Override
+      public void describeTo(Description description) {
+        description.appendText("with hint: ");
+        stringMatcher.describeTo(description);
+      }
+
+      @Override
+      public boolean matchesSafely(TextView textView) {
+        return stringMatcher.matches(textView.getHint());
+      }
+    };
+  }
+
+  /**
+   * Returns a matcher that matches a descendant of {@link TextView} that is displaying the hint
+   * associated with the given resource id.
+   *
+   * @param resourceId the string resource the text view is expected to have as a hint.
+   */
+  public static Matcher<View> withHint(final int resourceId) {
+    return withCharSequence(resourceId, TextViewMethod.GET_HINT);
   }
 
   /**
@@ -773,6 +906,23 @@ public final class ViewMatchers {
   }
 
   /**
+   * Returns a matcher that matches {@link TextView}s that have links.
+   */
+  public static Matcher<View> hasLinks() {
+    return new BoundedMatcher<View, TextView>(TextView.class) {
+      @Override
+      public void describeTo(Description description) {
+        description.appendText("has links");
+      }
+
+      @Override
+      public boolean matchesSafely(TextView textView) {
+        return textView.getUrls().length > 0;
+      }
+    };
+  }
+
+  /**
    * A replacement for MatcherAssert.assertThat that renders View objects nicely.
    *
    * @param actual the actual value.
@@ -805,5 +955,99 @@ public final class ViewMatchers {
       throw new AssertionFailedError(description.toString());
     }
   }
-}
 
+  /**
+   * Returns a matcher that matches a descendant of {@link Spinner} that is displaying the string
+   * of the selected item associated with the given resource id.
+   *
+   * @param resourceId the string resource the text view is expected to hold.
+   */
+  public static Matcher<View> withSpinnerText(final int resourceId) {
+
+    return new BoundedMatcher<View, Spinner>(Spinner.class) {
+      private String resourceName = null;
+      private String expectedText = null;
+
+      @Override
+      public void describeTo(Description description) {
+        description.appendText("with string from resource id: ");
+        description.appendValue(resourceId);
+        if (null != this.resourceName) {
+          description.appendText("[");
+          description.appendText(this.resourceName);
+          description.appendText("]");
+        }
+        if (null != this.expectedText) {
+          description.appendText(" value: ");
+          description.appendText(this.expectedText);
+        }
+      }
+
+      @Override
+      public boolean matchesSafely(Spinner spinner) {
+        if (null == this.expectedText) {
+          try {
+            this.expectedText = spinner.getResources().getString(resourceId);
+            this.resourceName = spinner.getResources().getResourceEntryName(resourceId);
+          } catch (Resources.NotFoundException ignored) {
+            /*
+             * view could be from a context unaware of the resource id.
+             */
+          }
+        }
+        if (null != this.expectedText) {
+          return this.expectedText.equals(spinner.getSelectedItem().toString());
+        } else {
+          return false;
+        }
+      }
+    };
+  }
+
+  /**
+   * Returns a matcher that matches {@link Spinner}s based on toString value of the selected item.
+   *
+   * @param stringMatcher {@link Matcher} of {@link String} with text to match.
+   */
+  public static Matcher<View> withSpinnerText(final Matcher<String> stringMatcher) {
+    checkNotNull(stringMatcher);
+    return new BoundedMatcher<View, Spinner>(Spinner.class) {
+      @Override
+      public void describeTo(Description description) {
+        description.appendText("with text: ");
+        stringMatcher.describeTo(description);
+      }
+
+      @Override
+      public boolean matchesSafely(Spinner spinner) {
+        return stringMatcher.matches(spinner.getSelectedItem().toString());
+      }
+    };
+  }
+
+  /**
+   * Returns a matcher that matches {@link Spinner} based on it's selected item's toString value.
+   * <p>
+   * Note: Sugar for withSpinnerText(is("string")).
+   */
+  public static Matcher<View> withSpinnerText(String text) {
+    return withSpinnerText(is(text));
+  }
+
+  /**
+   * Returns a matcher that matches {@link WebView} if they are evaluating Javascript.
+   */
+  public static Matcher<View> isJavascriptEnabled() {
+    return new BoundedMatcher<View, WebView>(WebView.class) {
+      @Override
+      public void describeTo(Description description) {
+        description.appendText("WebView with JS enabled");
+      }
+
+      @Override
+      public boolean matchesSafely(WebView webView) {
+        return webView.getSettings().getJavaScriptEnabled();
+      }
+    };
+  }
+}

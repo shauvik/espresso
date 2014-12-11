@@ -22,10 +22,7 @@ import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 import android.support.test.espresso.FailureHandler;
-import android.support.test.espresso.NoMatchingViewException;
-import android.support.test.espresso.base.DefaultFailureHandler;
 
-import android.content.Context;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
@@ -51,7 +48,7 @@ public class CustomFailureHandlerTest extends ActivityInstrumentationTestCase2<M
   public void setUp() throws Exception {
     super.setUp();
     getActivity();
-    setFailureHandler(new CustomFailureHandler(getInstrumentation().getTargetContext()));
+    setFailureHandler(new CustomFailureHandler());
   }
 
   public void testWithCustomFailureHandler() {
@@ -63,24 +60,13 @@ public class CustomFailureHandlerTest extends ActivityInstrumentationTestCase2<M
   }
 
   /**
-   * A {@link FailureHandler} that re-throws {@link NoMatchingViewException} as
-   * {@link MySpecialException}. All other functionality is delegated to
-   * {@link DefaultFailureHandler}.
+   * A {@link FailureHandler} that re-throws all exceptions as
+   * {@link MySpecialException}.
    */
   private static class CustomFailureHandler implements FailureHandler {
-    private final FailureHandler delegate;
-
-    public CustomFailureHandler(Context targetContext) {
-      delegate = new DefaultFailureHandler(targetContext);
-    }
-
     @Override
     public void handle(Throwable error, Matcher<View> viewMatcher) {
-      try {
-        delegate.handle(error, viewMatcher);
-      } catch (NoMatchingViewException e) {
-        throw new MySpecialException(e);
-      }
+      throw new MySpecialException(error);
     }
   }
 

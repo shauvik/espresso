@@ -15,6 +15,7 @@
  */
 
 package android.support.test.espresso.contrib;
+
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.contrib.DrawerMatchers.isClosed;
 import static android.support.test.espresso.contrib.DrawerMatchers.isOpen;
@@ -64,6 +65,7 @@ public final class DrawerActions {
     }
     onView(withId(drawerLayoutId)).perform(registerListener());
     onView(withId(drawerLayoutId)).perform(actionOpenDrawer());
+    onView(withId(drawerLayoutId)).perform(unregisterListener());
   }
 
   /**
@@ -77,6 +79,7 @@ public final class DrawerActions {
     }
     onView(withId(drawerLayoutId)).perform(registerListener());
     onView(withId(drawerLayoutId)).perform(actionCloseDrawer());
+    onView(withId(drawerLayoutId)).perform(unregisterListener());
   }
 
   /**
@@ -166,7 +169,38 @@ public final class DrawerActions {
           // listener is already registered. No need to assign.
           return;
         }
-        drawer.setDrawerListener(IdlingDrawerListener.getInstance(existingListener));
+        IdlingDrawerListener instance = IdlingDrawerListener.getInstance(existingListener);
+        drawer.setDrawerListener(instance);
+        Espresso.registerIdlingResources(instance);
+      }
+    };
+  }
+
+  /**
+   * Returns a {@link ViewAction} that removes the {@link IdlingDrawerListener} from the
+   * {@link DrawerLayout}. All listeners that exists prior the registration of
+   * {@link IdlingDrawerListener}, are retained.
+   */
+  private static ViewAction unregisterListener() {
+    return new ViewAction() {
+      @Override
+      public Matcher<View> getConstraints() {
+        return isAssignableFrom(DrawerLayout.class);
+      }
+
+      @Override
+      public String getDescription() {
+        return "unregister idling drawer listener";
+      }
+
+      @Override
+      public void perform(UiController uiController, View view) {
+        DrawerLayout drawer = (DrawerLayout) view;
+        DrawerListener existingListener = getDrawerListener(drawer);
+        if (existingListener instanceof IdlingDrawerListener) {
+          Espresso.unregisterIdlingResources((IdlingResource) existingListener);
+          drawer.setDrawerListener(((IdlingDrawerListener) existingListener).parentListener);
+        }
       }
     };
   }
@@ -206,7 +240,6 @@ public final class DrawerActions {
     private static IdlingDrawerListener getInstance(DrawerListener parentListener) {
       if (instance == null) {
         instance = new IdlingDrawerListener();
-        Espresso.registerIdlingResources(instance);
       }
       instance.setParentListener(parentListener);
       return instance;

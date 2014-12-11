@@ -16,9 +16,11 @@
 
 package android.support.test.espresso.matcher;
 
+import static android.support.test.espresso.matcher.ViewMatchers.assertThat;
 import static android.support.test.espresso.matcher.ViewMatchers.hasContentDescription;
 import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.hasImeAction;
+import static android.support.test.espresso.matcher.ViewMatchers.hasLinks;
 import static android.support.test.espresso.matcher.ViewMatchers.hasSibling;
 import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static android.support.test.espresso.matcher.ViewMatchers.isChecked;
@@ -28,24 +30,34 @@ import static android.support.test.espresso.matcher.ViewMatchers.isEnabled;
 import static android.support.test.espresso.matcher.ViewMatchers.isFocusable;
 import static android.support.test.espresso.matcher.ViewMatchers.isNotChecked;
 import static android.support.test.espresso.matcher.ViewMatchers.isRoot;
+import static android.support.test.espresso.matcher.ViewMatchers.isSelected;
 import static android.support.test.espresso.matcher.ViewMatchers.supportsInputMethods;
 import static android.support.test.espresso.matcher.ViewMatchers.withChild;
 import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static android.support.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
+import static android.support.test.espresso.matcher.ViewMatchers.withHint;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withParent;
+import static android.support.test.espresso.matcher.ViewMatchers.withSpinnerText;
 import static android.support.test.espresso.matcher.ViewMatchers.withTagKey;
 import static android.support.test.espresso.matcher.ViewMatchers.withTagValue;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 
 import android.support.test.espresso.matcher.ViewMatchers.Visibility;
 import android.support.test.testapp.test.R;
+import com.google.common.collect.Lists;
 
+import android.graphics.Color;
 import android.test.InstrumentationTestCase;
+import android.text.Spannable;
+import android.text.style.ForegroundColorSpan;
+import android.text.util.Linkify;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.Checkable;
@@ -60,6 +72,8 @@ import android.widget.TextView;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
+
+import java.util.List;
 
 /**
  * Unit tests for {@link ViewMatchers}.
@@ -127,6 +141,26 @@ public class ViewMatchersTest extends InstrumentationTestCase {
     assertTrue(withId(is(R.id.testId1)).matches(view));
     assertFalse(withId(is(R.id.testId2)).matches(view));
     assertFalse(withId(is(1234)).matches(view));
+  }
+
+  public void testWithId_describeWithNoResourceLookup() {
+    assertThat(withId(5).toString(), is("with id: 5"));
+  }
+
+  public void testWithId_describeWithFailedResourceLookup() {
+    View view = new View(getInstrumentation().getContext());
+    Matcher<View> matcher = withId(5);
+    // Running matches will allow withId to grab resources from view Context
+    matcher.matches(view);
+    assertThat(matcher.toString(), is("with id: 5 (resource name not found)"));
+  }
+
+  public void testWithId_describeWithResourceLookup() {
+    View view = new View(getInstrumentation().getContext());
+    Matcher<View> matcher = withId(R.id.testId1);
+    // Running matches will allow withId to grab resources from view Context
+    matcher.matches(view);
+    assertThat(matcher.toString(), containsString("id/testId1"));
   }
 
   public void testWithTagNull() {
@@ -357,11 +391,62 @@ public class ViewMatchersTest extends InstrumentationTestCase {
     assertFalse(isFocusable().matches(notFocusable));
   }
 
+  public void testIsSelected() {
+    View selected = new View(getInstrumentation().getTargetContext());
+    selected.setSelected(true);
+    View notSelected = new View(getInstrumentation().getTargetContext());
+    notSelected.setSelected(false);
+    assertTrue(isSelected().matches(selected));
+    assertFalse(isSelected().matches(notSelected));
+  }
+
   public void testWithTextResourceId() {
     TextView textView = new TextView(getInstrumentation().getTargetContext());
     textView.setText(R.string.something);
     assertTrue(withText(R.string.something).matches(textView));
     assertFalse(withText(R.string.other_string).matches(textView));
+  }
+
+  public void testWithTextResourceId_charSequence() {
+    TextView textView = new TextView(getInstrumentation().getTargetContext());
+    String expectedText = getInstrumentation().getTargetContext()
+        .getResources().getString(R.string.something);
+    Spannable textSpan = Spannable.Factory.getInstance().newSpannable(expectedText);
+    textSpan.setSpan(new ForegroundColorSpan(Color.RED), 0, expectedText.length() - 1, 0);
+    textView.setText(textSpan);
+    assertTrue(withText(R.string.something).matches(textView));
+    assertFalse(withText(R.string.other_string).matches(textView));
+  }
+
+  public void testWithHintString() {
+    TextView textView = new TextView(getInstrumentation().getTargetContext());
+    textView.setHint(null);
+    assertFalse(withHint(is("")).matches(textView));
+    String testText = "test text!";
+    textView.setHint(testText);
+    assertTrue(withHint(is(testText)).matches(textView));
+    assertFalse(withHint(is("blah")).matches(textView));
+  }
+
+  public void testWithHintResourceId() {
+    TextView textView = new TextView(getInstrumentation().getTargetContext());
+    textView.setHint(R.string.something);
+    assertTrue(withHint(R.string.something).matches(textView));
+    assertFalse(withHint(R.string.other_string).matches(textView));
+    // test the case of resource is not found, espresso should not crash
+    assertFalse(withHint(R.string.other_string + 100).matches(textView));
+  }
+
+
+  public void testWithHintResourceId_charSequence() {
+    TextView textView = new TextView(getInstrumentation().getTargetContext());
+    String expectedText = getInstrumentation().getTargetContext()
+        .getResources().getString(R.string.something);
+    Spannable textSpan = Spannable.Factory.getInstance().newSpannable(expectedText);
+    textSpan.setSpan(new ForegroundColorSpan(Color.RED), 0, expectedText.length() - 1, 0);
+    textView.setHint(textSpan);
+    assertTrue(withHint(R.string.something).matches(textView));
+    assertFalse(withHint(R.string.other_string).matches(textView));
   }
 
   public void testWithParent() {
@@ -452,5 +537,57 @@ public class ViewMatchersTest extends InstrumentationTestCase {
     EditText editText = new EditText(getInstrumentation().getTargetContext());
     assertFalse(supportsInputMethods().matches(button));
     assertTrue(supportsInputMethods().matches(editText));
+  }
+
+  public void testHasLinks() {
+    TextView viewWithLinks = new TextView(getInstrumentation().getTargetContext());
+    viewWithLinks.setText("Here is a www.google.com link");
+    Linkify.addLinks(viewWithLinks, Linkify.ALL);
+    assertTrue(hasLinks().matches(viewWithLinks));
+
+    TextView viewWithNoLinks = new TextView(getInstrumentation().getTargetContext());
+    viewWithNoLinks.setText("Here is an unlikified www.google.com");
+    assertFalse(hasLinks().matches(viewWithNoLinks));
+  }
+
+  public void testWithSpinnerTextResourceId() {
+    Spinner spinner = new Spinner(this.getInstrumentation().getTargetContext());
+    List<String> values = Lists.newArrayList();
+    values.add(this.getInstrumentation().getTargetContext().getString(R.string.something));
+    values.add(this.getInstrumentation().getTargetContext().getString(R.string.other_string));
+    ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+        this.getInstrumentation().getTargetContext(),
+        android.R.layout.simple_spinner_item,
+        values);
+    spinner.setAdapter(adapter);
+    spinner.setSelection(0);
+    assertTrue(withSpinnerText(R.string.something).matches(spinner));
+    assertFalse(withSpinnerText(R.string.other_string).matches(spinner));
+  }
+
+  public void testWithSpinnerTextString() {
+    Spinner spinner = new Spinner(this.getInstrumentation().getTargetContext());
+    List<String> values = Lists.newArrayList();
+    values.add("Hello World");
+    values.add("Goodbye!!");
+    ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+        this.getInstrumentation().getTargetContext(),
+        android.R.layout.simple_spinner_item,
+        values);
+    spinner.setAdapter(adapter);
+    spinner.setSelection(0);
+    spinner.setTag("spinner");
+    assertTrue(withSpinnerText(is("Hello World")).matches(spinner));
+    assertFalse(withSpinnerText(is("Goodbye!!")).matches(spinner));
+    assertFalse(withSpinnerText(is("")).matches(spinner));
+  }
+
+  public void testWithSpinnerTextNull() {
+    try {
+      withSpinnerText((Matcher<String>) null);
+      fail("Should of thrown NPE");
+    } catch (NullPointerException e) {
+      // Good, this is expected.
+    }
   }
 }

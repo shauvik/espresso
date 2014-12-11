@@ -80,14 +80,12 @@ public final class ViewAssertions {
         viewMatcher.describeTo(description);
         if (noViewException != null) {
           description.appendText(String.format(
-              "' check could not be performed because view '%s' was not found.\n", viewMatcher));
+              "' check could not be performed because view '%s' was not found.\n",
+              noViewException.getViewMatcherDescription()));
           Log.e(TAG, description.toString());
           throw noViewException;
         } else {
-          // TODO(valeraz): ideally, we should append the matcher used to find the view
-          // This can be done in DefaultFailureHandler (just like we currently to with
-          // PerformException)
-          description.appendText("' doesn't match the selected view.");
+          description.appendText(String.format("' doesn't match the selected view."));
           assertThat(description.toString(), view, viewMatcher);
         }
       }

@@ -79,12 +79,10 @@ afterEvaluate {
             addJavadocTasks(project, variant.assemble, variant.name, variant.javaCompile)
 
             task("copy${variant.name.capitalize()}BinaryJars", type: Copy, dependsOn: variant.assemble) {
-                variant.outputs.each { output ->
-                    description "Copies the release Apk to $project.distDir"
-                    from output.outputFile
-                    into project.distDir
-                    rename(output.outputFile.name, "${project.name}-${variant.name}-${project.version}.apk")
-                }
+                description "Copies the release Apk to $project.distDir"
+                from variant.outputs[0].outputFile
+                into project.distDir
+                rename(variant.outputs[0].outputFile.name, "${project.name}-${variant.name}-${project.version}.apk")
             }
         }
     }

@@ -17,8 +17,12 @@
 package android.support.test.espresso.action;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import android.support.test.espresso.action.AdapterViewProtocol.AdaptedData.Builder;
+import android.support.test.espresso.util.HumanReadables;
 import com.google.common.base.Optional;
 
+import android.database.Cursor;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.AdapterView;
@@ -142,6 +146,13 @@ public interface AdapterViewProtocol {
   boolean isDataRenderedWithinAdapterView(
       AdapterView<? extends Adapter> adapterView, AdaptedData adaptedData);
 
+  /**
+   * A custom function that is applied when {@link AdaptedData#getData()} is executed.
+   * @see {@link Builder#withDataFunction(DataFunction)}
+   */
+  public interface DataFunction {
+    public Object getData();
+  }
 
   /**
    * A holder that associates a data object from an AdapterView with a token the
@@ -152,8 +163,11 @@ public interface AdapterViewProtocol {
 
     /**
      * One of the objects the AdapterView is exposing to the user.
+     *
+     * @deprecated use {@link AdaptedData#getData()} instead.
      */
     @Nullable
+    @Deprecated
     public final Object data;
 
     /**
@@ -163,20 +177,37 @@ public interface AdapterViewProtocol {
      */
     public final Object opaqueToken;
 
-    @Override
-    public String toString() {
-      return String.format("Data: %s (class: %s) token: %s", data,
-          null == data ? null : data.getClass(), opaqueToken);
+    private final DataFunction dataFunction;
+
+    public Object getData() {
+      return dataFunction.getData();
     }
 
-    private AdaptedData(Object data, Object opaqueToken) {
+    @Override
+    public String toString() {
+      Object myData = getData();
+      String itsClass = null == myData ? "null" : myData.getClass().getName();
+      if (myData instanceof Cursor) {
+        myData = HumanReadables.describe((Cursor) myData);
+      }
+      return String.format("Data: %s (class: %s) token: %s", myData, itsClass, opaqueToken);
+    }
+
+    private AdaptedData(Object data, Object opaqueToken, DataFunction dataFunction) {
       this.data = data;
       this.opaqueToken = checkNotNull(opaqueToken);
+      this.dataFunction = checkNotNull(dataFunction);
     }
 
     public static class Builder {
       private Object data;
       private Object opaqueToken;
+      private DataFunction dataFunction;
+
+      public Builder withDataFunction(@Nullable DataFunction dataFunction) {
+        this.dataFunction = dataFunction;
+        return this;
+      }
 
       public Builder withData(@Nullable Object data) {
         this.data = data;
@@ -189,7 +220,18 @@ public interface AdapterViewProtocol {
       }
 
       public AdaptedData build() {
-        return new AdaptedData(data, opaqueToken);
+        if (null != dataFunction) {
+          data = dataFunction.getData();
+        } else {
+          dataFunction = new DataFunction() {
+            @Override
+            public Object getData() {
+              return data;
+            }
+          };
+        }
+
+        return new AdaptedData(data, opaqueToken, dataFunction);
       }
     }
   }

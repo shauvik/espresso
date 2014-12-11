@@ -143,6 +143,7 @@ final class UiControllerImpl implements UiController, Handler.Callback {
   private final ExecutorService keyEventExecutor = Executors.newSingleThreadExecutor();
   private final QueueInterrogator queueInterrogator;
   private final Looper mainLooper;
+  private final Recycler recycler;
 
   private Handler controllerHandler;
   // only updated on main thread.
@@ -155,7 +156,8 @@ final class UiControllerImpl implements UiController, Handler.Callback {
       @SdkAsyncTask AsyncTaskPoolMonitor asyncTaskMonitor,
       @CompatAsyncTask Optional<AsyncTaskPoolMonitor> compatTaskMonitor,
       IdlingResourceRegistry registry,
-      Looper mainLooper) {
+      Looper mainLooper,
+      Recycler recycler) {
     this.eventInjector = checkNotNull(eventInjector);
     this.asyncTaskMonitor = checkNotNull(asyncTaskMonitor);
     this.compatTaskMonitor = checkNotNull(compatTaskMonitor);
@@ -163,6 +165,7 @@ final class UiControllerImpl implements UiController, Handler.Callback {
     this.idlingResourceRegistry = checkNotNull(registry);
     this.mainLooper = checkNotNull(mainLooper);
     this.queueInterrogator = new QueueInterrogator(mainLooper);
+    this.recycler = checkNotNull(recycler);
   }
 
   @SuppressWarnings("deprecation")
@@ -451,37 +454,12 @@ final class UiControllerImpl implements UiController, Handler.Callback {
           QueueState queueState = queueInterrogator.determineQueueState();
           if (queueState == QueueState.EMPTY || queueState == QueueState.TASK_DUE_LONG) {
             return;
-          } else {
-            Log.v(
-                "ESP_TRACE",
-
-                "Barrier detected or task avaliable for running shortly.");
           }
         }
 
         Message message = queueInterrogator.getNextMessage();
-        String callbackString = "unknown";
-        String messageString = "unknown";
-        try {
-          if (null == message.getCallback()) {
-            callbackString = "no callback.";
-          } else {
-            callbackString = message.getCallback().toString();
-          }
-          messageString = message.toString();
-        } catch (NullPointerException e) {
-          /*
-           * Ignore. android.app.ActivityThread$ActivityClientRecord#toString() fails for API level
-           * 15.
-           */
-        }
-
-        Log.v(
-            "ESP_TRACE",
-            String.format("%s: MessageQueue.next(): %s, with target: %s, callback: %s", TAG,
-              messageString, message.getTarget().getClass().getCanonicalName(), callbackString));
         message.getTarget().dispatchMessage(message);
-        message.recycle();
+        recycler.recycle(message);
         loopCount++;
       }
       List<String> idleConditions = Lists.newArrayList();
@@ -508,7 +486,6 @@ final class UiControllerImpl implements UiController, Handler.Callback {
       controllerHandler = new Handler(this);
     }
   }
-
 
   /**
    * Encapsulates posting a signal message to update the conditions set after a task has

@@ -130,23 +130,56 @@ public class EspressoTest extends ActivityInstrumentationTestCase2<MainActivity>
 
   public void testRegisterResourceWithNullName() {
     try {
-      Espresso.registerIdlingResources(new IdlingResource() {
-        @Override
-        public boolean isIdleNow() {
-          return true;
-        }
-
-        @Override
-        public String getName() {
-          return null;
-        }
-
-       @Override
-       public void registerIdleTransitionCallback(ResourceCallback callback) {
-         // ignore
-       }
-      });
+      Espresso.registerIdlingResources(new DummyIdlingResource(null));
       fail("Should have thrown NPE");
-    } catch (NullPointerException expected) {}
+    } catch (RuntimeException expected) {}
+  }
+
+  public void testGetIdlingResources() {
+    int originalCount = Espresso.getIdlingResources().size();
+
+    IdlingResource resource = new DummyIdlingResource("test");
+
+    Espresso.registerIdlingResources(resource);
+    assertEquals(originalCount + 1, Espresso.getIdlingResources().size());
+
+    Espresso.unregisterIdlingResources(resource);
+    assertEquals(originalCount, Espresso.getIdlingResources().size());
+  }
+
+  public void testRegisterIdlingResources() {
+    IdlingResource resource = new DummyIdlingResource("test");
+    assertTrue(Espresso.registerIdlingResources(resource));
+    assertFalse(Espresso.registerIdlingResources(resource));
+  }
+
+  public void testUnregisterIdlingResources() {
+    IdlingResource resource = new DummyIdlingResource("test");
+    Espresso.registerIdlingResources(resource);
+    assertTrue(Espresso.unregisterIdlingResources(resource));
+    assertFalse(Espresso.unregisterIdlingResources(resource));
+  }
+
+  private class DummyIdlingResource implements IdlingResource {
+    private String name;
+
+    public DummyIdlingResource(String name) {
+      this.name = name;
+    }
+
+    @Override
+    public boolean isIdleNow() {
+      return true;
+    }
+
+    @Override
+    public String getName() {
+      return name;
+    }
+
+   @Override
+   public void registerIdleTransitionCallback(ResourceCallback callback) {
+     // ignore
+   }
   }
 }

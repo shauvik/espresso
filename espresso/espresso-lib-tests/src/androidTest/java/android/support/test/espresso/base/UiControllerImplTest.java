@@ -18,6 +18,7 @@ package android.support.test.espresso.base;
 
 import android.support.test.espresso.IdlingResourceTimeoutException;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 
 import android.os.Build;
 import android.os.Handler;
@@ -107,12 +108,19 @@ public class UiControllerImplTest extends TestCase {
       strat.initialize();
       injector = new EventInjector(strat);
     }
+
+    Recycler recycler = Recycler.DEFAULT_RECYCLER;
+    if (Build.VERSION.SDK_INT > 20) {
+      recycler = new UncheckedRecycler();
+    }
+
     uiController.set(new UiControllerImpl(
         injector,
         new AsyncTaskPoolMonitor(asyncPool),
         Optional.<AsyncTaskPoolMonitor>absent(),
         idlingResourceRegistry,
-        testThread.getLooper()
+        testThread.getLooper(),
+        recycler
         ));
 
 
@@ -307,7 +315,7 @@ public class UiControllerImplTest extends TestCase {
 
   public void testLoopMainThreadUntilIdle_oneIdlingResource() throws InterruptedException {
     OnDemandIdlingResource fakeResource = new OnDemandIdlingResource("FakeResource");
-    idlingResourceRegistry.register(fakeResource);
+    idlingResourceRegistry.registerResources(Lists.newArrayList(fakeResource));
     final CountDownLatch latch = new CountDownLatch(1);
     assertTrue(testThread.getHandler().post(new Runnable() {
       @Override
@@ -328,8 +336,7 @@ public class UiControllerImplTest extends TestCase {
     OnDemandIdlingResource fakeResource2 = new OnDemandIdlingResource("FakeResource2");
     OnDemandIdlingResource fakeResource3 = new OnDemandIdlingResource("FakeResource3");
     // Register the first two right away and one later (once the wait for the first two begins).
-    idlingResourceRegistry.register(fakeResource1);
-    idlingResourceRegistry.register(fakeResource2);
+    idlingResourceRegistry.registerResources(Lists.newArrayList(fakeResource1, fakeResource2));
     final CountDownLatch latch = new CountDownLatch(1);
     assertTrue(testThread.getHandler().post(new Runnable() {
       @Override
@@ -344,7 +351,7 @@ public class UiControllerImplTest extends TestCase {
     fakeResource1.forceIdleNow();
     assertFalse(
         "Should not have stopped looping the main thread yet!", latch.await(1, TimeUnit.SECONDS));
-    idlingResourceRegistry.register(fakeResource3);
+    idlingResourceRegistry.registerResources(Lists.newArrayList(fakeResource3));
     assertFalse(
         "Should not have stopped looping the main thread yet!", latch.await(1, TimeUnit.SECONDS));
     fakeResource2.forceIdleNow();
@@ -362,9 +369,8 @@ public class UiControllerImplTest extends TestCase {
         new OnDemandIdlingResource("KindaCrappyResource");
     OnDemandIdlingResource badResource =
         new OnDemandIdlingResource("VeryBadResource");
-    idlingResourceRegistry.register(goodResource);
-    idlingResourceRegistry.register(kindaCrappyResource);
-    idlingResourceRegistry.register(badResource);
+    idlingResourceRegistry.registerResources(
+        Lists.newArrayList(goodResource, kindaCrappyResource, badResource));
     final CountDownLatch latch = new CountDownLatch(1);
     assertTrue(testThread.getHandler().post(new Runnable() {
       @Override

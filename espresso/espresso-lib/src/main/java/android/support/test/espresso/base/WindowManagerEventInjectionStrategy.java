@@ -76,7 +76,7 @@ final class WindowManagerEventInjectionStrategy implements EventInjectionStrateg
 
       injectInputKeyEventMethod =
           wmInstance.getClass().getDeclaredMethod("injectKeyEvent", KeyEvent.class, Boolean.TYPE);
-      injectInputMotionEventMethod.setAccessible(true);
+      injectInputKeyEventMethod.setAccessible(true);
 
       initComplete = true;
     } catch (ClassNotFoundException e) {

@@ -93,7 +93,7 @@ public class KeyEventActionIntegrationTest extends ActivityInstrumentationTestCa
   }
 
   @SuppressWarnings("unchecked")
-  @SdkSuppress(minSdkVersion = 11) // uses native fragments.
+  @SdkSuppress(minSdkVersion=10)
   @FlakyTest
   public void testClickOnBackFromFragment() {
     Intent fragmentStack = new Intent().setClassName(getInstrumentation().getTargetContext(),

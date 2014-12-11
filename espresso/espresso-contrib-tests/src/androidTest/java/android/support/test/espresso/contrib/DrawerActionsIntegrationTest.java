@@ -18,6 +18,7 @@ package android.support.test.espresso.contrib;
 
 import static android.support.test.espresso.Espresso.onData;
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.contrib.DrawerActions.closeDrawer;
@@ -33,6 +34,8 @@ import static org.hamcrest.Matchers.is;
 import android.support.test.testapp.DrawerActivity;
 import android.support.test.testapp.R;
 
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 
@@ -41,6 +44,8 @@ import android.test.suitebuilder.annotation.LargeTest;
  */
 @LargeTest
 public class DrawerActionsIntegrationTest extends ActivityInstrumentationTestCase2<DrawerActivity> {
+
+  static final String EXTRA_DATA = "android.support.test.testapp.DATA";
 
   public DrawerActionsIntegrationTest() {
     super(DrawerActivity.class);
@@ -102,5 +107,63 @@ public class DrawerActionsIntegrationTest extends ActivityInstrumentationTestCas
 
     // The text view will now display "You picked: Pickle"
     onView(withId(R.id.drawer_text_view)).check(matches(withText("You picked: " + rowContents)));
+  }
+
+// Don't use swipeLeft() to close an open drawer. Since we unregister the IdlingDrawerListener
+// after the drawer is open, a left swipe to close the drawer is not synchronized and will result
+// in a flaky test. Therefore this test is commented out.
+//
+//  public void testOpenDrawer_closeBySwipeLeft() {
+//    openDrawer(R.id.drawer_layout);
+//
+//    // Swipe left to close drawer.
+//    onView(withId(R.id.drawer_layout)).perform(swipeLeft());
+//
+//    // Drawer should be closed.
+//    onView(withId(R.id.drawer_layout)).check(matches(isClosed()));
+//  }
+
+  public void testOpenDrawer_startNewActivity() {
+    openDrawer(R.id.drawer_layout);
+
+    Intent displayActivity = new Intent().setClassName(getInstrumentation().getTargetContext(),
+        "android.support.test.testapp.DisplayActivity");
+    displayActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    displayActivity.putExtra(EXTRA_DATA, "Have a cup of Espresso.");
+    getInstrumentation().startActivitySync(displayActivity);
+
+    onView(withId(R.id.display_data)).check(matches(withText(("Have a cup of Espresso."))));
+
+    // Going back to the previous activity
+    pressBack();
+
+    // The drawer should still be open.
+    onView(withId(R.id.drawer_layout)).check(matches(isOpen()));
+  }
+
+  public void testOpenDrawer_rotateScreen() {
+    openDrawer(R.id.drawer_layout);
+
+    // Rotate to landscape.
+    setOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+    // The drawer should still be open.
+    onView(withId(R.id.drawer_layout)).check(matches(isOpen()));
+
+    // Rotate to portrait.
+    setOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+    // The drawer should still be open.
+    onView(withId(R.id.drawer_layout)).check(matches(isOpen()));
+  }
+
+
+  private void setOrientation(final int orientation) {
+    getInstrumentation().runOnMainSync(new Runnable() {
+      @Override
+      public void run() {
+        getActivity().setRequestedOrientation(orientation);
+      }
+    });
   }
 }

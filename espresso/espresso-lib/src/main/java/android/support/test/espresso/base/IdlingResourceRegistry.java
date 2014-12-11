@@ -24,6 +24,7 @@ import android.support.test.espresso.IdlingPolicies;
 import android.support.test.espresso.IdlingPolicy;
 import android.support.test.espresso.IdlingResource;
 import android.support.test.espresso.IdlingResource.ResourceCallback;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 import android.os.Handler;
@@ -33,6 +34,10 @@ import android.util.Log;
 
 import java.util.BitSet;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -79,40 +84,92 @@ public final class IdlingResourceRegistry {
   }
 
   /**
-   * Registers the given resource.
+   * Registers the given resources. If any of the given resources are already
+   * registered, a warning is logged.
+   *
+   * @return @{code true} if all resources were successfully registered
    */
-  public void register(final IdlingResource resource) {
-    checkNotNull(resource);
+  public boolean registerResources(final List<? extends IdlingResource> resourceList) {
     if (Looper.myLooper() != looper) {
-      handler.post(new Runnable() {
+      return runSynchronouslyOnMainThread(new Callable<Boolean>() {
         @Override
-        public void run() {
-          register(resource);
+        public Boolean call() {
+          return registerResources(resourceList);
         }
       });
-    } else {      
-      for (IdlingResource oldResource : resources) {
-        if (resource.getName().equals(oldResource.getName())) {
-          // This does not throw an error to avoid leaving tests that register resource in test
-          // setup in an undeterministic state (we cannot assume that everyone clears vm state
-          // between each test run)
-          Log.e(TAG, String.format("Attempted to register resource with same names:" +
-              " %s. R1: %s R2: %s.\nDuplicate resource registration will be ignored.",
-              resource.getName(), resource, oldResource));
-          return;
+    } else {
+      boolean allRegisteredSuccesfully = true;
+      for (IdlingResource resource : resourceList) {
+        checkNotNull(resource.getName(), "IdlingResource.getName() should not be null");
+
+        boolean duplicate = false;
+        for (IdlingResource oldResource : resources) {
+          if (resource.getName().equals(oldResource.getName())) {
+            // This does not throw an error to avoid leaving tests that register resource in test
+            // setup in an undeterministic state (we cannot assume that everyone clears vm state
+            // between each test run)
+            Log.e(TAG, String.format("Attempted to register resource with same names:"
+                + " %s. R1: %s R2: %s.\nDuplicate resource registration will be ignored.",
+                resource.getName(), resource, oldResource));
+            duplicate = true;
+            break;
+          }
+        }
+
+        if (!duplicate) {
+          resources.add(resource);
+          final int position = resources.size() - 1;
+          registerToIdleCallback(resource, position);
+          idleState.set(position, resource.isIdleNow());
+        } else {
+          allRegisteredSuccesfully = false;
         }
       }
-      resources.add(resource);
-      final int position = resources.size() - 1;
-      registerToIdleCallback(resource, position);
-      idleState.set(position, resource.isIdleNow());
+      return allRegisteredSuccesfully;
+    }
+  }
+
+  /**
+   * Unregisters the given resources. If any of the given resources are not already
+   * registered, a warning is logged.
+   *
+   * @return @{code true} if all resources were successfully unregistered
+   */
+  public boolean unregisterResources(final List<? extends IdlingResource> resourceList) {
+    if (Looper.myLooper() != looper) {
+      return runSynchronouslyOnMainThread(new Callable<Boolean>() {
+        @Override
+        public Boolean call() {
+          return unregisterResources(resourceList);
+        }
+      });
+    } else {
+      boolean allUnregisteredSuccesfully = true;
+      for (IdlingResource resource : resourceList) {
+        int resourceIndex = resources.indexOf(resource);
+
+        if (resourceIndex != -1) {
+          // Left shift BitSet values to right of position of resource in array.
+          // Must be done before removing the resource in order to set the last bit to 0.
+          for (int i = resourceIndex; i < resources.size(); i++) {
+            idleState.set(i, idleState.get(i + 1));
+          }
+
+          resources.remove(resourceIndex);
+        } else {
+          allUnregisteredSuccesfully = false;
+          Log.e(TAG, String.format("Attempted to unregister resource that is not registered: "
+              + "'%s'. Resource list: %s", resource.getName(), resources));
+        }
+      }
+      return allUnregisteredSuccesfully;
     }
   }
 
   public void registerLooper(Looper looper, boolean considerWaitIdle) {
     checkNotNull(looper);
     checkArgument(Looper.getMainLooper() != looper, "Not intended for use with main looper!");
-    register(new LooperIdlingResource(looper, considerWaitIdle));
+    registerResources(Lists.newArrayList(new LooperIdlingResource(looper, considerWaitIdle)));
   }
 
   private void registerToIdleCallback(IdlingResource resource, final int position) {
@@ -124,6 +181,25 @@ public final class IdlingResourceRegistry {
         handler.sendMessage(m);
       }
     });
+  }
+
+  /**
+   * Returns a list of all currently registered {@link IdlingResource}s.
+   * This method is safe to call from any thread.
+   *
+   * @return an ImmutableList of {@link IdlingResource}s.
+   */
+  public List<IdlingResource> getResources() {
+    if (Looper.myLooper() != looper) {
+      return runSynchronouslyOnMainThread(new Callable<List<IdlingResource>>() {
+        @Override
+        public List<IdlingResource> call() {
+          return getResources();
+        }
+      });
+    } else {
+      return ImmutableList.copyOf(resources);
+    }
   }
 
   boolean allResourcesAreIdle() {
@@ -157,6 +233,21 @@ public final class IdlingResourceRegistry {
 
   void cancelIdleMonitor() {
     dispatcher.deregister();
+  }
+
+  private <T> T runSynchronouslyOnMainThread(Callable<T> task) {
+    FutureTask<T> futureTask = new FutureTask<T>(task);
+    handler.post(futureTask);
+
+    try {
+      return futureTask.get();
+    } catch (CancellationException ce) {
+      throw new RuntimeException(ce);
+    } catch (ExecutionException ee) {
+      throw new RuntimeException(ee);
+    } catch (InterruptedException ie) {
+      throw new RuntimeException(ie);
+    }
   }
 
   private void scheduleTimeoutMessages() {

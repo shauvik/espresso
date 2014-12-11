@@ -18,6 +18,7 @@ package android.support.test.espresso.action;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.clearText;
+import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
@@ -32,21 +33,25 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 
 /**
- * {@link ClearTextAction} integration tests.
+ * {@link ReplaceTextAction} integration tests.
  */
 @LargeTest
-public class ClearTextActionIntegrationTest extends ActivityInstrumentationTestCase2<SendActivity> {
+public class ReplaceTextActionIntegrationTest extends ActivityInstrumentationTestCase2<SendActivity>
+{
   @SuppressWarnings("deprecation")
-  public ClearTextActionIntegrationTest() {
+  public ReplaceTextActionIntegrationTest() {
     // Supporting froyo.
     super("android.support.test.testapp", SendActivity.class);
   }
 
   @LargeTest
-  public void testClearTextActionPerform() {
+  public void testReplaceTextActionPerform() {
     Activity activity = getActivity();
     String text = activity.getText(R.string.send_data_to_message_edit_text).toString();
     onView(withId(is(R.id.send_data_to_message_edit_text))).check(matches(withText(is(text))));
+    String newText = "new Text";
+    onView(withId(is(R.id.send_data_to_message_edit_text))).perform(replaceText(newText));
+    onView(withId(is(R.id.send_data_to_message_edit_text))).check(matches(withText(is(newText))));
     onView(withId(is(R.id.send_data_to_message_edit_text))).perform(clearText());
     onView(withId(is(R.id.send_data_to_message_edit_text))).check(matches(withText(is(""))));
   }

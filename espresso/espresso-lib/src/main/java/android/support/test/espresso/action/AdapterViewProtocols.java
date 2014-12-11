@@ -23,7 +23,9 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 
+import android.database.Cursor;
 import android.os.Build;
+import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.Adapter;
@@ -58,17 +60,41 @@ public final class AdapterViewProtocols {
     return STANDARD_PROTOCOL;
   }
 
-  // TODO(user): expandablelistview protocols
-
   private static final class StandardAdapterViewProtocol implements AdapterViewProtocol {
+
+    private static final String  TAG = "StdAdapterViewProtocol";
+
+    private static final class StandardDataFunction implements DataFunction {
+        private final Object dataAtPosition;
+        private final int position;
+
+        private StandardDataFunction(Object dataAtPosition, int position) {
+          checkArgument(position >= 0, "position must be >= 0");
+          this.dataAtPosition = dataAtPosition;
+          this.position = position;
+        }
+
+        @Override
+        public Object getData() {
+          if (dataAtPosition instanceof Cursor) {
+            if (!((Cursor) dataAtPosition).moveToPosition(position)) {
+              Log.e(TAG, "Cannot move cursor to position: " + position);
+            }
+          }
+          return dataAtPosition;
+        }
+    }
+
     @Override
     public Iterable<AdaptedData> getDataInAdapterView(AdapterView<? extends Adapter> adapterView) {
       List<AdaptedData> datas = Lists.newArrayList();
       for (int i = 0; i < adapterView.getCount(); i++) {
+        int position = i;
+        Object dataAtPosition = adapterView.getItemAtPosition(position);
         datas.add(
             new AdaptedData.Builder()
-              .withData(adapterView.getItemAtPosition(i))
-              .withOpaqueToken(i)
+              .withDataFunction(new StandardDataFunction(dataAtPosition, position))
+              .withOpaqueToken(position)
               .build());
       }
       return datas;
@@ -81,7 +107,8 @@ public final class AdapterViewProtocols {
         int position = adapterView.getPositionForView(descendantView);
         if (position != AdapterView.INVALID_POSITION) {
           return Optional.of(new AdaptedData.Builder()
-              .withData(adapterView.getItemAtPosition(position))
+              .withDataFunction(new StandardDataFunction(adapterView.getItemAtPosition(position),
+                      position))
               .withOpaqueToken(Integer.valueOf(position))
               .build());
         }
@@ -123,25 +150,29 @@ public final class AdapterViewProtocols {
       }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public boolean isDataRenderedWithinAdapterView(
         AdapterView<? extends Adapter> adapterView, AdaptedData adaptedData) {
       checkArgument(adaptedData.opaqueToken instanceof Integer, "Not my data: %s", adaptedData);
       int dataPosition = ((Integer) adaptedData.opaqueToken).intValue();
+      boolean inView = false;
 
       if (Range.closed(adapterView.getFirstVisiblePosition(), adapterView.getLastVisiblePosition())
           .contains(dataPosition)) {
         if (adapterView.getFirstVisiblePosition() == adapterView.getLastVisiblePosition()) {
           // thats a huge element.
-          return true;
+          inView = true;
         } else {
-          return isElementFullyRendered(adapterView,
+          inView = isElementFullyRendered(adapterView,
               dataPosition - adapterView.getFirstVisiblePosition());
         }
-      } else {
-        return false;
       }
+      if (inView) {
+        // stops animations - locks in our x/y location.
+        adapterView.setSelection(dataPosition);
+      }
+
+      return inView;
     }
 
     private boolean isElementFullyRendered(AdapterView<? extends Adapter> adapterView,

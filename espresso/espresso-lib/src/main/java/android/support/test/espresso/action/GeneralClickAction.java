@@ -104,8 +104,11 @@ public final class GeneralClickAction implements ViewAction {
             .build();
       }
 
+      int duration = ViewConfiguration.getPressedStateDuration();
       // ensures that all work enqueued to process the tap has been run.
-      uiController.loopMainThreadForAtLeast(ViewConfiguration.getPressedStateDuration());
+      if (duration > 0) {
+        uiController.loopMainThreadForAtLeast(duration);
+      }
       if (status == Tapper.Status.WARNING) {
         if (rollbackAction.isPresent()) {
           rollbackAction.get().perform(uiController, view);

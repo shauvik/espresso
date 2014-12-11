@@ -85,9 +85,9 @@ public enum Swipe implements Swiper {
     float[][] steps = interpolate(startCoordinates, endCoordinates, SWIPE_EVENT_COUNT);
     final int delayBetweenMovements = duration / steps.length;
 
-    MotionEvent downEvent = MotionEvents.sendDown(uiController, steps[0], precision).down;
+    MotionEvent downEvent = MotionEvents.sendDown(uiController, startCoordinates, precision).down;
     try {
-      for (int i = 1; i < steps.length; i++) {
+      for (int i = 0; i < steps.length; i++) {
         if (!MotionEvents.sendMovement(uiController, downEvent, steps[i])) {
           Log.e(TAG, "Injection of move event as part of the swipe failed. Sending cancel event.");
           MotionEvents.sendCancel(uiController, downEvent);

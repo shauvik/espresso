@@ -122,6 +122,6 @@ public final class TypeTextAction implements ViewAction {
 
   @Override
   public String getDescription() {
-    return "type text";
+    return String.format("type text(%s)", stringToBeTyped);
   }
 }

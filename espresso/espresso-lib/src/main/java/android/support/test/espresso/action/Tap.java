@@ -21,9 +21,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.action.MotionEvents.DownResultHolder;
 
+import android.os.Build;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Executes different click types to given position.
@@ -33,21 +37,13 @@ public enum Tap implements Tapper {
   @Override
     public Tapper.Status sendTap(UiController uiController, float[] coordinates,
         float[] precision) {
-      checkNotNull(uiController);
-
-      checkNotNull(coordinates);
-      checkNotNull(precision);
-      DownResultHolder res = MotionEvents.sendDown(uiController, coordinates, precision);
-      try {
-        if (!MotionEvents.sendUp(uiController, res.down)) {
-          Log.d(TAG, "Injection of up event as part of the click failed. Send cancel event.");
-          MotionEvents.sendCancel(uiController, res.down);
-          return Tapper.Status.FAILURE;
-        }
-      } finally {
-        res.down.recycle();
+      Tapper.Status stat = sendSingleTap(uiController, coordinates, precision);
+      if (Tapper.Status.SUCCESS == stat) {
+        // Wait until the touch event was processed by the main thread.
+        long singlePressTimeout = (long) (ViewConfiguration.getTapTimeout() * 1.5f);
+        uiController.loopMainThreadForAtLeast(singlePressTimeout);
       }
-      return res.longPress ? Tapper.Status.WARNING : Tapper.Status.SUCCESS;
+      return stat;
     }
   },
   LONG {
@@ -84,16 +80,22 @@ public enum Tap implements Tapper {
       checkNotNull(uiController);
       checkNotNull(coordinates);
       checkNotNull(precision);
-      Tapper.Status stat = SINGLE.sendTap(uiController, coordinates, precision);
+      Tapper.Status stat = sendSingleTap(uiController, coordinates, precision);
       if (stat == Tapper.Status.FAILURE) {
         return Tapper.Status.FAILURE;
       }
 
-      Tapper.Status secondStat = SINGLE.sendTap(uiController, coordinates, precision);
+
+      if (0 < DOUBLE_TAP_MIN_TIMEOUT) {
+        uiController.loopMainThreadForAtLeast(DOUBLE_TAP_MIN_TIMEOUT);
+      }
+
+      Tapper.Status secondStat = sendSingleTap(uiController, coordinates, precision);
 
       if (secondStat == Tapper.Status.FAILURE) {
         return Tapper.Status.FAILURE;
       }
+
 
       if (secondStat == Tapper.Status.WARNING || stat == Tapper.Status.WARNING) {
         return Tapper.Status.WARNING;
@@ -104,5 +106,41 @@ public enum Tap implements Tapper {
   };
 
   private static final String TAG = Tap.class.getSimpleName();
+  private static final int DOUBLE_TAP_MIN_TIMEOUT;
+  static {
+    int timeVal = 0;
+    if (Build.VERSION.SDK_INT > 18) {
+      try {
+        Method getDoubleTapMinTimeMethod = ViewConfiguration.class.getDeclaredMethod(
+          "getDoubleTapMinTime");
+        timeVal = (Integer) getDoubleTapMinTimeMethod.invoke(null);
+      } catch (NoSuchMethodException nsme) {
+        Log.w(TAG, "Expected to find getDoubleTapMinTime", nsme);
+      } catch (InvocationTargetException ite) {
+        Log.w(TAG, "Unable to query double tap min time!", ite);
+      } catch (IllegalAccessException iae) {
+        Log.w(TAG, "Unable to query double tap min time!", iae);
+      }
+    }
+    DOUBLE_TAP_MIN_TIMEOUT = timeVal;
+  }
+
+  private static Tapper.Status sendSingleTap(UiController uiController,
+      float[] coordinates, float[] precision) {
+    checkNotNull(uiController);
+    checkNotNull(coordinates);
+    checkNotNull(precision);
+    DownResultHolder res = MotionEvents.sendDown(uiController, coordinates, precision);
+    try {
+      if (!MotionEvents.sendUp(uiController, res.down)) {
+        Log.d(TAG, "Injection of up event as part of the click failed. Send cancel event.");
+        MotionEvents.sendCancel(uiController, res.down);
+        return Tapper.Status.FAILURE;
+      }
+    } finally {
+      res.down.recycle();
+    }
+    return res.longPress ? Tapper.Status.WARNING : Tapper.Status.SUCCESS;
+  }
 
 }

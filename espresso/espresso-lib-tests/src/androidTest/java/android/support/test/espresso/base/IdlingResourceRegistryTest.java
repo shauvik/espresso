@@ -18,6 +18,8 @@ package android.support.test.espresso.base;
 
 import android.support.test.espresso.IdlingResource;
 import android.support.test.espresso.base.IdlingResourceRegistry.IdleNotificationCallback;
+import com.google.common.collect.Lists;
+
 
 import android.os.Handler;
 import android.os.Looper;
@@ -49,9 +51,127 @@ public class IdlingResourceRegistryTest extends InstrumentationTestCase {
   public void testRegisterDuplicates() {
     IdlingResource r1 = new OnDemandIdlingResource("r1");
     IdlingResource r1dup = new OnDemandIdlingResource("r1");
-    registry.register(r1);
-    registry.register(r1);
-    registry.register(r1dup);
+    registry.registerResources(Lists.newArrayList(r1));
+    registry.registerResources(Lists.newArrayList(r1));
+    registry.registerResources(Lists.newArrayList(r1dup));
+  }
+
+  public void testUnregisterNeverRegistered() throws InterruptedException {
+    final IdlingResource r1 = new OnDemandIdlingResource("r1");
+    final IdlingResource r2 = new OnDemandIdlingResource("r2");
+
+    registry.registerResources(Lists.newArrayList(r1));
+    registry.unregisterResources(Lists.newArrayList(r2));
+
+    final AtomicBoolean resourcesIdle = new AtomicBoolean();
+    final CountDownLatch latch = new CountDownLatch(1);
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        resourcesIdle.set(registry.allResourcesAreIdle());
+        latch.countDown();
+      }
+    });
+    latch.await();
+
+    // r1 should still be registered
+    assertFalse(resourcesIdle.get());
+  }
+
+  public void testRegisterAndUnregisterIdling() throws InterruptedException {
+    OnDemandIdlingResource r1 = new OnDemandIdlingResource("r1");
+    r1.forceIdleNow();
+
+    final AtomicBoolean resourcesIdle = new AtomicBoolean();
+
+    final CountDownLatch latch = new CountDownLatch(1);
+    registry.registerResources(Lists.newArrayList(r1));
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        resourcesIdle.set(registry.allResourcesAreIdle());
+        latch.countDown();
+      }
+    });
+    latch.await();
+    assertTrue(resourcesIdle.get());
+
+    r1.reset();
+
+    final CountDownLatch latch2 = new CountDownLatch(1);
+    registry.unregisterResources(Lists.newArrayList(r1));
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        resourcesIdle.set(registry.allResourcesAreIdle());
+        latch2.countDown();
+      }
+    });
+    latch2.await();
+    assertTrue(resourcesIdle.get());
+  }
+
+  public void testRegisterAndUnregisterNeverIdling() throws InterruptedException {
+    IdlingResource r1 = new OnDemandIdlingResource("r1");
+    final AtomicBoolean resourcesIdle = new AtomicBoolean();
+
+    final CountDownLatch latch = new CountDownLatch(1);
+    registry.registerResources(Lists.newArrayList(r1));
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        resourcesIdle.set(registry.allResourcesAreIdle());
+        latch.countDown();
+      }
+    });
+    latch.await();
+    assertFalse(resourcesIdle.get());
+
+    final CountDownLatch latch2 = new CountDownLatch(1);
+    registry.unregisterResources(Lists.newArrayList(r1));
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        resourcesIdle.set(registry.allResourcesAreIdle());
+        latch2.countDown();
+      }
+    });
+    latch2.await();
+    assertTrue(resourcesIdle.get());
+  }
+
+  public void testRegisterAndUnregisterReturnValue() {
+    IdlingResource r1 = new OnDemandIdlingResource("r1");
+    IdlingResource r2 = new OnDemandIdlingResource("r2");
+
+    assertTrue(registry.registerResources(Lists.newArrayList(r1)));
+    assertFalse(registry.registerResources(Lists.newArrayList(r1)));
+    assertTrue(registry.registerResources(Lists.newArrayList(r2)));
+
+    IdlingResource r3 = new OnDemandIdlingResource("r3");
+    assertFalse(registry.registerResources(Lists.newArrayList(r3, r3)));
+
+    IdlingResource r4 = new OnDemandIdlingResource("r4");
+    assertFalse(registry.unregisterResources(Lists.newArrayList(r4)));
+
+    assertTrue(registry.unregisterResources(Lists.newArrayList(r1)));
+    assertFalse(registry.unregisterResources(Lists.newArrayList(r1)));
+    assertTrue(registry.unregisterResources(Lists.newArrayList(r2)));
+
+    assertFalse(registry.unregisterResources(Lists.newArrayList(r3, r3)));
+  }
+
+  public void testGetResources() {
+    IdlingResource r1 = new OnDemandIdlingResource("r1");
+    IdlingResource r2 = new OnDemandIdlingResource("r2");
+
+    assertEquals(registry.getResources().size(), 0);
+
+    registry.registerResources(Lists.newArrayList(r1, r2));
+    assertEquals(registry.getResources().size(), 2);
+
+    registry.unregisterResources(Lists.newArrayList(r1, r2));
+    assertEquals(registry.getResources().size(), 0);
   }
 
   public void testAllResourcesAreIdle() throws InterruptedException {
@@ -60,8 +180,7 @@ public class IdlingResourceRegistryTest extends InstrumentationTestCase {
     IdlingResource r3 = new OnDemandIdlingResource("r3");
     r1.forceIdleNow();
     r2.forceIdleNow();
-    registry.register(r1);
-    registry.register(r2);
+    registry.registerResources(Lists.newArrayList(r1, r2));
     final AtomicBoolean resourcesIdle = new AtomicBoolean(false);
     final CountDownLatch latch = new CountDownLatch(1);
     handler.post(new Runnable() {
@@ -75,7 +194,7 @@ public class IdlingResourceRegistryTest extends InstrumentationTestCase {
     assertTrue(resourcesIdle.get());
 
     final CountDownLatch latch2 = new CountDownLatch(1);
-    registry.register(r3);
+    registry.registerResources(Lists.newArrayList(r3));
     handler.post(new Runnable() {
       @Override
       public void run() {
@@ -90,7 +209,7 @@ public class IdlingResourceRegistryTest extends InstrumentationTestCase {
   @LargeTest
   public void testAllResourcesAreIdle_RepeatingToIdleTransitions() throws InterruptedException {
     OnDemandIdlingResource r1 = new OnDemandIdlingResource("r1");
-    registry.register(r1);
+    registry.registerResources(Lists.newArrayList(r1));
     final AtomicBoolean resourcesIdle = new AtomicBoolean(false);
     for (int i = 1; i <= 3; i++) {
       final CountDownLatch latch = new CountDownLatch(1);
@@ -130,9 +249,7 @@ public class IdlingResourceRegistryTest extends InstrumentationTestCase {
     OnDemandIdlingResource r1 = new OnDemandIdlingResource("r1");
     OnDemandIdlingResource r2 = new OnDemandIdlingResource("r2");
     OnDemandIdlingResource r3 = new OnDemandIdlingResource("r3");
-    registry.register(r1);
-    registry.register(r2);
-    registry.register(r3);
+    registry.registerResources(Lists.newArrayList(r1, r2, r3));
 
     handler.post(new Runnable() {
 
@@ -188,9 +305,7 @@ public class IdlingResourceRegistryTest extends InstrumentationTestCase {
     OnDemandIdlingResource r1 = new OnDemandIdlingResource("r1");
     OnDemandIdlingResource r2 = new OnDemandIdlingResource("r2");
     OnDemandIdlingResource r3 = new OnDemandIdlingResource("r3");
-    registry.register(r1);
-    registry.register(r2);
-    registry.register(r3);
+    registry.registerResources(Lists.newArrayList(r1, r2, r3));
 
     handler.post(new Runnable() {
       @Override

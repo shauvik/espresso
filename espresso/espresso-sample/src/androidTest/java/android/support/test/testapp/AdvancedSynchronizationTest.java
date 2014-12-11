@@ -18,6 +18,7 @@ package android.support.test.testapp;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.registerIdlingResources;
+import static android.support.test.espresso.Espresso.unregisterIdlingResources;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
@@ -36,6 +37,7 @@ import android.test.suitebuilder.annotation.LargeTest;
  */
 @LargeTest
 public class AdvancedSynchronizationTest extends ActivityInstrumentationTestCase2<SyncActivity> {
+  private CountingIdlingResource countingResource;
 
   private class DecoratedHelloWorldServer implements HelloWorldServer {
     private final HelloWorldServer realHelloWorldServer;
@@ -74,9 +76,15 @@ public class AdvancedSynchronizationTest extends ActivityInstrumentationTestCase
     HelloWorldServer realServer = activity.getHelloWorldServer();
     // Here, we use CountingIdlingResource - a common convenience class - to track the idle state of
     // the server. You could also do this yourself, by implementing the IdlingResource interface.
-    CountingIdlingResource countingResource = new CountingIdlingResource("HelloWorldServerCalls");
+    countingResource = new CountingIdlingResource("HelloWorldServerCalls");
     activity.setHelloWorldServer(new DecoratedHelloWorldServer(realServer, countingResource));
-    registerIdlingResources(countingResource);
+    assertTrue(registerIdlingResources(countingResource));
+  }
+
+  @Override
+  public void tearDown() throws Exception {
+    assertTrue(unregisterIdlingResources(countingResource));
+    super.tearDown();
   }
 
   public void testCountingIdlingResource() {

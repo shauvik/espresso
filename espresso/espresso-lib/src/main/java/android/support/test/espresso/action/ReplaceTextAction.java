@@ -18,6 +18,7 @@ package android.support.test.espresso.action;
 
 import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.Matchers.allOf;
 
 import android.support.test.espresso.UiController;
@@ -29,9 +30,16 @@ import android.widget.EditText;
 import org.hamcrest.Matcher;
 
 /**
- * Clears view text by setting {@link EditText}s text property to "".
+ * Replaces view text by setting {@link EditText}s text property to given String.
  */
-public final class ClearTextAction implements ViewAction {
+public final class ReplaceTextAction implements ViewAction {
+  private final String stringToBeSet;
+
+  public ReplaceTextAction(String value) {
+    checkNotNull(value);
+    this.stringToBeSet = value;
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public Matcher<View> getConstraints() {
@@ -40,11 +48,11 @@ public final class ClearTextAction implements ViewAction {
 
   @Override
   public void perform(UiController uiController, View view) {
-    ((EditText) view).setText("");
+    ((EditText) view).setText(stringToBeSet);
   }
 
   @Override
   public String getDescription() {
-    return "clear text";
+    return "replace text";
   }
 }

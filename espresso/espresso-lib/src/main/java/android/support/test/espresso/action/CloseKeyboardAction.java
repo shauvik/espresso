@@ -16,6 +16,7 @@
 
 package android.support.test.espresso.action;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.hamcrest.Matchers.anything;
 
@@ -129,6 +130,10 @@ public final class CloseKeyboardAction implements ViewAction {
       resumedActivities =
           ActivityLifecycleMonitorRegistry.getInstance().getActivitiesInStage(Stage.RESUMED);
     }
+    checkState(resumedActivities.size() == 1,
+        "More than one activity is in RESUMED stage."
+        + " There may have been an error during the activity creation/startup process,"
+        + " please check your logs.");
     Activity topActivity = getOnlyElement(resumedActivities);
     return topActivity;
   }

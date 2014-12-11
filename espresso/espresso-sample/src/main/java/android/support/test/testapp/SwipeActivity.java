@@ -32,6 +32,7 @@ public class SwipeActivity extends Activity {
 
     ((ViewPager) findViewById(R.id.small_pager)).setAdapter(new SimplePagerAdapter());
     ((ViewPager) findViewById(R.id.overlapped_pager)).setAdapter(new SimplePagerAdapter());
+    ((VerticalViewPager) findViewById(R.id.vertical_pager)).setAdapter(new SimplePagerAdapter());
   }
 
 }

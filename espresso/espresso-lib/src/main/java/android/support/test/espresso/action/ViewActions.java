@@ -17,10 +17,17 @@
 package android.support.test.espresso.action;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.is;
 
 import android.support.test.espresso.ViewAction;
 
+import android.net.Uri;
 import android.view.KeyEvent;
+
+import org.hamcrest.Matcher;
+
+import javax.annotation.Nonnull;
 
 /**
  * A collection of common {@link ViewActions}.
@@ -28,6 +35,13 @@ import android.view.KeyEvent;
 public final class ViewActions {
 
   private ViewActions() {}
+
+  /**
+   * The distance of a swipe's start position from the view's edge, in terms of the view's length.
+   * We do not start the swipe exactly on the view's edge, but somewhat more inward, since swiping
+   * from the exact edge may behave in an unexpected way (e.g. may open a navigation drawer).
+   */
+  private static final float EDGE_FUZZ_FACTOR = 0.083f;
 
   /**
    * Returns an action that clears text on the view.<br>
@@ -38,7 +52,7 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction clearText() {
-    return new ClearTextAction();
+    return new ReplaceTextAction("");
   }
 
   /**
@@ -50,7 +64,7 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction click() {
-    return new GeneralClickAction(Tap.SINGLE, GeneralLocation.CENTER, Press.FINGER);
+    return new GeneralClickAction(Tap.SINGLE, GeneralLocation.VISIBLE_CENTER, Press.FINGER);
   }
 
   /**
@@ -80,7 +94,7 @@ public final class ViewActions {
 
   /**
    * Returns an action that performs a swipe right-to-left across the vertical center of the
-   * view.<br>
+   * view. The swipe doesn't start at the very edge of the view, but is a bit offset.<br>
    * <br>
    * View constraints:
    * <ul>
@@ -88,13 +102,14 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction swipeLeft() {
-    return new GeneralSwipeAction(Swipe.FAST, GeneralLocation.CENTER_RIGHT,
+    return new GeneralSwipeAction(Swipe.FAST,
+        GeneralLocation.translate(GeneralLocation.CENTER_RIGHT, -EDGE_FUZZ_FACTOR, 0),
         GeneralLocation.CENTER_LEFT, Press.FINGER);
   }
 
   /**
    * Returns an action that performs a swipe left-to-right across the vertical center of the
-   * view.<br>
+   * view. The swipe doesn't start at the very edge of the view, but is a bit offset.<br>
    * <br>
    * View constraints:
    * <ul>
@@ -102,8 +117,39 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction swipeRight() {
-    return new GeneralSwipeAction(Swipe.FAST, GeneralLocation.CENTER_LEFT,
+    return new GeneralSwipeAction(Swipe.FAST,
+        GeneralLocation.translate(GeneralLocation.CENTER_LEFT, EDGE_FUZZ_FACTOR, 0),
         GeneralLocation.CENTER_RIGHT, Press.FINGER);
+  }
+
+  /**
+   * Returns an action that performs a swipe top-to-bottom across the horizontal center of the view.
+   * The swipe doesn't start at the very edge of the view, but has a bit of offset.<br>
+   * <br>
+   * View constraints:
+   * <ul>
+   * <li>must be displayed on screen
+   * <ul>
+   */
+  public static ViewAction swipeDown() {
+    return new GeneralSwipeAction(Swipe.FAST,
+        GeneralLocation.translate(GeneralLocation.TOP_CENTER, 0, EDGE_FUZZ_FACTOR),
+        GeneralLocation.BOTTOM_CENTER, Press.FINGER);
+  }
+
+  /**
+   * Returns an action that performs a swipe bottom-to-top across the horizontal center of the view.
+   * The swipe doesn't start at the very edge of the view, but has a bit of offset.<br>
+   * <br>
+   * View constraints:
+   * <ul>
+   * <li>must be displayed on screen
+   * <ul>
+   */
+  public static ViewAction swipeUp() {
+    return new GeneralSwipeAction(Swipe.FAST,
+        GeneralLocation.translate(GeneralLocation.BOTTOM_CENTER, 0, -EDGE_FUZZ_FACTOR),
+        GeneralLocation.TOP_CENTER, Press.FINGER);
   }
 
   /**
@@ -207,7 +253,7 @@ public final class ViewActions {
   /**
    * Returns an action that selects the view (by clicking on it) and types the provided string into
    * the view. Appending a \n to the end of the string translates to a ENTER key event. Note: this
-   * method performs a tap on the view before typing to force the view into focus, if the view 
+   * method performs a tap on the view before typing to force the view into focus, if the view
    * already contains text this tap may place the cursor at an arbitrary position within the text.
    * <br>
    * <br>
@@ -219,5 +265,70 @@ public final class ViewActions {
    */
   public static ViewAction typeText(String stringToBeTyped) {
     return new TypeTextAction(stringToBeTyped);
+  }
+
+  /**
+   * Returns an action that updates the text attribute of a view.
+   * <br>
+   * <br>
+   * View preconditions:
+   * <ul>
+   * <li>must be displayed on screen
+   * <li>must be assignable from EditText
+   * <ul>
+   */
+  public static ViewAction replaceText(@Nonnull String stringToBeSet) {
+    return new ReplaceTextAction(stringToBeSet);
+  }
+
+  /**
+   * Same as {@code openLinkWithText(Matcher<String> linkTextMatcher)}, but uses
+   * {@code is(linkText)} as the linkTextMatcher.
+   */
+  public static ViewAction openLinkWithText(String linkText) {
+    return openLinkWithText(is(linkText));
+  }
+
+  /**
+   * Same as {@code openLink(Matcher<String> linkTextMatcher, Matcher<Uri> uriMatcher)}, but uses
+   * {@code any(Uri.class)} as the uriMatcher.
+   */
+  public static ViewAction openLinkWithText(Matcher<String> linkTextMatcher) {
+    return openLink(linkTextMatcher, any(Uri.class));
+  }
+
+  /**
+   * Same as {@code openLinkWithUri(Matcher<Uri> uriMatcher)}, but uses {@code is(uri)} as the
+   * uriMatcher.
+   */
+  public static ViewAction openLinkWithUri(String uri) {
+    return openLinkWithUri(is(Uri.parse(uri)));
+  }
+
+  /**
+   * Same as {@code openLink(Matcher<String> linkTextMatcher, Matcher<Uri> uriMatcher)}, but uses
+   * {@code any(String.class)} as the linkTextMatcher.
+   */
+  public static ViewAction openLinkWithUri(Matcher<Uri> uriMatcher) {
+    return openLink(any(String.class), uriMatcher);
+  }
+
+  /**
+   * Returns an action that opens a link matching the given link text and uri matchers. The action
+   * is performed by invoking the link's onClick method (as opposed to actually issuing a click on
+   * the screen).
+   * <br>
+   * <br>
+   * View preconditions:
+   * <ul>
+   * <li>must be displayed on screen
+   * <li>must be assignable from TextView
+   * <li>must have links
+   * <ul>
+   */
+  public static ViewAction openLink(Matcher<String> linkTextMatcher, Matcher<Uri> uriMatcher) {
+    checkNotNull(linkTextMatcher);
+    checkNotNull(uriMatcher);
+    return new OpenLinkAction(linkTextMatcher, uriMatcher);
   }
 }

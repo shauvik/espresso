@@ -37,6 +37,7 @@ import android.view.View;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
@@ -52,7 +53,7 @@ public class ViewInteractionTest extends AndroidTestCase {
   @Mock
   private UiController mockUiController;
 
-  
+
   private FailureHandler failureHandler;
   private Executor testExecutor = MoreExecutors.sameThreadExecutor();
 
@@ -198,11 +199,27 @@ public class ViewInteractionTest extends AndroidTestCase {
     verify(mockAssertion).check(null, noViewException);
   }
 
+  public void testFailureHandler() {
+    RuntimeException exceptionToRaise = new RuntimeException();
+    when(mockViewFinder.getView()).thenReturn(targetView);
+    doThrow(exceptionToRaise)
+        .when(mockAction)
+        .perform(mockUiController, targetView);
+    initInteraction();
+    FailureHandler customFailureHandler = Mockito.mock(FailureHandler.class);
+    testInteraction.withFailureHandler(customFailureHandler).perform(mockAction);
+    verify(mockAction).perform(mockUiController, targetView);
+    verify(customFailureHandler).handle(exceptionToRaise, viewMatcher);
+  }
+
   private void initInteraction() {
     when(mockAction.getConstraints()).thenReturn(actionConstraint);
 
-    testInteraction = new ViewInteraction(mockUiController, mockViewFinder, testExecutor,
-        failureHandler, viewMatcher, rootMatcherRef);
-
+    testInteraction = new ViewInteraction(mockUiController,
+        mockViewFinder,
+        testExecutor,
+        failureHandler,
+        viewMatcher,
+        rootMatcherRef);
   }
 }

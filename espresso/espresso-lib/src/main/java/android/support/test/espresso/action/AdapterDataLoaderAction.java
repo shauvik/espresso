@@ -49,7 +49,7 @@ public final class AdapterDataLoaderAction implements ViewAction {
   private final Optional<Integer> atPosition;
   private AdapterViewProtocol.AdaptedData adaptedData;
   private boolean performed = false;
-  private Object dataLock = new Object();
+  private final Object dataLock = new Object();
 
   public AdapterDataLoaderAction(Matcher<Object> dataToLoadMatcher, Optional<Integer> atPosition,
       AdapterViewProtocol adapterViewProtocol) {
@@ -80,7 +80,7 @@ public final class AdapterDataLoaderAction implements ViewAction {
     for (AdapterViewProtocol.AdaptedData data : adapterViewProtocol.getDataInAdapterView(
         adapterView)) {
 
-      if (dataToLoadMatcher.matches(data.data)) {
+      if (dataToLoadMatcher.matches(data.getData())) {
         matchedDataItems.add(data);
       }
     }

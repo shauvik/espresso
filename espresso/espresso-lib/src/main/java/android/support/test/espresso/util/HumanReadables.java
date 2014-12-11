@@ -28,6 +28,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.os.Build;
 import android.util.Printer;
 import android.util.StringBuilderPrinter;
@@ -90,6 +91,65 @@ public final class HumanReadables {
         }));
 
     return errorMessage.toString();
+  }
+
+  public static String describe(Cursor c) {
+    if (c.isBeforeFirst()) {
+      return "Cursor positioned before first element.";
+    } else if (c.isAfterLast()) {
+      return "Cursor positioned after last element.";
+    }
+    StringBuilder result = new StringBuilder("Row ")
+        .append(c.getPosition())
+        .append(": {");
+    String[] columns = c.getColumnNames();
+    for (int i = 0; i < columns.length; i++) {
+      result.append(columns[i])
+          .append(":");
+      int type = Cursor.FIELD_TYPE_STRING;
+      if (Build.VERSION.SDK_INT > 10) {
+        type = c.getType(i);
+      }
+      switch (type) {
+        case Cursor.FIELD_TYPE_STRING:
+          result.append("\"")
+              .append(c.getString(i))
+              .append("\"");
+          break;
+        case Cursor.FIELD_TYPE_INTEGER:
+          result.append(c.getLong(i));
+          break;
+        case Cursor.FIELD_TYPE_FLOAT:
+          result.append(c.getDouble(i));
+          result.append("f");
+          break;
+        case Cursor.FIELD_TYPE_NULL:
+          result.append("null");
+          break;
+        case Cursor.FIELD_TYPE_BLOB:
+          byte[] val = c.getBlob(i);
+          result.append("[");
+          for (int j = 0; j < 5 && j < val.length; j++) {
+            result.append(val[j]);
+            result.append(",");
+          }
+          if (5 < val.length) {
+            result.append("... (")
+                .append(val.length - 5)
+                .append(" more elements)");
+          }
+          result.append("]");
+          break;
+        default:
+          result.append("\"")
+              .append(c.getString(i))
+              .append("\"");
+          break;
+      }
+      result.append(", ");
+    }
+    result.append("}");
+    return result.toString();
   }
 
   /**
@@ -189,6 +249,7 @@ public final class HumanReadables {
 
     helper.add("input-type", textBox.getInputType());
     helper.add("ime-target", textBox.isInputMethodTarget());
+    helper.add("has-links", textBox.getUrls().length > 0);
   }
 
   private static void innerDescribe(Checkable checkable, ToStringHelper helper) {

@@ -288,7 +288,13 @@
             android:hint="@string/pick_water"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
-
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spanned"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/textWithLinks"
+            android:autoLink = "web" />
         <!-- Keep this on bottom to test scrolling to views that are not showing. -->
         <!-- Huge top margin to guarantee this being out of view on large screen layout. -->
 

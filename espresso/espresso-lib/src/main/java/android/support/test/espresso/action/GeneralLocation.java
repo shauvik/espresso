@@ -16,6 +16,7 @@
 
 package android.support.test.espresso.action;
 
+import android.graphics.Rect;
 import android.view.View;
 
 /**
@@ -76,13 +77,48 @@ public enum GeneralLocation implements CoordinatesProvider {
     public float[] calculateCoordinates(View view) {
       return getCoordinates(view, Position.END, Position.END);
     }
+  },
+  VISIBLE_CENTER {
+  @Override
+    public float[] calculateCoordinates(View view) {
+      return getCoordinatesOfVisiblePart(view, Position.MIDDLE, Position.MIDDLE);
+    }
   };
+
+  /**
+   * Translates the given coordinates by the given distances. The distances are given in term
+   * of the view's size -- 1.0 means to translate by an amount equivalent to the view's length.
+   */
+  static CoordinatesProvider translate(final CoordinatesProvider coords,
+      final float dx, final float dy) {
+    return new CoordinatesProvider() {
+      @Override
+      public float[] calculateCoordinates(View view) {
+        float xy[] = coords.calculateCoordinates(view);
+        xy[0] += dx * view.getWidth();
+        xy[1] += dy * view.getHeight();
+        return xy;
+      }
+    };
+  }
 
   private static float[] getCoordinates(View view, Position vertical, Position horizontal) {
     final int[] xy = new int[2];
     view.getLocationOnScreen(xy);
     final float x = horizontal.getPosition(xy[0], view.getWidth());
     final float y = vertical.getPosition(xy[1], view.getHeight());
+    float[] coordinates = {x, y};
+    return coordinates;
+  }
+
+  private static float[] getCoordinatesOfVisiblePart(View view, Position vertical,
+      Position horizontal) {
+    final int[] xy = new int[2];
+    view.getLocationOnScreen(xy);
+    Rect visibleParts = new Rect();
+    view.getGlobalVisibleRect(visibleParts);
+    final float x = horizontal.getPosition(xy[0], visibleParts.width());
+    final float y = vertical.getPosition(xy[1], visibleParts.height());
     float[] coordinates = {x, y};
     return coordinates;
   }
@@ -97,13 +133,14 @@ public enum GeneralLocation implements CoordinatesProvider {
     MIDDLE {
     @Override
       public float getPosition(int viewPos, int viewLength) {
-        return viewPos + (viewLength / 2.0f);
+        // Midpoint between the leftmost and rightmost pixel (position viewLength - 1).
+        return viewPos + (viewLength - 1) / 2.0f;
       }
     },
     END {
     @Override
       public float getPosition(int viewPos, int viewLength) {
-        return viewPos + viewLength;
+        return viewPos + viewLength - 1;
       }
     };
 

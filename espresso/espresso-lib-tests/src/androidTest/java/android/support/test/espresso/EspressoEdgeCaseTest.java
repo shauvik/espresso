@@ -61,14 +61,13 @@ public class EspressoEdgeCaseTest extends ActivityInstrumentationTestCase2<SendA
   };
 
   private Handler mainHandler;
-  private OneShotResource oneShotResource;
+  private final OneShotResource oneShotResource = new OneShotResource();
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
     getActivity();
     mainHandler = new Handler(Looper.getMainLooper());
-    oneShotResource = new OneShotResource();
   }
 
   @Override
@@ -285,7 +284,7 @@ public class EspressoEdgeCaseTest extends ActivityInstrumentationTestCase2<SendA
 
     @Override
     public String getName() {
-      return "TestOneShotResource_" + counter;
+      return "TestOneShotResource_" + instance;
     }
 
     public void setIdle(boolean idle) {

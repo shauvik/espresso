@@ -7,3 +7,7 @@ bin/
 *.settings
 *.pyc
 .DS_Store
+.idea
+*.iml
+.gradle
+build

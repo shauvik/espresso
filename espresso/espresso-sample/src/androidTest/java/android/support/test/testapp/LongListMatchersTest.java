@@ -38,8 +38,16 @@ public final class LongListMatchersTest extends ActivityUnitTestCase<LongListAct
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    startActivity(new Intent(getInstrumentation().getTargetContext(), LongListActivity.class),
-        null, null);
+    // AndroidJUnitRunner does not call Looper.prepare anymore. Hence Instrumentation thread is no
+    // longer a Looper! To not run into an exception, we need to ensure that the Handler is created
+    // on the Ui thread.
+    getInstrumentation().runOnMainSync(new Runnable() {
+      @Override
+      public void run() {
+        startActivity(new Intent(getInstrumentation().getTargetContext(), LongListActivity.class),
+            null, null);
+      }
+    });
   }
 
   public void testWithContent() {

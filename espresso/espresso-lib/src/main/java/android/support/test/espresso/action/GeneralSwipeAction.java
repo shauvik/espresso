@@ -76,8 +76,11 @@ public final class GeneralSwipeAction implements ViewAction {
             .build();
       }
 
+      int duration = ViewConfiguration.getPressedStateDuration();
       // ensures that all work enqueued to process the swipe has been run.
-      uiController.loopMainThreadForAtLeast(ViewConfiguration.getPressedStateDuration());
+      if (duration > 0) {
+        uiController.loopMainThreadForAtLeast(duration);
+      }
     }
 
     if (status == Swiper.Status.FAILURE) {

@@ -45,7 +45,6 @@ import javax.inject.Inject;
  * asserts are performed on the UI thread (thus ensuring sequential execution). The same goes for
  * retrieval of views (this is done to ensure that view state is "fresh" prior to execution of each
  * operation).
- * <p>
  */
 public final class ViewInteraction {
 
@@ -54,7 +53,7 @@ public final class ViewInteraction {
   private final UiController uiController;
   private final ViewFinder viewFinder;
   private final Executor mainThreadExecutor;
-  private final FailureHandler failureHandler;
+  private volatile FailureHandler failureHandler;
   private final Matcher<View> viewMatcher;
   private final AtomicReference<Matcher<Root>> rootMatcherRef;
 
@@ -90,6 +89,17 @@ public final class ViewInteraction {
     return this;
   }
 
+  /**
+   * Replaces the default failure handler (@see Espresso.setFailureHandler) with a custom
+   * failurehandler for this particular interaction.
+   *
+   * @param failureHandler a non-null failurehandler to use to report failures.
+   * @return this interaction for further perform/verification calls.
+   */
+  public ViewInteraction withFailureHandler(FailureHandler failureHandler) {
+    this.failureHandler = checkNotNull(failureHandler);
+    return this;
+  }
 
   /**
    * Makes this ViewInteraction scoped to the root selected by the given root matcher.
@@ -111,8 +121,7 @@ public final class ViewInteraction {
         Log.i(TAG, String.format(
             "Performing '%s' action on view %s", viewAction.getDescription(), viewMatcher));
         if (!constraints.matches(targetView)) {
-          // TODO(valeraz): update this to describeMismatch once hamcrest is updated to new
-          // version in google3 (we are waiting for version 1.4 to avoid issues with generics)
+          // TODO(user): update this to describeMismatch once hamcrest is updated to new
           StringDescription stringDescription = new StringDescription(new StringBuilder(
               "Action will not be performed because the target view "
               + "does not match one or more of the following constraints:\n"));
@@ -141,7 +150,7 @@ public final class ViewInteraction {
   /**
    * Checks the given {@link ViewAssertion} on the the view selected by the current view matcher.
    *
-   * @param viewAssert the assertion to perform.
+   * @param viewAssert the assertion to check.
    * @return this interaction for further perform/verification calls.
    */
   public ViewInteraction check(final ViewAssertion viewAssert) {
@@ -164,13 +173,14 @@ public final class ViewInteraction {
     return this;
   }
 
+
   private void runSynchronouslyOnUiThread(Runnable action) {
     FutureTask<Void> uiTask = new FutureTask<Void>(action, null);
     mainThreadExecutor.execute(uiTask);
     try {
       uiTask.get();
     } catch (InterruptedException ie) {
-      throw new RuntimeException("Interrupted  running UI task", ie);
+      throw new RuntimeException("Interrupted running UI task", ie);
     } catch (ExecutionException ee) {
       failureHandler.handle(ee.getCause(), viewMatcher);
     }

@@ -116,9 +116,7 @@ android.libraryVariants.all { variant ->
 
     // Fix the dependency chain so the output jars will be available at the right time.
     project.tasks.getByName("$jarJarTaskName").dependsOn classesJarTask, configurations.provided
-    variant.outputs.each { output ->
-        output.packageLibrary.dependsOn "$jarJarTaskName"
-    }
+    variant.outputs.get(0).packageLibrary.dependsOn "$jarJarTaskName"
 }
 
 apply from: "../../publish.gradle"

@@ -14,11 +14,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="android.support.test.testapp">
 
-    <uses-sdk android:minSdkVersion = "8" android:targetSdkVersion= "16"/>
+    <uses-sdk android:minSdkVersion = "8" android:targetSdkVersion= "21"/>
 
     <application android:label="UI Test App" android:icon="@drawable/ic_launcher" >
         <activity android:name="MainActivity" android:label="UI Test App">
@@ -26,21 +25,40 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="test_intent_filter.google.com"
+                    android:scheme="http" />
+            </intent-filter>
         </activity>
         <activity android:name="ActionBarTestActivity" android:label="actionbar test activity" android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
         <activity android:name="SimpleActivity" android:label="simple activity"/>
         <activity android:name="SendActivity" android:label="send activity"/>
+        <activity android:name="PickersActivity" android:label="pickers activity"/>
         <activity android:name="DisplayActivity" android:label="display activity"/>
         <activity android:name="DrawerActivity" android:label="drawer activity" android:theme="@style/Theme.AppCompat.Light"/>
         <activity android:name="GestureActivity" android:label="gesture activity" android:exported="true"/>
         <activity android:name="ScrollActivity" android:label="scroll activity" android:exported="true"/>
         <activity android:name="LongListActivity" android:label="list activity" android:exported="true"/>
+        <activity android:name="CursorAdapterActivity" android:label="cursor adapter activity"/>
         <activity android:name="MenuActivity" android:label="menu activity"/>
         <activity android:name="FragmentStack" android:label="fragment stack activity"/>
         <activity android:name="SyncActivity" android:label="sync activity"/>
         <activity android:name="SimpleWebViewActivity" android:label="web view"/>
+        <activity android:name="WebFormActivity" android:label="web form"/>
         <activity android:name="SwipeActivity" android:label="swipe activity"/>
         <activity android:name="ViewPagerActivity" android:label="view pager activity"/>
+        <activity android:name="RecyclerViewActivity" android:label="recyclerview activity" />
+        <activity android:name="VerticalViewPagerActivity" android:label="vertical view pager activity"/>
+        <activity android:name="LargeViewActivity" android:label="large view activity"/>
+        <activity android:name="PaddingActivity" android:label="padding activity"/>
+        <activity android:name="ActionBarSearchActivity" android:label="action bar with v7 search" android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
+        <activity android:name="LayoutIssuesActivity" android:label="layout issues activity"/>
+        <activity android:name="ToolbarActivity" android:label="tool bar activity" android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <activity android:name="TaskStackActivity" android:label="task stack activity"/>
     </application>
 
     <uses-permission android:name="android.permission.CALL_PHONE"></uses-permission>

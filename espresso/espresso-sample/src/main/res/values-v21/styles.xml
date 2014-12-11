@@ -15,13 +15,8 @@
   ~ limitations under the License.
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="android.support.test.espresso" >
-
-    <uses-sdk
-        android:minSdkVersion="7"
-        android:targetSdkVersion="17" />
-
-    <application android:label="Espresso" />
-
-</manifest>
+<resources>
+    <style name="TabIndicator">
+        <item name="android:theme">@style/ActionBarThemeOverlay</item>
+    </style>
+</resources>

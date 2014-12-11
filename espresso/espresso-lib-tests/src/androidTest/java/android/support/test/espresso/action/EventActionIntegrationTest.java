@@ -29,7 +29,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 import android.support.test.filters.SdkSuppress;
-
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.matcher.ViewMatchers;
@@ -96,7 +95,7 @@ public class EventActionIntegrationTest extends ActivityInstrumentationTestCase2
         .check(matches(isDisplayed()));
   }
 
-  @SdkSuppress(minSdkVersion = 14)
+  @SdkSuppress(minSdkVersion=13)
   public void testLongClick() {
     onView(withText(is(getActivity().getString(R.string.text_long_click))))
         .check(matches(not(isDisplayed())));
@@ -106,7 +105,7 @@ public class EventActionIntegrationTest extends ActivityInstrumentationTestCase2
         .check(matches(isDisplayed()));
   }
 
-    @SdkSuppress(minSdkVersion = 14)
+  @SdkSuppress(minSdkVersion=13)
   public void testDoubleClick() {
     onView(withText(is(getActivity().getString(R.string.text_double_click))))
         .check(matches(not(ViewMatchers.isDisplayed())));

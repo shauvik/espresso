@@ -28,7 +28,9 @@ import dagger.Module;
 import dagger.Provides;
 
 import org.hamcrest.Matcher;
+
 import java.util.concurrent.atomic.AtomicReference;
+
 
 /**
  * Adds the user interaction scope to the Espresso graph.

@@ -71,13 +71,18 @@ public class UiControllerImplIntegrationTest
       strat.initialize();
       injector = new EventInjector(strat);
     }
+    Recycler recycler = Recycler.DEFAULT_RECYCLER;
+    if (Build.VERSION.SDK_INT > 20) {
+      recycler = new UncheckedRecycler();
+    }
     uiController = new UiControllerImpl(
         injector,
         new AsyncTaskPoolMonitor(new ThreadPoolExecutorExtractor(
             Looper.getMainLooper()).getAsyncTaskThreadPool()),
         Optional.<AsyncTaskPoolMonitor>absent(),
         new IdlingResourceRegistry(Looper.getMainLooper()),
-        Looper.getMainLooper());
+        Looper.getMainLooper(),
+        recycler);
   }
 
 

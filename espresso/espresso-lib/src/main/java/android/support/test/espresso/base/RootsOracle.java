@@ -34,7 +34,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 /**
@@ -51,7 +50,7 @@ import javax.inject.Singleton;
  * Obviously, you need to be on the main thread to use this.
  */
 @Singleton
-final class RootsOracle implements Provider<List<Root>> {
+final class RootsOracle implements ActiveRootLister {
 
   private static final String TAG = RootsOracle.class.getSimpleName();
   private static final String WINDOW_MANAGER_IMPL_CLAZZ =
@@ -76,7 +75,7 @@ final class RootsOracle implements Provider<List<Root>> {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<Root> get() {
+  public List<Root> listActiveRoots() {
     checkState(mainLooper.equals(Looper.myLooper()), "must be called on main thread.");
 
     if (!initialized) {

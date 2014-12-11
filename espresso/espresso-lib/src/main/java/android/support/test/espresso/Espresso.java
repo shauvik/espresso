@@ -31,6 +31,7 @@ import android.support.test.espresso.action.ViewActions;
 import android.support.test.espresso.base.BaseLayerModule;
 import android.support.test.espresso.base.IdlingResourceRegistry;
 import android.support.test.espresso.util.TreeIterables;
+import com.google.common.collect.ImmutableList;
 
 import android.content.Context;
 import android.os.Build;
@@ -41,6 +42,8 @@ import android.view.ViewConfiguration;
 import dagger.ObjectGraph;
 
 import org.hamcrest.Matcher;
+
+import java.util.List;
 
 /**
  * Entry point to the Espresso framework. Test authors can initiate testing by using one of the on*
@@ -55,7 +58,7 @@ public final class Espresso {
   private Espresso() {}
 
   /**
-   * Creates an {@link PartiallyScopedViewInteraction} for a given view. Note: the view has
+   * Creates a {@link ViewInteraction} for a given view. Note: the view has
    * to be part of the  view hierarchy. This may not be the case if it is rendered as part of
    * an AdapterView (e.g. ListView). If this is the case, use Espresso.onData to load the view
    * first.
@@ -93,10 +96,10 @@ public final class Espresso {
    * Registers a Looper for idle checking with the framework. This is intended for use with
    * non-UI thread loopers.
    *
-   * This method allows the caller to consider Thread.State.WAIT to be 'idle'.
+   * <p>This method allows the caller to consider Thread.State.WAIT to be 'idle'.
    *
-   * This is useful in the case where a looper is sending a message to the UI thread synchronously
-   * through a wait/notify mechanism.
+   * <p>This is useful in the case where a looper is sending a message to the UI thread
+   * synchronously through a wait/notify mechanism.
    *
    * @throws IllegalArgumentException if looper is the main looper.
    */
@@ -108,15 +111,33 @@ public final class Espresso {
    * Registers one or more {@link IdlingResource}s with the framework. It is expected, although not
    * strictly required, that this method will be called at test setup time prior to any interaction
    * with the application under test. When registering more than one resource, ensure that each has
-   * a unique name.
+   * a unique name. If any of the given resources is already registered, a warning is logged.
+   *
+   * @return @{code true} if all resources were successfully registered
    */
-  public static void registerIdlingResources(IdlingResource... resources) {
+  public static boolean registerIdlingResources(IdlingResource... resources) {
     checkNotNull(resources);
     IdlingResourceRegistry registry = espressoGraph().get(IdlingResourceRegistry.class);
-    for (IdlingResource resource : resources) {
-      checkNotNull(resource.getName(), "IdlingResource.getName() should not be null");
-      registry.register(resource);
-    }
+    return registry.registerResources(ImmutableList.copyOf(resources));
+  }
+
+  /**
+   * Unregisters one or more {@link IdlingResource}s. If any of the given resources are not already
+   * registered, a warning is logged.
+   *
+   * @return @{code true} if all resources were successfully unregistered
+   */
+  public static boolean unregisterIdlingResources(IdlingResource... resources) {
+    checkNotNull(resources);
+    IdlingResourceRegistry registry = espressoGraph().get(IdlingResourceRegistry.class);
+    return registry.unregisterResources(ImmutableList.copyOf(resources));
+  }
+
+  /**
+   * Returns a list of all currently registered {@link IdlingResource}s.
+   */
+  public static List<IdlingResource> getIdlingResources() {
+    return espressoGraph().get(IdlingResourceRegistry.class).getResources();
   }
 
   /**
@@ -148,11 +169,11 @@ public final class Espresso {
   /**
    * Opens the overflow menu displayed in the contextual options of an ActionMode.
    *
-   * This works with both native and SherlockActionBar action modes.
+   * <p>This works with both native and SherlockActionBar action modes.
    *
-   * Note the significant difference in UX between ActionMode and ActionBar overflows - ActionMode
-   * will always present an overflow icon and that icon only responds to clicks. The menu button
-   * (if present) has no impact on it.
+   * <p>Note the significant difference in UX between ActionMode and ActionBar overflows -
+   * ActionMode will always present an overflow icon and that icon only responds to clicks.
+   * The menu button (if present) has no impact on it.
    */
   @SuppressWarnings("unchecked")
   public static void openContextualActionModeOverflowMenu() {
@@ -176,9 +197,9 @@ public final class Espresso {
   /**
    * Opens the overflow menu displayed within an ActionBar.
    *
-   * This works with both native and SherlockActionBar ActionBars.
+   * <p>This works with both native and SherlockActionBar ActionBars.
    *
-   * Note the significant differences of UX between ActionMode and ActionBars with respect to
+   * <p>Note the significant differences of UX between ActionMode and ActionBars with respect to
    * overflows. If a hardware menu key is present, the overflow icon is never displayed in
    * ActionBars and can only be interacted with via menu key presses.
    */

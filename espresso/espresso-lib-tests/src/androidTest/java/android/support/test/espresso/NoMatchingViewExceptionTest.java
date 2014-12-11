@@ -18,7 +18,7 @@ package android.support.test.espresso;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-
+import static org.hamcrest.Matchers.equalTo;
 import android.test.AndroidTestCase;
 import android.view.View;
 
@@ -53,6 +53,13 @@ public class NoMatchingViewExceptionTest extends AndroidTestCase {
 
     assertThat("missing root element" + exceptionMessage, exceptionMessage,
         containsString("{id=0,"));
+  }
+
+  public void testException_MatcherDescriptionReturnsCorrectValue () {
+    final NoMatchingViewException noMatchingViewExcpetion = createException();
+    final String viewMatcherDescription = noMatchingViewExcpetion.getViewMatcherDescription();
+
+    assertThat("wrong view matcher description", viewMatcherDescription, equalTo("null"));
   }
 
   private NoMatchingViewException createException() {

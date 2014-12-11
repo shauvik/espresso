@@ -24,13 +24,12 @@ import static android.support.test.espresso.action.ViewActions.scrollTo;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.action.ViewActions.typeTextIntoFocusedView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.RootMatchers.withDecorView;
+import static android.support.test.espresso.matcher.RootMatchers.isPlatformPopup;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 
 import android.os.Build;
 import android.test.ActivityInstrumentationTestCase2;
@@ -93,7 +92,7 @@ public class MultipleWindowTest extends ActivityInstrumentationTestCase2<SendAct
     // Now we may want to explicitly tap on a completion. We must override Espresso's
     // default window selection heuristic with our own.
     onView(withText("South China Sea"))
-        .inRoot(withDecorView(not(is(getActivity().getWindow().getDecorView()))))
+        .inRoot(isPlatformPopup())
         .perform(click());
 
     // And by clicking on the auto complete term, the text should be filled in.
@@ -110,7 +109,7 @@ public class MultipleWindowTest extends ActivityInstrumentationTestCase2<SendAct
     // Which is useful because some of the completions may not be part of the View Hierarchy
     // unless you scroll around the list.
     onData(allOf(instanceOf(String.class), is("Baltic Sea")))
-        .inRoot(withDecorView(not(is(getActivity().getWindow().getDecorView()))))
+        .inRoot(isPlatformPopup())
         .perform(click());
 
     onView(withId(R.id.auto_complete_text_view))

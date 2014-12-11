@@ -20,10 +20,10 @@ import android.support.test.runner.lifecycle.ActivityLifecycleMonitor;
 import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.FailureHandler;
-import android.support.test.espresso.Root;
 import android.support.test.espresso.UiController;
 import com.google.common.base.Optional;
 
+import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -31,7 +31,6 @@ import android.os.Looper;
 import dagger.Module;
 import dagger.Provides;
 
-import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicReference;
@@ -40,10 +39,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Dagger module for creating the implementation classes within the base package.
+ * Dagger module for creating the implementation classes within the base
+package.
  */
 @Module(library = true, injects = {
-    BaseLayerModule.FailureHandlerHolder.class, FailureHandler.class})
+    BaseLayerModule.FailureHandlerHolder.class, FailureHandler.class, ActiveRootLister.class})
 public class BaseLayerModule {
 
   @Provides @Singleton
@@ -53,6 +53,12 @@ public class BaseLayerModule {
     return ActivityLifecycleMonitorRegistry.getInstance();
   }
 
+  @Provides
+  public Context provideTargetContext() {
+    // TODO(user): replace with installation of AndroidInstrumentationModule once
+    // proguard issues resolved.
+   return InstrumentationRegistry.getTargetContext();
+  }
 
   @Provides @Singleton
   public Looper provideMainLooper() {
@@ -92,10 +98,30 @@ public class BaseLayerModule {
 
   }
 
+  @Provides @Singleton
+  public ActiveRootLister provideActiveRootLister(RootsOracle rootsOracle) {
+    return rootsOracle;
+  }
+
   @Provides
-  public List<Root> provideKnownRoots(RootsOracle rootsOracle) {
-    // RootsOracle acts as a provider, but returning Providers is illegal, so delegate.
-    return rootsOracle.get();
+  public Recycler provideRecycler() {
+    int sdkVersion = Build.VERSION.SDK_INT;
+    if (sdkVersion > 20) {
+      return new UncheckedRecycler();
+    } else if (sdkVersion >= 19) {
+      // handle lying sdk versions.
+      try {
+        return new UncheckedRecycler();
+      } catch (RuntimeException re) {
+        if (re.getCause() != null && re.getCause() instanceof NoSuchMethodException) {
+          return Recycler.DEFAULT_RECYCLER;
+        } else {
+          throw re;
+        }
+      }
+    } else {
+      return Recycler.DEFAULT_RECYCLER;
+    }
   }
 
   @Provides @Singleton
@@ -152,8 +178,9 @@ public class BaseLayerModule {
 
   @Provides
   @Default
-  FailureHandler provideFailureHander() {
-    return new DefaultFailureHandler(InstrumentationRegistry.getTargetContext());
+  FailureHandler provideFailureHander(
+) {
+   return new DefaultFailureHandler(InstrumentationRegistry.getTargetContext());
   }
 
 }

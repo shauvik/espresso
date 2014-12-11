@@ -32,7 +32,6 @@ import org.hamcrest.Matcher;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-
 /**
  * Espresso's default {@link FailureHandler}. If this does not fit your needs, feel free to provide
  * your own implementation via Espresso.setFailureHandler(FailureHandler).
@@ -42,7 +41,8 @@ public final class DefaultFailureHandler implements FailureHandler {
   private static final AtomicInteger failureCount = new AtomicInteger(0);
   private final Context appContext;
 
-  public DefaultFailureHandler(Context appContext) {
+  public DefaultFailureHandler(
+      Context appContext) {
     this.appContext = checkNotNull(appContext);
   }
 

@@ -51,46 +51,21 @@ public class SwipeTest extends ActivityInstrumentationTestCase2<ViewPagerActivit
     // Should be on position 0 to start with.
     onView(withText("Position #0")).check(matches(isDisplayed()));
 
-    // Swipe left once.
     onView(withId(R.id.pager_layout)).perform(swipeLeft());
-
-    // Now position 1 should be visible.
     onView(withText("Position #1")).check(matches(isDisplayed()));
 
-    // Swipe left again.
     onView(withId(R.id.pager_layout)).perform(swipeLeft());
-
-    // Now position 2 should be visible.
-    onView(withText("Position #2")).check(matches(isDisplayed()));
-
-    // Swipe left again.
-    onView(withId(R.id.pager_layout)).perform(swipeLeft());
-
-    // Position 2 should still be visible as this is the last view in the pager.
     onView(withText("Position #2")).check(matches(isDisplayed()));
   }
 
   public void testSwipingBackAndForward() {
     // Should be on position 0 to start with.
     onView(withText("Position #0")).check(matches(isDisplayed()));
-    
-    // Swipe left once.
-    onView(withId(R.id.pager_layout)).perform(swipeLeft());
-    
-    // Now position 1 should be visible.
-    onView(withText("Position #1")).check(matches(isDisplayed()));
-    
-    // Swipe back to the right.
-    onView(withId(R.id.pager_layout)).perform(swipeRight());
-    
-    // Now position 0 should be visible again.
-    onView(withText("Position #0")).check(matches(isDisplayed()));
 
-    // Swipe right again.
+    onView(withId(R.id.pager_layout)).perform(swipeLeft());
+    onView(withText("Position #1")).check(matches(isDisplayed()));
+
     onView(withId(R.id.pager_layout)).perform(swipeRight());
-    
-    // Position 0 should still be visible as this is the first view in the pager.
     onView(withText("Position #0")).check(matches(isDisplayed()));
   }
-
 }

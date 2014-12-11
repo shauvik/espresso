@@ -64,6 +64,18 @@ public final class NoMatchingViewException extends RuntimeException implements E
     this.includeViewHierarchy = builder.includeViewHierarchy;
   }
 
+  /**
+   * Returns a string description of the {@link ViewMatcher} that did not match any view
+   * in the hierarchy.
+   */
+  public String getViewMatcherDescription() {
+    String viewMatcherDescription = "unknown";
+    if (null != viewMatcher) {
+      viewMatcherDescription = viewMatcher.toString();
+    }
+    return viewMatcherDescription;
+  }
+
   private static String getErrorMessage(Builder builder) {
     String errorMessage = "";
     if (builder.includeViewHierarchy) {

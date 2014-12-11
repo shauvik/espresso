@@ -30,7 +30,7 @@
 
   <RelativeLayout
       android:layout_width="fill_parent"
-      android:layout_height="200dp">
+      android:layout_height="100dp">
     <android.support.v4.view.ViewPager
         android:id="@+id/overlapped_pager"
         android:layout_width="fill_parent"
@@ -44,6 +44,11 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"/>
   </RelativeLayout>
+
+  <android.support.test.testapp.VerticalViewPager
+    android:id="@+id/vertical_pager"
+    android:layout_width="fill_parent"
+    android:layout_height="200dp" />
 
   <TextView
       android:id="@+id/text_simple"

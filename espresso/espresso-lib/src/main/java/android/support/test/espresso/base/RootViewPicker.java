@@ -56,18 +56,17 @@ import javax.inject.Singleton;
 public final class RootViewPicker implements Provider<View> {
   private static final String TAG = RootViewPicker.class.getSimpleName();
 
-  private final Provider<List<Root>> rootsOracle;
+  private final ActiveRootLister activeRootLister;
   private final UiController uiController;
   private final ActivityLifecycleMonitor activityLifecycleMonitor;
   private final AtomicReference<Matcher<Root>> rootMatcherRef;
 
-  private List<Root> roots;
 
   @Inject
-  RootViewPicker(Provider<List<Root>> rootsOracle, UiController uiController,
+  RootViewPicker(ActiveRootLister activeRootLister, UiController uiController,
       ActivityLifecycleMonitor activityLifecycleMonitor,
       AtomicReference<Matcher<Root>> rootMatcherRef) {
-    this.rootsOracle = rootsOracle;
+    this.activeRootLister = activeRootLister;
     this.uiController = uiController;
     this.activityLifecycleMonitor = activityLifecycleMonitor;
     this.rootMatcherRef = rootMatcherRef;
@@ -78,7 +77,7 @@ public final class RootViewPicker implements Provider<View> {
     checkState(Looper.getMainLooper().equals(Looper.myLooper()), "must be called on main thread.");
     Matcher<Root> rootMatcher = rootMatcherRef.get();
 
-    Root root = findRoot(rootMatcher);
+    FindRootResult findResult = findRoot(rootMatcher);
 
     // we only want to propagate a root view that the user can interact with and is not
     // about to relay itself out. An app should be in this state the majority of the time,
@@ -86,7 +85,7 @@ public final class RootViewPicker implements Provider<View> {
     // we should come to it quickly enough.
     int loops = 0;
 
-    while (!isReady(root)) {
+    while (!isReady(findResult.needle)) {
       if (loops < 3) {
         uiController.loopMainThreadUntilIdle();
       } else if (loops < 1001) {
@@ -101,14 +100,14 @@ public final class RootViewPicker implements Provider<View> {
             + " window focus and not be requesting layout for over 10 seconds. If you specified a"
             + " non default root matcher, it may be picking a root that never takes focus."
             + " Otherwise, something is seriously wrong. Selected Root:\n%s\n. All Roots:\n%s"
-            , root, Joiner.on("\n").join(roots)));
+            , findResult.needle, Joiner.on("\n").join(findResult.haystack)));
       }
 
-      root = findRoot(rootMatcher);
+      findResult = findRoot(rootMatcher);
       loops++;
     }
 
-    return root.getDecorView();
+    return findResult.needle.getDecorView();
   }
 
   private boolean isReady(Root root) {
@@ -121,10 +120,20 @@ public final class RootViewPicker implements Provider<View> {
     return false;
   }
 
-  private Root findRoot(Matcher<Root> rootMatcher) {
+  private static class FindRootResult {
+    private final Root needle;
+    private final List<Root> haystack;
+
+    FindRootResult(Root needle, List<Root> haystack) {
+      this.needle = needle;
+      this.haystack = haystack;
+    }
+  }
+
+  private FindRootResult findRoot(Matcher<Root> rootMatcher) {
     waitForAtLeastOneActivityToBeResumed();
 
-    roots = rootsOracle.get();
+    List<Root> roots = activeRootLister.listActiveRoots();
 
     // TODO(user): move these checks into the RootsOracle.
     if (roots.isEmpty()) {
@@ -160,7 +169,7 @@ public final class RootViewPicker implements Provider<View> {
       throw NoMatchingRootException.create(rootMatcher, roots);
     }
 
-    return reduceRoots(selectedRoots);
+    return new FindRootResult(reduceRoots(selectedRoots), roots);
   }
 
   @SuppressWarnings("unused")

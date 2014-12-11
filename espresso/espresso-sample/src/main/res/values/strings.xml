@@ -76,6 +76,14 @@
     <string name="nav_drawer_open">Open navigation drawer</string>
     <string name="pick_water">Pick a body of water</string>
     <string name="nav_drawer_close">Close navigation drawer</string>
+    <string name="button_pick_date">Pick a date</string>
+    <string name="button_pick_time">Pick a time</string>
+    <string name="textWithLinks">Before www.google.com there was altavista.com. How did we survive
+        without www.google.com?
+    </string>
+    <string name="selected_item">Clicked on:</string>
+    <string name="selected_item_default_text">No item selected</string>
+    <string name="selected_item_text">Selected: %1$s</string>
 
     <string-array name="spinner_array">
         <item>Espresso</item>

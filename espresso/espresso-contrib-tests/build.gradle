@@ -44,8 +44,11 @@ dependencies {
     compile files('../libs/guava-14.0.1.jar')
     compile 'com.android.support:support-v4:21.0.2'
     compile 'com.android.support:appcompat-v7:21.0.2'
+    compile 'com.android.support:recyclerview-v7:21.0.2'
 
     androidTestCompile project(':espresso-contrib')
+    androidTestCompile 'org.mockito:mockito-core:1.9.5'
+    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
 }
 
 apply from: "../../publish.gradle"

@@ -21,7 +21,11 @@ import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.typeText;
+import static android.support.test.espresso.assertion.PositionAssertions.isBelow;
+import static android.support.test.espresso.assertion.PositionAssertions.isLeftOf;
+import static android.support.test.espresso.assertion.PositionAssertions.isTopAlignedWith;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.withHint;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
@@ -63,6 +67,9 @@ public class BasicTest extends ActivityInstrumentationTestCase2<SimpleActivity> 
 
   public void testTypingAndPressBack() {
     onView(withId(R.id.sendtext_simple))
+        .check(matches(withHint(R.string.send_hint)));
+
+    onView(withId(R.id.sendtext_simple))
         .perform(typeText("Have a cup of Espresso."));
 
     onView(withId(R.id.send_simple))
@@ -79,6 +86,9 @@ public class BasicTest extends ActivityInstrumentationTestCase2<SimpleActivity> 
 
     onView(withId(R.id.sendtext_simple))
         .check(matches(withText(containsString("Espresso"))));
+
+    onView(withId(R.id.sendtext_simple))
+        .check(matches(withHint(R.string.send_hint)));
   }
 
   @SuppressWarnings("unchecked")
@@ -94,6 +104,17 @@ public class BasicTest extends ActivityInstrumentationTestCase2<SimpleActivity> 
 
     onView(withId(R.id.spinnertext_simple))
       .check(matches(withText(containsString("Americano"))));
+  }
+
+  public void testRelativePositionOfViews() {
+    onView(withId(R.id.button_simple))
+        .check(isBelow(withId(R.id.spinnertext_simple)));
+
+    onView(withId(R.id.sendtext_simple))
+         .check(isLeftOf(withId(R.id.send_simple)));
+
+    onView(withId(R.id.sendtext_simple))
+         .check(isTopAlignedWith(withId(R.id.send_simple)));
   }
 }
 

@@ -16,9 +16,11 @@
 
 package android.support.test.espresso.matcher;
 
+import static android.support.test.espresso.matcher.ViewMatchers.withClassName;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.is;
 
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitor;
 import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
@@ -127,6 +129,24 @@ public final class RootMatchers {
           }
         }
         return false;
+      }
+    };
+  }
+
+  /**
+   * Matches {@link Root}s that are popups - like autocomplete suggestions or the actionbar spinner.
+   */
+  public static Matcher<Root> isPlatformPopup() {
+    return new TypeSafeMatcher<Root>() {
+      @Override
+      public boolean matchesSafely(Root item) {
+        return withDecorView(withClassName(
+            is("android.widget.PopupWindow$PopupViewContainer"))).matches(item);
+      }
+
+      @Override
+      public void describeTo(Description description) {
+        description.appendText("with decor view of type PopupWindow$PopupViewContainer");
       }
     };
   }

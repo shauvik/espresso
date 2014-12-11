@@ -16,11 +16,10 @@
 
 package android.support.test.espresso;
 
-import android.support.test.internal.runner.tracker.UsageTrackerRegistry;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import android.support.test.internal.runner.tracker.UsageTrackerRegistry;
 import android.support.test.espresso.base.BaseLayerModule;
 import android.support.test.espresso.base.IdlingResourceRegistry;
 
@@ -66,6 +65,14 @@ public final class GraphHolder {
     System.arraycopy(modules, 0, allModules, 1, modules.length);
     GraphHolder holder = new GraphHolder(ObjectGraph.create(modules));
     checkState(instance.compareAndSet(null, holder), "Espresso already initialized.");
+  }
+
+  public static <T> T espressoGet(Class<T> type) {
+    return graph().get(type);
+  }
+
+  public static <T> T espressoInject(T instance) {
+    return graph().inject(instance);
   }
   // moe:end_strip
 

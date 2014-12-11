@@ -17,10 +17,11 @@
 package android.support.test.espresso.action;
 
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.util.ActivityLifecycles.hasForegroundActivities;
+import static android.support.test.espresso.util.ActivityLifecycles.hasVisibleActivities;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
-import android.support.test.runner.lifecycle.Stage;
 import android.support.test.espresso.InjectEventSecurityException;
 import android.support.test.espresso.NoActivityResumedException;
 import android.support.test.espresso.PerformException;
@@ -103,10 +104,14 @@ public final class KeyEventAction implements ViewAction {
 
     if (this.key.getKeyCode() == KeyEvent.KEYCODE_BACK) {
       controller.loopMainThreadUntilIdle();
-      boolean activeActivities = !ActivityLifecycleMonitorRegistry.getInstance()
-          .getActivitiesInStage(Stage.RESUMED)
-          .isEmpty();
-      if (!activeActivities) {
+      boolean resumed = false;
+      for (int attempts = 0; attempts < 4 && !resumed; attempts++) {
+        resumed = hasForegroundActivities(ActivityLifecycleMonitorRegistry.getInstance());
+        if (!resumed && hasVisibleActivities(ActivityLifecycleMonitorRegistry.getInstance())) {
+          controller.loopMainThreadForAtLeast(150);
+        }
+      }
+      if (!resumed) {
         Throwable cause = new PerformException.Builder()
           .withActionDescription(this.getDescription())
           .withViewDescription(HumanReadables.describe(view))
