@@ -33,6 +33,7 @@ LOCAL_RESOURCE_DIR := \
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-v4 \
     android-support-v7-appcompat \
+    android-support-v7-recyclerview \
     espresso-guava \
     jsr305
 

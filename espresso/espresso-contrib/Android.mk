@@ -26,6 +26,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-v4 \
+    android-support-v7-recyclerview \
     espresso-lib
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
