@@ -39,8 +39,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Dagger module for creating the implementation classes within the base
-package.
+ * Dagger module for creating the implementation classes within the base package.
  */
 @Module(library = true, injects = {
     BaseLayerModule.FailureHandlerHolder.class, FailureHandler.class, ActiveRootLister.class})

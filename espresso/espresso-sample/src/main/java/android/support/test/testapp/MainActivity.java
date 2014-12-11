@@ -84,8 +84,7 @@ public class MainActivity extends ListActivity {
           String[] label = activityInfo.name.split(getPackageName() + ".");
           try {
             addItem(data, label[1],
-                createActivityIntent(activityInfo.applicationInfo.
-packageName, activityInfo.name));
+                createActivityIntent(activityInfo.applicationInfo.packageName, activityInfo.name));
           } catch (ArrayIndexOutOfBoundsException aoobe) {
             Log.e(TAG, "No label for Activity: " + activityInfo.name, aoobe);
           }
