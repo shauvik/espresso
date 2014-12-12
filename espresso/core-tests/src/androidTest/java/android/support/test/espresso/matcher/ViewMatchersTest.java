@@ -51,6 +51,7 @@ import com.google.common.collect.Lists;
 
 import android.graphics.Color;
 import android.test.InstrumentationTestCase;
+import android.test.UiThreadTest;
 import android.text.Spannable;
 import android.text.style.ForegroundColorSpan;
 import android.text.util.Linkify;
@@ -241,6 +242,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
     }
   }
 
+  @UiThreadTest
   public void testCheckBoxMatchers() {
     assertFalse(isChecked().matches(new Spinner(getInstrumentation().getTargetContext())));
     assertFalse(isNotChecked().matches(new Spinner(getInstrumentation().getTargetContext())));
@@ -550,6 +552,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
     assertFalse(hasLinks().matches(viewWithNoLinks));
   }
 
+  @UiThreadTest
   public void testWithSpinnerTextResourceId() {
     Spinner spinner = new Spinner(this.getInstrumentation().getTargetContext());
     List<String> values = Lists.newArrayList();
@@ -565,6 +568,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
     assertFalse(withSpinnerText(R.string.other_string).matches(spinner));
   }
 
+  @UiThreadTest
   public void testWithSpinnerTextString() {
     Spinner spinner = new Spinner(this.getInstrumentation().getTargetContext());
     List<String> values = Lists.newArrayList();
