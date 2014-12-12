@@ -34,9 +34,9 @@ android {
         // Setting espresso-sample as the main root of this project to avoid source code duplication.
         // Temporary workaround until Android Gradle plugin supports settings custom target package
         // for Android Tests (Bug: https://code.google.com/p/android/issues/detail?id=69211).
-        main.manifest.srcFile file("../espresso-sample/src/main/AndroidManifest.xml")
-        main.java.srcDirs = ['../espresso-sample/src/main/java']
-        main.res.srcDirs = ['../espresso-sample/src/main/res']
+        main.manifest.srcFile file("../sample/src/main/AndroidManifest.xml")
+        main.java.srcDirs = ['../sample/src/main/java']
+        main.res.srcDirs = ['../sample/src/main/res']
     }
 }
 
@@ -47,7 +47,7 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:21.0.2'
 
     // run test against an un-jarjared variant of the lib
-    androidTestCompile project(path: ':espresso-lib', configuration: 'debug')
+    androidTestCompile project(path: ':espresso-core', configuration: 'debug')
 
     androidTestCompile 'org.mockito:mockito-core:1.9.5'
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'

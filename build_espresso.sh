@@ -46,9 +46,9 @@ fi
 cd "$PROG_DIR"
 
 TASKS="--project-prop buildFromServer=true \
-:espresso-lib:createArchive \
+:espresso-core:createArchive \
 :espresso-contrib:createArchive \
-:espresso-idling-resource-interface:createArchive"
+:espresso-idling-resource:createArchive"
 
 # first build Eclipse/Monitor
 ( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ./gradlew $TASKS )

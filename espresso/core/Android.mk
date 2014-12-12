@@ -18,7 +18,7 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := espresso-lib
+LOCAL_MODULE := espresso-core
 
 LOCAL_SDK_VERSION := 19
 

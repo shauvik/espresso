@@ -57,7 +57,7 @@ dependencies {
     provided files('../libs/dagger-compiler-1.2.1.jar')
     provided files('../libs/guava-14.0.1.jar')
 
-    compile project(':espresso-idling-resource-interface')
+    compile project(':espresso-idling-resource')
     compile project(':testing-support-lib')
     compile 'javax.annotation:javax.annotation-api:1.2'
     compile 'javax.inject:javax.inject:1'

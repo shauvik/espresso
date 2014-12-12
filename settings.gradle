@@ -15,17 +15,17 @@
  */
 
 include(':espresso-contrib')
-project(':espresso-contrib').projectDir = new File(rootDir, 'espresso/espresso-contrib')
+project(':espresso-contrib').projectDir = new File(rootDir, 'espresso/contrib')
 include(':espresso-contrib-tests')
-project(':espresso-contrib-tests').projectDir = new File(rootDir, 'espresso/espresso-contrib-tests')
-include(':espresso-lib')
-project(':espresso-lib').projectDir = new File(rootDir, 'espresso/espresso-lib')
-include(':espresso-lib-tests')
-project(':espresso-lib-tests').projectDir = new File(rootDir, 'espresso/espresso-lib-tests')
+project(':espresso-contrib-tests').projectDir = new File(rootDir, 'espresso/contrib-tests')
+include(':espresso-core')
+project(':espresso-core').projectDir = new File(rootDir, 'espresso/core')
+include(':espresso-core-tests')
+project(':espresso-core-tests').projectDir = new File(rootDir, 'espresso/core-tests')
 include(':espresso-sample')
-project(':espresso-sample').projectDir = new File(rootDir, 'espresso/espresso-sample')
-include(':espresso-idling-resource-interface')
-project(':espresso-idling-resource-interface').projectDir = new File(rootDir, 'espresso/idling-resource-interface')
+project(':espresso-sample').projectDir = new File(rootDir, 'espresso/sample')
+include(':espresso-idling-resource')
+project(':espresso-idling-resource').projectDir = new File(rootDir, 'espresso/idling-resource')
 
 
 include(':testing-support-lib')
