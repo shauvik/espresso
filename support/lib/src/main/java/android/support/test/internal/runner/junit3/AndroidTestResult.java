@@ -17,7 +17,6 @@ package android.support.test.internal.runner.junit3;
 
 import android.app.Instrumentation;
 import android.os.Bundle;
-import android.support.test.BundleTest;
 import android.test.AndroidTestCase;
 import android.test.InstrumentationTestCase;
 
@@ -46,9 +45,6 @@ class AndroidTestResult extends DelegatingTestResult {
         }
         if (test instanceof InstrumentationTestCase) {
             ((InstrumentationTestCase)test).injectInstrumentation(mInstr);
-        }
-        if (test instanceof BundleTest) {
-            ((BundleTest)test).injectBundle(mBundle);
         }
         super.run(test);
     }
