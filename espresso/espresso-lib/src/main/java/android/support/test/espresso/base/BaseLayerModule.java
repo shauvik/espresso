@@ -56,7 +56,7 @@ public class BaseLayerModule {
   public Context provideTargetContext() {
     // TODO(user): replace with installation of AndroidInstrumentationModule once
     // proguard issues resolved.
-   return InstrumentationRegistry.getTargetContext();
+    return InstrumentationRegistry.getTargetContext();
   }
 
   @Provides @Singleton
@@ -177,9 +177,8 @@ public class BaseLayerModule {
 
   @Provides
   @Default
-  FailureHandler provideFailureHander(
-) {
-   return new DefaultFailureHandler(InstrumentationRegistry.getTargetContext());
+  FailureHandler provideFailureHander() {
+    return new DefaultFailureHandler(InstrumentationRegistry.getTargetContext());
   }
 
 }
