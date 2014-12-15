@@ -88,8 +88,9 @@ afterEvaluate {
     }
 
     // Use mainUpload anchor task to copy binary jars to disDir
-    // Disable until Espresso jar generations is fixed.
-    //mainUpload.dependsOn copyReleaseBinaryJars
+    if (project.hasProperty("buildFromServer") && project.buildFromServer == "true") {
+        mainUpload.dependsOn copyReleaseBinaryJars
+    }
 
     artifacts {
         archives packageReleaseJavadoc
