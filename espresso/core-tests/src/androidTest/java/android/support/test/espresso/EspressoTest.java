@@ -65,17 +65,6 @@ public class EspressoTest extends ActivityInstrumentationTestCase2<MainActivity>
   }
 
   @SuppressWarnings("unchecked")
-  public void testOpenOverflowInActionMode() {
-    onData(allOf(instanceOf(Map.class), hasValue(ActionBarTestActivity.class.getSimpleName())))
-        .perform(click());
-    openContextualActionModeOverflowMenu();
-    onView(withText("Key"))
-        .perform(click());
-    onView(withId(R.id.text_action_bar_result))
-        .check(matches(withText("Key")));
-  }
-
-  @SuppressWarnings("unchecked")
   public void testOpenOverflowFromActionBar() {
     onData(allOf(instanceOf(Map.class), hasValue(ActionBarTestActivity.class.getSimpleName())))
         .perform(click());
@@ -86,6 +75,17 @@ public class EspressoTest extends ActivityInstrumentationTestCase2<MainActivity>
         .perform(click());
     onView(withId(R.id.text_action_bar_result))
         .check(matches(withText("World")));
+  }
+
+  @SuppressWarnings("unchecked")
+  public void testOpenOverflowInActionMode() {
+    onData(allOf(instanceOf(Map.class), hasValue(ActionBarTestActivity.class.getSimpleName())))
+        .perform(click());
+    openContextualActionModeOverflowMenu();
+    onView(withText("Key"))
+        .perform(click());
+    onView(withId(R.id.text_action_bar_result))
+        .check(matches(withText("Key")));
   }
 
   @SuppressWarnings("unchecked")
@@ -138,7 +138,7 @@ public class EspressoTest extends ActivityInstrumentationTestCase2<MainActivity>
   public void testGetIdlingResources() {
     int originalCount = Espresso.getIdlingResources().size();
 
-    IdlingResource resource = new DummyIdlingResource("test");
+    IdlingResource resource = new DummyIdlingResource("testGetIdlingResources");
 
     Espresso.registerIdlingResources(resource);
     assertEquals(originalCount + 1, Espresso.getIdlingResources().size());
@@ -148,13 +148,13 @@ public class EspressoTest extends ActivityInstrumentationTestCase2<MainActivity>
   }
 
   public void testRegisterIdlingResources() {
-    IdlingResource resource = new DummyIdlingResource("test");
+    IdlingResource resource = new DummyIdlingResource("testRegisterIdlingResources");
     assertTrue(Espresso.registerIdlingResources(resource));
     assertFalse(Espresso.registerIdlingResources(resource));
   }
 
   public void testUnregisterIdlingResources() {
-    IdlingResource resource = new DummyIdlingResource("test");
+    IdlingResource resource = new DummyIdlingResource("testUnregisterIdlingResources");
     Espresso.registerIdlingResources(resource);
     assertTrue(Espresso.unregisterIdlingResources(resource));
     assertFalse(Espresso.unregisterIdlingResources(resource));
