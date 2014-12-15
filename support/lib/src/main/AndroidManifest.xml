@@ -16,7 +16,7 @@
   -->
 
 <manifest
-    package="com.android.support.test"
+    package="android.support.test"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-sdk

@@ -15,7 +15,7 @@
  */
 package android.support.test;
 
-import android.support.test.internal.runner.junit4.AndroidJUnit4;
+import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
 import junit.framework.Assert;

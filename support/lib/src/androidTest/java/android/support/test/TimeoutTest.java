@@ -17,7 +17,7 @@
 package android.support.test;
 
 import android.support.test.internal.runner.TestRequestBuilder;
-import android.support.test.internal.runner.junit4.AndroidJUnit4;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.LargeTest;
 
 import junit.framework.TestCase;

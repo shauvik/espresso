@@ -16,6 +16,7 @@
 
 package android.support.test.internal.runner.junit4;
 
+import android.support.test.runner.AndroidJUnit4;
 import android.support.test.internal.util.AndroidRunnerParams;
 
 import org.junit.internal.builders.AnnotatedBuilder;

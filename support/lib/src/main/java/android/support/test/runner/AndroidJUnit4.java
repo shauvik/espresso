@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package android.support.test.internal.runner.junit4;
+package android.support.test.runner;
 
+import android.support.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 import android.support.test.internal.util.AndroidRunnerParams;
 
 import org.junit.runners.model.InitializationError;
