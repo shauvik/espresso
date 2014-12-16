@@ -45,7 +45,7 @@ fi
 
 cd "$PROG_DIR"
 
-TASKS="testing-support-lib:createArchive"
+TASKS="--project-prop buildFromServer=true :testing-support-lib:createArchive"
 
 # first build Eclipse/Monitor
 ( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ./gradlew $TASKS )
