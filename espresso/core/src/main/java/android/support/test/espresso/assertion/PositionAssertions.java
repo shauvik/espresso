@@ -41,7 +41,7 @@ import org.hamcrest.StringDescription;
 import java.util.Iterator;
 
 /**
- * A collection of common {@link ViewAssertion}s.
+ * A collection of {@link ViewAssertion}s for checking relative position of elements on the screen.
  */
 public final class PositionAssertions {
 
