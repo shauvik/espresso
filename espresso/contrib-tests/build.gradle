@@ -51,4 +51,3 @@ dependencies {
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
 }
 
-apply from: "../../publish.gradle"

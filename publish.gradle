@@ -89,10 +89,18 @@ afterEvaluate {
 
     // Use mainUpload anchor task to copy binary jars to disDir
     if (project.hasProperty("buildFromServer") && project.buildFromServer == "true") {
-        mainUpload.dependsOn copyReleaseBinaryJars
+        // FIXME - filter out which .jars to copy over (only espresso for espresso build)
+        // FIXME - started copying apk as well
+        rootProject.mainUpload.dependsOn copyReleaseBinaryJars
+    }
+
+    task createSourcesJar(type: Jar) {
+        classifier = 'sources'
+        from 'src/main/java' // not sure why android.sourceSets.main.java doesnt work anymore
     }
 
     artifacts {
+        archives createSourcesJar
         archives packageReleaseJavadoc
     }
 }

@@ -40,5 +40,3 @@ project(':doclava').projectDir = new File(rootDir, '../../external/doclava')
 include(':tagsoup')
 project(':tagsoup').projectDir = new File(rootDir, '../../external/tagsoup')
 
-include(':junit')
-project(':junit').projectDir = new File(rootDir, '../../external/junit')

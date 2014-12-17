@@ -48,6 +48,7 @@ cd "$PROG_DIR"
 TASKS=" \
 --project-prop buildFromServer=true \
 --project-prop buildEspresso=true \
+--project-prop buildRunner=true \
 createArchive"
 
 # first build Eclipse/Monitor

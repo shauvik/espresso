@@ -40,4 +40,3 @@ dependencies {
     androidTestCompile project(':espresso-contrib')
 }
 
-apply from: "../../publish.gradle"

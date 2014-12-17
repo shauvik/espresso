@@ -107,9 +107,9 @@ android.libraryVariants.all { variant ->
                 zipfileset(src: "$depDaggerJar")
                 zipfileset(src: "$tmpClassesJar")
                 rule pattern: "com.google.common.**",
-                        result: "com.google.android.apps.common.testing.deps.guava.@1"
+                        result: "com.android.support.test.deps.guava.@1"
                 rule pattern: "dagger.**",
-                        result: "com.google.android.apps.common.testing.deps.dagger.@1"
+                        result: "com.android.support.test.deps.dagger.@1"
             }
         }
     }
