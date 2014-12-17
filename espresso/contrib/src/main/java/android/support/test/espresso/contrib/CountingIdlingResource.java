@@ -16,8 +16,8 @@
 
 package android.support.test.espresso.contrib;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static android.support.test.espresso.contrib.Checks.checkNotNull;
+import static android.support.test.espresso.contrib.Checks.checkState;
 
 import android.support.test.espresso.IdlingResource;
 

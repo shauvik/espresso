@@ -16,10 +16,10 @@
 
 package android.support.test.espresso.contrib;
 
+import static android.support.test.espresso.contrib.Checks.checkArgument;
+import static android.support.test.espresso.contrib.Checks.checkNotNull;
 import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.Matchers.allOf;
 
 import android.support.test.espresso.Espresso;
@@ -27,8 +27,6 @@ import android.support.test.espresso.PerformException;
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.util.HumanReadables;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
@@ -41,6 +39,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -356,7 +355,9 @@ public final class RecyclerViewActions {
           StringBuilder ambiguousViewError = new StringBuilder();
           ambiguousViewError.append(
               String.format("Found more than one sub-view matching %s", viewHolderMatcher));
-          Joiner.on("\n").appendTo(ambiguousViewError, matchedItems);
+          for (MatchedItem item : matchedItems) {
+            ambiguousViewError.append(item + "\n");
+          }
           throw new RuntimeException(ambiguousViewError.toString());
         }
         recyclerView.scrollToPosition(matchedItems.get(selectIndex).position);
@@ -412,7 +413,7 @@ public final class RecyclerViewActions {
       final RecyclerView recyclerView, final Matcher<VH> viewHolderMatcher, int max) {
     final Adapter<T> adapter = recyclerView.getAdapter();
     SparseArray<VH> viewHolderCache = new SparseArray<VH>();
-    List<MatchedItem> matchedItems = Lists.newArrayList();
+    List<MatchedItem> matchedItems = new ArrayList<MatchedItem>();
     for (int position = 0; position < adapter.getItemCount(); position++) {
       int itemType = adapter.getItemViewType(position);
       VH cachedViewHolder = viewHolderCache.get(itemType);
