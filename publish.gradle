@@ -66,11 +66,13 @@ afterEvaluate {
 
             addJavadocTasks(project, variant.assemble, variant.name, variant.javaCompile)
 
-            task("copy${variant.name.capitalize()}BinaryJars", type: Copy, dependsOn: variant.assemble) {
-                description "Copies the release Jar to $project.distDir"
-                from packageReleaseJar.archivePath
-                into project.distDir
-                rename(packageReleaseJar.archiveName, "${project.name}-${variant.name}-${project.version}.jar")
+            task("copy${variant.name.capitalize()}Binaries", type: Copy, dependsOn: variant.assemble) {
+                if (rootProject.getProjectsToArchive().contains(project)) {
+                    description "Copies the release Jar to $project.distDir"
+                    from packageReleaseJar.archivePath
+                    into project.distDir
+                    rename(packageReleaseJar.archiveName, "${project.name}-${variant.name}-${project.version}.jar")
+                }
             }
         }
     } else {
@@ -78,20 +80,20 @@ afterEvaluate {
 
             addJavadocTasks(project, variant.assemble, variant.name, variant.javaCompile)
 
-            task("copy${variant.name.capitalize()}BinaryJars", type: Copy, dependsOn: variant.assemble) {
-                description "Copies the release Apk to $project.distDir"
-                from variant.outputs[0].outputFile
-                into project.distDir
-                rename(variant.outputs[0].outputFile.name, "${project.name}-${variant.name}-${project.version}.apk")
+            task("copy${variant.name.capitalize()}Binaries", type: Copy, dependsOn: variant.assemble) {
+                if (rootProject.getProjectsToArchive().contains(project)) {
+                    description "Copies the release Apk to $project.distDir"
+                    from variant.outputs[0].outputFile
+                    into project.distDir
+                    rename(variant.outputs[0].outputFile.name, "${project.name}-${variant.name}-${project.version}.apk")
+                }
             }
         }
     }
 
-    // Use mainUpload anchor task to copy binary jars to disDir
+    // Use mainUpload anchor task to copy binaries to project.distDir
     if (project.hasProperty("buildFromServer") && project.buildFromServer == "true") {
-        // FIXME - filter out which .jars to copy over (only espresso for espresso build)
-        // FIXME - started copying apk as well
-        rootProject.mainUpload.dependsOn copyReleaseBinaryJars
+        rootProject.mainUpload.dependsOn copyReleaseBinaries
     }
 
     task createSourcesJar(type: Jar) {
