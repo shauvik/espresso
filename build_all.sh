@@ -56,11 +56,21 @@ createArchive"
 
 # Workaround for https://code.google.com/p/android/issues/detail?id=80444
 # This removes libs/* from espresso-core-2.0.aar
-mkdir $DIST_DIR/tmp
-unzip $DIST_DIR/android_m2repository_r10-testing.zip -d $DIST_DIR/tmp
-zip -d $DIST_DIR/tmp/m2repository/com/android/support/test/espresso/espresso-core/2.0/espresso-core-2.0.aar libs/*
+mkdir $DIST_DIR/libsTmp
+mkdir $DIST_DIR/classesJarTmp
+unzip $DIST_DIR/android_m2repository_r10-testing.zip -d $DIST_DIR/libsTmp
+zip -d $DIST_DIR/libsTmp/m2repository/com/android/support/test/espresso/espresso-core/2.0/espresso-core-2.0.aar libs/*
+
+# Remove guava and dagger deps from classes.jar
+unzip $DIST_DIR/libsTmp/m2repository/com/android/support/test/espresso/espresso-core/2.0/espresso-core-2.0.aar -d $DIST_DIR/classesJarTmp
+zip -d $DIST_DIR/classesJarTmp/classes.jar dagger/* com/google/*
+cd $DIST_DIR/classesJarTmp/
+zip -r $DIST_DIR/libsTmp/m2repository/com/android/support/test/espresso/espresso-core/2.0/espresso-core-2.0.aar .
+cd ..
+rm -rf $DIST_DIR/classesJarTmp
+
 rm $DIST_DIR/android_m2repository_r10-testing.zip
-cd $DIST_DIR/tmp
+cd $DIST_DIR/libsTmp
 zip -r ../android_m2repository_r10-testing.zip .
 cd ..
-rm -rf tmp
+rm -rf libsTmp
