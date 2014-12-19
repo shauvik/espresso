@@ -24,7 +24,7 @@ buildscript {
     }
 }
 
-ext.extraVersion = 10
+ext.extraVersion = 11
 ext.supportRepoOut = ''
 ext.buildToolsVersion = '24.0.2'
 
