@@ -26,7 +26,7 @@ buildscript {
 
 ext.extraVersion = 11
 ext.supportRepoOut = ''
-ext.buildToolsVersion = '24.0.2'
+ext.buildToolsVersion = '21.1.2'
 
 // define extra property to enforce the use of prebuilt dependencies in all sub-projects.
 project.ext.usePrebuilts = "true"
