@@ -54,3 +54,13 @@ createArchive"
 # first build Eclipse/Monitor
 ( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ./gradlew $TASKS )
 
+# Workaround for https://code.google.com/p/android/issues/detail?id=80444
+# This removes libs/* from espresso-core-2.0.aar
+mkdir $DIST_DIR/tmp
+unzip $DIST_DIR/android_m2repository_r10-testing.zip -d $DIST_DIR/tmp
+zip -d $DIST_DIR/tmp/m2repository/com/android/support/test/espresso/espresso-core/2.0/espresso-core-2.0.aar libs/*
+rm $DIST_DIR/android_m2repository_r10-testing.zip
+cd $DIST_DIR/tmp
+zip -r ../android_m2repository_r10-testing.zip .
+cd ..
+rm -rf tmp
