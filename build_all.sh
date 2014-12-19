@@ -58,7 +58,7 @@ createArchive"
 # This removes libs/* from espresso-core-2.0.aar
 mkdir $DIST_DIR/libsTmp
 mkdir $DIST_DIR/classesJarTmp
-unzip $DIST_DIR/android_m2repository_r10-testing.zip -d $DIST_DIR/libsTmp
+unzip $DIST_DIR/android_m2repository_r10.zip -d $DIST_DIR/libsTmp
 zip -d $DIST_DIR/libsTmp/m2repository/com/android/support/test/espresso/espresso-core/2.0/espresso-core-2.0.aar libs/*
 
 # Remove guava and dagger deps from classes.jar
@@ -69,8 +69,8 @@ zip -r $DIST_DIR/libsTmp/m2repository/com/android/support/test/espresso/espresso
 cd ..
 rm -rf $DIST_DIR/classesJarTmp
 
-rm $DIST_DIR/android_m2repository_r10-testing.zip
+rm $DIST_DIR/android_m2repository_r10.zip
 cd $DIST_DIR/libsTmp
-zip -r ../android_m2repository_r10-testing.zip .
+zip -r ../android_m2repository_r10.zip .
 cd ..
 rm -rf libsTmp
