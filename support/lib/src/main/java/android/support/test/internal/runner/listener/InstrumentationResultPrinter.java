@@ -75,6 +75,7 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
      *
      * @deprecated  not supported in JUnit4, use REPORT_VALUE_RESULT_FAILURE instead
      */
+    @Deprecated
     public static final int REPORT_VALUE_RESULT_ERROR = -1;
     /**
      * The test completed with a failure.

@@ -24,7 +24,7 @@
 
     <instrumentation
         android:name="android.support.test.runner.AndroidJUnitRunner"
-        android:targetPackage="com.android.support.test.tests">
+        android:targetPackage="android.support.test.tests">
         <meta-data
             android:name="listener"
             android:value="android.support.test.internal.runner.listener.ManifestListener"/>

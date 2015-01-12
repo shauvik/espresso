@@ -38,7 +38,7 @@ android {
     }
 
     defaultConfig {
-        testApplicationId "com.android.support.test.tests"
+        testApplicationId "android.support.test.tests"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 }
