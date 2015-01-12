@@ -19,7 +19,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(call all-java-files-under, java)
 
-LOCAL_MODULE := android-support-test
+LOCAL_MODULE := android-support-test-src
 
 LOCAL_MODULE_TAGS := optional
 
@@ -54,7 +54,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, java) \
 LOCAL_MODULE := android-support-test-docs
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
-LOCAL_JAVA_LIBRARIES := android-support-test
+LOCAL_JAVA_LIBRARIES := android-support-test-src
 LOCAL_SDK_VERSION := 8
 LOCAL_IS_HOST_MODULE := false
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR := build/tools/droiddoc/templates-sdk
@@ -76,7 +76,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, java) \
 LOCAL_MODULE := android-support-test-offline-docs
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
-LOCAL_JAVA_LIBRARIES := android-support-test
+LOCAL_JAVA_LIBRARIES := android-support-test-src
 LOCAL_SDK_VERSION := 8
 LOCAL_IS_HOST_MODULE := false
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR := build/tools/droiddoc/templates-sdk

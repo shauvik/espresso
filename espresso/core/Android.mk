@@ -35,7 +35,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     espresso-javawriter-2.1.1 \
     espresso-javax-inject-1 \
     jsr305 \
-    android-support-test
+    android-support-test-src
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
