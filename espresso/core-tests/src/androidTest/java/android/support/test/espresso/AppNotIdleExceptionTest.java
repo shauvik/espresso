@@ -29,6 +29,7 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -47,7 +48,15 @@ public class AppNotIdleExceptionTest extends ActivityInstrumentationTestCase2<Sy
   public void setUp() throws Exception {
     super.setUp();
     getActivity();
+    IdlingPolicies.setMasterPolicyTimeout(5, TimeUnit.SECONDS);
   }
+
+  public void tearDown() throws Exception {
+    IdlingPolicies.setMasterPolicyTimeout(60, TimeUnit.SECONDS);
+    super.tearDown();
+  }
+
+
 
   public void testAppIdleException() throws Exception {
     final AtomicBoolean continueBeingBusy = new AtomicBoolean(true);
@@ -69,8 +78,9 @@ public class AppNotIdleExceptionTest extends ActivityInstrumentationTestCase2<Sy
       // Request the "hello world!" text by clicking on the request button.
       onView(withId(R.id.request_button)).perform(click());
       fail("Espresso failed to throw AppNotIdleException");
-    } catch (AppNotIdleException e) {
+    } catch (AppNotIdleException expected) {
       // Do Nothing. Test pass.
+    } finally {
       continueBeingBusy.getAndSet(false);
     }
   }
