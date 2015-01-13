@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.support.test.Rules;
+package android.support.test.rules;
 
 import android.app.Activity;
 import android.content.Intent;

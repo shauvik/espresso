@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.support.test.Rules;
+package android.support.test.rules;
 
 import android.support.test.UiThreadTest;
 import android.support.test.internal.runner.junit4.statements.UiThreadStatement;

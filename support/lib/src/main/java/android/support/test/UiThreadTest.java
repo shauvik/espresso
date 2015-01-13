@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation should be used along with {@link android.support.test.Rules.UiThreadTestRule} or
+ * This annotation should be used along with {@link android.support.test.rules.UiThreadTestRule} or
  * with any rule that inherits from it.
  * When the annotation is present, the test method is executed on the application's
  * main thread (or UI thread).
