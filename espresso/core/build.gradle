@@ -106,10 +106,11 @@ android.libraryVariants.all { variant ->
                 zipfileset(src: "$depGuavaJar")
                 zipfileset(src: "$depDaggerJar")
                 zipfileset(src: "$tmpClassesJar")
-                rule pattern: "com.google.common.**",
-                        result: "com.android.support.test.deps.guava.@1"
-                rule pattern: "dagger.**",
-                        result: "com.android.support.test.deps.dagger.@1"
+                file('jarjar-rules.txt').splitEachLine('\\s+') {
+                    if (it[0] == 'rule') {
+                        rule pattern: it[1], result: it[2]
+                    }
+                }
             }
         }
     }
