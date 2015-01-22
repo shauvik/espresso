@@ -1,0 +1,2 @@
+rule com.google.common.** com.google.android.apps.common.testing.deps.guava.@1
+rule dagger.** com.google.android.apps.common.testing.deps.dagger.@1

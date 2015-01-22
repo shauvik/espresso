@@ -37,6 +37,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     jsr305 \
     android-support-test-src
 
+LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
+
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
 #############################################################
