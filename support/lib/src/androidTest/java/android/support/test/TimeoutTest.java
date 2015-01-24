@@ -24,6 +24,7 @@ import junit.framework.TestCase;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -49,12 +50,21 @@ public class TimeoutTest {
     private static final int GLOBAL_RULE_TIMEOUT = 50;
     private static final int TEST_TIMEOUT = 25;
 
+    private TestRequestBuilder mBuilder;
+
+    @Before
+    public void setUp() throws Exception {
+        mBuilder = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()),
+                getInstrumentation(), getArguments());
+    }
+
     @Test
     public void testTimeoutsInJUnit4WithRule() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(JUnit4WithRuleClass.class.getName());
-        b.setPerTestTimeout(GLOBAL_ARG_TIMEOUT);
-        Request request = b.build(getInstrumentation(), getArguments()).getRequest();
+        Request request = mBuilder
+                .addTestClass(JUnit4WithRuleClass.class.getName())
+                .setPerTestTimeout(GLOBAL_ARG_TIMEOUT)
+                .build()
+                .getRequest();
         JUnitCore junitCore = new JUnitCore();
         Result result = junitCore.run(request);
         assertThat(result.getFailures(), isEmpty());
@@ -63,10 +73,11 @@ public class TimeoutTest {
 
     @Test
     public void testTimeoutsInJUnit4WithNoRule() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(JUnit4NoRuleClass.class.getName());
-        b.setPerTestTimeout(GLOBAL_ARG_TIMEOUT);
-        Request request = b.build(getInstrumentation(), getArguments()).getRequest();
+        Request request = mBuilder
+                .addTestClass(JUnit4NoRuleClass.class.getName())
+                .setPerTestTimeout(GLOBAL_ARG_TIMEOUT)
+                .build()
+                .getRequest();
         JUnitCore junitCore = new JUnitCore();
         Result result = junitCore.run(request);
         assertThat(result.getFailures(), isEmpty());
@@ -75,10 +86,11 @@ public class TimeoutTest {
 
     @Test
     public void testTimeoutInJUnit3Style() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(JUnit3StyleClass.class.getName());
-        b.setPerTestTimeout(GLOBAL_ARG_TIMEOUT);
-        Request request = b.build(getInstrumentation(), getArguments()).getRequest();
+        Request request = mBuilder
+                .addTestClass(JUnit3StyleClass.class.getName())
+                .setPerTestTimeout(GLOBAL_ARG_TIMEOUT)
+                .build()
+                .getRequest();
         JUnitCore junitCore = new JUnitCore();
         Result result = junitCore.run(request);
         assertEquals(String.format("Test timed out after %s milliseconds", GLOBAL_ARG_TIMEOUT),

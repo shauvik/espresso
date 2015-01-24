@@ -73,8 +73,7 @@ import java.util.List;
  * <p/>
  * Write JUnit3 style {@link junit.framework.TestCase}s and/or JUnit4 style
  * {@link org.junit.Test}s that perform tests against the classes in your package.
- * Make use of the {@link android.support.test.InjectContext} and
- * {@link android.support.test.InjectInstrumentation} annotations if needed.
+ * Make use of the {@link android.support.test.InstrumentationRegistry} if needed.
  * <p/>
  * In an appropriate AndroidManifest.xml, define an instrumentation with android:name set to
  * {@link android.support.test.runner.AndroidJUnitRunner} and the appropriate android:targetPackage
@@ -462,11 +461,13 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
      * Exposed for unit testing.
      */
     TestRequest buildRequest(Bundle arguments, PrintStream writer) {
-        // only load tests for current aka testContext
+
+        TestRequestBuilder builder = createTestRequestBuilder(writer, this, arguments);
+
+        // only scan for tests for current apk aka testContext
         // Note that this represents a change from InstrumentationTestRunner where
-        // getTargetContext().getPackageCodePath() was also scanned
-        TestRequestBuilder builder = createTestRequestBuilder(writer,
-                getContext().getPackageCodePath());
+        // getTargetContext().getPackageCodePath() aka app under test was also scanned
+        builder.addApkToScan(getContext().getPackageCodePath());
 
         String testClassName = arguments.getString(ARGUMENT_TEST_CLASS);
         if (testClassName != null) {
@@ -539,7 +540,7 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
             }
         }
 
-        return builder.build(this, arguments);
+        return builder.build();
     }
 
     /**
@@ -547,8 +548,9 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
      * <p/>
      * Exposed for unit testing.
      */
-    TestRequestBuilder createTestRequestBuilder(PrintStream writer, String... packageCodePaths) {
-        return new TestRequestBuilder(writer, packageCodePaths);
+    TestRequestBuilder createTestRequestBuilder(PrintStream writer, Instrumentation instr,
+                                                Bundle arguments) {
+        return new TestRequestBuilder(writer, instr, arguments);
     }
 
     /**

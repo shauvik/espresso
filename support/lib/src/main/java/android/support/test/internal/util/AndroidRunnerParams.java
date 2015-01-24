@@ -20,7 +20,7 @@ import android.app.Instrumentation;
 import android.os.Bundle;
 
 /**
- * Helper class to store frequently passed parameters between the different test runners
+ * Helper class to store frequently passed test parameters between the different classes
  */
 public class AndroidRunnerParams {
     private final Instrumentation mInstrumentation;
@@ -37,7 +37,7 @@ public class AndroidRunnerParams {
      *                      timeout
      */
     public AndroidRunnerParams(Instrumentation instrumentation, Bundle bundle,
-                               boolean skipExecution, long perTestTimeout) {
+                             boolean skipExecution, long perTestTimeout) {
         this.mInstrumentation = instrumentation;
         this.mBundle = bundle;
         this.mSkipExecution = skipExecution;

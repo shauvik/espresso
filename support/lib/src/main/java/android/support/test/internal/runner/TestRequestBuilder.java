@@ -24,6 +24,7 @@ import android.support.test.internal.runner.ClassPathScanner.ExcludePackageNameF
 import android.support.test.internal.runner.ClassPathScanner.ExternalClassNameFilter;
 import android.support.test.internal.runner.ClassPathScanner.InclusivePackageNameFilter;
 import android.support.test.internal.util.AndroidRunnerParams;
+import android.support.test.internal.util.Checks;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -42,17 +43,19 @@ import org.junit.runners.model.InitializationError;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * Builds a {@link Request} from test classes in given apk paths, filtered on provided set of
+ * A builder for {@link TestRequest} that builds up tests to run, filtered on provided set of
  * restrictions.
  */
 public class TestRequestBuilder {
@@ -65,7 +68,7 @@ public class TestRequestBuilder {
 
     static final String EMULATOR_HARDWARE = "goldfish";
 
-    private String[] mApkPaths;
+    private List<String> mApkPaths = new ArrayList<String>();
     private TestLoader mTestLoader;
     private ClassAndMethodFilter mClassMethodFilter = new ClassAndMethodFilter();
     private Filter mFilter = new AnnotationExclusionFilter(Suppress.class)
@@ -76,6 +79,8 @@ public class TestRequestBuilder {
     private String mTestPackageName = null;
     private final DeviceBuild mDeviceBuild;
     private long mPerTestTimeout = 0;
+    private final Instrumentation mInstr;
+    private final Bundle mArgsBundle;
 
     /**
      * Accessor interface for retrieving device build properties.
@@ -373,37 +378,6 @@ public class TestRequestBuilder {
         }
     }
 
-    public TestRequestBuilder(PrintStream writer, String... apkPaths) {
-        this(new DeviceBuildImpl(), writer, apkPaths);
-    }
-
-    TestRequestBuilder(DeviceBuild deviceBuildAccessor, PrintStream writer, String... apkPaths) {
-        mDeviceBuild = deviceBuildAccessor;
-        mApkPaths = apkPaths;
-        mTestLoader = new TestLoader(writer);
-    }
-
-    /**
-     * Add a test class to be executed. All test methods in this class will be executed.
-     *
-     * @param className
-     */
-    public void addTestClass(String className) {
-        mTestLoader.loadClass(className);
-    }
-
-    /**
-     * Adds a test method to run.
-     * <p/>
-     * Currently only supports one test method to be run.
-     */
-    public void addTestMethod(String testClassName, String testMethodName) {
-        Class<?> clazz = mTestLoader.loadClass(testClassName);
-        if (clazz != null) {
-            mClassMethodFilter.add(testClassName, testMethodName);
-        }
-    }
-
     /**
      * A {@link Filter} to support the ability to filter out multiple classes#methodes combinations.
      */
@@ -498,18 +472,78 @@ public class TestRequestBuilder {
     }
 
     /**
-     * Run only tests within given java package
+     * Creates a TestRequestBuilder
+     *
+     * @param writer the {@link PrintStream} to use for logging error information
+     * @param instr the {@link} Instrumentation to pass to applicable tests
+     * @param bundle the {@link} Bundle to pass to applicable tests
+     */
+    public TestRequestBuilder(PrintStream writer, Instrumentation instr, Bundle bundle) {
+        this(new DeviceBuildImpl(), writer, instr, bundle);
+    }
+
+    /**
+     * Alternate TestRequestBuilder constructor that accepts a custom DeviceBuild
+     *
+     * VisibleForTesting
+     */
+    TestRequestBuilder(DeviceBuild deviceBuildAccessor, PrintStream writer, Instrumentation instr,
+                       Bundle bundle) {
+        mDeviceBuild = Checks.checkNotNull(deviceBuildAccessor);
+        mTestLoader = new TestLoader(writer);
+        mInstr = Checks.checkNotNull(instr);
+        mArgsBundle = Checks.checkNotNull(bundle);
+    }
+
+    /**
+     * Instruct builder to scan given apk, and add all tests classes found. Will be ignored if
+     * addTestClass or addTestMethod is used.
+     *
+     * @param apkPath
+     */
+    public TestRequestBuilder addApkToScan(String apkPath) {
+        mApkPaths.add(apkPath);
+        return this;
+    }
+
+    /**
+     * Add a test class to be executed. All test methods in this class will be executed.
+     *
+     * @param className
+     */
+    public TestRequestBuilder addTestClass(String className) {
+        mTestLoader.loadClass(className);
+        return this;
+    }
+
+    /**
+     * Adds a test method to run.
+     * <p/>
+     * Currently only supports one test method to be run.
+     */
+    public TestRequestBuilder addTestMethod(String testClassName, String testMethodName) {
+        Class<?> clazz = mTestLoader.loadClass(testClassName);
+        if (clazz != null) {
+            mClassMethodFilter.add(testClassName, testMethodName);
+        }
+        return this;
+    }
+
+    /**
+     * Run only tests within given java package. Will be ignored if addTestClass has been called.
+     * At least one addApkPath also must be provided.
      * @param testPackage
      */
-    public void addTestPackageFilter(String testPackage) {
+    public TestRequestBuilder addTestPackageFilter(String testPackage) {
         mTestPackageName = testPackage;
+        return this;
     }
 
     /**
      * Run only tests with given size
      * @param testSize
      */
-    public void addTestSizeFilter(String testSize) {
+    public TestRequestBuilder addTestSizeFilter(String testSize) {
         if (SMALL_SIZE.equals(testSize)) {
             mFilter = mFilter.intersect(new SizeFilter(SmallTest.class));
         } else if (MEDIUM_SIZE.equals(testSize)) {
@@ -519,6 +553,7 @@ public class TestRequestBuilder {
         } else {
             Log.e(LOG_TAG, String.format("Unrecognized test size '%s'", testSize));
         }
+        return this;
     }
 
     /**
@@ -526,11 +561,12 @@ public class TestRequestBuilder {
      *
      * @param annotation the full class name of annotation
      */
-    public void addAnnotationInclusionFilter(String annotation) {
+    public TestRequestBuilder addAnnotationInclusionFilter(String annotation) {
         Class<? extends Annotation> annotationClass = loadAnnotationClass(annotation);
         if (annotationClass != null) {
             mFilter = mFilter.intersect(new AnnotationInclusionFilter(annotationClass));
         }
+        return this;
     }
 
     /**
@@ -538,30 +574,34 @@ public class TestRequestBuilder {
      *
      * @param notAnnotation the full class name of annotation
      */
-    public void addAnnotationExclusionFilter(String notAnnotation) {
+    public TestRequestBuilder addAnnotationExclusionFilter(String notAnnotation) {
         Class<? extends Annotation> annotationClass = loadAnnotationClass(notAnnotation);
         if (annotationClass != null) {
             mFilter = mFilter.intersect(new AnnotationExclusionFilter(annotationClass));
         }
+        return this;
     }
 
-    public void addShardingFilter(int numShards, int shardIndex) {
+    public TestRequestBuilder addShardingFilter(int numShards, int shardIndex) {
         mFilter = mFilter.intersect(new ShardingFilter(numShards, shardIndex));
+        return this;
     }
 
     /**
      * Build a request that will generate test started and test ended events, but will skip actual
      * test execution.
      */
-    public void setSkipExecution(boolean b) {
+    public TestRequestBuilder setSkipExecution(boolean b) {
         mSkipExecution = b;
+        return this;
     }
 
     /**
      * Sets milliseconds timeout value applied to each test where 0 means no timeout
      */
-    public void setPerTestTimeout(long millis) {
+    public TestRequestBuilder setPerTestTimeout(long millis) {
         mPerTestTimeout = millis;
+        return this;
     }
 
     /**
@@ -569,14 +609,14 @@ public class TestRequestBuilder {
      * <p/>
      * If no classes have been explicitly added, will scan the classpath for all tests.
      */
-    public TestRequest build(Instrumentation instr, Bundle bundle) {
+    public TestRequest build() {
         if (mTestLoader.isEmpty()) {
             // no class restrictions have been specified. Load all classes
             loadClassesFromClassPath();
         }
 
         Request request = classes(
-                new AndroidRunnerParams(instr, bundle, mSkipExecution, mPerTestTimeout),
+                new AndroidRunnerParams(mInstr, mArgsBundle, mSkipExecution, mPerTestTimeout),
                 new Computer(),
                 mTestLoader.getLoadedClasses().toArray(new Class[0]));
         return new TestRequest(mTestLoader.getLoadFailures(),
@@ -611,8 +651,11 @@ public class TestRequestBuilder {
     }
 
     private Collection<String> getClassNamesFromClassPath() {
+        if (mApkPaths.isEmpty()) {
+            throw new IllegalStateException("neither test class to execute or apk paths were provided");
+        }
         Log.i(LOG_TAG, String.format("Scanning classpath to find tests in apks %s",
-                Arrays.toString(mApkPaths)));
+                mApkPaths));
         ClassPathScanner scanner = new ClassPathScanner(mApkPaths);
 
         ChainedClassNameFilter filter =   new ChainedClassNameFilter();

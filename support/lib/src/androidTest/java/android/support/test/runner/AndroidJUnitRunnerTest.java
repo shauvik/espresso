@@ -15,6 +15,7 @@
  */
 package android.support.test.runner;
 
+import android.app.Instrumentation;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -63,8 +64,8 @@ public class AndroidJUnitRunnerTest {
         mAndroidJUnitRunner = new AndroidJUnitRunner() {
 
             @Override
-            TestRequestBuilder createTestRequestBuilder(PrintStream writer,
-                    String... packageCodePaths) {
+            TestRequestBuilder createTestRequestBuilder(PrintStream writer, Instrumentation instr,
+                                                        Bundle arguments) {
                 return mMockBuilder;
             }
 

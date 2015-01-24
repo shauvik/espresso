@@ -16,16 +16,17 @@
 
 package android.support.test.internal.runner;
 
-import dalvik.system.DexFile;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
+import dalvik.system.DexFile;
 
 /**
  * Finds class entries in apks.
@@ -156,9 +157,11 @@ class ClassPathScanner {
     private Set<String> mApkPaths = new HashSet<String>();
 
     public ClassPathScanner(String... apkPaths) {
-        for (String apkPath : apkPaths) {
-            mApkPaths.add(apkPath);
-        }
+        this(Arrays.asList(apkPaths));
+    }
+
+    public ClassPathScanner(Collection<String> apkPaths) {
+        mApkPaths.addAll(apkPaths);
     }
 
     /**

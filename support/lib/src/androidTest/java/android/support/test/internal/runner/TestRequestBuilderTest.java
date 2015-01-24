@@ -15,9 +15,6 @@
  */
 package android.support.test.internal.runner;
 
-import android.app.Instrumentation;
-import android.os.Bundle;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.RequiresDevice;
 import android.support.test.filters.SdkSuppress;
 import android.support.test.internal.runner.TestRequestBuilder.DeviceBuild;
@@ -28,9 +25,11 @@ import android.test.suitebuilder.annotation.Suppress;
 import junit.framework.TestCase;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
+import org.junit.runner.Request;
 import org.junit.runner.Result;
 import org.junit.runner.RunWith;
 import org.junit.runner.notification.RunListener;
@@ -285,16 +284,34 @@ public class TestRequestBuilderTest {
     @Mock
     private DeviceBuild mMockDeviceBuild;
 
+    private TestRequestBuilder mBuilder;
+
+    @Before
+    public void setUp() throws Exception {
+        mBuilder = createBuilder();
+    }
+
+    private TestRequestBuilder createBuilder() {
+        return new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()),
+                getInstrumentation(), getArguments());
+    }
+
+    private TestRequestBuilder createBuilder(DeviceBuild deviceBuild) {
+        return new TestRequestBuilder(deviceBuild, new PrintStream(new ByteArrayOutputStream()),
+                getInstrumentation(), getArguments());
+    }
+
     /**
      * Test initial condition for size filtering - that all tests run when no filter is attached
      */
     @Test
     public void testNoSize() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleTest.class.getName());
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestClass(SampleTest.class.getName())
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
+        Result result = testRunner.run(request);
         Assert.assertEquals(2, result.getRunCount());
     }
 
@@ -303,12 +320,13 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testSize() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleTest.class.getName());
-        b.addTestSizeFilter("small");
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestClass(SampleTest.class.getName())
+                .addTestSizeFilter("small")
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
+        Result result = testRunner.run(request);
         Assert.assertEquals(1, result.getRunCount());
     }
 
@@ -317,13 +335,14 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testSize_class() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleTest.class.getName());
-        b.addTestClass(SampleClassSize.class.getName());
-        b.addTestSizeFilter("small");
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestClass(SampleTest.class.getName())
+                .addTestClass(SampleClassSize.class.getName())
+                .addTestSizeFilter("small")
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
+        Result result = testRunner.run(request);
         Assert.assertEquals(3, result.getRunCount());
     }
 
@@ -332,15 +351,16 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testSize_classFiltered() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleTest.class.getName());
-        b.addTestClass(SampleNoSize.class.getName());
-        b.addTestSizeFilter("small");
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestClass(SampleTest.class.getName())
+                .addTestClass(SampleNoSize.class.getName())
+                .addTestSizeFilter("small")
+                .build()
+                .getRequest();
         MyRunListener l = new MyRunListener();
         JUnitCore testRunner = new JUnitCore();
         testRunner.addListener(l);
-        testRunner.run(request.getRequest());
+        testRunner.run(request);
         Assert.assertEquals(1, l.mTestCount);
     }
 
@@ -358,13 +378,14 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testSize_junit3Method() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleJUnit3Test.class.getName());
-        b.addTestClass(SampleNoSize.class.getName());
-        b.addTestSizeFilter("small");
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestClass(SampleJUnit3Test.class.getName())
+                .addTestClass(SampleNoSize.class.getName())
+                .addTestSizeFilter("small")
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result r = testRunner.run(request.getRequest());
+        Result r = testRunner.run(request);
         Assert.assertEquals(2, r.getRunCount());
     }
 
@@ -373,11 +394,12 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testSuppress_junit3Method() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleJUnit3Suppressed.class.getName());
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestClass(SampleJUnit3Suppressed.class.getName())
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result r = testRunner.run(request.getRequest());
+        Result r = testRunner.run(request);
         Assert.assertEquals(2, r.getRunCount());
     }
 
@@ -386,15 +408,16 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testSuppress_withSize() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleJUnit3Suppressed.class.getName());
-        b.addTestClass(SampleJUnit3Test.class.getName());
-        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestClass(SampleJUnit3Suppressed.class.getName())
+                .addTestClass(SampleJUnit3Test.class.getName())
+                .addTestSizeFilter(TestRequestBuilder.SMALL_SIZE)
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
         MyRunListener l = new MyRunListener();
         testRunner.addListener(l);
-        Result r = testRunner.run(request.getRequest());
+        Result r = testRunner.run(request);
         Assert.assertEquals(2, r.getRunCount());
         Assert.assertEquals(2, l.mTestCount);
     }
@@ -404,15 +427,16 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testSuppress_withSizeAndSuper() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleJUnit3SuppressedWithSuper.class.getName());
-        b.addTestClass(SampleJUnit3Test.class.getName());
-        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestClass(SampleJUnit3SuppressedWithSuper.class.getName())
+                .addTestClass(SampleJUnit3Test.class.getName())
+                .addTestSizeFilter(TestRequestBuilder.SMALL_SIZE)
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
         MyRunListener l = new MyRunListener();
         testRunner.addListener(l);
-        Result r = testRunner.run(request.getRequest());
+        Result r = testRunner.run(request);
         Assert.assertEquals(2, r.getRunCount());
         Assert.assertEquals(2, l.mTestCount);
     }
@@ -422,14 +446,15 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testSuppress_all() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleAllSuppressed.class.getName());
-        b.addTestClass(SampleJUnit3Suppressed.class.getName());
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestClass(SampleAllSuppressed.class.getName())
+                .addTestClass(SampleJUnit3Suppressed.class.getName())
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
         MyRunListener l = new MyRunListener();
         testRunner.addListener(l);
-        Result r = testRunner.run(request.getRequest());
+        Result r = testRunner.run(request);
         Assert.assertEquals(2, r.getRunCount());
         Assert.assertEquals(2, l.mTestCount);
     }
@@ -440,15 +465,16 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testSizeAndSuppress() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleSizeAndSuppress.class.getName());
-        b.addTestClass(SampleJUnit3Test.class.getName());
-        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestClass(SampleSizeAndSuppress.class.getName())
+                .addTestClass(SampleJUnit3Test.class.getName())
+                .addTestSizeFilter(TestRequestBuilder.SMALL_SIZE)
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
         MyRunListener l = new MyRunListener();
         testRunner.addListener(l);
-        Result r = testRunner.run(request.getRequest());
+        Result r = testRunner.run(request);
         Assert.assertEquals(2, r.getRunCount());
         Assert.assertEquals(2, l.mTestCount);
     }
@@ -459,15 +485,16 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testSizeWithSuppress() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleSizeWithSuppress.class.getName());
-        b.addTestClass(SampleJUnit3Test.class.getName());
-        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestClass(SampleSizeWithSuppress.class.getName())
+                .addTestClass(SampleJUnit3Test.class.getName())
+                .addTestSizeFilter(TestRequestBuilder.SMALL_SIZE)
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
         MyRunListener l = new MyRunListener();
         testRunner.addListener(l);
-        Result r = testRunner.run(request.getRequest());
+        Result r = testRunner.run(request);
         Assert.assertEquals(2, r.getRunCount());
         Assert.assertEquals(2, l.mTestCount);
     }
@@ -477,13 +504,14 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testAddAnnotationInclusionFilter() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addAnnotationInclusionFilter(SmallTest.class.getName());
-        b.addTestClass(SampleTest.class.getName());
-        b.addTestClass(SampleClassSize.class.getName());
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addAnnotationInclusionFilter(SmallTest.class.getName())
+                .addTestClass(SampleTest.class.getName())
+                .addTestClass(SampleClassSize.class.getName())
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
+        Result result = testRunner.run(request);
         Assert.assertEquals(3, result.getRunCount());
     }
 
@@ -492,13 +520,14 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testAddAnnotationExclusionFilter() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addAnnotationExclusionFilter(SmallTest.class.getName());
-        b.addTestClass(SampleTest.class.getName());
-        b.addTestClass(SampleClassSize.class.getName());
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addAnnotationExclusionFilter(SmallTest.class.getName())
+                .addTestClass(SampleTest.class.getName())
+                .addTestClass(SampleClassSize.class.getName())
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
+        Result result = testRunner.run(request);
         Assert.assertEquals(1, result.getRunCount());
     }
 
@@ -509,12 +538,13 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testAddAnnotationInclusionFilter_super() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addAnnotationInclusionFilter(SmallTest.class.getName());
-        b.addTestClass(InheritedAnnnotation.class.getName());
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addAnnotationInclusionFilter(SmallTest.class.getName())
+                .addTestClass(InheritedAnnnotation.class.getName())
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
+        Result result = testRunner.run(request);
         Assert.assertEquals(2, result.getRunCount());
     }
 
@@ -523,20 +553,22 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testTestSizeFilter_override() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
-        b.addTestClass(SampleOverrideSize.class.getName());
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestSizeFilter(TestRequestBuilder.SMALL_SIZE)
+                .addTestClass(SampleOverrideSize.class.getName())
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
+        Result result = testRunner.run(request);
         Assert.assertEquals(1, result.getRunCount());
 
-        b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestSizeFilter(TestRequestBuilder.MEDIUM_SIZE);
-        b.addTestClass(SampleOverrideSize.class.getName());
-        request = b.build(getInstrumentation(), getArguments());
+        request = createBuilder()
+                .addTestSizeFilter(TestRequestBuilder.MEDIUM_SIZE)
+                .addTestClass(SampleOverrideSize.class.getName())
+                .build()
+                .getRequest();
         testRunner = new JUnitCore();
-        result = testRunner.run(request.getRequest());
+        result = testRunner.run(request);
         Assert.assertEquals(1, result.getRunCount());
     }
 
@@ -546,12 +578,13 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testTestSizeFilter_sameAnnotation() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestSizeFilter(TestRequestBuilder.SMALL_SIZE);
-        b.addTestClass(SampleSameSize.class.getName());
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestSizeFilter(TestRequestBuilder.SMALL_SIZE)
+                .addTestClass(SampleSameSize.class.getName())
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
+        Result result = testRunner.run(request);
         Assert.assertEquals(1, result.getRunCount());
     }
 
@@ -560,13 +593,14 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testTestSizeFilter_multipleNotAnnotation() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addAnnotationExclusionFilter(SmallTest.class.getName());
-        b.addAnnotationExclusionFilter(MediumTest.class.getName());
-        b.addTestClass(SampleMultipleAnnotation.class.getName());
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addAnnotationExclusionFilter(SmallTest.class.getName())
+                .addAnnotationExclusionFilter(MediumTest.class.getName())
+                .addTestClass(SampleMultipleAnnotation.class.getName())
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
+        Result result = testRunner.run(request);
         // expect 1 test that failed
         Assert.assertEquals(1, result.getRunCount());
         Assert.assertEquals("testRunThis",
@@ -580,27 +614,25 @@ public class TestRequestBuilderTest {
     public void testShardingFilter() {
         JUnitCore testRunner = new JUnitCore();
 
-        TestRequestBuilder[] builders = new TestRequestBuilder[5];
         Result[] results = new Result[4];
         int totalRun = 0;
         // The last iteration through the loop doesn't add a ShardingFilter - it runs all the
         // tests to establish a baseline for the total number that should have been run.
         for (int i = 0; i < 5; i++) {
-            TestRequestBuilder b = new TestRequestBuilder(new PrintStream(
-                    new ByteArrayOutputStream()));
+            TestRequestBuilder b = createBuilder();
             if (i < 4) {
                 b.addShardingFilter(4, i);
             }
-            builders[i] = b;
-            b.addTestClass(SampleTest.class.getName());
-            b.addTestClass(SampleNoSize.class.getName());
-            b.addTestClass(SampleClassSize.class.getName());
-            b.addTestClass(SampleJUnit3Test.class.getName());
-            b.addTestClass(SampleOverrideSize.class.getName());
-            b.addTestClass(SampleJUnit3ClassSize.class.getName());
-            b.addTestClass(SampleMultipleAnnotation.class.getName());
-            TestRequest request = b.build(getInstrumentation(), getArguments());
-            Result result = testRunner.run(request.getRequest());
+            Request request = b.addTestClass(SampleTest.class.getName())
+                .addTestClass(SampleNoSize.class.getName())
+                .addTestClass(SampleClassSize.class.getName())
+                .addTestClass(SampleJUnit3Test.class.getName())
+                .addTestClass(SampleOverrideSize.class.getName())
+                .addTestClass(SampleJUnit3ClassSize.class.getName())
+                .addTestClass(SampleMultipleAnnotation.class.getName())
+                .build()
+                .getRequest();
+            Result result = testRunner.run(request);
             if (i == 4) {
                 Assert.assertEquals(result.getRunCount(), totalRun);
             } else {
@@ -620,12 +652,13 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testNoTests() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestClass(SampleTest.class.getName());
-        b.addTestSizeFilter("medium");
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestClass(SampleTest.class.getName())
+                .addTestSizeFilter("medium")
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
+        Result result = testRunner.run(request);
         Assert.assertEquals(0, result.getRunCount());
     }
 
@@ -633,15 +666,15 @@ public class TestRequestBuilderTest {
      * Test that {@link SdkSuppress} filters tests as appropriate
      */
     @Test
-    public void testSdkSuppress() {
+    public void testSdkSuppress() throws Exception {
         MockitoAnnotations.initMocks(this);
-        TestRequestBuilder b = new TestRequestBuilder(mMockDeviceBuild,
-                new PrintStream(new ByteArrayOutputStream()));
+        TestRequestBuilder b = createBuilder(mMockDeviceBuild);
         Mockito.when(mMockDeviceBuild.getSdkVersionInt()).thenReturn(16);
-        b.addTestClass(SampleSdkSuppress.class.getName());
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = b.addTestClass(SampleSdkSuppress.class.getName())
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
+        Result result = testRunner.run(request);
         Assert.assertEquals(2, result.getRunCount());
     }
 
@@ -651,14 +684,14 @@ public class TestRequestBuilderTest {
     @Test
     public void testRequiresDevice() {
         MockitoAnnotations.initMocks(this);
-        TestRequestBuilder b = new TestRequestBuilder(mMockDeviceBuild,
-                new PrintStream(new ByteArrayOutputStream()));
+        TestRequestBuilder b = createBuilder(mMockDeviceBuild);
         Mockito.when(mMockDeviceBuild.getHardware()).thenReturn(
                 TestRequestBuilder.EMULATOR_HARDWARE);
-        b.addTestClass(SampleRequiresDevice.class.getName());
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = b.addTestClass(SampleRequiresDevice.class.getName())
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
+        Result result = testRunner.run(request);
         Assert.assertEquals(2, result.getRunCount());
     }
 
@@ -667,12 +700,12 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testMethodFilterWithDollar() {
-        TestRequestBuilder b = new TestRequestBuilder(mMockDeviceBuild,
-                new PrintStream(new ByteArrayOutputStream()));
-        b.addTestMethod(DollarMethod.class.getName(), "testWith$");
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestMethod(DollarMethod.class.getName(), "testWith$")
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
+        Result result = testRunner.run(request);
         Assert.assertEquals(1, result.getRunCount());
     }
 
@@ -681,12 +714,13 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testMultipleMethodsFilter() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestMethod(SampleJUnit3Test.class.getName(), "testSmall");
-        b.addTestMethod(SampleJUnit3Test.class.getName(), "testSmall2");
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestMethod(SampleJUnit3Test.class.getName(), "testSmall")
+                .addTestMethod(SampleJUnit3Test.class.getName(), "testSmall2")
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
+        Result result = testRunner.run(request);
         Assert.assertEquals(2, result.getRunCount());
     }
 
@@ -695,12 +729,13 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testTwoMethodsDiffClassFilter() {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestMethod(SampleJUnit3Test.class.getName(), "testSmall");
-        b.addTestMethod(SampleTest.class.getName(), "testOther");
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestMethod(SampleJUnit3Test.class.getName(), "testSmall")
+                .addTestMethod(SampleTest.class.getName(), "testOther")
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
+        Result result = testRunner.run(request);
         Assert.assertEquals(2, result.getRunCount());
     }
 
@@ -709,11 +744,21 @@ public class TestRequestBuilderTest {
      */
     @Test
     public void testParameterizedMethods() throws Exception {
-        TestRequestBuilder b = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()));
-        b.addTestMethod(ParameterizedTest.class.getName(), "testParameterized");
-        TestRequest request = b.build(getInstrumentation(), getArguments());
+        Request request = mBuilder
+                .addTestMethod(ParameterizedTest.class.getName(), "testParameterized")
+                .build()
+                .getRequest();
         JUnitCore testRunner = new JUnitCore();
-        Result result = testRunner.run(request.getRequest());
+        Result result = testRunner.run(request);
         Assert.assertEquals(3, result.getRunCount());
+    }
+
+    /**
+     * Test exception is thrown when no apk path and no class has been provided
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testNoApkPath() throws Exception {
+        mBuilder.addTestPackageFilter("foo")
+                .build();
     }
 }
