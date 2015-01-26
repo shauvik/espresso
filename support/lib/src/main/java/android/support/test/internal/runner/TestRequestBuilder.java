@@ -496,8 +496,8 @@ public class TestRequestBuilder {
     }
 
     /**
-     * Instruct builder to scan given apk, and add all tests classes found. Will be ignored if
-     * addTestClass or addTestMethod is used.
+     * Instruct builder to scan given apk, and add all tests classes found. Cannot be used in
+     * conjunction with addTestClass or addTestMethod is used.
      *
      * @param apkPath
      */
@@ -530,9 +530,12 @@ public class TestRequestBuilder {
     }
 
     /**
-     * Run only tests within given java package. Will be ignored if addTestClass has been called.
+     * Run only tests within given java package. Cannot be used in conjunction with
+     * addTestClass/Method.
+     * <p/>
      * At least one addApkPath also must be provided.
-     * @param testPackage
+     *
+     * @param testPackage the fully qualified java package name
      */
     public TestRequestBuilder addTestPackageFilter(String testPackage) {
         mTestPackageName = testPackage;
@@ -605,11 +608,12 @@ public class TestRequestBuilder {
     }
 
     /**
-     * Builds the {@link TestRequest} based on current contents of added classes and methods.
-     * <p/>
-     * If no classes have been explicitly added, will scan the classpath for all tests.
+     * Builds the {@link TestRequest} based on provided data.
+     *
+     * @throws java.lang.IllegalArgumentException if provided set of data is not valid
      */
     public TestRequest build() {
+        validate();
         if (mTestLoader.isEmpty()) {
             // no class restrictions have been specified. Load all classes
             loadClassesFromClassPath();
@@ -621,6 +625,23 @@ public class TestRequestBuilder {
                 mTestLoader.getLoadedClasses().toArray(new Class[0]));
         return new TestRequest(mTestLoader.getLoadFailures(),
                 new LenientFilterRequest(request, mFilter));
+    }
+
+    /**
+     * Validate that the set of options provided to this builder are valid and not conflicting
+     */
+    private void validate() {
+        if (mTestLoader.isEmpty() && mApkPaths.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Must provide either classes to run, or apks to scan");
+        }
+        // TODO: consider failing if both test classes and apk paths are given.
+        // Right now that is allowed though
+
+        if (mTestPackageName != null && !mTestLoader.isEmpty()) {
+            throw new IllegalArgumentException("Ambiguous arguments: " +
+                    "cannot provide both test package and test class(es) to run");
+        }
     }
 
     /**

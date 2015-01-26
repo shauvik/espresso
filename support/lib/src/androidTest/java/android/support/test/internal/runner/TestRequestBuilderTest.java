@@ -756,9 +756,19 @@ public class TestRequestBuilderTest {
     /**
      * Test exception is thrown when no apk path and no class has been provided
      */
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testNoApkPath() throws Exception {
-        mBuilder.addTestPackageFilter("foo")
+        mBuilder.addTestPackageFilter("android.support.test.internal.runner")
+                .build();
+    }
+
+    /**
+     * Test exception is thrown when both test package and class has been provided
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testBothPackageAndTestClass() throws Exception {
+        mBuilder.addTestPackageFilter("android.support.test.internal.runner")
+                .addTestClass(SampleJUnit3Test.class.getName())
                 .build();
     }
 }
