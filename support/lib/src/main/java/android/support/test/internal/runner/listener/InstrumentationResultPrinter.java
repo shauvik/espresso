@@ -19,13 +19,26 @@ import android.app.Instrumentation;
 import android.os.Bundle;
 import android.util.Log;
 
+import org.junit.internal.TextListener;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
+import org.junit.runner.notification.RunListener;
+
+import java.io.PrintStream;
 
 /**
  * A {@link RunListener} that sends detailed pass/fail results back as instrumentation status
- * bundles. This output appears when running the instrumentation in '-r' or raw mode.
+ * bundles.
+ * <p/>
+ * When running instrumentation in '-r' or raw mode, output will be displayed in this format
+ * <pre>
+ *     INSTRUMENTATION_STATUS: key=value
+ * </pre>
+ * for each key-value pair in the bundle.
+ * <p/>
+ * When running in normal aka non raw mode, only the value of the
+ * Instrumentation.REPORT_KEY_STREAMRESULT key will be displayed.
  */
 public class InstrumentationResultPrinter extends InstrumentationRunListener {
 
@@ -98,6 +111,7 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
     public static final String REPORT_KEY_STACK = "stack";
 
     private final Bundle mResultTemplate;
+    private Result mJUnitResult = null;
     Bundle mTestResult;
     int mTestNum = 0;
     int mTestResultCode = 0;
@@ -116,6 +130,7 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
 
     @Override
     public void testRunFinished(Result result) throws Exception {
+       mJUnitResult = result;
     }
 
     /**
@@ -127,7 +142,7 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
         mDescription = description; // cache Description in case of a crash
         String testClass = description.getClassName();
         String testName = description.getMethodName();
-        mTestResult = getTestResult();
+        mTestResult = new Bundle(mResultTemplate);
         mTestResult.putString(REPORT_KEY_NAME_CLASS, testClass);
         mTestResult.putString(REPORT_KEY_NAME_TEST, testName);
         mTestResult.putInt(REPORT_KEY_NUM_CURRENT, ++mTestNum);
@@ -144,14 +159,6 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
         mTestResultCode = REPORT_VALUE_RESULT_OK;
     }
 
-    // Exposed for unit testing
-    Bundle getTestResult() {
-        if (mTestResult == null) {
-            mTestResult = new Bundle(mResultTemplate);
-        }
-        return mTestResult;
-    }
-
     @Override
     public void testFinished(Description description) throws Exception {
         if (mTestResultCode == REPORT_VALUE_RESULT_OK) {
@@ -165,7 +172,6 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
         mTestResultCode = REPORT_VALUE_RESULT_FAILURE;
         reportFailure(failure);
     }
-
 
     @Override
     public void testAssumptionFailure(Failure failure) {
@@ -207,5 +213,15 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
             Log.e(LOG_TAG, "Failed to mark test " + mDescription.getDisplayName() +
                     " as finished after process crash");
         }
+    }
+
+    @Override
+    public void instrumentationRunFinished(PrintStream streamResult, Bundle resultBundle) {
+        if (mJUnitResult == null) {
+            Log.e(LOG_TAG, "Error: missing JUnit results");
+            return;
+        }
+        // reuse JUnit TextListener to display a summary of the run
+        new TextListener(streamResult).testRunFinished(mJUnitResult);
     }
 }

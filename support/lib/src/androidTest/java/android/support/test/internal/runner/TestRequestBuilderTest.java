@@ -38,8 +38,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -292,13 +290,11 @@ public class TestRequestBuilderTest {
     }
 
     private TestRequestBuilder createBuilder() {
-        return new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()),
-                getInstrumentation(), getArguments());
+        return new TestRequestBuilder(getInstrumentation(), getArguments());
     }
 
     private TestRequestBuilder createBuilder(DeviceBuild deviceBuild) {
-        return new TestRequestBuilder(deviceBuild, new PrintStream(new ByteArrayOutputStream()),
-                getInstrumentation(), getArguments());
+        return new TestRequestBuilder(deviceBuild, getInstrumentation(), getArguments());
     }
 
     /**

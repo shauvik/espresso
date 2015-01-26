@@ -21,7 +21,6 @@ import android.util.Log;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 
-import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -32,23 +31,12 @@ import java.util.Map;
 /**
  * A class for loading JUnit3 and JUnit4 test classes given a set of potential class names.
  */
-public class TestLoader {
+public final class TestLoader {
 
     private static final String LOG_TAG = "TestLoader";
 
     private Map<String, Class<?>> mLoadedClassesMap = new LinkedHashMap<String, Class<?>>();
     private Map<String, Failure> mLoadFailuresMap = new LinkedHashMap<String, Failure>();
-
-    private PrintStream mWriter;
-
-    /**
-     * Create a {@link TestLoader}.
-     *
-     * @param writer a {@link PrintStream} used for reporting errors.
-     */
-    public TestLoader(PrintStream writer) {
-        mWriter = writer;
-    }
 
     /**
      * Loads the test class from a given class name if its not already loaded.
@@ -86,7 +74,6 @@ public class TestLoader {
         } catch (ClassNotFoundException e) {
             String errMsg = String.format("Could not find class: %s", className);
             Log.e(LOG_TAG, errMsg);
-            mWriter.println(errMsg);
             Description description = Description.createSuiteDescription(className);
             Failure failure = new Failure(description, e);
             mLoadFailuresMap.put(className, failure);

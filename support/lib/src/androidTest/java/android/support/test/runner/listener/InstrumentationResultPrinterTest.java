@@ -41,10 +41,6 @@ public class InstrumentationResultPrinterTest {
                 resultCode[0] = code;
                 resultBundle[0] = bundle;
             }
-
-            Bundle getTestResult() {
-                return new Bundle();
-            }
         };
 
         // fake start test execution

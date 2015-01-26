@@ -64,7 +64,7 @@ public class AndroidJUnitRunnerTest {
         mAndroidJUnitRunner = new AndroidJUnitRunner() {
 
             @Override
-            TestRequestBuilder createTestRequestBuilder(PrintStream writer, Instrumentation instr,
+            TestRequestBuilder createTestRequestBuilder(Instrumentation instr,
                                                         Bundle arguments) {
                 return mMockBuilder;
             }
@@ -92,7 +92,7 @@ public class AndroidJUnitRunnerTest {
     public void testBuildRequest_singleClass() {
         Bundle b = new Bundle();
         b.putString(AndroidJUnitRunner.ARGUMENT_TEST_CLASS, "ClassName");
-        mAndroidJUnitRunner.buildRequest(b, mStubStream);
+        mAndroidJUnitRunner.buildRequest(b);
         Mockito.verify(mMockBuilder).addTestClass("ClassName");
     }
 
@@ -104,7 +104,7 @@ public class AndroidJUnitRunnerTest {
     public void testBuildRequest_multiClass() {
         Bundle b = new Bundle();
         b.putString(AndroidJUnitRunner.ARGUMENT_TEST_CLASS, "ClassName1,ClassName2");
-        mAndroidJUnitRunner.buildRequest(b, mStubStream);
+        mAndroidJUnitRunner.buildRequest(b);
         Mockito.verify(mMockBuilder).addTestClass("ClassName1");
         Mockito.verify(mMockBuilder).addTestClass("ClassName2");
     }
@@ -117,7 +117,7 @@ public class AndroidJUnitRunnerTest {
     public void testBuildRequest_method() {
         Bundle b = new Bundle();
         b.putString(AndroidJUnitRunner.ARGUMENT_TEST_CLASS, "ClassName1#method");
-        mAndroidJUnitRunner.buildRequest(b, mStubStream);
+        mAndroidJUnitRunner.buildRequest(b);
         Mockito.verify(mMockBuilder).addTestMethod("ClassName1", "method");
     }
 
@@ -129,7 +129,7 @@ public class AndroidJUnitRunnerTest {
     public void testBuildRequest_classAndMethodCombo() {
         Bundle b = new Bundle();
         b.putString(AndroidJUnitRunner.ARGUMENT_TEST_CLASS, "ClassName1#method,ClassName2");
-        mAndroidJUnitRunner.buildRequest(b, mStubStream);
+        mAndroidJUnitRunner.buildRequest(b);
         Mockito.verify(mMockBuilder).addTestMethod("ClassName1", "method");
         Mockito.verify(mMockBuilder).addTestClass("ClassName2");
     }
@@ -155,7 +155,7 @@ public class AndroidJUnitRunnerTest {
         Bundle b = new Bundle();
         b.putString(AndroidJUnitRunner.ARGUMENT_TEST_FILE, file.getPath());
         b.putString(AndroidJUnitRunner.ARGUMENT_TEST_CLASS, "ClassName1#method1,ClassName2");
-        mAndroidJUnitRunner.buildRequest(b, mStubStream);
+        mAndroidJUnitRunner.buildRequest(b);
         Mockito.verify(mMockBuilder).addTestMethod("ClassName1", "method1");
         Mockito.verify(mMockBuilder).addTestClass("ClassName2");
         Mockito.verify(mMockBuilder).addTestClass("ClassName3");
@@ -170,7 +170,7 @@ public class AndroidJUnitRunnerTest {
     public void testBuildRequest_timeout() {
         Bundle b = new Bundle();
         b.putString(AndroidJUnitRunner.ARGUMENT_TIMEOUT, "5000"); //5 seconds
-        mAndroidJUnitRunner.buildRequest(b, mStubStream);
+        mAndroidJUnitRunner.buildRequest(b);
         Mockito.verify(mMockBuilder).setPerTestTimeout(5000);
     }
 
@@ -182,7 +182,7 @@ public class AndroidJUnitRunnerTest {
     public void testBuildRequest_timeoutWithWrongFormat() {
         Bundle b = new Bundle();
         b.putString(AndroidJUnitRunner.ARGUMENT_TIMEOUT, "not a long");
-        mAndroidJUnitRunner.buildRequest(b, mStubStream);
+        mAndroidJUnitRunner.buildRequest(b);
         Mockito.verify(mMockBuilder, Mockito.times(0)).setPerTestTimeout(1);
     }
 
@@ -194,7 +194,7 @@ public class AndroidJUnitRunnerTest {
     public void testBuildRequest_timeoutWithNegativeValue() {
         Bundle b = new Bundle();
         b.putString(AndroidJUnitRunner.ARGUMENT_TIMEOUT, "-500");
-        mAndroidJUnitRunner.buildRequest(b, mStubStream);
+        mAndroidJUnitRunner.buildRequest(b);
         Mockito.verify(mMockBuilder, Mockito.times(0)).setPerTestTimeout(1);
     }
 

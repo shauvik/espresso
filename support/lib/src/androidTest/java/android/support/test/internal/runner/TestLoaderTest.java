@@ -23,9 +23,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
 /**
  * Unit tests for {@link TestLoader}.
  */
@@ -70,7 +67,7 @@ public class TestLoaderTest {
 
     @Before
     public void setUp() throws Exception {
-        mLoader = new TestLoader(new PrintStream(new ByteArrayOutputStream()));
+        mLoader = new TestLoader();
     }
 
     @Test

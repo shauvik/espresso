@@ -28,15 +28,14 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.IBinder;
+import android.support.test.internal.runner.TestExecutor;
 import android.support.test.internal.runner.TestRequest;
 import android.support.test.internal.runner.TestRequestBuilder;
 import android.support.test.internal.runner.listener.ActivityFinisherRunListener;
 import android.support.test.internal.runner.listener.CoverageListener;
 import android.support.test.internal.runner.listener.DelayInjector;
 import android.support.test.internal.runner.listener.InstrumentationResultPrinter;
-import android.support.test.internal.runner.listener.InstrumentationRunListener;
 import android.support.test.internal.runner.listener.LogRunListener;
 import android.support.test.internal.runner.listener.SuiteAssignmentPrinter;
 import android.support.test.internal.runner.tracker.AnalyticsBasedUsageTracker;
@@ -45,18 +44,13 @@ import android.support.test.internal.runner.tracker.UsageTrackerRegistry;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
-import org.junit.internal.TextListener;
-import org.junit.runner.JUnitCore;
-import org.junit.runner.Result;
 import org.junit.runner.notification.RunListener;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -211,6 +205,8 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
         super.onCreate(arguments);
         setArguments(arguments);
 
+        setupDexmakerClassloader();
+
         start();
     }
 
@@ -249,40 +245,16 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
     public void onStart() {
         super.onStart();
 
+        TestExecutor.Builder executorBuilder = new TestExecutor.Builder(this);
         if (getBooleanArgument(ARGUMENT_DEBUG)) {
-            Debug.waitForDebugger();
+            executorBuilder.setWaitForDebugger(true);
         }
+        addListeners(executorBuilder);
 
-        setupDexmakerClassloader();
+        TestRequest testRequest = buildRequest(getArguments());
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        PrintStream writer = new PrintStream(byteArrayOutputStream);
-        List<RunListener> listeners = new ArrayList<RunListener>();
-
-        try {
-            JUnitCore testRunner = new JUnitCore();
-            addListeners(listeners, testRunner, writer);
-
-            TestRequest testRequest = buildRequest(getArguments(), writer);
-            Result result = testRunner.run(testRequest.getRequest());
-            result.getFailures().addAll(testRequest.getFailures());
-        } catch (Throwable t) {
-            // catch all exceptions so a more verbose error message can be displayed
-            writer.println(String.format(
-                    "Test run aborted due to unexpected exception: %s",
-                    t.getMessage()));
-            t.printStackTrace(writer);
-
-        } finally {
-            Bundle results = new Bundle();
-            reportRunEnded(listeners, writer, results);
-            writer.close();
-            results.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
-                    String.format("\n%s",
-                            byteArrayOutputStream.toString()));
-            finish(Activity.RESULT_OK, results);
-        }
-
+        Bundle results = executorBuilder.build().execute(testRequest);
+        finish(Activity.RESULT_OK, results);
     }
 
     @Override
@@ -296,53 +268,44 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
         super.finish(resultCode, results);
     }
 
-    private void addListeners(List<RunListener> listeners, JUnitCore testRunner,
-            PrintStream writer) {
+    private void addListeners(TestExecutor.Builder builder) {
         if (getBooleanArgument(ARGUMENT_SUITE_ASSIGNMENT)) {
-            listeners.add(new SuiteAssignmentPrinter());
+            builder.addRunListener(new SuiteAssignmentPrinter());
         } else {
-            listeners.add(new TextListener(writer));
-            listeners.add(new LogRunListener());
+            builder.addRunListener(new LogRunListener());
             mInstrumentationResultPrinter = new InstrumentationResultPrinter();
-            listeners.add(mInstrumentationResultPrinter);
-            listeners.add(new ActivityFinisherRunListener(this,
+            builder.addRunListener(mInstrumentationResultPrinter);
+            builder.addRunListener(new ActivityFinisherRunListener(this,
                     new MonitoringInstrumentation.ActivityFinisher()));
-            addDelayListener(listeners);
-            addCoverageListener(listeners);
+            addDelayListener(builder);
+            addCoverageListener(builder);
         }
 
-        addListenersFromArg(listeners, writer);
-        addListenersFromManifest(listeners, writer);
-
-        for (RunListener listener : listeners) {
-            testRunner.addListener(listener);
-            if (listener instanceof InstrumentationRunListener) {
-                ((InstrumentationRunListener)listener).setInstrumentation(this);
-            }
-        }
+        addListenersFromArg(builder);
+        addListenersFromManifest(builder);
     }
 
-    private void addCoverageListener(List<RunListener> list) {
+    private void addCoverageListener(TestExecutor.Builder builder) {
         if (getBooleanArgument(ARGUMENT_COVERAGE)) {
             String coverageFilePath = getArguments().getString(ARGUMENT_COVERAGE_PATH);
-            list.add(new CoverageListener(coverageFilePath));
+            builder.addRunListener(new CoverageListener(coverageFilePath));
         }
     }
 
     /**
      * Sets up listener to inject {@link #ARGUMENT_DELAY_MSEC}, if specified.
      */
-    private void addDelayListener(List<RunListener> list) {
+    private void addDelayListener(TestExecutor.Builder builder) {
         try {
             Object delay = getArguments().get(ARGUMENT_DELAY_MSEC);  // Accept either string or int
             if (delay != null) {
                 int delayMsec = Integer.parseInt(delay.toString());
-                list.add(new DelayInjector(delayMsec));
+                builder.addRunListener(new DelayInjector(delayMsec));
             } else if (getBooleanArgument(ARGUMENT_LOG_ONLY)
                     && Build.VERSION.SDK_INT < 16) {
                 // On older platforms, collecting tests can fail for large volume of tests.
                 // Insert a small delay between each test to prevent this
-                list.add(new DelayInjector(15 /* msec */));
+                builder.addRunListener(new DelayInjector(15 /* msec */));
             }
         } catch (NumberFormatException e) {
             Log.e(LOG_TAG, "Invalid delay_msec parameter", e);
@@ -352,17 +315,14 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
     /**
      * Add extra {@link RunListener}s specified via command line
      */
-    private void addListenersFromArg(List<RunListener> listeners,
-            PrintStream writer) {
-        addListenersFromClassString(getArguments().getString(ARGUMENT_LISTENER),
-                listeners, writer);
+    private void addListenersFromArg(TestExecutor.Builder builder) {
+        addListenersFromClassString(getArguments().getString(ARGUMENT_LISTENER), builder);
     }
 
     /**
      * Load the listeners specified via meta-data name="listener" in the AndroidManifest.
      */
-    private void addListenersFromManifest(List<RunListener> listeners,
-            PrintStream writer) {
+    private void addListenersFromManifest(TestExecutor.Builder builder) {
         PackageManager pm = getContext().getPackageManager();
         try {
             InstrumentationInfo instrInfo = pm.getInstrumentationInfo(getComponentName(),
@@ -372,7 +332,7 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
                 return;
             }
             String extraListenerList = b.getString(ARGUMENT_LISTENER);
-            addListenersFromClassString(extraListenerList, listeners, writer);
+            addListenersFromClassString(extraListenerList, builder);
         } catch (NameNotFoundException e) {
             // should never happen
             Log.wtf(LOG_TAG, String.format("Could not find component %s", getComponentName()));
@@ -383,56 +343,44 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
      * Add extra {@link RunListener}s to the testRunner as given in the csv class name list
      *
      * @param extraListenerList the CSV class name of {@link RunListener}s to add
-     * @param writer the {@link PrintStream} to dump errors to
-     * @param listeners the {@link List} to add listeners to
+     * @param builder the TestExecutor builder to add listeners to
      */
     private void addListenersFromClassString(String extraListenerList,
-            List<RunListener> listeners, PrintStream writer) {
+                                             TestExecutor.Builder builder) {
         if (extraListenerList == null) {
             return;
         }
 
         for (String listenerName : extraListenerList.split(",")) {
-            addListenerByClassName(listeners, writer, listenerName);
+            addListenerByClassName(builder, listenerName);
         }
     }
 
-    private void addListenerByClassName(List<RunListener> listeners,
-            PrintStream writer, String extraListener) {
+    private void addListenerByClassName(TestExecutor.Builder builder,
+            String extraListener) {
         if (extraListener == null || extraListener.length() == 0) {
             return;
         }
 
-        final Class<?> klass;
         try {
-            klass = Class.forName(extraListener);
-        } catch (ClassNotFoundException e) {
-            writer.println("Could not find extra RunListener class " + extraListener);
-            return;
-        }
-
-        if (!RunListener.class.isAssignableFrom(klass)) {
-            writer.println("Extra listeners must extend RunListener class " + extraListener);
-            return;
-        }
-
-        try {
+            final Class<?> klass = Class.forName(extraListener);
             klass.getConstructor().setAccessible(true);
+            final RunListener l =  (RunListener) klass.newInstance();
+            builder.addRunListener(l);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException("Could not find extra RunListener class "
+                    + extraListener);
         } catch (NoSuchMethodException e) {
-            writer.println("Must have no argument constructor for class " + extraListener);
-            return;
+            throw new IllegalArgumentException("Must have no argument constructor for class "
+                    + extraListener);
+        } catch (ClassCastException e) {
+           throw new IllegalArgumentException("Listeners must extend RunListener: "
+                   + extraListener);
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException("Failed to create listener: " + extraListener, e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Failed to create listener: " + extraListener);
         }
-
-        final RunListener l;
-        try {
-            l = (RunListener) klass.newInstance();
-        } catch (Throwable t) {
-            writer.println("Could not instantiate extra RunListener class " + extraListener);
-            t.printStackTrace(writer);
-            return;
-        }
-
-        listeners.add(l);
     }
 
     @Override
@@ -445,22 +393,14 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
         return super.onException(obj, e);
     }
 
-    private void reportRunEnded(List<RunListener> listeners, PrintStream writer, Bundle results) {
-        for (RunListener listener : listeners) {
-            if (listener instanceof InstrumentationRunListener) {
-                ((InstrumentationRunListener)listener).instrumentationRunFinished(writer, results);
-            }
-        }
-    }
-
     /**
      * Builds a {@link TestRequest} based on given input arguments.
      * <p/>
      * Exposed for unit testing.
      */
-    TestRequest buildRequest(Bundle arguments, PrintStream writer) {
+    TestRequest buildRequest(Bundle arguments) {
 
-        TestRequestBuilder builder = createTestRequestBuilder(writer, this, arguments);
+        TestRequestBuilder builder = createTestRequestBuilder(this, arguments);
 
         // only scan for tests for current apk aka testContext
         // Note that this represents a change from InstrumentationTestRunner where
@@ -546,9 +486,8 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
      * <p/>
      * Exposed for unit testing.
      */
-    TestRequestBuilder createTestRequestBuilder(PrintStream writer, Instrumentation instr,
-                                                Bundle arguments) {
-        return new TestRequestBuilder(writer, instr, arguments);
+    TestRequestBuilder createTestRequestBuilder(Instrumentation instr, Bundle arguments) {
+        return new TestRequestBuilder(instr, arguments);
     }
 
     /**
@@ -630,15 +569,15 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
     // @see b/14561718
     @Override
     public Activity newActivity(Class<?> clazz,
-            Context context,
-            IBinder token,
-            Application application,
-            Intent intent,
-            ActivityInfo info,
-            CharSequence title,
-            Activity parent,
-            String id,
-            Object lastNonConfigurationInstance) throws InstantiationException, IllegalAccessException {
+                                Context context,
+                                IBinder token,
+                                Application application,
+                                Intent intent,
+                                ActivityInfo info,
+                                CharSequence title,
+                                Activity parent,
+                                String id,
+                                Object lastNonConfigurationInstance) throws InstantiationException, IllegalAccessException {
         String activityClassPackageName = clazz.getPackage().getName();
         String contextPackageName = context.getPackageName();
         ComponentName intentComponentName = intent.getComponent();

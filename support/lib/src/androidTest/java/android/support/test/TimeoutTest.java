@@ -34,8 +34,6 @@ import org.junit.runner.Request;
 import org.junit.runner.Result;
 import org.junit.runner.RunWith;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.List;
 
 import static android.support.test.InstrumentationRegistry.getArguments;
@@ -54,8 +52,7 @@ public class TimeoutTest {
 
     @Before
     public void setUp() throws Exception {
-        mBuilder = new TestRequestBuilder(new PrintStream(new ByteArrayOutputStream()),
-                getInstrumentation(), getArguments());
+        mBuilder = new TestRequestBuilder(getInstrumentation(), getArguments());
     }
 
     @Test

@@ -41,7 +41,6 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.model.InitializationError;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -474,12 +473,11 @@ public class TestRequestBuilder {
     /**
      * Creates a TestRequestBuilder
      *
-     * @param writer the {@link PrintStream} to use for logging error information
      * @param instr the {@link} Instrumentation to pass to applicable tests
      * @param bundle the {@link} Bundle to pass to applicable tests
      */
-    public TestRequestBuilder(PrintStream writer, Instrumentation instr, Bundle bundle) {
-        this(new DeviceBuildImpl(), writer, instr, bundle);
+    public TestRequestBuilder(Instrumentation instr, Bundle bundle) {
+        this(new DeviceBuildImpl(), instr, bundle);
     }
 
     /**
@@ -487,10 +485,9 @@ public class TestRequestBuilder {
      *
      * VisibleForTesting
      */
-    TestRequestBuilder(DeviceBuild deviceBuildAccessor, PrintStream writer, Instrumentation instr,
-                       Bundle bundle) {
+    TestRequestBuilder(DeviceBuild deviceBuildAccessor,Instrumentation instr, Bundle bundle) {
         mDeviceBuild = Checks.checkNotNull(deviceBuildAccessor);
-        mTestLoader = new TestLoader(writer);
+        mTestLoader = new TestLoader();
         mInstr = Checks.checkNotNull(instr);
         mArgsBundle = Checks.checkNotNull(bundle);
     }
@@ -615,7 +612,7 @@ public class TestRequestBuilder {
     public TestRequest build() {
         validate();
         if (mTestLoader.isEmpty()) {
-            // no class restrictions have been specified. Load all classes
+            // no class restrictions have been specified. Load all classes.
             loadClassesFromClassPath();
         }
 
