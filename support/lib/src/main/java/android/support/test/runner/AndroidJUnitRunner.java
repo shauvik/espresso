@@ -64,9 +64,8 @@ import java.util.List;
  * An {@link Instrumentation} that runs JUnit3 and JUnit4 tests against
  * an Android package (application).
  * <p/>
- * Currently experimental. Based on {@link android.test.InstrumentationTestRunner}.
- * <p/>
- * Will eventually support a superset of {@link android.test.InstrumentationTestRunner} features,
+ * Based on and replacement for {@link android.test.InstrumentationTestRunner}. Supports a superset
+ * of {@link android.test.InstrumentationTestRunner} features,
  * while maintaining command/output format compatibility with that class.
  *
  * <h3>Typical Usage</h3>
