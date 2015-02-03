@@ -113,9 +113,10 @@ public class MonitoringInstrumentation extends Instrumentation {
         mExecutorService = Executors.newCachedThreadPool();
         Looper.myQueue().addIdleHandler(mIdleHandler);
         super.onCreate(arguments);
+        specifyDexMakerCacheProperty();
     }
 
-    protected final void specifyDexMakerCacheProperty() {
+    private final void specifyDexMakerCacheProperty() {
         // DexMaker uses heuristics to figure out where to store its temporary dex files
         // these heuristics may break (eg - they no longer work on JB MR2). So we create
         // our own cache dir to be used if the app doesnt specify a cache dir, rather then

@@ -210,7 +210,6 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
     public void onCreate(Bundle arguments) {
         super.onCreate(arguments);
         setArguments(arguments);
-        specifyDexMakerCacheProperty();
 
         start();
     }
