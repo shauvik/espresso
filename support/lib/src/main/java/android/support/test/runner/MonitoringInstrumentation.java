@@ -17,11 +17,15 @@
 package android.support.test.runner;
 
 import android.app.Activity;
+import android.app.Application;
 import android.app.Instrumentation;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.MessageQueue.IdleHandler;
 import android.support.test.InstrumentationRegistry;
@@ -114,6 +118,7 @@ public class MonitoringInstrumentation extends Instrumentation {
         Looper.myQueue().addIdleHandler(mIdleHandler);
         super.onCreate(arguments);
         specifyDexMakerCacheProperty();
+        setupDexmakerClassloader();
     }
 
     private final void specifyDexMakerCacheProperty() {
@@ -124,6 +129,16 @@ public class MonitoringInstrumentation extends Instrumentation {
         //
         File dexCache = getTargetContext().getDir("dxmaker_cache", Context.MODE_PRIVATE);
         System.getProperties().put("dexmaker.dexcache", dexCache.getAbsolutePath());
+    }
+
+    private void setupDexmakerClassloader() {
+        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+        // must set the context classloader for apps that use a shared uid, see
+        // frameworks/base/core/java/android/app/LoadedApk.java
+        ClassLoader newClassLoader = this.getClass().getClassLoader();
+        Log.i(LOG_TAG, String.format("Setting context classloader to '%s', Original: '%s'",
+                newClassLoader.toString(), originalClassLoader.toString()));
+        Thread.currentThread().setContextClassLoader(newClassLoader);
     }
 
     private void logUncaughtExceptions() {
@@ -384,6 +399,45 @@ public class MonitoringInstrumentation extends Instrumentation {
     public void callActivityOnPause(Activity activity) {
         super.callActivityOnPause(activity);
         mLifecycleMonitor.signalLifecycleChange(Stage.PAUSED, activity);
+    }
+
+
+    // ActivityUnitTestCase defaults to building the ComponentName via
+    // Activity.getClass().getPackage().getName(). This will cause a problem if the Java Package of
+    // the Activity is not the Android Package of the application, specifically
+    // Activity.getPackageName() will return an incorrect value.
+    // @see b/14561718
+    @Override
+    public Activity newActivity(Class<?> clazz,
+                                Context context,
+                                IBinder token,
+                                Application application,
+                                Intent intent,
+                                ActivityInfo info,
+                                CharSequence title,
+                                Activity parent,
+                                String id,
+                                Object lastNonConfigurationInstance)
+            throws InstantiationException, IllegalAccessException {
+        String activityClassPackageName = clazz.getPackage().getName();
+        String contextPackageName = context.getPackageName();
+        ComponentName intentComponentName = intent.getComponent();
+        if (!contextPackageName.equals(intentComponentName.getPackageName())) {
+            if (activityClassPackageName.equals(intentComponentName.getPackageName())) {
+                intent.setComponent(
+                        new ComponentName(contextPackageName, intentComponentName.getClassName()));
+            }
+        }
+        return super.newActivity(clazz,
+                context,
+                token,
+                application,
+                intent,
+                info,
+                title,
+                parent,
+                id,
+                lastNonConfigurationInstance);
     }
 
     /**
