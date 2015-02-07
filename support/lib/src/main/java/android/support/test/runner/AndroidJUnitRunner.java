@@ -18,15 +18,10 @@ package android.support.test.runner;
 
 import android.app.Activity;
 import android.app.Instrumentation;
-import android.content.pm.InstrumentationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.support.test.internal.runner.RunnerArgs;
 import android.support.test.internal.runner.TestExecutor;
-import android.os.Debug;
-
 import android.support.test.internal.runner.TestRequest;
 import android.support.test.internal.runner.TestRequestBuilder;
 import android.support.test.internal.runner.listener.ActivityFinisherRunListener;
@@ -42,14 +37,6 @@ import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
 import org.junit.runner.notification.RunListener;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An {@link Instrumentation} that runs JUnit3 and JUnit4 tests against
@@ -149,11 +136,6 @@ import java.util.List;
  * <b> To specify one or more {@link RunListener}s to observe the test run:</b>
  * -e listener com.foo.Listener,com.foo.Listener2
  * <p/>
- * <b/>OR, specify the multiple listeners in the AndroidManifest via a meta-data tag:</b>
- * instrumentation android:name="android.support.test.runner.AndroidJUnitRunner" ...
- *    meta-data android:name="listener"
- *              android:value="com.foo.Listener,com.foo.Listener2"
- * <p/>
  * <b>Set timeout (in milliseconds) that will be applied to each test:</b>
  * -e timeout_msec 5000
  * <p/>
@@ -164,35 +146,17 @@ import java.util.List;
  * <p/>
  * <b>To disable Google Analytics:</b>
  * -e disableAnalytics true
+ * <p/>
+ * <b/>All arguments can also be specified in the in the AndroidManifest via a meta-data tag:</b>
+ * eg. using listeners:
+ * instrumentation android:name="android.support.test.runner.AndroidJUnitRunner" ...
+ *    meta-data android:name="listener"
+ *              android:value="com.foo.Listener,com.foo.Listener2"
+ * Arguments specified via shell will take override manifest specified arguments.
  */
 public class AndroidJUnitRunner extends MonitoringInstrumentation {
 
-    // constants for supported instrumentation arguments
-    public static final String ARGUMENT_TEST_CLASS = "class";
-    private static final String ARGUMENT_TEST_SIZE = "size";
-    private static final String ARGUMENT_LOG_ONLY = "log";
-    private static final String ARGUMENT_ANNOTATION = "annotation";
-    private static final String ARGUMENT_NOT_ANNOTATION = "notAnnotation";
-    private static final String ARGUMENT_NUM_SHARDS = "numShards";
-    private static final String ARGUMENT_SHARD_INDEX = "shardIndex";
-    private static final String ARGUMENT_DELAY_MSEC = "delay_msec";
-    private static final String ARGUMENT_COVERAGE = "coverage";
-    private static final String ARGUMENT_COVERAGE_PATH = "coverageFile";
-    private static final String ARGUMENT_SUITE_ASSIGNMENT = "suiteAssignment";
-    private static final String ARGUMENT_DEBUG = "debug";
-    private static final String ARGUMENT_LISTENER = "listener";
-    private static final String ARGUMENT_TEST_PACKAGE = "package";
-    static final String ARGUMENT_TIMEOUT = "timeout_msec";
-    static final String ARGUMENT_TEST_FILE = "testFile";
-    private static final String ARGUMENT_DISABLE_ANALYTICS = "disableAnalytics";
-    // TODO: consider supporting 'count' from InstrumentationTestRunner
-
     private static final String LOG_TAG = "AndroidJUnitRunner";
-
-    // used to separate multiple fully-qualified test case class names
-    private static final char CLASS_SEPARATOR = ',';
-    // used to separate fully-qualified test case class name, and one of its methods
-    private static final char METHOD_SEPARATOR = '#';
 
     private Bundle mArguments;
     private InstrumentationResultPrinter mInstrumentationResultPrinter = null;
@@ -200,7 +164,7 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
     @Override
     public void onCreate(Bundle arguments) {
         super.onCreate(arguments);
-        setArguments(arguments);
+        mArguments = arguments;
 
         start();
     }
@@ -209,24 +173,9 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
      * Get the Bundle object that contains the arguments passed to the instrumentation
      *
      * @return the Bundle object
-     * @hide
      */
-    public Bundle getArguments(){
+    private Bundle getArguments(){
         return mArguments;
-    }
-
-    /**
-     * Set the arguments.
-     *
-     * @VisibleForTesting
-     */
-    void setArguments(Bundle args) {
-        mArguments = args;
-    }
-
-    private boolean getBooleanArgument(String tag) {
-        String tagString = getArguments().getString(tag);
-        return tagString != null && Boolean.parseBoolean(tagString);
     }
 
     /**
@@ -240,15 +189,33 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
     public void onStart() {
         super.onStart();
 
-        TestExecutor.Builder executorBuilder = new TestExecutor.Builder(this);
-        if (getBooleanArgument(ARGUMENT_DEBUG)) {
-            executorBuilder.setWaitForDebugger(true);
+        Bundle results = new Bundle();
+        try {
+            // build the arguments. Read from manifest first so manifest-provided args can be overridden
+            // with command line arguments
+            RunnerArgs runnerArgs = new RunnerArgs.Builder()
+                    .fromManifest(this)
+                    .fromBundle(getArguments())
+                    .build();
+
+            TestExecutor.Builder executorBuilder = new TestExecutor.Builder(this);
+            if (runnerArgs.debug) {
+                executorBuilder.setWaitForDebugger(true);
+            }
+
+            addListeners(runnerArgs, executorBuilder);
+
+            TestRequest testRequest = buildRequest(runnerArgs, getArguments());
+
+            results = executorBuilder.build().execute(testRequest);
+
+        } catch (RuntimeException e) {
+            final String msg = "Fatal exception when running tests";
+            Log.e(LOG_TAG, msg, e);
+            // report the exception to instrumentation out
+            results.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
+                    msg + "\n" + Log.getStackTraceString(e));
         }
-        addListeners(executorBuilder);
-
-        TestRequest testRequest = buildRequest(getArguments());
-
-        Bundle results = executorBuilder.build().execute(testRequest);
         finish(Activity.RESULT_OK, results);
     }
 
@@ -263,8 +230,8 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
         super.finish(resultCode, results);
     }
 
-    private void addListeners(TestExecutor.Builder builder) {
-        if (getBooleanArgument(ARGUMENT_SUITE_ASSIGNMENT)) {
+    private void addListeners(RunnerArgs args, TestExecutor.Builder builder) {
+        if (args.suiteAssignment) {
             builder.addRunListener(new SuiteAssignmentPrinter());
         } else {
             builder.addRunListener(new LogRunListener());
@@ -272,109 +239,35 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
             builder.addRunListener(mInstrumentationResultPrinter);
             builder.addRunListener(new ActivityFinisherRunListener(this,
                     new MonitoringInstrumentation.ActivityFinisher()));
-            addDelayListener(builder);
-            addCoverageListener(builder);
+            addDelayListener(args, builder);
+            addCoverageListener(args, builder);
         }
 
-        addListenersFromArg(builder);
-        addListenersFromManifest(builder);
+        addListenersFromArg(args, builder);
     }
 
-    private void addCoverageListener(TestExecutor.Builder builder) {
-        if (getBooleanArgument(ARGUMENT_COVERAGE)) {
-            String coverageFilePath = getArguments().getString(ARGUMENT_COVERAGE_PATH);
-            builder.addRunListener(new CoverageListener(coverageFilePath));
-        }
-    }
-
-    /**
-     * Sets up listener to inject {@link #ARGUMENT_DELAY_MSEC}, if specified.
-     */
-    private void addDelayListener(TestExecutor.Builder builder) {
-        try {
-            Object delay = getArguments().get(ARGUMENT_DELAY_MSEC);  // Accept either string or int
-            if (delay != null) {
-                int delayMsec = Integer.parseInt(delay.toString());
-                builder.addRunListener(new DelayInjector(delayMsec));
-            } else if (getBooleanArgument(ARGUMENT_LOG_ONLY)
-                    && Build.VERSION.SDK_INT < 16) {
-                // On older platforms, collecting tests can fail for large volume of tests.
-                // Insert a small delay between each test to prevent this
-                builder.addRunListener(new DelayInjector(15 /* msec */));
-            }
-        } catch (NumberFormatException e) {
-            Log.e(LOG_TAG, "Invalid delay_msec parameter", e);
+    private void addCoverageListener(RunnerArgs args, TestExecutor.Builder builder) {
+        if (args.codeCoverage) {
+            builder.addRunListener(new CoverageListener(args.codeCoveragePath));
         }
     }
 
     /**
-     * Add extra {@link RunListener}s specified via command line
+     * Sets up listener to inject a delay between each test, if specified.
      */
-    private void addListenersFromArg(TestExecutor.Builder builder) {
-        addListenersFromClassString(getArguments().getString(ARGUMENT_LISTENER), builder);
-    }
-
-    /**
-     * Load the listeners specified via meta-data name="listener" in the AndroidManifest.
-     */
-    private void addListenersFromManifest(TestExecutor.Builder builder) {
-        PackageManager pm = getContext().getPackageManager();
-        try {
-            InstrumentationInfo instrInfo = pm.getInstrumentationInfo(getComponentName(),
-                    PackageManager.GET_META_DATA);
-            Bundle b = instrInfo.metaData;
-            if (b == null) {
-                return;
-            }
-            String extraListenerList = b.getString(ARGUMENT_LISTENER);
-            addListenersFromClassString(extraListenerList, builder);
-        } catch (NameNotFoundException e) {
-            // should never happen
-            Log.wtf(LOG_TAG, String.format("Could not find component %s", getComponentName()));
+    private void addDelayListener(RunnerArgs args, TestExecutor.Builder builder) {
+        if (args.delayMsec > 0) {
+            builder.addRunListener(new DelayInjector(args.delayMsec));
+        } else if (args.logOnly && Build.VERSION.SDK_INT < 16) {
+            // On older platforms, collecting tests can fail for large volume of tests.
+            // Insert a small delay between each test to prevent this
+            builder.addRunListener(new DelayInjector(15 /* msec */));
         }
     }
 
-    /**
-     * Add extra {@link RunListener}s to the testRunner as given in the csv class name list
-     *
-     * @param extraListenerList the CSV class name of {@link RunListener}s to add
-     * @param builder the TestExecutor builder to add listeners to
-     */
-    private void addListenersFromClassString(String extraListenerList,
-                                             TestExecutor.Builder builder) {
-        if (extraListenerList == null) {
-            return;
-        }
-
-        for (String listenerName : extraListenerList.split(",")) {
-            addListenerByClassName(builder, listenerName);
-        }
-    }
-
-    private void addListenerByClassName(TestExecutor.Builder builder,
-            String extraListener) {
-        if (extraListener == null || extraListener.length() == 0) {
-            return;
-        }
-
-        try {
-            final Class<?> klass = Class.forName(extraListener);
-            klass.getConstructor().setAccessible(true);
-            final RunListener l =  (RunListener) klass.newInstance();
-            builder.addRunListener(l);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("Could not find extra RunListener class "
-                    + extraListener);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Must have no argument constructor for class "
-                    + extraListener);
-        } catch (ClassCastException e) {
-           throw new IllegalArgumentException("Listeners must extend RunListener: "
-                   + extraListener);
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException("Failed to create listener: " + extraListener, e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Failed to create listener: " + extraListener);
+    private void addListenersFromArg(RunnerArgs args, TestExecutor.Builder builder) {
+        for (RunListener listener : args.listeners) {
+            builder.addRunListener(listener);
         }
     }
 
@@ -393,76 +286,18 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
      * <p/>
      * Exposed for unit testing.
      */
-    TestRequest buildRequest(Bundle arguments) {
+    TestRequest buildRequest(RunnerArgs runnerArgs, Bundle bundleArgs) {
 
-        TestRequestBuilder builder = createTestRequestBuilder(this, arguments);
+        TestRequestBuilder builder = createTestRequestBuilder(this, bundleArgs);
 
         // only scan for tests for current apk aka testContext
         // Note that this represents a change from InstrumentationTestRunner where
         // getTargetContext().getPackageCodePath() aka app under test was also scanned
         builder.addApkToScan(getContext().getPackageCodePath());
 
-        String testClassName = arguments.getString(ARGUMENT_TEST_CLASS);
-        if (testClassName != null) {
-            for (String className : testClassName.split(String.valueOf(CLASS_SEPARATOR))) {
-                parseTestClass(className, builder);
-            }
-        }
+        builder.addFromRunnerArgs(runnerArgs);
 
-        String testFilePath = arguments.getString(ARGUMENT_TEST_FILE);
-        if (testFilePath != null) {
-            parseTestClassesFromFile(testFilePath, builder);
-        }
-
-        String testPackage = arguments.getString(ARGUMENT_TEST_PACKAGE);
-        if (testPackage != null) {
-            builder.addTestPackageFilter(testPackage);
-        }
-
-        String testSize = arguments.getString(ARGUMENT_TEST_SIZE);
-        if (testSize != null) {
-            builder.addTestSizeFilter(testSize);
-        }
-
-        String annotation = arguments.getString(ARGUMENT_ANNOTATION);
-        if (annotation != null) {
-            builder.addAnnotationInclusionFilter(annotation);
-        }
-
-        String notAnnotations = arguments.getString(ARGUMENT_NOT_ANNOTATION);
-        if (notAnnotations != null) {
-            for (String notAnnotation : notAnnotations.split(",")) {
-                builder.addAnnotationExclusionFilter(notAnnotation);
-            }
-        }
-
-        String timeout = arguments.getString(ARGUMENT_TIMEOUT);
-        if (timeout != null) {
-            addTimeout(timeout, builder);
-        }
-
-        // Accept either string or int.
-        Object numShardsObj = arguments.get(ARGUMENT_NUM_SHARDS);
-        Object shardIndexObj = arguments.get(ARGUMENT_SHARD_INDEX);
-        if (numShardsObj != null && shardIndexObj != null) {
-            int numShards = -1;
-            int shardIndex = -1;
-            try {
-                numShards = Integer.parseInt(numShardsObj.toString());
-                shardIndex = Integer.parseInt(shardIndexObj.toString());
-            } catch(NumberFormatException e) {
-                Log.e(LOG_TAG, "Invalid sharding parameter", e);
-            }
-            if (numShards > 0 && shardIndex >= 0 && shardIndex < numShards) {
-                builder.addShardingFilter(numShards, shardIndex);
-            }
-        }
-
-        if (getBooleanArgument(ARGUMENT_LOG_ONLY)) {
-            builder.setSkipExecution(true);
-        }
-
-        if (!getBooleanArgument(ARGUMENT_DISABLE_ANALYTICS)) {
+        if (!runnerArgs.disableAnalytics) {
             if (null != getTargetContext()) {
                 UsageTracker tracker = new AnalyticsBasedUsageTracker.Builder(
                         getTargetContext()).buildIfPossible();
@@ -483,67 +318,5 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
      */
     TestRequestBuilder createTestRequestBuilder(Instrumentation instr, Bundle arguments) {
         return new TestRequestBuilder(instr, arguments);
-    }
-
-    /**
-     * Parse and load the given test class and, optionally, method
-     *
-     * @param testClassName - full package name of test class and optionally method to add.
-     *        Expected format: com.android.TestClass#testMethod
-     * @param testRequestBuilder - builder to add tests to
-     */
-    private void parseTestClass(String testClassName, TestRequestBuilder testRequestBuilder) {
-        int methodSeparatorIndex = testClassName.indexOf(METHOD_SEPARATOR);
-
-        if (methodSeparatorIndex > 0) {
-            String testMethodName = testClassName.substring(methodSeparatorIndex + 1);
-            testClassName = testClassName.substring(0, methodSeparatorIndex);
-            testRequestBuilder.addTestMethod(testClassName, testMethodName);
-        } else {
-            testRequestBuilder.addTestClass(testClassName);
-        }
-    }
-
-    /**
-     * Parse and load the content of a test file
-     *
-     * @param filePath  path to test file contaitnig full package names of test classes and
-     *                  optionally methods to add.
-     * @param testRequestBuilder - builder to add tests to
-     */
-    private void parseTestClassesFromFile(String filePath, TestRequestBuilder testRequestBuilder) {
-        List<String> classes = new ArrayList<String>();
-        BufferedReader br = null;
-        String line;
-        try {
-            br = new BufferedReader(new FileReader(new File(filePath)));
-            while ((line = br.readLine()) != null) {
-                classes.add(line);
-            }
-        } catch (FileNotFoundException e) {
-            Log.e(LOG_TAG, String.format("File not found: %s", filePath), e);
-        } catch (IOException e) {
-            Log.e(LOG_TAG,
-                    String.format("Something went wrong reading %s, ignoring file", filePath), e);
-        } finally {
-            if (br != null) {
-                try { br.close(); } catch (IOException e) { /* ignore */ }
-            }
-        }
-
-        for (String className : classes) {
-            parseTestClass(className, testRequestBuilder);
-        }
-    }
-
-    /**
-     * Attempt to set test timeout if valid
-     */
-    void addTimeout(String timeout, TestRequestBuilder testRequestBuilder) {
-        long t = Long.parseLong(timeout);
-        if (t < 0) {
-            throw new NumberFormatException("Timeout can not be negative");
-        }
-        testRequestBuilder.setPerTestTimeout(t);
     }
 }

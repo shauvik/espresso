@@ -19,6 +19,8 @@ import android.app.Instrumentation;
 import android.os.Bundle;
 import android.util.Log;
 
+import org.junit.runner.Result;
+
 import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
@@ -50,8 +52,8 @@ public class CoverageListener extends InstrumentationRunListener {
     public CoverageListener(String customCoverageFilePath) {
         mCoverageFilePath = customCoverageFilePath;
     }
-    
-    @Override 
+
+    @Override
     public void setInstrumentation(Instrumentation instr) {
         super.setInstrumentation(instr);
         if (mCoverageFilePath == null) {
@@ -61,7 +63,7 @@ public class CoverageListener extends InstrumentationRunListener {
     }
 
     @Override
-    public void instrumentationRunFinished(PrintStream writer, Bundle results) {
+    public void instrumentationRunFinished(PrintStream writer, Bundle results, Result junitResults) {
         generateCoverageReport(writer, results);
     }
 

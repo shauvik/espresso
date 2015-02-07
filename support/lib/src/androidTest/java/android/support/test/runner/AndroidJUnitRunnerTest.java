@@ -15,31 +15,21 @@
  */
 package android.support.test.runner;
 
-import android.app.Instrumentation;
 import android.content.Context;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.test.internal.runner.TestRequestBuilder;
 import android.support.test.internal.runner.listener.InstrumentationResultPrinter;
 
 import junit.framework.Assert;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintStream;
 
 /**
@@ -52,8 +42,7 @@ public class AndroidJUnitRunnerTest {
 
     private AndroidJUnitRunner mAndroidJUnitRunner;
     private PrintStream mStubStream;
-    @Mock
-    private TestRequestBuilder mMockBuilder;
+
     @Mock
     private Context mMockContext;
     @Mock
@@ -62,12 +51,6 @@ public class AndroidJUnitRunnerTest {
     @Before
     public void setUp() throws Exception {
         mAndroidJUnitRunner = new AndroidJUnitRunner() {
-
-            @Override
-            TestRequestBuilder createTestRequestBuilder(Instrumentation instr,
-                                                        Bundle arguments) {
-                return mMockBuilder;
-            }
 
             @Override
             public Context getContext() {
@@ -79,123 +62,8 @@ public class AndroidJUnitRunnerTest {
                 return mInstrumentationResultPrinter;
             }
         };
-        mAndroidJUnitRunner.setArguments(new Bundle());
         mStubStream = new PrintStream(new ByteArrayOutputStream());
         MockitoAnnotations.initMocks(this);
-    }
-
-    /**
-     * Test {@link AndroidJUnitRunner#buildRequest(Bundle, PrintStream)} when
-     * a single class name is provided.
-     */
-    @Test
-    public void testBuildRequest_singleClass() {
-        Bundle b = new Bundle();
-        b.putString(AndroidJUnitRunner.ARGUMENT_TEST_CLASS, "ClassName");
-        mAndroidJUnitRunner.buildRequest(b);
-        Mockito.verify(mMockBuilder).addTestClass("ClassName");
-    }
-
-    /**
-     * Test {@link AndroidJUnitRunner#buildRequest(Bundle, PrintStream)} when
-     * multiple class names are provided.
-     */
-    @Test
-    public void testBuildRequest_multiClass() {
-        Bundle b = new Bundle();
-        b.putString(AndroidJUnitRunner.ARGUMENT_TEST_CLASS, "ClassName1,ClassName2");
-        mAndroidJUnitRunner.buildRequest(b);
-        Mockito.verify(mMockBuilder).addTestClass("ClassName1");
-        Mockito.verify(mMockBuilder).addTestClass("ClassName2");
-    }
-
-    /**
-     * Test {@link AndroidJUnitRunner#buildRequest(Bundle, PrintStream)} when
-     * class name and method name is provided.
-     */
-    @Test
-    public void testBuildRequest_method() {
-        Bundle b = new Bundle();
-        b.putString(AndroidJUnitRunner.ARGUMENT_TEST_CLASS, "ClassName1#method");
-        mAndroidJUnitRunner.buildRequest(b);
-        Mockito.verify(mMockBuilder).addTestMethod("ClassName1", "method");
-    }
-
-    /**
-     * Test {@link AndroidJUnitRunner#buildRequest(Bundle, PrintStream)} when
-     * class name and method name is provided along with an additional class name.
-     */
-    @Test
-    public void testBuildRequest_classAndMethodCombo() {
-        Bundle b = new Bundle();
-        b.putString(AndroidJUnitRunner.ARGUMENT_TEST_CLASS, "ClassName1#method,ClassName2");
-        mAndroidJUnitRunner.buildRequest(b);
-        Mockito.verify(mMockBuilder).addTestMethod("ClassName1", "method");
-        Mockito.verify(mMockBuilder).addTestClass("ClassName2");
-    }
-
-    /**
-     * Temp file used for testing
-     */
-    @Rule
-    public TemporaryFolder mTmpFolder = new TemporaryFolder();
-
-    /**
-     * Test {@link AndroidJUnitRunner#buildRequest(Bundle, PrintStream)} when
-     * multiple class and method names are provided within a test file
-     */
-    @Test
-    public void testBuildRequest_testFile() throws IOException {
-        final File file = mTmpFolder.newFile("myTestFile.txt");
-        BufferedWriter out = new BufferedWriter(new FileWriter(file));
-        out.write("ClassName3\n");
-        out.write("ClassName4#method2\n");
-        out.close();
-
-        Bundle b = new Bundle();
-        b.putString(AndroidJUnitRunner.ARGUMENT_TEST_FILE, file.getPath());
-        b.putString(AndroidJUnitRunner.ARGUMENT_TEST_CLASS, "ClassName1#method1,ClassName2");
-        mAndroidJUnitRunner.buildRequest(b);
-        Mockito.verify(mMockBuilder).addTestMethod("ClassName1", "method1");
-        Mockito.verify(mMockBuilder).addTestClass("ClassName2");
-        Mockito.verify(mMockBuilder).addTestClass("ClassName3");
-        Mockito.verify(mMockBuilder).addTestMethod("ClassName4", "method2");
-    }
-
-    /**
-     * Test {@link AndroidJUnitRunner#buildRequest(Bundle, PrintStream)} when
-     * a valid {@link AndroidJUnitRunner#ARGUMENT_TIMEOUT} is passed as an argument
-     */
-    @Test
-    public void testBuildRequest_timeout() {
-        Bundle b = new Bundle();
-        b.putString(AndroidJUnitRunner.ARGUMENT_TIMEOUT, "5000"); //5 seconds
-        mAndroidJUnitRunner.buildRequest(b);
-        Mockito.verify(mMockBuilder).setPerTestTimeout(5000);
-    }
-
-    /**
-     * Test {@link AndroidJUnitRunner#buildRequest(Bundle, PrintStream)} when
-     * an invalid {@link AndroidJUnitRunner#ARGUMENT_TIMEOUT} is passed as an argument
-     */
-    @Test(expected = NumberFormatException.class)
-    public void testBuildRequest_timeoutWithWrongFormat() {
-        Bundle b = new Bundle();
-        b.putString(AndroidJUnitRunner.ARGUMENT_TIMEOUT, "not a long");
-        mAndroidJUnitRunner.buildRequest(b);
-        Mockito.verify(mMockBuilder, Mockito.times(0)).setPerTestTimeout(1);
-    }
-
-    /**
-     * Test {@link AndroidJUnitRunner#buildRequest(Bundle, PrintStream)} when
-     * a negative value {@link AndroidJUnitRunner#ARGUMENT_TIMEOUT} is passed as an argument
-     */
-    @Test(expected = NumberFormatException.class)
-    public void testBuildRequest_timeoutWithNegativeValue() {
-        Bundle b = new Bundle();
-        b.putString(AndroidJUnitRunner.ARGUMENT_TIMEOUT, "-500");
-        mAndroidJUnitRunner.buildRequest(b);
-        Mockito.verify(mMockBuilder, Mockito.times(0)).setPerTestTimeout(1);
     }
 
     /**

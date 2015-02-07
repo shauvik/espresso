@@ -7,8 +7,10 @@ import android.support.test.internal.runner.listener.InstrumentationRunListener;
 import android.support.test.internal.util.Checks;
 import android.util.Log;
 
+import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 
 import java.io.ByteArrayOutputStream;
@@ -37,7 +39,7 @@ public final class TestExecutor {
      * Execute the tests
      */
     public Bundle execute(TestRequest testRequest) {
-        Bundle results = new Bundle();
+        Bundle resultBundle = new Bundle();
 
         if (mWaitForDebugger) {
             Log.i(LOG_TAG, "Waiting for debugger to connect...");
@@ -45,39 +47,26 @@ public final class TestExecutor {
             Log.i(LOG_TAG, "Debugger connected.");
         }
 
-        ByteArrayOutputStream summaryStream = new ByteArrayOutputStream();
-        // create the stream used to output summary data to the user
-        PrintStream summaryWriter = new PrintStream(summaryStream);
-
+        Result junitResults = new Result();
         try {
             JUnitCore testRunner = new JUnitCore();
             setUpListeners(testRunner);
-            Result result = testRunner.run(testRequest.getRequest());
-            result.getFailures().addAll(testRequest.getFailures());
+            junitResults = testRunner.run(testRequest.getRequest());
+            junitResults.getFailures().addAll(testRequest.getFailures());
         } catch (Throwable t) {
-            // catch all exceptions so a more verbose error message can be displayed
-            summaryWriter.println(String.format(
-                    "Test run aborted due to unexpected exception: %s",
-                    t.getMessage()));
-            t.printStackTrace(summaryWriter);
-
+            final String msg = "Fatal exception when running tests";
+            Log.e(LOG_TAG, msg, t);
+            junitResults.getFailures().add(new Failure(Description.createSuiteDescription(msg), t));
         } finally {
-            reportRunEnded(mListeners, summaryWriter, results);
+            ByteArrayOutputStream summaryStream = new ByteArrayOutputStream();
+            // create the stream used to output summary data to the user
+            PrintStream summaryWriter = new PrintStream(summaryStream);
+            reportRunEnded(mListeners, summaryWriter, resultBundle, junitResults);
             summaryWriter.close();
-            results.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
+            resultBundle.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
                     String.format("\n%s", summaryStream.toString()));
         }
-        return results;
-    }
-
-    private void setupDexmakerClassloader() {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        // must set the context classloader for apps that use a shared uid, see
-        // frameworks/base/core/java/android/app/LoadedApk.java
-        ClassLoader newClassLoader = this.getClass().getClassLoader();
-        Log.i(LOG_TAG, String.format("Setting context classloader to '%s', Original: '%s'",
-                newClassLoader.toString(), originalClassLoader.toString()));
-        Thread.currentThread().setContextClassLoader(newClassLoader);
+        return resultBundle;
     }
 
     /**
@@ -94,11 +83,11 @@ public final class TestExecutor {
     }
 
     private void reportRunEnded(List<RunListener> listeners, PrintStream summaryWriter,
-                                Bundle results) {
+                                Bundle resultBundle, Result jUnitResults) {
         for (RunListener listener : listeners) {
             if (listener instanceof InstrumentationRunListener) {
                 ((InstrumentationRunListener)listener).instrumentationRunFinished(summaryWriter,
-                        results);
+                        resultBundle, jUnitResults);
             }
         }
     }

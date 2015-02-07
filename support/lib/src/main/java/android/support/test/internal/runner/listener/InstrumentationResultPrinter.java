@@ -216,12 +216,9 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
     }
 
     @Override
-    public void instrumentationRunFinished(PrintStream streamResult, Bundle resultBundle) {
-        if (mJUnitResult == null) {
-            Log.e(LOG_TAG, "Error: missing JUnit results");
-            return;
-        }
+    public void instrumentationRunFinished(PrintStream streamResult, Bundle resultBundle,
+                                           Result junitResults) {
         // reuse JUnit TextListener to display a summary of the run
-        new TextListener(streamResult).testRunFinished(mJUnitResult);
+        new TextListener(streamResult).testRunFinished(junitResults);
     }
 }

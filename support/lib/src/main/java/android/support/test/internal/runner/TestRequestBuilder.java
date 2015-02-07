@@ -605,6 +605,42 @@ public class TestRequestBuilder {
     }
 
     /**
+     * Convenience method to set builder attributes from {@link RunnerArgs}
+     */
+    public TestRequestBuilder addFromRunnerArgs(RunnerArgs runnerArgs) {
+        for (RunnerArgs.TestArg test : runnerArgs.tests) {
+            if (test.methodName == null) {
+                addTestClass(test.testClassName);
+            } else {
+                addTestMethod(test.testClassName, test.methodName);
+            }
+        }
+        if (runnerArgs.testPackage != null) {
+            addTestPackageFilter(runnerArgs.testPackage);
+        }
+        if (runnerArgs.testSize != null) {
+            addTestSizeFilter(runnerArgs.testSize);
+        }
+        if (runnerArgs.annotation != null) {
+            addAnnotationInclusionFilter(runnerArgs.annotation);
+        }
+        for (String notAnnotation : runnerArgs.notAnnotations) {
+            addAnnotationExclusionFilter(notAnnotation);
+        }
+        if (runnerArgs.testTimeout > 0) {
+            setPerTestTimeout(runnerArgs.testTimeout);
+        }
+        if (runnerArgs.numShards > 0 && runnerArgs.shardIndex >= 0 &&
+                runnerArgs.shardIndex < runnerArgs.numShards) {
+            addShardingFilter(runnerArgs.numShards, runnerArgs.shardIndex);
+        }
+        if (runnerArgs.logOnly) {
+            setSkipExecution(true);
+        }
+        return this;
+    }
+
+    /**
      * Builds the {@link TestRequest} based on provided data.
      *
      * @throws java.lang.IllegalArgumentException if provided set of data is not valid

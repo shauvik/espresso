@@ -19,6 +19,7 @@ import android.app.Instrumentation;
 import android.os.Bundle;
 
 import org.junit.runner.notification.RunListener;
+import org.junit.runner.Result;
 
 import java.io.PrintStream;
 
@@ -33,7 +34,7 @@ public abstract class InstrumentationRunListener extends RunListener {
     public Instrumentation getInstrumentation() {
         return mInstr;
     }
-    
+
     public void setInstrumentation(Instrumentation instr) {
         mInstr = instr;
     }
@@ -61,8 +62,10 @@ public abstract class InstrumentationRunListener extends RunListener {
      * @param streamResult the {@link PrintStream} to instrumentation out. Will be displayed even
      *                     when instrumentation not run in -r mode
      * @param resultBundle the instrumentation result bundle. Can be used to inject key-value pairs
-     * into the instrumentation output when run in -r/raw mode
+     *                     into the instrumentation output when run in -r/raw mode
+     * @param junitResults the test results
      */
-    public void instrumentationRunFinished(PrintStream streamResult, Bundle resultBundle) {
+    public void instrumentationRunFinished(PrintStream streamResult, Bundle resultBundle,
+                                           Result junitResults) {
     }
 }
