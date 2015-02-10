@@ -16,11 +16,8 @@
 
 package android.support.test.internal.runner.lifecycle;
 
-import static android.support.test.internal.util.Checks.checkNotNull;
-
 import android.app.Activity;
 import android.os.Looper;
-import android.support.test.runner.AndroidJUnitRunner;
 import android.support.test.runner.lifecycle.ActivityLifecycleCallback;
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitor;
 import android.support.test.runner.lifecycle.Stage;
@@ -32,8 +29,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import static android.support.test.internal.util.Checks.checkNotNull;
+
 /**
- * The lifecycle monitor used by {@link AndroidJUnitRunner}.
+ * The lifecycle monitor implementation.
  */
 public final class ActivityLifecycleMonitorImpl implements ActivityLifecycleMonitor {
     private static final String TAG = "LifecycleMonitor";

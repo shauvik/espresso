@@ -322,12 +322,12 @@ public class MonitoringInstrumentation extends Instrumentation {
         return super.onException(obj, e);
     }
 
-    protected final void dumpThreadStateToOutputs(String outputFileName) {
+    protected void dumpThreadStateToOutputs(String outputFileName) {
         String threadState = getThreadState();
         Log.e("THREAD_STATE", threadState);
     }
 
-    private static String getThreadState() {
+    protected String getThreadState() {
         Set<Map.Entry<Thread, StackTraceElement[]>> threads = Thread.getAllStackTraces().entrySet();
         StringBuilder threadState = new StringBuilder();
         for (Map.Entry<Thread, StackTraceElement[]> threadAndStack : threads) {
