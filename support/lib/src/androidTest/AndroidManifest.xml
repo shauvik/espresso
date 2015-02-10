@@ -18,7 +18,7 @@
     package="android.support.test.tests"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <application>
+    <application android:name="android.support.test.MyApplication">
         <uses-library android:name="android.test.runner"/>
     </application>
 
@@ -27,7 +27,10 @@
         android:targetPackage="android.support.test.tests">
         <meta-data
             android:name="listener"
-            android:value="android.support.test.internal.runner.listener.ManifestListener"/>
+            android:value="android.support.test.internal.runner.listener.ManifestListener" />
+        <meta-data
+            android:name="appListener"
+            android:value="android.support.test.internal.runner.lifecycle.AppLifecycleListener" />
     </instrumentation>
 
     <uses-sdk android:minSdkVersion="8"/>

@@ -4,6 +4,7 @@ import android.app.Instrumentation;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.test.runner.lifecycle.ApplicationLifecycleCallback;
 import android.util.Log;
 
 import org.junit.runner.notification.RunListener;
@@ -42,6 +43,7 @@ public class RunnerArgs {
     static final String ARGUMENT_TIMEOUT = "timeout_msec";
     static final String ARGUMENT_TEST_FILE = "testFile";
     private static final String ARGUMENT_DISABLE_ANALYTICS = "disableAnalytics";
+    private static final String ARGUMENT_APP_LISTENER = "appListener";
     // TODO: consider supporting 'count' from InstrumentationTestRunner
 
     // used to separate multiple fully-qualified test case class names
@@ -65,6 +67,7 @@ public class RunnerArgs {
     public final int numShards;
     public final int shardIndex;
     public final boolean disableAnalytics;
+    public final List<ApplicationLifecycleCallback> appListeners;
 
     /**
      * Encapsulates a test class and optional method
@@ -100,6 +103,7 @@ public class RunnerArgs {
         this.numShards = builder.numShards;
         this.shardIndex = builder.shardIndex;
         this.disableAnalytics = builder.disableAnalytics;
+        this.appListeners = Collections.unmodifiableList(builder.appListeners);
     }
 
     public static class Builder {
@@ -119,6 +123,8 @@ public class RunnerArgs {
         private int numShards = 0;
         private int shardIndex = 0;
         private boolean disableAnalytics = false;
+        private List<ApplicationLifecycleCallback> appListeners =
+                new ArrayList<ApplicationLifecycleCallback>();
 
         /**
          * Populate the arg data from given Bundle
@@ -128,7 +134,8 @@ public class RunnerArgs {
             this.delayMsec = parseUnsignedInt(bundle.get(ARGUMENT_DELAY_MSEC), ARGUMENT_DELAY_MSEC);
             this.tests.addAll(parseTestClasses(bundle.getString(ARGUMENT_TEST_CLASS)));
             this.tests.addAll(parseTestClassesFromFile(bundle.getString(ARGUMENT_TEST_FILE)));
-            this.listeners.addAll(parseListeners(bundle.getString(ARGUMENT_LISTENER)));
+            this.listeners.addAll(parseAndLoadClasses(bundle.getString(ARGUMENT_LISTENER),
+                    RunListener.class));
             this.testPackage = bundle.getString(ARGUMENT_TEST_PACKAGE);
             this.testSize = bundle.getString(ARGUMENT_TEST_SIZE);
             this.annotation = bundle.getString(ARGUMENT_ANNOTATION);
@@ -138,6 +145,8 @@ public class RunnerArgs {
             this.shardIndex = parseUnsignedInt(bundle.get(ARGUMENT_SHARD_INDEX), ARGUMENT_SHARD_INDEX);
             this.logOnly = parseBoolean(bundle.getString(ARGUMENT_LOG_ONLY));
             this.disableAnalytics = parseBoolean(bundle.getString(ARGUMENT_DEBUG));
+            this.appListeners.addAll(parseAndLoadClasses(bundle.getString(ARGUMENT_APP_LISTENER),
+                    ApplicationLifecycleCallback.class));
             return this;
         }
 
@@ -284,55 +293,54 @@ public class RunnerArgs {
         }
 
         /**
-         * Parse a list of RunListeners given a CSV string of full class names
+         * Create a set of objects given a CSV string of full class names and type
          *
          * @return the List of RunListeners or empty list on null input
          */
-        private List<RunListener> parseListeners(String listenersString) {
-            List<RunListener> listeners = new ArrayList<RunListener>();
-            if (listenersString != null) {
-                for (String listenerName : listenersString.split(",")) {
-                    addListenerByClassName(listeners, listenerName);
+        private <T> List<T> parseAndLoadClasses(String classString, Class<T> type) {
+            List<T> objects = new ArrayList<T>();
+            if (classString != null) {
+                for (String className : classString.split(",")) {
+                    addByClassName(objects, className, type);
                 }
             }
-            return listeners;
+            return objects;
         }
 
         /**
-         * Load and add RunListener object given class string.
+         * Load and add object given class string.
          * <p/>
          * No effect if input is null or empty.
          * <p/>
          *
-         * @param listeners the List to add the listener to
-         * @param extraListener the fully qualified class string
+         * @param objects the List to add to
+         * @param className the fully qualified class name\
          *
          * @throws IllegalArgumentException if listener cannot be loaded
          */
-        private void addListenerByClassName(List<RunListener> listeners,
-                                            String extraListener) {
-            if (extraListener == null || extraListener.length() == 0) {
+        private <T> void addByClassName(List<T> objects,
+                                    String className, Class<T> type) {
+            if (className == null || className.length() == 0) {
                 return;
             }
             try {
-                final Class<?> klass = Class.forName(extraListener);
+                final Class<?> klass = Class.forName(className);
                 klass.getConstructor().setAccessible(true);
-                final RunListener l =  (RunListener) klass.newInstance();
-                listeners.add(l);
+                final T l =  (T) klass.newInstance();
+                objects.add(l);
             } catch (ClassNotFoundException e) {
-                throw new IllegalArgumentException("Could not find extra RunListener class "
-                        + extraListener);
+                throw new IllegalArgumentException("Could not find extra class "
+                        + className);
             } catch (NoSuchMethodException e) {
                 throw new IllegalArgumentException("Must have no argument constructor for class "
-                        + extraListener);
+                        + className);
             } catch (ClassCastException e) {
-                throw new IllegalArgumentException("Listeners must extend RunListener: "
-                        + extraListener);
+                throw new IllegalArgumentException(className + " does not extend " + type.getName()
+                        );
             } catch (InstantiationException e) {
-                throw new IllegalArgumentException("Failed to create listener: " + extraListener,
-                        e);
+                throw new IllegalArgumentException("Failed to create: " + className, e);
             } catch (IllegalAccessException e) {
-                throw new IllegalArgumentException("Failed to create listener: " + extraListener);
+                throw new IllegalArgumentException("Failed to create listener: " + className, e);
             }
         }
 

@@ -33,6 +33,8 @@ import android.support.test.internal.runner.listener.SuiteAssignmentPrinter;
 import android.support.test.internal.runner.tracker.AnalyticsBasedUsageTracker;
 import android.support.test.internal.runner.tracker.UsageTracker;
 import android.support.test.internal.runner.tracker.UsageTrackerRegistry;
+import android.support.test.runner.lifecycle.ApplicationLifecycleCallback;
+import android.support.test.runner.lifecycle.ApplicationLifecycleMonitorRegistry;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
@@ -160,11 +162,22 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
 
     private Bundle mArguments;
     private InstrumentationResultPrinter mInstrumentationResultPrinter = null;
+    private RunnerArgs mRunnerArgs;
 
     @Override
     public void onCreate(Bundle arguments) {
         super.onCreate(arguments);
+
         mArguments = arguments;
+        // build the arguments. Read from manifest first so manifest-provided args can be overridden
+        // with command line arguments
+        mRunnerArgs = new RunnerArgs.Builder()
+                .fromManifest(this)
+                .fromBundle(getArguments())
+                .build();
+        for (ApplicationLifecycleCallback listener : mRunnerArgs.appListeners) {
+            ApplicationLifecycleMonitorRegistry.getInstance().addLifecycleCallback(listener);
+        }
 
         start();
     }
@@ -191,21 +204,14 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
 
         Bundle results = new Bundle();
         try {
-            // build the arguments. Read from manifest first so manifest-provided args can be overridden
-            // with command line arguments
-            RunnerArgs runnerArgs = new RunnerArgs.Builder()
-                    .fromManifest(this)
-                    .fromBundle(getArguments())
-                    .build();
-
             TestExecutor.Builder executorBuilder = new TestExecutor.Builder(this);
-            if (runnerArgs.debug) {
+            if (mRunnerArgs.debug) {
                 executorBuilder.setWaitForDebugger(true);
             }
 
-            addListeners(runnerArgs, executorBuilder);
+            addListeners(mRunnerArgs, executorBuilder);
 
-            TestRequest testRequest = buildRequest(runnerArgs, getArguments());
+            TestRequest testRequest = buildRequest(mRunnerArgs, getArguments());
 
             results = executorBuilder.build().execute(testRequest);
 

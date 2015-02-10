@@ -30,7 +30,10 @@ import android.os.Looper;
 import android.os.MessageQueue.IdleHandler;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorImpl;
+import android.support.test.internal.runner.lifecycle.ApplicationLifecycleMonitorImpl;
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.ApplicationLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.ApplicationStage;
 import android.support.test.runner.lifecycle.Stage;
 import android.util.Log;
 
@@ -80,6 +83,8 @@ public class MonitoringInstrumentation extends Instrumentation {
 
     private static final int START_ACTIVITY_TIMEOUT_SECONDS = 45;
     private ActivityLifecycleMonitorImpl mLifecycleMonitor = new ActivityLifecycleMonitorImpl();
+    private ApplicationLifecycleMonitorImpl mApplicationMonitor =
+            new ApplicationLifecycleMonitorImpl();
     private ExecutorService mExecutorService;
     private Handler mHandlerForMainLooper;
     private AtomicBoolean mAnActivityHasBeenLaunched = new AtomicBoolean(false);
@@ -111,6 +116,7 @@ public class MonitoringInstrumentation extends Instrumentation {
 
         InstrumentationRegistry.registerInstance(this, arguments);
         ActivityLifecycleMonitorRegistry.registerInstance(mLifecycleMonitor);
+        ApplicationLifecycleMonitorRegistry.registerInstance(mApplicationMonitor);
 
         mHandlerForMainLooper = new Handler(Looper.getMainLooper());
         mMainThread = Thread.currentThread();
@@ -252,6 +258,13 @@ public class MonitoringInstrumentation extends Instrumentation {
         Log.i(LOG_TAG, "Instrumentation Finished!");
         Looper.myQueue().removeIdleHandler(mIdleHandler);
         super.onDestroy();
+    }
+
+    @Override
+    public void callApplicationOnCreate(Application app) {
+        mApplicationMonitor.signalLifecycleChange(app, ApplicationStage.PRE_ON_CREATE);
+        super.callApplicationOnCreate(app);
+        mApplicationMonitor.signalLifecycleChange(app, ApplicationStage.CREATED);
     }
 
     @Override
