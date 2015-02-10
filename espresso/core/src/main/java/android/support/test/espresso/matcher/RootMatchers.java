@@ -23,7 +23,7 @@ import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.is;
 
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitor;
-import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.runner.lifecycle.Stage;
 import android.support.test.espresso.NoActivityResumedException;
 import android.support.test.espresso.Root;

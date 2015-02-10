@@ -17,7 +17,7 @@
 package android.support.test.espresso.base;
 
 import android.support.test.runner.lifecycle.ActivityLifecycleCallback;
-import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.runner.lifecycle.Stage;
 import android.support.test.espresso.InjectEventSecurityException;
 import android.support.test.testapp.R;

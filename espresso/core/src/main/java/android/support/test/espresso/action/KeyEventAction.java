@@ -21,7 +21,7 @@ import static android.support.test.espresso.util.ActivityLifecycles.hasForegroun
 import static android.support.test.espresso.util.ActivityLifecycles.hasVisibleActivities;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.espresso.InjectEventSecurityException;
 import android.support.test.espresso.NoActivityResumedException;
 import android.support.test.espresso.PerformException;

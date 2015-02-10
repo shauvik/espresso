@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package android.support.test.internal.runner.lifecycle;
-
-import android.support.test.runner.lifecycle.ActivityLifecycleMonitor;
+package android.support.test.runner.lifecycle;
 
 import java.util.concurrent.atomic.AtomicReference;
 

@@ -17,7 +17,7 @@
 package android.support.test.espresso.base;
 
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitor;
-import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.FailureHandler;
 import android.support.test.espresso.UiController;
