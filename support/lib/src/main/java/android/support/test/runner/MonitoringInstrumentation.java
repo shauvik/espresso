@@ -18,7 +18,6 @@ package android.support.test.runner;
 
 import android.app.Activity;
 import android.app.Application;
-import android.app.Instrumentation;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +28,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.MessageQueue.IdleHandler;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.internal.runner.hidden.ExposedInstrumentationApi;
 import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorImpl;
 import android.support.test.internal.runner.lifecycle.ApplicationLifecycleMonitorImpl;
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
@@ -73,7 +73,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * This Instrumentation is *NOT* a test instrumentation (some of its subclasses are). It makes no
  * assumptions about what the subclass wants to do.
  */
-public class MonitoringInstrumentation extends Instrumentation {
+public class MonitoringInstrumentation extends ExposedInstrumentationApi {
 
     private static final long MILLIS_TO_WAIT_FOR_ACTIVITY_TO_STOP = TimeUnit.SECONDS.toMillis(2);
     private static final long MILLIS_TO_POLL_FOR_ACTIVITY_STOP =
