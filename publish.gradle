@@ -36,7 +36,7 @@ void addJavadocTasks(Project project, Task topTask, String variantName, JavaComp
             destinationDir = file("${project.docsDir}/$variantName/javadoc")
             options.encoding = "UTF-8"
             options.doclet = "com.google.doclava.Doclava"
-            options.bootClasspath = files(android.plugin.bootClasspath).asType(List)
+            options.bootClasspath = files(android.getBootClasspath()).asType(List)
             options.docletpath = configurations.doclava.files.asType(List)
             options.addStringOption("templatedir", "${rootDir}/../../build/tools/droiddoc/templates-sdk")
         }
