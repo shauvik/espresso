@@ -16,8 +16,8 @@
 
 buildscript {
     repositories {
-        maven { url "$rootDir/../../prebuilts/gradle-plugin" }
-        maven { url "$rootDir/../../prebuilts/tools/common/m2/repository" }
+        maven { url "$rootDir/prebuilts/gradle-plugin" }
+        maven { url "$rootDir/prebuilts/tools/common/m2/repository" }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.0.0'
@@ -42,8 +42,8 @@ if (System.env.DIST_DIR != null && System.env.OUT_DIR != null) {
     buildDir = file(System.env.OUT_DIR + '/gradle/frameworks/testing/build')
     project.ext.distDir = file(System.env.DIST_DIR)
 } else {
-    buildDir = file("$rootDir/../../out/gradle/frameworks/testing/build")
-    project.ext.distDir = file("$rootDir/../../out/dist")
+    buildDir = file("$rootDir/out/gradle/frameworks/testing/build")
+    project.ext.distDir = file("$rootDir/out/dist")
 }
 
 ext.supportRepoOut = new File(buildDir, 'support_repo')
@@ -74,7 +74,7 @@ createArchive.dependsOn createRepository
 
 // prepare repository with older versions
 task unzipRepo(type: Copy) {
-    from "$rootDir/../../prebuilts/maven_repo/android"
+    from "$rootDir/prebuilts/maven_repo/android"
     into project.supportRepoOut
 }
 
@@ -171,8 +171,8 @@ configure(getProjectsToArchive()) {
 subprojects {
 
     repositories {
-        maven { url "$rootDir/../../prebuilts/tools/common/m2/repository" }
-        maven { url "$rootDir/../../prebuilts/maven_repo/android" }
+        maven { url "$rootDir/prebuilts/tools/common/m2/repository" }
+        maven { url "$rootDir/prebuilts/maven_repo/android" }
     }
 
 
@@ -203,5 +203,5 @@ FileCollection getAndroidPrebuilt(String apiLevel) {
     if (apiLevel.contains("android-")) {
         apiLevel = apiLevel.replaceAll("android-", "")
     }
-    files("$rootDir/../../prebuilts/sdk/$apiLevel/android.jar")
+    files("$rootDir/prebuilts/sdk/$apiLevel/android.jar")
 }

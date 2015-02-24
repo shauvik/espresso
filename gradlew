@@ -66,7 +66,7 @@ APP_HOME="`pwd -P`"
 cd "$SAVED" >&-
 
 # Set the location of the Gradle Jar
-CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
+CLASSPATH=$APP_HOME/frameworks/testing/gradle/wrapper/gradle-wrapper.jar
 
 # Determine the Java command to use to start the JVM.
 if [ -n "$JAVA_HOME" ] ; then
@@ -164,14 +164,14 @@ JVM_OPTS[${#JVM_OPTS[*]}]="-Dorg.gradle.appname=$APP_BASE_NAME"
 
 # For reproducible builds, always use the SDKs stored in source control
 if $darwin; then
-    ANDROID_HOME="$APP_HOME/../../prebuilts/sdk/tools/darwin"
+    ANDROID_HOME="$APP_HOME/prebuilts/sdk/tools/darwin"
 else
-    ANDROID_HOME="$APP_HOME/../../prebuilts/sdk/tools/linux"
+    ANDROID_HOME="$APP_HOME/prebuilts/sdk/tools/linux"
 fi
 export ANDROID_HOME
 
 # Change the project's .gradle to the android out dir.
-ANDROID_OUT_ROOT="$APP_HOME/../../out"
+ANDROID_OUT_ROOT="$APP_HOME/out"
 if [[ -n "$OUT_DIR" ]]; then
     ANDROID_OUT_ROOT="$OUT_DIR"
 fi

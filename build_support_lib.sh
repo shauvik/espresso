@@ -43,7 +43,7 @@ then
     popd
 fi
 
-cd "$PROG_DIR"
+cd "$PROG_DIR"/../..
 
 TASKS=" \
 --project-prop buildFromServer=true \

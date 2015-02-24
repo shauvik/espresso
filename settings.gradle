@@ -15,28 +15,28 @@
  */
 
 include(':espresso-contrib')
-project(':espresso-contrib').projectDir = new File(rootDir, 'espresso/contrib')
+project(':espresso-contrib').projectDir = new File(rootDir, 'frameworks/testing/espresso/contrib')
 include(':espresso-contrib-tests')
-project(':espresso-contrib-tests').projectDir = new File(rootDir, 'espresso/contrib-tests')
+project(':espresso-contrib-tests').projectDir = new File(rootDir, 'frameworks/testing/espresso/contrib-tests')
 include(':espresso-core')
-project(':espresso-core').projectDir = new File(rootDir, 'espresso/core')
+project(':espresso-core').projectDir = new File(rootDir, 'frameworks/testing/espresso/core')
 include(':espresso-core-tests')
-project(':espresso-core-tests').projectDir = new File(rootDir, 'espresso/core-tests')
+project(':espresso-core-tests').projectDir = new File(rootDir, 'frameworks/testing/espresso/core-tests')
 include(':espresso-sample')
-project(':espresso-sample').projectDir = new File(rootDir, 'espresso/sample')
+project(':espresso-sample').projectDir = new File(rootDir, 'frameworks/testing/espresso/sample')
 include(':espresso-idling-resource')
-project(':espresso-idling-resource').projectDir = new File(rootDir, 'espresso/idling-resource')
+project(':espresso-idling-resource').projectDir = new File(rootDir, 'frameworks/testing/espresso/idling-resource')
 
 
 include(':testing-support-lib')
-project(':testing-support-lib').projectDir = new File(rootDir, 'support/lib')
+project(':testing-support-lib').projectDir = new File(rootDir, 'frameworks/testing/support/lib')
 
 
 // External
 include(':doclava')
-project(':doclava').projectDir = new File(rootDir, '../../external/doclava')
+project(':doclava').projectDir = new File(rootDir, 'external/doclava')
 
 // Required for Doclava dep
 include(':tagsoup')
-project(':tagsoup').projectDir = new File(rootDir, '../../external/tagsoup')
+project(':tagsoup').projectDir = new File(rootDir, 'external/tagsoup')
 
