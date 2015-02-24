@@ -144,6 +144,11 @@ Set<Project> getProjectsToArchive() {
             ['testing-support-lib'].contains(it.name)
         })
     }
+    if (project.hasProperty("buildUiAutomator") && project.buildUiAutomator == "true") {
+        projects.addAll(subprojects.findAll {
+            ['uiautomator-v18'].contains(it.name)
+        })
+    }
     return projects
 }
 
