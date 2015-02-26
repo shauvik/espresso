@@ -62,6 +62,17 @@ afterEvaluate {
     }
 
     if (project.android.isLibrary) {
+
+        // Find the release variant
+        def releaseVariant = android.libraryVariants.find { it.name == 'release' }
+        def buildConfig = fileTree(releaseVariant.getGenerateBuildConfig().sourceOutputDir)
+
+        // Add the source and classpath files for the release variant to the global javadoc task
+        rootProject.createJavadocs.source(releaseVariant.javaCompile.source.minus(buildConfig))
+        rootProject.createJavadocs.classpath = rootProject.createJavadocs.classpath +
+                files(releaseVariant.javaCompile.classpath) + getAndroidPrebuilt(android.compileSdkVersion)
+        rootProject.createJavadocs.options.bootClasspath = files(android.plugin.bootClasspath).asType(List)
+
         android.libraryVariants.all { variant ->
 
             addJavadocTasks(project, variant.assemble, variant.name, variant.javaCompile)

@@ -23,6 +23,10 @@ buildscript {
         classpath 'com.android.tools.build:gradle:1.0.0'
     }
 }
+repositories {
+    maven { url "$rootDir/prebuilts/tools/common/m2/repository" }
+    maven { url "$rootDir/prebuilts/maven_repo/android" }
+}
 
 ext.extraVersion = 11
 ext.supportRepoOut = ''
@@ -62,6 +66,34 @@ task(createArchive) << {
 // to the local repo.
 task(mainUpload) << {
 }
+
+configurations {
+    doclava
+}
+
+dependencies {
+    doclava project(':doclava')
+}
+
+// Unified javadoc task
+task createJavadocs(type: Javadoc, dependsOn: project.configurations.doclava) {
+    title = null
+    destinationDir = file("${buildDir}/javadoc")
+    options.encoding = "UTF-8"
+    options.doclet = "com.google.doclava.Doclava"
+    options.addStringOption("templatedir", "${rootDir}/build/tools/droiddoc/templates-sdk")
+}
+createJavadocs.dependsOn mainUpload
+project.afterEvaluate {
+    createJavadocs.options.docletpath = configurations.doclava.files.asType(List)
+}
+
+task packageJavadoc(type: Zip, dependsOn: createJavadocs) {
+    from createJavadocs
+    destinationDir distDir
+    baseName = 'ub-support-test-javadocs'
+}
+createArchive.dependsOn packageJavadoc
 
 // Repository creation task
 task createRepository(type: Zip, dependsOn: mainUpload) {
