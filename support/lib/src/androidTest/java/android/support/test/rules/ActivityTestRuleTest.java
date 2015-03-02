@@ -20,6 +20,8 @@ import android.app.Activity;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.LargeTest;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.Result;
@@ -29,6 +31,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.runner.JUnitCore.runClasses;
 import static org.mockito.Mockito.mock;
@@ -40,29 +43,54 @@ public class ActivityTestRuleTest {
     private static final ActivityFixture MOCK_ACTIVITY = mock(ActivityFixture.class);
 
     public class ActivityFixture extends Activity {
+
         private final boolean SUCCESS = true;
     }
 
     public static class ActivityLifecycleTest {
+
         private static StringBuilder log = new StringBuilder();
 
         @Rule
         public ActivityTestRule<ActivityFixture> mActivityRule =
                 new ActivityTestRule<ActivityFixture>(ActivityFixture.class) {
                     @Override
+                    protected void beforeActivity() {
+                        log.append("beforeActivity ");
+                    }
+
+                    @Override
                     ActivityFixture launchActivity() {
                         log.append("launchActivity ");
                         return null;
                     }
+
+                    @Override
+                    protected void afterActivity() {
+                        log.append("afterActivity ");
+                    }
+
                     @Override
                     void finishActivity() {
                         log.append("finishActivity ");
                     }
                 };
 
+        @Before
+        public void before() {
+            log.append("before ");
+        }
+
         @Test
         public void fails() {
+            log.append("test ");
             fail("This is a dummy test");
+        }
+
+
+        @After
+        public void after() {
+            log.append("after ");
         }
     }
 
@@ -71,10 +99,12 @@ public class ActivityTestRuleTest {
         Result result = runClasses(ActivityLifecycleTest.class);
         assertEquals(1, result.getFailureCount());
         assertThat(result.getFailures().get(0).getMessage(), is("This is a dummy test"));
-        assertThat(ActivityLifecycleTest.log.toString(), is("launchActivity finishActivity "));
+        assertThat(ActivityLifecycleTest.log.toString(),
+                is("beforeActivity launchActivity before test after finishActivity afterActivity "));
     }
 
     public static class FailureOfActivityLaunch {
+
         @Rule
         public ActivityTestRule<ActivityFixture> mActivityRule =
                 new ActivityTestRule<>(ActivityFixture.class);
@@ -93,6 +123,7 @@ public class ActivityTestRuleTest {
     }
 
     public static class SuccessfulLaunch {
+
         @Rule
         public ActivityTestRule<ActivityFixture> mActivityRule =
                 new ActivityTestRule<ActivityFixture>(ActivityFixture.class) {

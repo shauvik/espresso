@@ -16,13 +16,13 @@
 
 package android.support.test.rules;
 
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.support.test.internal.runner.junit4.statements.UiThreadStatement;
 import android.util.Log;
-
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
@@ -40,7 +40,9 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
     private static final String LOG_TAG = "ActivityInstrumentationRule";
 
     private Class<T> mActivityClass;
+
     private boolean mInitialTouchMode = false;
+
     private T mActivity;
 
     /**
@@ -60,8 +62,7 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
      *                         targetPackage specified in the AndroidManifest.xml
      * @param initialTouchMode true if the Activity should be placed into "touch mode" when started
      */
-    public ActivityTestRule(Class<T> activityClass,
-                            boolean initialTouchMode) {
+    public ActivityTestRule(Class<T> activityClass, boolean initialTouchMode) {
         mActivityClass = activityClass;
         mInitialTouchMode = initialTouchMode;
     }
@@ -81,6 +82,26 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
     }
 
     /**
+     * Overwrite this method to execute any code that should run before your {@link Activity} is
+     * launched.
+     * This method is called before each test method, including any method annotated with
+     * {@link @Before}.
+     */
+    protected void beforeActivity() {
+        // empty by default
+    }
+
+    /**
+     * Overwrite this method to execute any code that should run after your {@link Activity} is
+     * finished.
+     * This method is called after each test method, including any method annotated with
+     * {@link @After}.
+     */
+    protected void afterActivity() {
+        // empty by default
+    }
+
+    /**
      * @return The activity under test.
      */
     public T getActivity() {
@@ -91,7 +112,7 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
     }
 
     @Override
-    public Statement apply(Statement base, Description description) {
+    public Statement apply(final Statement base, Description description) {
         return new ActivityStatement(super.apply(base, description));
     }
 
@@ -129,6 +150,7 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
      * {@link UiThreadStatement} that finishes the activity after the test was executed
      */
     private class ActivityStatement extends Statement {
+
         private final Statement mBase;
 
         public ActivityStatement(Statement base) {
@@ -137,11 +159,13 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
 
         @Override
         public void evaluate() throws Throwable {
+            beforeActivity();
             mActivity = launchActivity();
             try {
                 mBase.evaluate();
             } finally {
                 finishActivity();
+                afterActivity();
             }
         }
     }
