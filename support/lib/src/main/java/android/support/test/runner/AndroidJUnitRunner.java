@@ -149,6 +149,11 @@ import org.junit.runner.notification.RunListener;
  * <b>To disable Google Analytics:</b>
  * -e disableAnalytics true
  * <p/>
+ * In order to make sure we are on the right track with each new release,
+ * the test runner collects analytics. More specifically, it uploads a hash of the package name
+ * of the application under test for each invocation. This allows us to measure both the count of
+ * unique packages using this library as well as the volume of usage.
+ * <p/>
  * <b/>All arguments can also be specified in the in the AndroidManifest via a meta-data tag:</b>
  * eg. using listeners:
  * instrumentation android:name="android.support.test.runner.AndroidJUnitRunner" ...
