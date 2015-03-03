@@ -16,18 +16,17 @@
 
 package android.support.test.espresso.action;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import android.support.test.espresso.action.AdapterViewProtocol.AdaptedData.Builder;
-import android.support.test.espresso.util.HumanReadables;
-import com.google.common.base.Optional;
-
 import android.database.Cursor;
+import android.support.test.espresso.util.HumanReadables;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 
+import com.google.common.base.Optional;
+
 import javax.annotation.Nullable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A sadly necessary layer of indirection to interact with AdapterViews.
@@ -148,7 +147,7 @@ public interface AdapterViewProtocol {
 
   /**
    * A custom function that is applied when {@link AdaptedData#getData()} is executed.
-   * @see {@link Builder#withDataFunction(DataFunction)}
+   * @see android.support.test.espresso.action.AdapterViewProtocol.AdaptedData.Builder#withDataFunction(DataFunction)
    */
   public interface DataFunction {
     public Object getData();

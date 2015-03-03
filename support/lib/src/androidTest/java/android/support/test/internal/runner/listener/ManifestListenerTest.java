@@ -17,11 +17,11 @@ package android.support.test.internal.runner.listener;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.notification.RunListener;
 
 /**
- * Simple test to check that specifying a {@link RunListener} via a meta-data tag
- * in manifest works.
+ * Simple test to check that specifying a
+ * <a href="http://junit.org/javadoc/latest/org/junit/runner/notification/RunListener.html">
+ * <code>RunListener</code></a> via a meta-data tag in manifest works.
  */
 public class ManifestListenerTest {
 

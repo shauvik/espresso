@@ -23,7 +23,8 @@ import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 
 /**
- * A {@link RunListener} that outputs test events to logcat.
+ * A <a href="http://junit.org/javadoc/latest/org/junit/runner/notification/RunListener.html">
+ * <code>RunListener</code></a> that outputs test events to logcat.
  * <p/>
  * Attempts to follow similar format as InstrumentationTestRunner.
  */

@@ -16,17 +16,17 @@
 
 package android.support.test.espresso;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import android.support.test.espresso.util.HumanReadables;
+import android.view.View;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-
-import android.view.View;
 
 import org.hamcrest.Matcher;
 
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Indicates that a given matcher did not match any elements in the view hierarchy.
@@ -65,7 +65,7 @@ public final class NoMatchingViewException extends RuntimeException implements E
   }
 
   /**
-   * Returns a string description of the {@link ViewMatcher} that did not match any view
+   * Returns a string description of the ViewMatcher that did not match any view
    * in the hierarchy.
    */
   public String getViewMatcherDescription() {

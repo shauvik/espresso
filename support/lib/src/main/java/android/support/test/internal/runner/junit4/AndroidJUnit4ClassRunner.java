@@ -40,8 +40,9 @@ public class AndroidJUnit4ClassRunner extends BlockJUnit4ClassRunner {
     }
 
     /**
-     * Default to {@link Test} level timeout if set. Otherwise, set the timeout that was passed
-     * to the instrumentation via argument
+     * Default to <a href="http://junit.org/javadoc/latest/org/junit/Test.html">
+     * <code>Test</code></a> level timeout if set. Otherwise, set the timeout that was passed to the
+     * instrumentation via argument
      */
     @Override
     protected Statement withPotentialTimeout(FrameworkMethod method, Object test, Statement next) {

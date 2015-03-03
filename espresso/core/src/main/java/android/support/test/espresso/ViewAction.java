@@ -48,7 +48,8 @@ public interface ViewAction {
    * it may want to ensure the view is already in the viewable physical screen of the device or is
    * of a certain type.
    *
-   * @return a {@link Matcher} that will be tested prior to calling perform.
+   * @return a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
+   *     <code>Matcher</code></a> that will be tested prior to calling perform.
    */
   public Matcher<View> getConstraints();
 

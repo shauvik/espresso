@@ -16,25 +16,23 @@
 
 package android.support.test.espresso.contrib;
 
-import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static org.hamcrest.Matchers.allOf;
-
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
-
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
 
 import org.hamcrest.Matcher;
 
+import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static org.hamcrest.Matchers.allOf;
+
 /**
  * Espresso action for interacting with {@link DatePicker} and
  * {@link TimePicker}.
  *
- * @see <a
- *      href="http://developer.android.com/guide/topics/ui/controls/pickers.html">Pickers
+ * @see <a href="http://developer.android.com/guide/topics/ui/controls/pickers.html">Pickers
  *      API guide</a>
  */
 public final class PickerActions {

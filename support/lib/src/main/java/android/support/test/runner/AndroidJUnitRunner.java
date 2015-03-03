@@ -51,7 +51,8 @@ import org.junit.runner.notification.RunListener;
  * <h3>Typical Usage</h3>
  * <p/>
  * Write JUnit3 style {@link junit.framework.TestCase}s and/or JUnit4 style
- * {@link org.junit.Test}s that perform tests against the classes in your package.
+ * <a href="http://junit.org/javadoc/latest/org/junit/Test.html">
+ * <code>Test</code></a>s that perform tests against the classes in your package.
  * Make use of the {@link android.support.test.InstrumentationRegistry} if needed.
  * <p/>
  * In an appropriate AndroidManifest.xml, define an instrumentation with android:name set to
@@ -135,7 +136,9 @@ import org.junit.runner.notification.RunListener;
  * <b> To specify EMMA code coverage results file path:</b>
  * -e coverageFile /sdcard/myFile.ec
  * <p/>
- * <b> To specify one or more {@link RunListener}s to observe the test run:</b>
+ * <b> To specify one or more
+ * <a href="http://junit.org/javadoc/latest/org/junit/runner/notification/RunListener.html">
+ * <code>RunListener</code></a>s to observe the test run:</b>
  * -e listener com.foo.Listener,com.foo.Listener2
  * <p/>
  * <b>Set timeout (in milliseconds) that will be applied to each test:</b>
@@ -143,8 +146,14 @@ import org.junit.runner.notification.RunListener;
  * <p/>
  * Supported for both JUnit3 and JUnit4 style tests. For JUnit3 tests, this flag is the only way
  * to specify timeouts. For JUnit4 tests, this flag overrides timeouts specified via
- * {@link org.junit.rules.Timeout}. Please note that in JUnit4 {@link org.junit.Test#timeout()}
- * annotation take precedence over both, this flag and {@link org.junit.Test#timeout()} annotation.
+ * <a href="http://junit.org/javadoc/latest/org/junit/rules/Timeout.html">
+ * <code>org.junit.rules.Timeout</code></a>. Please note that in JUnit4
+ * <a href="http://junit.org/javadoc/latest/org/junit/Test.html#timeout()">
+ * <code>org.junit.Test#timeout()</code></a>
+ * annotation take precedence over both, this flag and
+ * <a href="http://junit.org/javadoc/latest/org/junit/Test.html#timeout()">
+ * <code>org.junit.Test#timeout()</code></a>
+ * annotation.
  * <p/>
  * <b>To disable Google Analytics:</b>
  * -e disableAnalytics true

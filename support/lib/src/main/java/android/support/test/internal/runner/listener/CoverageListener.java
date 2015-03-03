@@ -27,7 +27,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * A test {@link RunListener} that generates EMMA code coverage.
+ * A test <a href="http://junit.org/javadoc/latest/org/junit/runner/notification/RunListener.html">
+ * <code>RunListener</code></a> that generates EMMA code coverage.
  */
 public class CoverageListener extends InstrumentationRunListener {
 

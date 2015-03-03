@@ -24,7 +24,8 @@ import org.junit.runner.Result;
 import java.io.PrintStream;
 
 /**
- * A {@link RunListener} that has access to a {@link Instrumentation}. This is useful for
+ * A <a href="http://junit.org/javadoc/latest/org/junit/runner/notification/RunListener.html">
+ * <code>RunListener</code></a> that has access to a {@link Instrumentation}. This is useful for
  * test result listeners that want to dump data back to the instrumentation results.
  */
 public abstract class InstrumentationRunListener extends RunListener {

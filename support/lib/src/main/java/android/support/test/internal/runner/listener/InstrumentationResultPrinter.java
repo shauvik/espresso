@@ -23,12 +23,12 @@ import org.junit.internal.TextListener;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
-import org.junit.runner.notification.RunListener;
 
 import java.io.PrintStream;
 
 /**
- * A {@link RunListener} that sends detailed pass/fail results back as instrumentation status
+ * A <a href="http://junit.org/javadoc/latest/org/junit/runner/notification/RunListener.html">
+ * <code>RunListener</code></a> that sends detailed pass/fail results back as instrumentation status
  * bundles.
  * <p/>
  * When running instrumentation in '-r' or raw mode, output will be displayed in this format
