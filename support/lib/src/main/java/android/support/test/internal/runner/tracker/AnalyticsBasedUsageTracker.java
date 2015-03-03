@@ -1,8 +1,5 @@
 package android.support.test.internal.runner.tracker;
 
-import static android.support.test.internal.util.Checks.checkNotNull;
-import static java.net.URLEncoder.encode;
-
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -24,6 +21,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static android.support.test.internal.util.Checks.checkNotNull;
+import static java.net.URLEncoder.encode;
 
 /**
  * Creates a usage tracker that pings google analytics when infra bits get used.
@@ -251,6 +251,8 @@ public final class AnalyticsBasedUsageTracker implements UsageTracker {
                                 // j5 compatibility. this is utf8.
                         .getBytes();
 
+                analyticsConnection.setConnectTimeout(3000); //milliseconds
+                analyticsConnection.setReadTimeout(5000); //milliseconds
                 analyticsConnection.setDoOutput(true);
                 analyticsConnection.setFixedLengthStreamingMode(body.length);
                 analyticsConnection.getOutputStream().write(body);
