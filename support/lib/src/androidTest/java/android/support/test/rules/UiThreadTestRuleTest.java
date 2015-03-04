@@ -19,43 +19,53 @@ package android.support.test.rules;
 import android.os.Looper;
 import android.support.test.UiThreadTest;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.Result;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import org.junit.Rule;
-import org.junit.Test;
+import static org.junit.runner.JUnitCore.runClasses;
 
 public class UiThreadTestRuleTest {
 
     @Rule
     public UiThreadTestRule mUiThreadRule = new UiThreadTestRule();
 
-    @Test
-    public void verifyNotOnUiThread() {
+    private static void verifyRunsOnUiThread() {
+        assertTrue(Looper.getMainLooper().getThread() == Thread.currentThread());
+        assertTrue(Looper.myLooper() == Looper.getMainLooper());
+    }
+
+    private static void verifyRunsNotOnUiThread() {
         assertFalse(Looper.getMainLooper().getThread() == Thread.currentThread());
         assertFalse(Looper.myLooper() == Looper.getMainLooper());
+    }
+
+    @Test
+    public void verifyNotOnUiThread() {
+        verifyRunsNotOnUiThread();
     }
 
     @Test
     @UiThreadTest
     public void verifyOnUiThread() {
-        assertTrue(Looper.getMainLooper().getThread() == Thread.currentThread());
-        assertTrue(Looper.myLooper() == Looper.getMainLooper());
+        verifyRunsOnUiThread();
     }
 
     @Test
     public void verifyRunTestOnUiThreadMethod() throws Throwable {
         // verify not on UI thread
-        assertFalse(Looper.getMainLooper().getThread() == Thread.currentThread());
-        assertFalse(Looper.myLooper() == Looper.getMainLooper());
+        verifyRunsNotOnUiThread();
         mUiThreadRule.runTestOnUiThread(new Runnable() {
             @Override
             public void run() {
                 // verify on UI thread
-                assertTrue(Looper.getMainLooper().getThread() == Thread.currentThread());
-                assertTrue(Looper.myLooper() == Looper.getMainLooper());
+                verifyRunsOnUiThread();
             }
         });
     }
@@ -64,8 +74,7 @@ public class UiThreadTestRuleTest {
     @UiThreadTest
     public void attemptingToRunOnUiThreadFromUiThreadShouldFail() throws Throwable {
         // verify on UI thread
-        assertTrue(Looper.getMainLooper().getThread() == Thread.currentThread());
-        assertTrue(Looper.myLooper() == Looper.getMainLooper());
+        verifyRunsOnUiThread();
 
         try {
             mUiThreadRule.runTestOnUiThread(new Runnable() {
@@ -79,5 +88,66 @@ public class UiThreadTestRuleTest {
             assertEquals("This method can not be called from the main application thread",
                     e.getMessage());
         }
+    }
+
+    public static class CheckBeforeAndAfterRunOnUiThread {
+        @Rule
+        public UiThreadTestRule mUiThreadRule = new UiThreadTestRule();
+
+        @Before
+        public void verifyBeforeOnUiThread() {
+            verifyRunsOnUiThread();
+        }
+
+        @Test
+        @UiThreadTest
+        public void verifyOnUiThread() {
+            verifyRunsOnUiThread();
+        }
+
+        @After
+        public void verifyAfterOnUiThread() {
+            verifyRunsOnUiThread();
+        }
+    }
+
+    @Test
+    public void verifyBeforeAndAfterRunOnUiThread() {
+        Result result = runClasses(CheckBeforeAndAfterRunOnUiThread.class);
+        assertEquals(0, result.getFailureCount());
+    }
+
+    public static class CheckBeforeAndAfterRunNotOnUiThread {
+        @Rule
+        public UiThreadTestRule mUiThreadRule = new UiThreadTestRule();
+
+        @Before
+        public void verifyBeforeNotOnUiThread() {
+            verifyRunsNotOnUiThread();
+        }
+
+        @Test
+        public void verifyRunTestOnUiThreadMethod() throws Throwable {
+            // verify not on UI thread
+            verifyRunsNotOnUiThread();
+            mUiThreadRule.runTestOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // verify on UI thread
+                    verifyRunsOnUiThread();
+                }
+            });
+        }
+
+        @After
+        public void verifyAfterNotOnUiThread() {
+            verifyRunsNotOnUiThread();
+        }
+    }
+
+    @Test
+    public void verifyBeforeAndAfterRunNotOnUiThread() {
+        Result result = runClasses(CheckBeforeAndAfterRunNotOnUiThread.class);
+        assertEquals(0, result.getFailureCount());
     }
 }

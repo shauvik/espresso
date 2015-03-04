@@ -23,9 +23,15 @@ import java.lang.annotation.Target;
 
 /**
  * This annotation should be used along with {@link android.support.test.rules.UiThreadTestRule} or
- * with any rule that inherits from it.
- * When the annotation is present, the test method is executed on the application's
- * main thread (or UI thread).
+ * with any rule that inherits from it. When the annotation is present, the test method is executed
+ * on the application's UI thread (or main thread).
+ * <p/>
+ * Note, due to current JUnit limitation, methods annotated with {@link org.junit.Before} and
+ * {@link org.junit.After} will also be executed on the UI Thread. Consider using
+ * {@link android.support.test.rules.UiThreadTestRule#runTestOnUiThread(Runnable)} if this is an
+ * issue.
+ *
+ * @see android.support.test.rules.UiThreadTestRule#runTestOnUiThread(Runnable)
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

@@ -23,11 +23,18 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 /**
  * This rule allows the test method annotated with {@link UiThreadTest} to execute on the
  * application's main thread (or UI thread).
+ * <p/>
+ * Note, methods annotated with {@link org.junit.Before} and {@link org.junit.After} will also be
+ * executed on the UI thread.
+ *
+ * @see android.support.test.UiThreadTest
  */
 public class UiThreadTestRule implements TestRule {
 
@@ -44,24 +51,30 @@ public class UiThreadTestRule implements TestRule {
      * Helper for running portions of a test on the UI thread.
      * <p/>
      * Note, in most cases it is simpler to annotate the test method with
-     * {@link UiThreadTest}, which will run the entire test method on the UI thread.
+     * {@link UiThreadTest}, which will run the entire test method including methods annotated with
+     * {@link org.junit.Before} and {@link org.junit.After} on the UI thread.
+     * <p/>
      * Use this method if you need to switch in and out of the UI thread to perform your test.
      *
-     * @param r runnable containing test code in the {@link Runnable#run()} method
+     * @param runnable runnable containing test code in the {@link Runnable#run()} method
+     *
+     * @see android.support.test.UiThreadTest
      */
-    public void runTestOnUiThread(final Runnable r) throws Throwable {
-        final Throwable[] exceptions = new Throwable[1];
+    public void runTestOnUiThread(final Runnable runnable) throws Throwable {
+        final AtomicReference<Throwable> exceptionRef = new AtomicReference<>();
         getInstrumentation().runOnMainSync(new Runnable() {
             public void run() {
                 try {
-                    r.run();
+                    runnable.run();
                 } catch (Throwable throwable) {
-                    exceptions[0] = throwable;
+                    exceptionRef.set(throwable);
                 }
             }
         });
-        if (exceptions[0] != null) {
-            throw exceptions[0];
+
+        Throwable throwable = exceptionRef.get();
+        if (throwable != null) {
+            throw throwable;
         }
     }
 }
