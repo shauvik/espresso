@@ -52,25 +52,3 @@ createArchive"
 
 # first build Eclipse/Monitor
 ( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ./gradlew $TASKS )
-
-# Workaround for https://code.google.com/p/android/issues/detail?id=80444
-# This removes libs/* from espresso-core-2.0.aar
-REPO_FILE="android_m2repository_r11.zip"
-mkdir $DIST_DIR/libsTmp
-mkdir $DIST_DIR/classesJarTmp
-unzip $DIST_DIR/$REPO_FILE -d $DIST_DIR/libsTmp
-zip -d $DIST_DIR/libsTmp/m2repository/com/android/support/test/espresso/espresso-core/2.0/espresso-core-2.0.aar libs/*
-
-# Remove guava and dagger deps from classes.jar
-unzip $DIST_DIR/libsTmp/m2repository/com/android/support/test/espresso/espresso-core/2.0/espresso-core-2.0.aar -d $DIST_DIR/classesJarTmp
-zip -d $DIST_DIR/classesJarTmp/classes.jar dagger/* com/google/*
-cd $DIST_DIR/classesJarTmp/
-zip -r $DIST_DIR/libsTmp/m2repository/com/android/support/test/espresso/espresso-core/2.0/espresso-core-2.0.aar .
-cd ..
-rm -rf $DIST_DIR/classesJarTmp
-
-rm $DIST_DIR/$REPO_FILE
-cd $DIST_DIR/libsTmp
-zip -r ../$REPO_FILE .
-cd ..
-rm -rf libsTmp

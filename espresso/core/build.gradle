@@ -82,7 +82,7 @@ android.libraryVariants.all { variant ->
         return;
     }
 
-    // Get the original classes.jar output folder to place the final jarjar'ed file in for the
+    // Get the original classes.jar output folder to place the final jarjar'd file in for the
     // aar generation to pick up.
     Jar classesJarTask = (Jar) project.tasks.getByName("package${variant.name.capitalize()}Jar")
     def finalOutputJarDir = classesJarTask.destinationDir
