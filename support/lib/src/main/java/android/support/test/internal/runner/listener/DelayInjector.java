@@ -21,7 +21,8 @@ import org.junit.runner.Description;
 import org.junit.runner.notification.RunListener;
 
 /**
- * A {@link RunListener} that injects a given delay between tests.
+ * A <a href="http://junit.org/javadoc/latest/org/junit/runner/notification/RunListener.html">
+ * <code>RunListener</code></a> that injects a given delay between tests.
  */
 public class DelayInjector extends RunListener {
 

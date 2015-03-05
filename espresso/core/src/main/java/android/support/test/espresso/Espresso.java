@@ -64,7 +64,8 @@ public final class Espresso {
    * first.
    *
    * @param viewMatcher used to select the view.
-   * @see #onData
+   *
+   * @see #onData(org.hamcrest.Matcher)
    */
   public static ViewInteraction onView(final Matcher<View> viewMatcher) {
     return espressoGraph().plus(new ViewInteractionModule(viewMatcher)).get(ViewInteraction.class);
