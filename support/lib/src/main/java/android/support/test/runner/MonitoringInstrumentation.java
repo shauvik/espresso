@@ -18,6 +18,7 @@ package android.support.test.runner;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.Fragment;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -29,8 +30,10 @@ import android.os.Looper;
 import android.os.MessageQueue.IdleHandler;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.internal.runner.hidden.ExposedInstrumentationApi;
+import android.support.test.internal.runner.intent.IntentMonitorImpl;
 import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorImpl;
 import android.support.test.internal.runner.lifecycle.ApplicationLifecycleMonitorImpl;
+import android.support.test.runner.intent.IntentMonitorRegistry;
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.runner.lifecycle.ApplicationLifecycleMonitorRegistry;
 import android.support.test.runner.lifecycle.ApplicationStage;
@@ -85,6 +88,7 @@ public class MonitoringInstrumentation extends ExposedInstrumentationApi {
     private ActivityLifecycleMonitorImpl mLifecycleMonitor = new ActivityLifecycleMonitorImpl();
     private ApplicationLifecycleMonitorImpl mApplicationMonitor =
             new ApplicationLifecycleMonitorImpl();
+    private IntentMonitorImpl mIntentMonitor = new IntentMonitorImpl();
     private ExecutorService mExecutorService;
     private Handler mHandlerForMainLooper;
     private AtomicBoolean mAnActivityHasBeenLaunched = new AtomicBoolean(false);
@@ -117,6 +121,7 @@ public class MonitoringInstrumentation extends ExposedInstrumentationApi {
         InstrumentationRegistry.registerInstance(this, arguments);
         ActivityLifecycleMonitorRegistry.registerInstance(mLifecycleMonitor);
         ApplicationLifecycleMonitorRegistry.registerInstance(mApplicationMonitor);
+        IntentMonitorRegistry.registerInstance(mIntentMonitor);
 
         mHandlerForMainLooper = new Handler(Looper.getMainLooper());
         mMainThread = Thread.currentThread();
@@ -323,6 +328,61 @@ public class MonitoringInstrumentation extends ExposedInstrumentationApi {
             throw new RuntimeException(
                     "this method cannot be called from the main application thread");
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ActivityResult execStartActivity(
+            Context who, IBinder contextThread, IBinder token, Activity target,
+            Intent intent, int requestCode) {
+        Log.d(LOG_TAG, "execStartActivity(context, ibinder, ibinder, activity, intent, int)");
+        mIntentMonitor.signalIntent(intent);
+        return super.execStartActivity(who, contextThread, token, target, intent, requestCode);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ActivityResult execStartActivity(
+            Context who, IBinder contextThread, IBinder token, Activity target,
+            Intent intent, int requestCode, Bundle options) {
+        Log.d(LOG_TAG, "execStartActivity(context, ibinder, ibinder, activity, intent, int, bundle");
+        mIntentMonitor.signalIntent(intent);
+        return super.execStartActivity(who, contextThread, token, target, intent, requestCode, options);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void execStartActivities(Context who, IBinder contextThread,
+            IBinder token, Activity target, Intent[] intents, Bundle options)  {
+        // This method is used in HONEYCOMB and higher to create a synthetic back stack for the
+        // launched activity. The intent at the end of the array is the top most,
+        // user visible activity, and the intents beneath it are launched when the user presses back.
+        Log.d(LOG_TAG, "execStartActivities(context, ibinder, ibinder, activity, intent[], bundle)");
+        // For requestCode < 0, the caller doesn't expect any result and
+        // in this case we are not expecting any result so selecting
+        // a value < 0.
+        int requestCode = -1;
+        for (Intent intent : intents) {
+            execStartActivity(who, contextThread, token, target, intent, requestCode, options);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ActivityResult execStartActivity(
+            Context who, IBinder contextThread, IBinder token, Fragment target,
+            Intent intent, int requestCode, Bundle options) {
+        Log.d(LOG_TAG, "execStartActivity(context, IBinder, IBinder, Fragment, Intent, int, Bundle)");
+        mIntentMonitor.signalIntent(intent);
+        return super.execStartActivity(who, contextThread, token, target, intent, requestCode, options);
     }
 
     @Override
