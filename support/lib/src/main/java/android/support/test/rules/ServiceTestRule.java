@@ -23,6 +23,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.annotation.Beta;
 import android.support.test.internal.util.Checks;
 import android.util.Log;
 
@@ -71,6 +72,7 @@ import java.util.concurrent.TimeoutException;
  * <p>
  *
  */
+@Beta
 public class ServiceTestRule implements TestRule {
 
     private static final String TAG = "ServiceTestRule";

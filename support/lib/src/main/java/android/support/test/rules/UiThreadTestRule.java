@@ -17,6 +17,7 @@
 package android.support.test.rules;
 
 import android.support.test.UiThreadTest;
+import android.support.test.annotation.Beta;
 import android.support.test.internal.runner.junit4.statements.UiThreadStatement;
 
 import org.junit.rules.TestRule;
@@ -36,6 +37,7 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
  *
  * @see android.support.test.UiThreadTest
  */
+@Beta
 public class UiThreadTestRule implements TestRule {
 
     @Override

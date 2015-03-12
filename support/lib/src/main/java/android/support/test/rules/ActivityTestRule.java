@@ -21,6 +21,7 @@ import org.junit.runners.model.Statement;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.test.annotation.Beta;
 import android.support.test.internal.runner.junit4.statements.UiThreadStatement;
 import android.util.Log;
 
@@ -35,6 +36,7 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
  *
  * @param <T> The activity to test
  */
+@Beta
 public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
 
     private static final String LOG_TAG = "ActivityInstrumentationRule";
