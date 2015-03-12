@@ -19,7 +19,14 @@ apply plugin: 'com.android.library'
 version = '0.2'
 group = 'com.android.support.test'
 
+configurations {
+    androidTestCompile.exclude module: 'exposed-instrumentation-api-publish'
+}
+
 dependencies {
+    provided project(path: ':exposed-instrumentation-api-provided', configuration: 'androidJar')
+    publish project(path: ':exposed-instrumentation-api-publish', configuration: 'androidJar')
+
     compile 'junit:junit-dep:4.10'
     compile 'com.android.support:support-annotations:21.0.3'
     androidTestCompile 'org.hamcrest:hamcrest-library:1.1'

@@ -35,6 +35,11 @@ include(':uiautomator-v18')
 project(':uiautomator-v18').projectDir = new File(rootDir, 'frameworks/uiautomator')
 project(':uiautomator-v18').buildFileName = 'support-test.gradle'
 
+// For internal use only, please do not depend on any of these artifacts directly!
+include(':exposed-instrumentation-api-provided')
+project(':exposed-instrumentation-api-provided').projectDir = new File(rootDir, 'frameworks/testing/exposed-instrumentation-api-provided')
+include(':exposed-instrumentation-api-publish')
+project(':exposed-instrumentation-api-publish').projectDir = new File(rootDir, 'frameworks/testing/exposed-instrumentation-api-publish')
 
 // External
 include(':doclava')
