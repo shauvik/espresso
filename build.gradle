@@ -168,6 +168,14 @@ configure(getProjectsToArchive()) {
                 }
             }
 
+    // Depending on a non jar dependency in a pom must include the type of the dependency
+    // Gradle doesn't properly do this, a workaround is to customize the pom on the fly.
+    def deployer = releaseRepoTask.repositories.mavenDeployer
+    deployer.pom*.whenConfigured { pom ->
+        pom.dependencies.findAll {dep -> dep.groupId.startsWith('com.android.support') &&
+                dep.artifactId != 'support-annotations'}*.type = 'aar'
+    }
+
     // Make the mainUpload depend on this one.
     mainUpload.dependsOn releaseRepoTask
 }
