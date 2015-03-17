@@ -16,17 +16,25 @@
 
 package android.support.test.espresso.action;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.is;
 
+import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
+import android.support.test.espresso.ViewAssertion;
 
 import android.net.Uri;
+import android.util.Log;
+import android.util.Pair;
 import android.view.KeyEvent;
+import android.view.View;
 
 import org.hamcrest.Matcher;
 
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import javax.annotation.Nonnull;
 
 /**
@@ -44,6 +52,90 @@ public final class ViewActions {
   private static final float EDGE_FUZZ_FACTOR = 0.083f;
 
   /**
+   * A set of {@code ViewAssertion}s to be executed before the ViewActions in this class.
+   */
+  private static Set<Pair<String, ViewAssertion>> globalAssertions =
+      new CopyOnWriteArraySet<Pair<String, ViewAssertion>>();
+
+  /**
+   * Adds a {@code ViewAssertion} to be run every time a {@code ViewAction} in this class is
+   * performed. The assertion will be run prior to performing the action.
+   *
+   * @param name a name of the assertion to be added
+   * @param viewAssertion a {@code ViewAssertion} to be added
+   * @throws IllegalArgumentException if the name/viewAssertion pair is already contained in the
+   *         global assertions.
+   */
+  public static void addGlobalAssertion(String name, ViewAssertion viewAssertion) {
+    checkNotNull(name);
+    checkNotNull(viewAssertion);
+    Pair<String, ViewAssertion> vaPair = new Pair<String, ViewAssertion>(name, viewAssertion);
+    checkArgument(!globalAssertions.contains(vaPair),
+        "ViewAssertion with name %s is already in the global assertions!", name);
+    globalAssertions.add(vaPair);
+  }
+
+  /**
+   * Removes the given assertion from the set of assertions to be run before actions are performed.
+   *
+   * @param viewAssertion the assertion to remove
+   * @throws IllegalArgumentException if the name/viewAssertion pair is not already contained in the
+   *         global assertions.
+   */
+  public static void removeGlobalAssertion(ViewAssertion viewAssertion) {
+    boolean removed = false;
+    for (Pair<String, ViewAssertion> vaPair : globalAssertions) {
+      if (viewAssertion != null && viewAssertion.equals(vaPair.second)) {
+        removed = removed || globalAssertions.remove(vaPair);
+      }
+    }
+    checkArgument(removed, "ViewAssertion was not in global assertions!");
+  }
+
+  public static void clearGlobalAssertions() {
+    globalAssertions.clear();
+  }
+
+  /**
+   * Performs all assertions in {@link globalAssertions} and then performs the given
+   * {@code ViewAction}
+   *
+   * @param viewAction the {@code ViewAction} to perform after the assertions
+   */
+  public static ViewAction actionWithAssertions(final ViewAction viewAction) {
+    if (globalAssertions.isEmpty()) {
+      return viewAction;
+    }
+    return new ViewAction() {
+      @Override
+      public String getDescription() {
+        StringBuilder msg = new StringBuilder("Running view assertions[");
+        for (Pair<String, ViewAssertion> vaPair : globalAssertions) {
+          msg.append(vaPair.first);
+          msg.append(", ");
+        }
+        msg.append("] and then running: ");
+        msg.append(viewAction.getDescription());
+        return msg.toString();
+      }
+
+      @Override
+      public Matcher<View> getConstraints() {
+        return viewAction.getConstraints();
+      }
+
+      @Override
+      public void perform(UiController uic, View view) {
+        for (Pair<String, ViewAssertion> vaPair : globalAssertions) {
+          Log.i("ViewAssertion", "Asserting " + vaPair.first);
+          vaPair.second.check(view, null);
+        }
+        viewAction.perform(uic, view);
+      }
+    };
+  }
+
+  /**
    * Returns an action that clears text on the view.<br>
    * <br>
    * View constraints:
@@ -52,7 +144,7 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction clearText() {
-    return new ReplaceTextAction("");
+    return actionWithAssertions(new ReplaceTextAction(""));
   }
 
   /**
@@ -64,7 +156,8 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction click() {
-    return new GeneralClickAction(Tap.SINGLE, GeneralLocation.VISIBLE_CENTER, Press.FINGER);
+    return actionWithAssertions(
+        new GeneralClickAction(Tap.SINGLE, GeneralLocation.VISIBLE_CENTER, Press.FINGER));
   }
 
   /**
@@ -88,8 +181,8 @@ public final class ViewActions {
    */
   public static ViewAction click(ViewAction rollbackAction) {
     checkNotNull(rollbackAction);
-    return new GeneralClickAction(Tap.SINGLE, GeneralLocation.CENTER, Press.FINGER,
-        rollbackAction);
+    return actionWithAssertions(
+        new GeneralClickAction(Tap.SINGLE, GeneralLocation.CENTER, Press.FINGER, rollbackAction));
   }
 
   /**
@@ -102,9 +195,9 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction swipeLeft() {
-    return new GeneralSwipeAction(Swipe.FAST,
+    return actionWithAssertions(new GeneralSwipeAction(Swipe.FAST,
         GeneralLocation.translate(GeneralLocation.CENTER_RIGHT, -EDGE_FUZZ_FACTOR, 0),
-        GeneralLocation.CENTER_LEFT, Press.FINGER);
+        GeneralLocation.CENTER_LEFT, Press.FINGER));
   }
 
   /**
@@ -117,9 +210,9 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction swipeRight() {
-    return new GeneralSwipeAction(Swipe.FAST,
+    return actionWithAssertions(new GeneralSwipeAction(Swipe.FAST,
         GeneralLocation.translate(GeneralLocation.CENTER_LEFT, EDGE_FUZZ_FACTOR, 0),
-        GeneralLocation.CENTER_RIGHT, Press.FINGER);
+        GeneralLocation.CENTER_RIGHT, Press.FINGER));
   }
 
   /**
@@ -132,9 +225,9 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction swipeDown() {
-    return new GeneralSwipeAction(Swipe.FAST,
+    return actionWithAssertions(new GeneralSwipeAction(Swipe.FAST,
         GeneralLocation.translate(GeneralLocation.TOP_CENTER, 0, EDGE_FUZZ_FACTOR),
-        GeneralLocation.BOTTOM_CENTER, Press.FINGER);
+        GeneralLocation.BOTTOM_CENTER, Press.FINGER));
   }
 
   /**
@@ -147,16 +240,16 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction swipeUp() {
-    return new GeneralSwipeAction(Swipe.FAST,
+    return actionWithAssertions(new GeneralSwipeAction(Swipe.FAST,
         GeneralLocation.translate(GeneralLocation.BOTTOM_CENTER, 0, -EDGE_FUZZ_FACTOR),
-        GeneralLocation.TOP_CENTER, Press.FINGER);
+        GeneralLocation.TOP_CENTER, Press.FINGER));
   }
 
   /**
    * Returns an action that closes soft keyboard. If the keyboard is already closed, it is a no-op.
    */
   public static ViewAction closeSoftKeyboard() {
-    return new CloseKeyboardAction();
+    return actionWithAssertions(new CloseKeyboardAction());
   }
 
   /**
@@ -164,7 +257,7 @@ public final class ViewActions {
    * (Input Method Editor). The selected view will have its onEditorAction method called.
    */
   public static ViewAction pressImeActionButton() {
-    return new EditorAction();
+    return actionWithAssertions(new EditorAction());
   }
 
   /**
@@ -185,14 +278,15 @@ public final class ViewActions {
    * Returns an action that presses the key specified by the keyCode (eg. Keyevent.KEYCODE_BACK).
    */
   public static ViewAction pressKey(int keyCode) {
-    return new KeyEventAction(new EspressoKey.Builder().withKeyCode(keyCode).build());
+    return actionWithAssertions(
+        new KeyEventAction(new EspressoKey.Builder().withKeyCode(keyCode).build()));
   }
 
   /**
    * Returns an action that presses the specified key with the specified modifiers.
    */
   public static ViewAction pressKey(EspressoKey key) {
-    return new KeyEventAction(key);
+    return actionWithAssertions(new KeyEventAction(key));
   }
 
   /**
@@ -204,7 +298,8 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction doubleClick() {
-    return new GeneralClickAction(Tap.DOUBLE, GeneralLocation.CENTER, Press.FINGER);
+    return actionWithAssertions(
+        new GeneralClickAction(Tap.DOUBLE, GeneralLocation.CENTER, Press.FINGER));
   }
 
   /**
@@ -217,7 +312,8 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction longClick() {
-    return new GeneralClickAction(Tap.LONG, GeneralLocation.CENTER, Press.FINGER);
+    return actionWithAssertions(
+        new GeneralClickAction(Tap.LONG, GeneralLocation.CENTER, Press.FINGER));
   }
 
   /**
@@ -230,7 +326,7 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction scrollTo() {
-    return new ScrollToAction();
+    return actionWithAssertions(new ScrollToAction());
   }
 
   /**
@@ -247,7 +343,7 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction typeTextIntoFocusedView(String stringToBeTyped) {
-    return new TypeTextAction(stringToBeTyped, false /* tapToFocus */);
+    return actionWithAssertions(new TypeTextAction(stringToBeTyped, false /* tapToFocus */));
   }
 
   /**
@@ -264,7 +360,7 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction typeText(String stringToBeTyped) {
-    return new TypeTextAction(stringToBeTyped);
+    return actionWithAssertions(new TypeTextAction(stringToBeTyped));
   }
 
   /**
@@ -278,7 +374,7 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction replaceText(@Nonnull String stringToBeSet) {
-    return new ReplaceTextAction(stringToBeSet);
+    return actionWithAssertions(new ReplaceTextAction(stringToBeSet));
   }
 
   /**
@@ -329,6 +425,6 @@ public final class ViewActions {
   public static ViewAction openLink(Matcher<String> linkTextMatcher, Matcher<Uri> uriMatcher) {
     checkNotNull(linkTextMatcher);
     checkNotNull(uriMatcher);
-    return new OpenLinkAction(linkTextMatcher, uriMatcher);
+    return actionWithAssertions(new OpenLinkAction(linkTextMatcher, uriMatcher));
   }
 }

@@ -37,8 +37,8 @@ import java.util.Arrays;
  * {@link AdapterView}s that are backed by a {@link Cursor} are very common. This class contains
  * <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
  * <code>Matcher</code></a>s that can be used together with
- * {@link android.support.test.espresso.Espresso#onData(Matcher)} to match a data row in a
- * {@link Cursor}.
+ * {@link android.support.test.espresso.Espresso#onData(Matcher)} to match a
+ * data row in a {@link Cursor}.
  * The <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
  * <code>Matcher</code></a>s can only operate on a single data row of the cursor and Espresso
  * internally moves the {@link Cursor} to the correct adapter position.

@@ -95,7 +95,7 @@ public class EventActionIntegrationTest extends ActivityInstrumentationTestCase2
         .check(matches(isDisplayed()));
   }
 
-  @SdkSuppress(minSdkVersion=13)
+  @SdkSuppress(minSdkVersion=15)
   public void testLongClick() {
     onView(withText(is(getActivity().getString(R.string.text_long_click))))
         .check(matches(not(isDisplayed())));
@@ -105,7 +105,7 @@ public class EventActionIntegrationTest extends ActivityInstrumentationTestCase2
         .check(matches(isDisplayed()));
   }
 
-  @SdkSuppress(minSdkVersion=13)
+  @SdkSuppress(minSdkVersion=15)
   public void testDoubleClick() {
     onView(withText(is(getActivity().getString(R.string.text_double_click))))
         .check(matches(not(ViewMatchers.isDisplayed())));

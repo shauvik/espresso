@@ -31,7 +31,7 @@ import android.view.ViewConfiguration;
 /**
  * Facilitates sending of motion events to a {@link UiController}.
  */
-final class MotionEvents {
+public final class MotionEvents {
 
   private static final String TAG = MotionEvents.class.getSimpleName();
 
@@ -42,7 +42,7 @@ final class MotionEvents {
     // Shouldn't be instantiated
   }
 
-  static DownResultHolder sendDown(
+  public static DownResultHolder sendDown(
       UiController uiController, float[] coordinates, float[] precision) {
     checkNotNull(uiController);
     checkNotNull(coordinates);
@@ -114,11 +114,14 @@ final class MotionEvents {
       .build();
   }
 
-  static boolean sendUp(UiController uiController, MotionEvent downEvent) {
+  public static boolean sendUp(UiController uiController, MotionEvent downEvent) {
     return sendUp(uiController, downEvent, new float[] { downEvent.getX(), downEvent.getY() });
   }
 
-  static boolean sendUp(UiController uiController, MotionEvent downEvent, float[] coordinates) {
+  public static boolean sendUp(
+      UiController uiController,
+      MotionEvent downEvent,
+      float[] coordinates) {
     checkNotNull(uiController);
     checkNotNull(downEvent);
     checkNotNull(coordinates);
@@ -155,7 +158,7 @@ final class MotionEvents {
     return true;
   }
 
-  static void sendCancel(UiController uiController, MotionEvent downEvent) {
+  public static void sendCancel(UiController uiController, MotionEvent downEvent) {
     checkNotNull(uiController);
     checkNotNull(downEvent);
 
@@ -191,7 +194,7 @@ final class MotionEvents {
     }
   }
 
-  static boolean sendMovement(UiController uiController, MotionEvent downEvent,
+  public static boolean sendMovement(UiController uiController, MotionEvent downEvent,
       float[] coordinates) {
     checkNotNull(uiController);
     checkNotNull(downEvent);
@@ -233,7 +236,7 @@ final class MotionEvents {
   /**
    * Holds the result of a down motion.
    */
-  static class DownResultHolder {
+  public static class DownResultHolder {
     public final MotionEvent down;
     public final boolean longPress;
 

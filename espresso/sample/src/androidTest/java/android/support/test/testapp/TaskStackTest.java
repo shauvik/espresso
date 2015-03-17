@@ -39,7 +39,7 @@ public class TaskStackTest extends ActivityInstrumentationTestCase2<TaskStackAct
   }
 
   // The task stack behavior is available on API level 11 and up.
- @SdkSuppress(minSdkVersion=10)
+ @SdkSuppress(minSdkVersion=11)
   public void testTaskStack() {
     onView(withText("display activity")).check(matches(isDisplayed()));
     pressBack();

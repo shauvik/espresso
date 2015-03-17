@@ -261,7 +261,13 @@ final class UiControllerImpl implements UiController, Handler.Callback {
     // http://developer.android.com/reference/android/view/KeyEvent.html#KeyEvent(long,
     // java.lang.String, int, int)
     KeyEvent[] events = keyCharacterMap.getEvents(str.toCharArray());
-    checkNotNull(events, "Failed to get events for string " + str);
+    if (events == null) {
+     throw new RuntimeException(String.format(
+         "Failed to get key events for string %s (i.e. current IME does not understand how to "
+          + "translate the string into key events). As a workaround, you can use replaceText action"
+          + " to set the text directly in the EditText field.", str));
+    }
+
     Log.d(TAG, String.format("Injecting string: \"%s\"", str));
 
     for (KeyEvent event : events) {

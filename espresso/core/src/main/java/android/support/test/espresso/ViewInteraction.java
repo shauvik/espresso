@@ -173,7 +173,6 @@ public final class ViewInteraction {
     return this;
   }
 
-
   private void runSynchronouslyOnUiThread(Runnable action) {
     FutureTask<Void> uiTask = new FutureTask<Void>(action, null);
     mainThreadExecutor.execute(uiTask);

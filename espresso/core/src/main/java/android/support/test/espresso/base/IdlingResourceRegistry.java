@@ -172,12 +172,13 @@ public final class IdlingResourceRegistry {
     registerResources(Lists.newArrayList(new LooperIdlingResource(looper, considerWaitIdle)));
   }
 
-  private void registerToIdleCallback(IdlingResource resource, final int position) {
+  private void registerToIdleCallback(final IdlingResource resource, final int position) {
     resource.registerIdleTransitionCallback(new ResourceCallback() {
       @Override
       public void onTransitionToIdle() {
         Message m = handler.obtainMessage(DYNAMIC_RESOURCE_HAS_IDLED);
         m.arg1 = position;
+        m.obj = resource;
         handler.sendMessage(m);
       }
     });
@@ -315,7 +316,14 @@ public final class IdlingResourceRegistry {
     }
 
     private void handleResourceIdled(Message m) {
-      idleState.set(m.arg1, true);
+      int position = m.arg1;
+      IdlingResource resource = (IdlingResource) m.obj;
+      if (position >= resources.size() || resources.get(position) != resource) {
+        Log.i(TAG, "Ignoring message from unregistered resource: " + resource);
+        return;
+      }
+
+      idleState.set(position, true);
       if (idleState.cardinality() == resources.size()) {
         try {
           idleNotificationCallback.allResourcesIdle();

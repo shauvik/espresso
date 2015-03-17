@@ -31,7 +31,8 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
-import android.os.Build;
+import android.support.test.filters.SdkSuppress;
+
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 
@@ -60,11 +61,9 @@ public class MultipleWindowTest extends ActivityInstrumentationTestCase2<SendAct
     getActivity();
   }
 
+  // Froyo's AutoCompleteTextBox is broken - do not bother testing with it.
+ @SdkSuppress(minSdkVersion=10)
   public void testInteractionsWithAutoCompletePopup() {
-    if (Build.VERSION.SDK_INT < 10) {
-      // Froyo's AutoCompleteTextBox is broken - do not bother testing with it.
-      return;
-    }
     // Android's Window system allows multiple view hierarchies to layer on top of each other.
     //
     // A real world analogy would be an overhead projector with multiple transparencies placed
@@ -117,5 +116,3 @@ public class MultipleWindowTest extends ActivityInstrumentationTestCase2<SendAct
   }
 
 }
-
-

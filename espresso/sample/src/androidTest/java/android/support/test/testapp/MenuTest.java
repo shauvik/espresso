@@ -27,7 +27,8 @@ import static android.support.test.espresso.matcher.ViewMatchers.isRoot;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
-import android.os.Build;
+import android.support.test.filters.SdkSuppress;
+
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 
@@ -48,11 +49,9 @@ public class MenuTest extends ActivityInstrumentationTestCase2<MenuActivity> {
     getActivity();
   }
 
+  // popup menus are post honeycomb.
+ @SdkSuppress(minSdkVersion=11)
   public void testPopupMenu() {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-      // popup menus are post honeycomb.
-      return;
-    }
     onView(withText(R.string.popup_item_1_text)).check(doesNotExist());
     onView(withId(R.id.popup_button)).perform(click());
     onView(withText(R.string.popup_item_1_text)).check(matches(isDisplayed())).perform(click());

@@ -25,10 +25,10 @@ import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
+import android.support.test.filters.SdkSuppress;
 import android.support.test.testapp.R;
 import android.support.test.testapp.SendActivity;
 
-import android.os.Build;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 
@@ -49,11 +49,9 @@ public class WindowOrderingIntegrationTest extends ActivityInstrumentationTestCa
     getActivity();
   }
 
+  // popup menus are post honeycomb.
+ @SdkSuppress(minSdkVersion=11)
   public void testPopupMenu() {
-    if (Build.VERSION.SDK_INT < 11) {
-      // popup menus are post honeycomb.
-      return;
-    }
     onView(withText(R.string.item_1_text))
         .check(doesNotExist());
     onView(withId(R.id.make_popup_menu_button))

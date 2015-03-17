@@ -53,7 +53,7 @@ public class ViewInteractionTest extends AndroidTestCase {
   @Mock
   private UiController mockUiController;
 
-
+  
   private FailureHandler failureHandler;
   private Executor testExecutor = MoreExecutors.sameThreadExecutor();
 
@@ -198,7 +198,7 @@ public class ViewInteractionTest extends AndroidTestCase {
     testInteraction.check(mockAssertion);
     verify(mockAssertion).check(null, noViewException);
   }
-
+  
   public void testFailureHandler() {
     RuntimeException exceptionToRaise = new RuntimeException();
     when(mockViewFinder.getView()).thenReturn(targetView);

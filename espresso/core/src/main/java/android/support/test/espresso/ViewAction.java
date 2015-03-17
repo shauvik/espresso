@@ -44,7 +44,7 @@ public interface ViewAction {
   /**
    * A mechanism for ViewActions to specify what type of views they can operate on.
    *
-   *  A ViewAction can demand that the view passed to perform meets certain constraints. For example
+   * A ViewAction can demand that the view passed to perform meets certain constraints. For example
    * it may want to ensure the view is already in the viewable physical screen of the device or is
    * of a certain type.
    *

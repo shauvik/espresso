@@ -94,4 +94,13 @@ public class TypeTextActionIntegrationTest extends ActivityInstrumentationTestCa
       .perform(scrollTo())
       .check(matches(withText(containsString(toType))));
   }
+
+  public void testTypeText_NonEnglish() {
+    try {
+      String toType = "在一个月之内的话";
+      onView(allOf(withParent(withId(R.id.delegating_edit_text)), withId(R.id.delegate_edit_text)))
+          .perform(scrollTo(), typeText(toType));
+      fail("expected the action above to fail.");
+    } catch (RuntimeException expected) {}
+  }
 }

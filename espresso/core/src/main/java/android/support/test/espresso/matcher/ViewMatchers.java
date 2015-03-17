@@ -41,9 +41,6 @@ import android.widget.Checkable;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-
 import junit.framework.AssertionFailedError;
 
 import org.hamcrest.Description;

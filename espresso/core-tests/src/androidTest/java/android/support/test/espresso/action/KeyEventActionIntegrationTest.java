@@ -46,7 +46,6 @@ import android.widget.TextView;
 
 import java.util.Map;
 
-
 /**
  * Integration tests for {@link KeyEventAction}.
  */
@@ -75,25 +74,27 @@ public class KeyEventActionIntegrationTest extends ActivityInstrumentationTestCa
   @SuppressWarnings("unchecked")
   public void testClickBackOnNonRootActivityLatte() {
     getActivity();
-    onData(allOf(instanceOf(Map.class), hasValue("SendActivity"))).perform(click());
+    onData(allOf(instanceOf(Map.class), hasValue("LargeViewActivity"))).perform(click());
     pressBack();
 
     // Make sure we are back.
-    onData(allOf(instanceOf(Map.class), hasValue("SendActivity"))).check(matches(isDisplayed()));
+    onData(allOf(instanceOf(Map.class), hasValue("LargeViewActivity")))
+        .check(matches(isDisplayed()));
   }
 
   @SuppressWarnings("unchecked")
   public void testClickBackOnNonRootActionNoLatte() {
     getActivity();
-    onData(allOf(instanceOf(Map.class), hasValue("SendActivity"))).perform(click());
+    onData(allOf(instanceOf(Map.class), hasValue("LargeViewActivity"))).perform(click());
     onView(isRoot()).perform(ViewActions.pressBack());
 
     // Make sure we are back.
-    onData(allOf(instanceOf(Map.class), hasValue("SendActivity"))).check(matches(isDisplayed()));
+    onData(allOf(instanceOf(Map.class), hasValue("LargeViewActivity")))
+        .check(matches(isDisplayed()));
   }
 
   @SuppressWarnings("unchecked")
-  @SdkSuppress(minSdkVersion=10)
+  @SdkSuppress(minSdkVersion=13)
   @FlakyTest
   public void testClickOnBackFromFragment() {
     Intent fragmentStack = new Intent().setClassName(getInstrumentation().getTargetContext(),
