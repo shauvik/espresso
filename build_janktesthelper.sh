@@ -47,11 +47,9 @@ cd "$PROG_DIR"/../..
 
 TASKS=" \
 --project-prop buildFromServer=true \
---project-prop buildEspresso=true \
---project-prop buildRunner=true \
---project-prop buildUiAutomator=true \
 --project-prop buildJankTestHelper=true \
 createArchive"
 
 # first build Eclipse/Monitor
 ( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ./gradlew $TASKS )
+
