@@ -50,6 +50,28 @@ public final class Checks {
         return reference;
     }
 
+    public static void checkState(boolean expression) {
+        if (!expression) {
+            throw new IllegalStateException();
+        }
+    }
+
+    public static void checkState(
+            boolean expression, Object errorMessage) {
+        if (!expression) {
+            throw new IllegalStateException(String.valueOf(errorMessage));
+        }
+    }
+
+    public static void checkState(boolean expression,
+            String errorMessageTemplate,
+            Object... errorMessageArgs) {
+        if (!expression) {
+            throw new IllegalStateException(
+                    format(errorMessageTemplate, errorMessageArgs));
+        }
+    }
+
     private static String format(String template, Object... args) {
         template = String.valueOf(template); // null -> "null"
 

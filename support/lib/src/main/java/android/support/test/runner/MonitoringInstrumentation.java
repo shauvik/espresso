@@ -31,6 +31,7 @@ import android.os.MessageQueue.IdleHandler;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.internal.runner.hidden.ExposedInstrumentationApi;
 import android.support.test.internal.runner.intent.IntentMonitorImpl;
+import android.support.test.runner.intent.IntentStubberRegistry;
 import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorImpl;
 import android.support.test.internal.runner.lifecycle.ApplicationLifecycleMonitorImpl;
 import android.support.test.runner.intent.IntentMonitorRegistry;
@@ -51,6 +52,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -339,6 +341,11 @@ public class MonitoringInstrumentation extends ExposedInstrumentationApi {
             Intent intent, int requestCode) {
         Log.d(LOG_TAG, "execStartActivity(context, ibinder, ibinder, activity, intent, int)");
         mIntentMonitor.signalIntent(intent);
+        ActivityResult ar = stubResultFor(intent);
+        if (ar != null) {
+            Log.i(LOG_TAG, String.format("Stubbing intent %s", intent));
+            return ar;
+        }
         return super.execStartActivity(who, contextThread, token, target, intent, requestCode);
     }
 
@@ -351,6 +358,11 @@ public class MonitoringInstrumentation extends ExposedInstrumentationApi {
             Intent intent, int requestCode, Bundle options) {
         Log.d(LOG_TAG, "execStartActivity(context, ibinder, ibinder, activity, intent, int, bundle");
         mIntentMonitor.signalIntent(intent);
+        ActivityResult ar = stubResultFor(intent);
+        if (ar != null) {
+            Log.i(LOG_TAG, String.format("Stubbing intent %s", intent));
+            return ar;
+        }
         return super.execStartActivity(who, contextThread, token, target, intent, requestCode, options);
     }
 
@@ -382,7 +394,49 @@ public class MonitoringInstrumentation extends ExposedInstrumentationApi {
             Intent intent, int requestCode, Bundle options) {
         Log.d(LOG_TAG, "execStartActivity(context, IBinder, IBinder, Fragment, Intent, int, Bundle)");
         mIntentMonitor.signalIntent(intent);
+        ActivityResult ar = stubResultFor(intent);
+        if (ar != null) {
+            Log.i(LOG_TAG, String.format("Stubbing intent %s", intent));
+            return ar;
+        }
         return super.execStartActivity(who, contextThread, token, target, intent, requestCode, options);
+    }
+
+    private static class StubResultCallable implements Callable<ActivityResult> {
+        private final Intent mIntent;
+
+        StubResultCallable(Intent intent) {
+            mIntent = intent;
+        }
+
+        @Override
+        public ActivityResult call() {
+            return IntentStubberRegistry.getInstance().getActivityResultForIntent(mIntent);
+        }
+    }
+
+    private ActivityResult stubResultFor(Intent intent) {
+        if (IntentStubberRegistry.isLoaded()) {
+            // Activities can be launched from the instrumentation thread, so if that's the case,
+            // get on main thread to retrieve the result.
+            if (Looper.myLooper() != Looper.getMainLooper()) {
+                FutureTask<ActivityResult> task = new FutureTask<ActivityResult>(
+                        new StubResultCallable(intent));
+                runOnMainSync(task);
+                try {
+                    return task.get();
+                } catch (ExecutionException e) {
+                    throw new RuntimeException(
+                            String.format("Could not retrieve stub result for intent %s", intent), e);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException(e);
+                }
+            } else {
+                return IntentStubberRegistry.getInstance().getActivityResultForIntent(intent);
+            }
+        }
+        return null;
     }
 
     @Override
