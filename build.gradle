@@ -136,7 +136,7 @@ Set<Project> getProjectsToArchive() {
     def projects = [] as Set
     if (project.hasProperty("buildEspresso") && project.buildEspresso == "true") {
         projects.addAll(subprojects.findAll {
-            ['espresso-core', 'espresso-contrib', 'espresso-idling-resource'].contains(it.name)
+            ['espresso-core', 'espresso-contrib', 'espresso-idling-resource', 'espresso-intents'].contains(it.name)
         })
     }
     if (project.hasProperty("buildRunner") && project.buildRunner == "true") {

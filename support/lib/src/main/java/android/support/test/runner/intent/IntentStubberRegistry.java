@@ -62,10 +62,9 @@ public final class IntentStubberRegistry {
     }
 
     /**
-     * Resets the Intent Stubber. Don't use this method directly and or only in tests.
+     * Clears the current instance of Intent Stubber.
      */
-    //VisibleForTesting
-    static synchronized void reset() {
+    public static synchronized void reset() {
         mInstance = null;
         mIsLoaded.set(false);
     }
