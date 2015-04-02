@@ -51,42 +51,42 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.hasItem;
 
+import android.support.test.espresso.intent.rules.IntentsTestRule;
 import android.support.test.filters.SdkSuppress;
-import android.support.test.runner.intent.IntentStubberRegistry;
+import android.support.test.runner.AndroidJUnit4;
 import android.support.test.testapp.R;
 import android.support.test.testapp.SendActivity;
 
 import android.app.Activity;
 import android.app.Instrumentation.ActivityResult;
 import android.content.Intent;
-import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 
 import junit.framework.AssertionFailedError;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Integration tests for {@Intents}.
  */
 @LargeTest
-public class IntentsIntegrationTest extends ActivityInstrumentationTestCase2<SendActivity> {
+@RunWith(AndroidJUnit4.class)
+public class IntentsIntegrationTest {
 
-  @SuppressWarnings("deprecation")
-  public IntentsIntegrationTest() {
-    // Keep froyo happy.
-    super("android.support.test.testapp", SendActivity.class);
-  }
+  @Rule
+  public IntentsTestRule<SendActivity> mIntentsTestRule = new IntentsTestRule<>(SendActivity.class);
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    getActivity();
-    Intents.init();
-    // Stubbing to block all external intents
+  @Before
+  public void stubExternalIntents() {
     intending(not(isInternal())).respondWith(new ActivityResult(Activity.RESULT_OK, null));
   }
 
+  @Test
   @SdkSuppress(minSdkVersion=10)
-  public void testExternalAnyIntentToCall() {
+  public void externalIntent_AnyIntentToCall() {
     onView(withId(R.id.send_data_to_call_edit_text))
         .perform(scrollTo(), typeText("11111"), closeSoftKeyboard());
     onView(withId(R.id.send_to_call_button)).perform(click());
@@ -94,7 +94,8 @@ public class IntentsIntegrationTest extends ActivityInstrumentationTestCase2<Sen
     assertOnSendActivity();
   }
 
-  public void testExternalWithResultStubbing_toPackage() {
+  @Test
+  public void externalIntent_WithResultStubbing_toPackage() {
     Intent resultData = new Intent();
     String phoneNumber = "123-345-6789";
     resultData.putExtra("phone", phoneNumber);
@@ -103,7 +104,8 @@ public class IntentsIntegrationTest extends ActivityInstrumentationTestCase2<Sen
     pick(phoneNumber);
   }
 
-  public void testExternalWithResultStubbing_hasAction() {
+  @Test
+  public void externalIntent_WithResultStubbing_hasAction() {
     Intent resultData = new Intent();
     String phoneNumber = "123-345-6789";
     resultData.putExtra("phone", phoneNumber);
@@ -112,7 +114,8 @@ public class IntentsIntegrationTest extends ActivityInstrumentationTestCase2<Sen
     pick(phoneNumber);
   }
 
-  public void testExternalWithResultStubbingMultiple_toPackage() {
+  @Test
+  public void externalIntents_WithResultStubbingMultiple_toPackage() {
     Intent resultData = new Intent();
     String phoneNumber = "123-345-6789";
     resultData.putExtra("phone", phoneNumber);
@@ -127,7 +130,8 @@ public class IntentsIntegrationTest extends ActivityInstrumentationTestCase2<Sen
     pick(phoneNumber2);
   }
 
-  public void testRecordsIntentsOnlyAfterInit() {
+  @Test
+  public void recordsIntentsOnlyAfterInit() {
     // Ensure that getActivity() in setUp() is not recorded by Intents
     try {
       intended(hasComponent(
@@ -140,8 +144,9 @@ public class IntentsIntegrationTest extends ActivityInstrumentationTestCase2<Sen
 
   }
 
+  @Test
   @SuppressWarnings("unchecked")
-  public void testScheme() {
+  public void intentScheme() {
     // Testing Scheme "tel:xxx-xxx-xxxx"
     onView(withId(R.id.send_data_to_call_edit_text))
         .perform(scrollTo(), typeText("123-345-6789"), closeSoftKeyboard());
@@ -163,7 +168,8 @@ public class IntentsIntegrationTest extends ActivityInstrumentationTestCase2<Sen
                            hasParamWithValue("id", "com.google.android.apps.plus")))));
   }
 
-  public void testInternalMultipleIntents() {
+  @Test
+  public void internalMultipleIntents() {
     clickToDisplayActivity();
     pressBack();
     clickToDisplayActivity();
@@ -205,9 +211,8 @@ public class IntentsIntegrationTest extends ActivityInstrumentationTestCase2<Sen
     intended(toPackage("android.support.test.testapp"), Intents.times(2));
   }
 
-  public void testAssertNoUnverifiedIntents() {
-    assertNoUnverifiedIntents();
-
+  @Test
+  public void noUnverifiedIntents() {
     clickToDisplayActivity();
     try {
       assertNoUnverifiedIntents();
@@ -238,17 +243,19 @@ public class IntentsIntegrationTest extends ActivityInstrumentationTestCase2<Sen
     assertNoUnverifiedIntents();
   }
 
+  @Test
   @SuppressWarnings("unchecked")
-  public void testExternalIntentWithType() {
+  public void externalIntentWithType() {
     onView(withId(R.id.send_message_button)).perform(scrollTo(), click());
     intended(allOf(hasAction(Intent.ACTION_SEND),
         toPackage("com.android.mms"),
         hasType("text/plain")));
   }
 
+  @Test
   @SuppressWarnings("unchecked")
   @SdkSuppress(minSdkVersion=10)
-  public void testCustomUriDataMatcher() {
+  public void customUriDataMatcher() {
     String uri = "https://www.google.com/search?q=Matcher&aq=f&oq=Matcher&sourceid=chrome&ie=UTF-8";
     sendUriToBrowser(uri);
     intended(allOf(hasAction(Intent.ACTION_VIEW),
@@ -263,8 +270,9 @@ public class IntentsIntegrationTest extends ActivityInstrumentationTestCase2<Sen
     assertOnSendActivity();
   }
 
+  @Test
   @SuppressWarnings("unchecked")
-  public void testCustomIntentMatcherWithExternalIntent() {
+  public void customIntentMatcher_WithExternalIntent() {
     String uri = "http://www.google.com";
     sendUriToBrowser(uri);
         intended(allOf(
@@ -278,15 +286,17 @@ public class IntentsIntegrationTest extends ActivityInstrumentationTestCase2<Sen
     assertOnSendActivity();
   }
 
+  @Test
   @SuppressWarnings("unchecked")
-  public void testComponentNameMatcher() {
+  public void componentNameMatcher() {
     clickToDisplayActivity();
     intended(hasComponent(allOf(
         hasPackageName("android.support.test.testapp"),
         hasShortClassName(".DisplayActivity"))));
   }
 
-  public void testInternalIntentStubbing() {
+  @Test
+  public void internalIntentStubbing() {
     intending(isInternal()).respondWith(new ActivityResult(Activity.RESULT_OK, null));
     clickToDisplayActivity();
 
@@ -321,9 +331,4 @@ public class IntentsIntegrationTest extends ActivityInstrumentationTestCase2<Sen
     onView(withId(R.id.send_to_browser_button)).perform(scrollTo(), click());
   }
 
-  @Override
-  public void tearDown() throws Exception {
-    Intents.release();
-    super.tearDown();
-  }
 }

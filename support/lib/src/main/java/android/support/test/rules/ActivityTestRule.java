@@ -86,11 +86,23 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
 
     /**
      * Overwrite this method to execute any code that should run before your {@link Activity} is
-     * launched.
+     * created and launched.
      * This method is called before each test method, including any method annotated with
      * {@link @Before}.
      */
-    protected void beforeActivity() {
+    protected void beforeActivityLaunched() {
+        // empty by default
+    }
+
+    /**
+     * Overwrite this method to execute any code that should run after your {@link Activity} is
+     * launched, but before any test code is run including any method annotated with {@link @Before}.
+     * <p>
+     * Prefer @Before over this method. This method should usually not be overwritten directly in
+     * tests and only be used by subclasses of ActivityTestRule to get notified when the activity is
+     * created and visible but test runs.
+     */
+    protected void afterActivityLaunched() {
         // empty by default
     }
 
@@ -100,7 +112,7 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
      * This method is called after each test method, including any method annotated with
      * {@link @After}.
      */
-    protected void afterActivity() {
+    protected void afterActivityFinished() {
         // empty by default
     }
 
@@ -162,13 +174,14 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
 
         @Override
         public void evaluate() throws Throwable {
-            beforeActivity();
-            mActivity = launchActivity();
             try {
+                beforeActivityLaunched();
+                mActivity = launchActivity();
+                afterActivityLaunched();
                 mBase.evaluate();
             } finally {
                 finishActivity();
-                afterActivity();
+                afterActivityFinished();
             }
         }
     }

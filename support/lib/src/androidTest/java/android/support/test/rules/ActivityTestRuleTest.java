@@ -51,8 +51,8 @@ public class ActivityTestRuleTest {
         public ActivityTestRule<ActivityFixture> mActivityRule =
                 new ActivityTestRule<ActivityFixture>(ActivityFixture.class) {
                     @Override
-                    protected void beforeActivity() {
-                        log.append("beforeActivity ");
+                    protected void beforeActivityLaunched() {
+                        log.append("beforeActivityLaunched ");
                     }
 
                     @Override
@@ -62,8 +62,13 @@ public class ActivityTestRuleTest {
                     }
 
                     @Override
-                    protected void afterActivity() {
-                        log.append("afterActivity ");
+                    protected void afterActivityLaunched() {
+                        log.append("afterActivityLaunched ");
+                    }
+
+                    @Override
+                    protected void afterActivityFinished() {
+                        log.append("afterActivityFinished ");
                     }
 
                     @Override
@@ -96,7 +101,8 @@ public class ActivityTestRuleTest {
         assertEquals(1, result.getFailureCount());
         assertThat(result.getFailures().get(0).getMessage(), is("This is a dummy test"));
         assertThat(ActivityLifecycleTest.log.toString(),
-                is("beforeActivity launchActivity before test after finishActivity afterActivity "));
+                is("beforeActivityLaunched launchActivity afterActivityLaunched before test after "
+                        + "finishActivity afterActivityFinished "));
     }
 
     public static class FailureOfActivityLaunch {
