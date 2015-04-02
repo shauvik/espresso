@@ -76,42 +76,41 @@ createArchive.dependsOn createRepository
 task unzipRepo(type: Copy) {
     from "$rootDir/prebuilts/maven_repo/android"
     into project.supportRepoOut
-}
-
-unzipRepo.doFirst {
-    project.supportRepoOut.deleteDir()
-    project.supportRepoOut.mkdirs()
+    doFirst {
+        project.supportRepoOut.deleteDir()
+        project.supportRepoOut.mkdirs()
+    }
 }
 
 // anchor for prepare repo. This is post unzip + sourceProp.
 task(prepareRepo) << {
 }
 
-task(createXml) << {
+task createXml(dependsOn: createRepository) << {
     def repoArchive = createRepository.archivePath
     def repoArchiveName = createRepository.archiveName
     def size = repoArchive.length()
     def sha1 = Hashing.sha1().hashUnencodedChars(repoArchive.getAbsolutePath()).toString()
 
-    def xml =
-            "<sdk:sdk-addon xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:sdk=\"http://schemas.android.com/sdk/android/addon/6\">\n\
-                  <sdk:extra>\n\
-                    <sdk:revision>\n\
-                      <sdk:major>${project.extraVersion}</sdk:major>\n\
-                    </sdk:revision>\n\
-                    <sdk:vendor-display>Android</sdk:vendor-display>\n\
-                    <sdk:vendor-id>android</sdk:vendor-id>\n\
-                    <sdk:name-display>Local Maven repository for Support Libraries</sdk:name-display>\n\
-                    <sdk:path>m2repository</sdk:path>\n\
-                    <sdk:archives>\n\
-                      <sdk:archive os=\"any\" arch=\"any\">\n\
-                       <sdk:size>${size}</sdk:size>\n\
-                       <sdk:checksum type=\"sha1\">${sha1}</sdk:checksum>\n\
-                       <sdk:url>${repoArchiveName}</sdk:url>\n\
-                      </sdk:archive>\n\
-                    </sdk:archives>\n\
-                  </sdk:extra>\n\
-                </sdk:sdk-addon>"
+    def xml = """\
+<sdk:sdk-addon xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sdk="http://schemas.android.com/sdk/android/addon/6">
+  <sdk:extra>
+    <sdk:revision>
+      <sdk:major>${project.extraVersion}</sdk:major>
+    </sdk:revision>
+    <sdk:vendor-display>Android</sdk:vendor-display>
+    <sdk:vendor-id>android</sdk:vendor-id>
+    <sdk:name-display>Local Maven repository for Support Libraries</sdk:name-display>
+    <sdk:path>m2repository</sdk:path>
+    <sdk:archives>
+      <sdk:archive os="any" arch="any">
+        <sdk:size>${size}</sdk:size>
+        <sdk:checksum type="sha1">${sha1}</sdk:checksum>
+        <sdk:url>${repoArchiveName}</sdk:url>
+      </sdk:archive>
+    </sdk:archives>
+  </sdk:extra>
+</sdk:sdk-addon>"""
 
     Files.write(xml, new File(project.distDir, 'repo-extras.xml'), Charsets.UTF_8)
 }
@@ -157,6 +156,8 @@ Set<Project> getProjectsToArchive() {
     return projects
 }
 
+
+ext.lastPublishTask = null;
 configure(getProjectsToArchive()) {
 
     apply plugin: 'maven'
@@ -183,6 +184,12 @@ configure(getProjectsToArchive()) {
 
     // Make the mainUpload depend on this one.
     mainUpload.dependsOn releaseRepoTask
+
+    // Maven upload tasks are not thread safe. Force them to run serially:
+    if (lastPublishTask) {
+        releaseRepoTask.dependsOn lastPublishTask
+    }
+    lastPublishTask = releaseRepoTask
 }
 
 

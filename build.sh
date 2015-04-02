@@ -12,7 +12,7 @@ CURRENT_OS=$(uname | tr A-Z a-z)
 
 function die() {
   echo "$*" > /dev/stderr
-  echo "Usage: $0 <target> <out_dir> <dest_dir> <build_number> [num_threads=47]" > /dev/stderr
+  echo "Usage: $0 <target> <out_dir> <dest_dir> <build_number> [num_threads]" > /dev/stderr
   exit 1
 }
 
@@ -87,4 +87,9 @@ support_janktesthelper)
     ;;
 esac
 
-( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ./gradlew $TASKS )
+if [[ -z "$NUM_THREADS" ]]
+then
+    ( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ./gradlew --parallel $TASKS )
+else
+    ( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ./gradlew --parallel-threads $NUM_THREADS $TASKS )
+fi
