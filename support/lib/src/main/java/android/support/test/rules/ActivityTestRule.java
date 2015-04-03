@@ -70,14 +70,15 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
     }
 
     /**
-     * Overwrite to set up the intent to start the Activity with
-     * <p/>
-     * <p>The default Intent (if this method returns null or is not overwritten) is:
+     * Override this method to set up Intent as if supplied to
+     * {@link android.content.Context#startActivity}.
+     * <p>
+     * The default Intent (if this method returns null or is not overwritten) is:
      * action = {@link Intent#ACTION_MAIN}
      * flags = {@link Intent#FLAG_ACTIVITY_NEW_TASK}
      * All other intent fields are null or empty.
      *
-     * @return The Intent to start the Activity with
+     * @return The Intent as if supplied to {@link android.content.Context#startActivity}.
      */
     protected Intent getActivityIntent() {
         return new Intent(Intent.ACTION_MAIN);

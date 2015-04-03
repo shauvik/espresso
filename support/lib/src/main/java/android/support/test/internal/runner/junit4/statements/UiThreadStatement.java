@@ -18,6 +18,8 @@ package android.support.test.internal.runner.junit4.statements;
 
 import org.junit.runners.model.Statement;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 /**
@@ -35,18 +37,19 @@ public class UiThreadStatement extends Statement {
     @Override
     public void evaluate() throws Throwable {
         if (mRunOnUiThread) {
-            final Throwable[] exceptions = new Throwable[1];
+            final AtomicReference<Throwable> exceptionRef = new AtomicReference<>();
             getInstrumentation().runOnMainSync(new Runnable() {
                 public void run() {
                     try {
                         mBase.evaluate();
                     } catch (Throwable throwable) {
-                        exceptions[0] = throwable;
+                        exceptionRef.set(throwable);
                     }
                 }
             });
-            if (exceptions[0] != null) {
-                throw exceptions[0];
+            Throwable throwable = exceptionRef.get();
+            if (throwable != null) {
+                throw throwable;
             }
         } else {
             mBase.evaluate();

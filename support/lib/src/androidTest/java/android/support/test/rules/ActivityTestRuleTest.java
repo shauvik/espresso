@@ -31,7 +31,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.runner.JUnitCore.runClasses;
 import static org.mockito.Mockito.mock;
@@ -42,10 +41,7 @@ public class ActivityTestRuleTest {
 
     private static final ActivityFixture MOCK_ACTIVITY = mock(ActivityFixture.class);
 
-    public class ActivityFixture extends Activity {
-
-        private final boolean SUCCESS = true;
-    }
+    public class ActivityFixture extends Activity {}
 
     public static class ActivityLifecycleTest {
 
