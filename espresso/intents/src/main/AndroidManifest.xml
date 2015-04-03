@@ -17,9 +17,7 @@
     package="android.support.test.espresso.intent" >
 
     <uses-sdk
-        android:minSdkVersion="7"
+        android:minSdkVersion="8"
         android:targetSdkVersion="17" />
-
-    <application android:label="Espresso Intents" />
 
 </manifest>
