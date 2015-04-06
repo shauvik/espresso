@@ -32,8 +32,8 @@ project(':espresso-intents').projectDir = new File(rootDir, 'frameworks/testing/
 include(':espresso-intents-tests')
 project(':espresso-intents-tests').projectDir = new File(rootDir, 'frameworks/testing/espresso/intents-tests')
 
-include(':testing-support-lib')
-project(':testing-support-lib').projectDir = new File(rootDir, 'frameworks/testing/support/lib')
+include(':test-runner')
+project(':test-runner').projectDir = new File(rootDir, 'frameworks/testing/support/test-runner')
 
 include(':uiautomator-v18')
 project(':uiautomator-v18').projectDir = new File(rootDir, 'frameworks/uiautomator')
