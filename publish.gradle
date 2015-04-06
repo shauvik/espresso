@@ -79,13 +79,58 @@ afterEvaluate {
 
             addJavadocTasks(project, variant.assemble, variant.name, variant.javaCompile)
 
-            task("copy${variant.name.capitalize()}Binaries", type: Copy, dependsOn: variant.assemble) {
+
+            Task copyLibBinaries =
+                project.tasks.create(name: "copy${variant.name.capitalize()}Binaries", type: Copy, dependsOn: variant.assemble) {
                 if (project.hasProperty("buildFromServer") &&
                         rootProject.getProjectsToArchive().contains(project)) {
                     description "Copies the release Jar to $project.distDir"
                     from packageReleaseJar.archivePath
                     into project.distDir
-                    rename(packageReleaseJar.archiveName, "${project.name}-${project.version}-${variant.name}.jar")
+                    rename(packageReleaseJar.archiveName, "${project.name}-${project.version}-${variant.name}-no-dep.jar")
+                }
+            }
+
+            Task uberJarTask =
+                    project.tasks.create(name: "create${variant.name.capitalize()}JarWithDeps", type: Jar) {
+                        classifier = "${variant.name}"
+                        destinationDir = project.distDir
+                        exclude('META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA', 'LICENSE.txt')
+                    }
+
+            Task collectClassPaths =
+                    project.tasks.create(name: "collect${variant.name.capitalize()}ClassPaths", dependsOn: variant.assemble) << {
+
+                        uberJarTask.from(variant.javaCompile.destinationDir)
+
+                        // Add all dependencies except for android.jar to the fat jar
+                        variant.variantData.variantDependency.packageConfiguration.collect { dep ->
+                            if (dep.isDirectory() && !zipTree(dep).isEmpty()) {
+                                uberJarTask.from(dep)
+                            } else if (dep.getName().endsWith(".jar") &&
+                                    dep.getName() != 'android.jar') {
+                                uberJarTask.from(zipTree(dep))
+                            } else if (dep.getName().endsWith(".aar")) {
+                                zipTree(dep).find {
+                                    if (it.getName() == 'classes.jar') {
+                                        uberJarTask.from(zipTree(it))
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+            uberJarTask.dependsOn collectClassPaths
+
+            // Use mainUpload anchor task to copy binaries to project.distDir
+            if (project.hasProperty("buildFromServer") &&
+                    project.buildFromServer == "true" &&
+                    variant.buildType.name == 'release') {
+                rootProject.mainUpload.dependsOn copyLibBinaries
+                // Skip if the project does not have any dependencies
+                if (rootProject.getProjectsToArchive().contains(project) &&
+                        variant.variantData.variantDependency.packageConfiguration.getAllDependencies().size() > 0) {
+                    rootProject.mainUpload.dependsOn uberJarTask
                 }
             }
         }
@@ -94,7 +139,8 @@ afterEvaluate {
 
             addJavadocTasks(project, variant.assemble, variant.name, variant.javaCompile)
 
-            task("copy${variant.name.capitalize()}Binaries", type: Copy, dependsOn: variant.assemble) {
+            Task copyApkBinaries =
+                project.tasks.create(name: "copy${variant.name.capitalize()}Binaries", type: Copy, dependsOn: variant.assemble) {
                 if (project.hasProperty("buildFromServer") &&
                         rootProject.getProjectsToArchive().contains(project)) {
                     description "Copies the release Apk to $project.distDir"
@@ -103,12 +149,13 @@ afterEvaluate {
                     rename(variant.outputs[0].outputFile.name, "${project.name}-${project.version}-${variant.name}.apk")
                 }
             }
-        }
-    }
 
-    // Use mainUpload anchor task to copy binaries to project.distDir
-    if (project.hasProperty("buildFromServer") && project.buildFromServer == "true") {
-        rootProject.mainUpload.dependsOn copyReleaseBinaries
+            // Use mainUpload anchor task to copy binaries to project.distDir
+            if (project.hasProperty("buildFromServer") &&
+            project.buildFromServer == "true") {
+                rootProject.mainUpload.dependsOn copyApkBinaries
+            }
+        }
     }
 
     task createSourcesJar(type: Jar) {
