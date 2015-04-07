@@ -43,9 +43,9 @@ android {
 dependencies {
     compile files('../libs/guava-14.0.1.jar')
     compile files('../libs/dagger-1.2.1.jar')
-    compile 'com.android.support:support-v4:21.0.3'
-    compile 'com.android.support:appcompat-v7:21.0.3'
-    compile 'com.android.support:recyclerview-v7:21.0.3'
+    compile 'com.android.support:support-v4:22.0.0'
+    compile 'com.android.support:appcompat-v7:22.0.0'
+    compile 'com.android.support:recyclerview-v7:22.0.0'
 
     if (project.hasProperty("buildFromServer") && project.buildFromServer == "true") {
         // don't bother because it fails to evaluate 'debug' configuration for espresso-core
