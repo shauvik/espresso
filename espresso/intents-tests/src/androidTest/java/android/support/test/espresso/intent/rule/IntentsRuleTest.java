@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.support.test.espresso.intent.rules;
+package android.support.test.espresso.intent.rule;
 
 import org.junit.Test;
 import org.junit.runner.Description;

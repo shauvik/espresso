@@ -51,7 +51,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.hasItem;
 
-import android.support.test.espresso.intent.rules.IntentsTestRule;
+import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.filters.SdkSuppress;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.testapp.R;
