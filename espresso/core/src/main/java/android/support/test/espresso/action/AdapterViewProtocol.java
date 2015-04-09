@@ -16,17 +16,18 @@
 
 package android.support.test.espresso.action;
 
-import android.database.Cursor;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import android.support.test.espresso.action.AdapterViewProtocol.AdaptedData.Builder;
 import android.support.test.espresso.util.HumanReadables;
+import com.google.common.base.Optional;
+
+import android.database.Cursor;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 
-import com.google.common.base.Optional;
-
 import javax.annotation.Nullable;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A sadly necessary layer of indirection to interact with AdapterViews.

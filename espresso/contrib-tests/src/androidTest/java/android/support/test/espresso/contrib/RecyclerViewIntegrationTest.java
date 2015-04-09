@@ -33,6 +33,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.startsWith;
 
 import android.support.test.espresso.PerformException;
 import android.support.test.testapp.ItemListAdapter.CustomViewHolder;
@@ -89,7 +90,7 @@ public abstract class RecyclerViewIntegrationTest extends
   public void testScrolling_scrollToViewWithViewHolderMatcher() {
     onView(withText(ITEM_100)).check(doesNotExist());
     onView((withId(rvLayoutId))).perform(scrollToHolder(new CustomViewHolderMatcher(
-        hasDescendant(withText(Matchers.startsWith(ITEM_10_PREFIX))))));
+        hasDescendant(withText(startsWith(ITEM_10_PREFIX))))));
     onView(withText(ITEM_100)).check(matches(isDisplayed()));
   }
 
@@ -253,11 +254,11 @@ public abstract class RecyclerViewIntegrationTest extends
   public void testActionOnItem_clickOnItemWithViewHolderMatcher() {
     onView(withId(rvLayoutId)).perform(
         actionOnHolderItem(new CustomViewHolderMatcher(
-            hasDescendant(withText(Matchers.startsWith(ITEM_10_PREFIX)))), click()));
+            hasDescendant(withText(startsWith(ITEM_10_PREFIX)))), click()));
     String expectedItemText = "Selected: " + ITEM_100;
     onView(withId(selectedItemId)).check(matches(withText(expectedItemText)));
   }
-  
+
   public void testActionOnItem_clickOnItemWithViewHolderMatcherWithAmbiguousViewError() {
     try {
       onView((withId(rvLayoutId))).perform(
@@ -266,7 +267,7 @@ public abstract class RecyclerViewIntegrationTest extends
     } catch (PerformException expected) {
     }
   }
-  
+
   public void testActionOnItem_clickOnItemWithViewHolderMatcherWithPositionOutOfRange() {
     try {
       onView((withId(rvLayoutId))).perform(
@@ -275,7 +276,7 @@ public abstract class RecyclerViewIntegrationTest extends
     } catch (PerformException expected) {
     }
   }
-  
+
   public void testActionOnItem_clickOnItemWithViewHolderMatcherWithPosition() {
     onView(withId(rvLayoutId)).perform(
         actionOnHolderItem(new CustomViewHolderMatcher(), click()).atPosition(1));
@@ -378,13 +379,13 @@ public abstract class RecyclerViewIntegrationTest extends
 
   private static class CustomViewHolderMatcher extends TypeSafeMatcher<RecyclerView.ViewHolder> {
     private Matcher<View> itemMatcher = Matchers.anything();
-    
+
     public CustomViewHolderMatcher() { }
-    
+
     public CustomViewHolderMatcher(Matcher<View> itemMatcher) {
       this.itemMatcher = itemMatcher;
     }
-    
+
     @Override
     public boolean matchesSafely(RecyclerView.ViewHolder viewHolder) {
       return CustomViewHolder.class.isAssignableFrom(viewHolder.getClass())

@@ -16,13 +16,6 @@
 
 package android.support.test.testapp;
 
-import android.support.test.espresso.matcher.BoundedMatcher;
-
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-
-import java.util.Map;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.Matchers.allOf;
@@ -31,8 +24,16 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
+import android.support.test.espresso.matcher.BoundedMatcher;
+
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+
+import java.util.Map;
+
 /**
- * Static utility methods to create <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
+ * Static utility methods to create
+ * <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
  * <code>Matcher</code></a> instances that can be applied to the data objects created by
  * {@link android.support.test.testapp.LongListActivity}.
  * <p>

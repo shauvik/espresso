@@ -19,6 +19,7 @@ package android.support.test.espresso;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+
 import android.test.AndroidTestCase;
 import android.view.View;
 

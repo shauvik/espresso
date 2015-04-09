@@ -16,11 +16,18 @@
 
 package android.support.test.espresso.contrib;
 
+import static android.support.test.espresso.contrib.Checks.checkArgument;
+import static android.support.test.espresso.contrib.Checks.checkNotNull;
+import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static org.hamcrest.Matchers.allOf;
+
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.PerformException;
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.util.HumanReadables;
+
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
@@ -34,12 +41,6 @@ import org.hamcrest.TypeSafeMatcher;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static android.support.test.espresso.contrib.Checks.checkArgument;
-import static android.support.test.espresso.contrib.Checks.checkNotNull;
-import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static org.hamcrest.Matchers.allOf;
 
 /**
  * {@link ViewAction}s to interact {@link RecyclerView}. RecyclerView works differently than
@@ -64,7 +65,7 @@ public final class RecyclerViewActions {
    * the RecyclerView. In this case the default behaviour is to expect that the matcher matches 1
    * and only one item within the RecyclerView.
    *
-   *  This interface gives users the ability to override that type of behaviour and explicitly
+   *  <p>This interface gives users the ability to override that type of behaviour and explicitly
    * select an item in the RecyclerView at a given position. This is similar to on the
    * onData(...).atPosition() api for AdapterViews.
    */
@@ -75,7 +76,7 @@ public final class RecyclerViewActions {
      * element which the matcher has selected.
      *
      * @param position a 0-based index into the list of matching elements within the RecyclerView.
-     * @returns PositionableRecyclerViewAction a new ViewAction focused on a particular position.
+     * @return PositionableRecyclerViewAction a new ViewAction focused on a particular position.
      * @throws IllegalArgumentException if position < 0.
      */
     public PositionableRecyclerViewAction atPosition(int position);
@@ -93,8 +94,9 @@ public final class RecyclerViewActions {
    * overloading with generic parameters is not possible.
    * </p>
    *
-   * @param viewHolderMatcher a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html"><code>Matcher</code></a> that matches an item view holder in
-   *        {@link RecyclerView}
+   * @param viewHolderMatcher a
+   *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
+   *     <code>Matcher</code></a> that matches an item view holder in {@link RecyclerView}
    * @throws PerformException if there are more than one items matching given viewHolderMatcher.
    */
   public static <VH extends ViewHolder> PositionableRecyclerViewAction scrollToHolder(
@@ -113,8 +115,9 @@ public final class RecyclerViewActions {
    * {@link RecyclerView#scrollToPosition(int)}.
    * </p>
    *
-   * @param itemViewMatcher a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   *                        <code>Matcher</code></a> that matches an item view in {@link RecyclerView}
+   * @param itemViewMatcher a
+   *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
+   *     <code>Matcher</code></a> that matches an item view in {@link RecyclerView}
    * @throws PerformException if there are more than one items matching given viewHolderMatcher.
    */
   public static <VH extends ViewHolder> PositionableRecyclerViewAction scrollTo(
@@ -140,8 +143,9 @@ public final class RecyclerViewActions {
    * <li>Perform an action on the matched view</li>
    * </ol>
    *
-   * @param itemViewMatcher a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   *                        <code>Matcher</code></a> that matches an item view in {@link RecyclerView}
+   * @param itemViewMatcher a
+   *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
+   *     <code>Matcher</code></a> that matches an item view in {@link RecyclerView}
    * @param viewAction the action that is performed on the view matched by viewHolderMatcher
    * @throws PerformException if there are more than one items matching given viewHolderMatcher.
    */
@@ -150,7 +154,7 @@ public final class RecyclerViewActions {
     Matcher<VH> viewHolderMatcher = viewHolderMatcher(itemViewMatcher);
     return new ActionOnItemViewAction<VH>(viewHolderMatcher, viewAction);
   }
-  
+
   /**
    * Performs a {@link ViewAction} on a view matched by viewHolderMatcher.
    *
@@ -161,8 +165,9 @@ public final class RecyclerViewActions {
    * Note: actionOnItem method is not overloaded, method overloading with
    * generic parameters is not possible.
    *
-   * @param viewHolderMatcher a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   *                          <code>Matcher</code></a> that matchesan item view holder in {@link RecyclerView}
+   * @param viewHolderMatcher a
+   *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
+   *     <code>Matcher</code></a> that matchesan item view holder in {@link RecyclerView}
    * @param viewAction the action that is performed on the view matched by viewHolderMatcher
    * @throws PerformException if there are more than one items matching given viewHolderMatcher.
    */
@@ -406,8 +411,9 @@ public final class RecyclerViewActions {
    * multiple positions if there are, rather than throwing Ambiguous view error exception.
    *
    * @param recyclerView recycler view which is hosting items.
-   * @param viewHolderMatcher a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   *                          <code>Matcher</code></a> that matches an item view in {@link RecyclerView}
+   * @param viewHolderMatcher a
+   *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
+   *     <code>Matcher</code></a> that matches an item view in {@link RecyclerView}
    * @return list of MatchedItem which contains position and description of items in recyclerView.
    * @throws RuntimeException if more than one item or item could not be found.
    */

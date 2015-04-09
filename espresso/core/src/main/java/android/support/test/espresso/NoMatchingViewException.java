@@ -16,17 +16,17 @@
 
 package android.support.test.espresso;
 
-import android.support.test.espresso.util.HumanReadables;
-import android.view.View;
+import static com.google.common.base.Preconditions.checkNotNull;
 
+import android.support.test.espresso.util.HumanReadables;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+
+import android.view.View;
 
 import org.hamcrest.Matcher;
 
 import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Indicates that a given matcher did not match any elements in the view hierarchy.
