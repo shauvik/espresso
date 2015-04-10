@@ -298,6 +298,52 @@ public final class ViewMatchers {
   }
 
   /**
+   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
+   * <code>Matcher</code></a> that matches {@link View}s based on content description property
+   * value.
+   *
+   * @param resourceId the resource id of the content description to match on.
+   */
+  public static Matcher<View> withContentDescription(final int resourceId) {
+    return new TypeSafeMatcher<View>() {
+      private String resourceName = null;
+      private String expectedText = null;
+
+      @Override
+      public void describeTo(Description description) {
+        description.appendText("with content description from resource id: ");
+        description.appendValue(resourceId);
+        if (null != this.resourceName) {
+          description.appendText("[");
+          description.appendText(resourceName);
+          description.appendText("]");
+        }
+        if (null != this.expectedText) {
+          description.appendText(" value: ");
+          description.appendText(expectedText);
+        }
+      }
+
+      @Override
+      public boolean matchesSafely(View view) {
+        if (null == this.expectedText) {
+          try {
+            expectedText = view.getResources().getString(resourceId);
+            resourceName = view.getResources().getResourceEntryName(resourceId);
+          } catch (Resources.NotFoundException ignored) {
+            // view could be from a context unaware of the resource id.
+          }
+        }
+        if (null != expectedText) {
+          return expectedText.equals(view.getContentDescription().toString());
+        } else {
+          return false;
+        }
+      }
+    };
+  }
+
+  /**
    * Returns an <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    * <code>Matcher</code></a> that matches {@link View}s based on content description property
    * value. Sugar for withContentDescription(is("string")).

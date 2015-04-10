@@ -16,23 +16,20 @@
 
 package android.support.test.espresso.matcher;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-
-
+import static android.support.test.espresso.matcher.PreferenceMatchers.isEnabled;
 import static android.support.test.espresso.matcher.PreferenceMatchers.withKey;
 import static android.support.test.espresso.matcher.PreferenceMatchers.withSummary;
 import static android.support.test.espresso.matcher.PreferenceMatchers.withSummaryText;
 import static android.support.test.espresso.matcher.PreferenceMatchers.withTitle;
 import static android.support.test.espresso.matcher.PreferenceMatchers.withTitleText;
-import static android.support.test.espresso.matcher.PreferenceMatchers.isEnabled;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 import android.support.test.testapp.test.R;
-
-import android.test.InstrumentationTestCase;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
+import android.test.InstrumentationTestCase;
 
 /**
  * Unit tests for preference matchers.
@@ -52,6 +49,8 @@ public class PreferenceMatchersTest extends InstrumentationTestCase {
 
   public void testWithTitle() {
     CheckBoxPreference pref = new CheckBoxPreference(getInstrumentation().getContext());
+    assertThat(pref, not(withTitle(R.string.other_string)));
+    assertThat(pref, not(withTitleText("not null")));
     pref.setTitle(R.string.other_string);
     assertThat(pref, withTitle(R.string.other_string));
     assertThat(pref, not(withTitle(R.string.something)));

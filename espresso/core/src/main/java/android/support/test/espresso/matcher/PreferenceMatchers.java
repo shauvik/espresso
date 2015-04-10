@@ -121,7 +121,7 @@ public final class PreferenceMatchers {
             /* view could be from a context unaware of the resource id. */
           }
         }
-        if (null != expectedText) {
+        if (null != expectedText && preference.getTitle() != null) {
           return expectedText.equals(preference.getTitle().toString());
         } else {
           return false;
@@ -144,6 +144,9 @@ public final class PreferenceMatchers {
 
       @Override
       public boolean matchesSafely(Preference pref) {
+        if (pref.getTitle() == null) {
+          return false;
+        }
         String title = pref.getTitle().toString();
         return titleMatcher.matches(title);
       }

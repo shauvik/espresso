@@ -19,6 +19,7 @@ package android.support.test.testapp;
 import com.google.common.annotations.VisibleForTesting;
 
 import android.database.MatrixCursor;
+import android.database.MergeCursor;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.widget.CursorAdapter;
@@ -49,8 +50,15 @@ public class CursorAdapterListFragment extends ListFragment {
     super.onActivityCreated(savedInstanceState);
     listItemCursor = new MatrixCursor(COLUMN_NAMES);
     populateData();
+
+    // Throw in a row with different column names... for the sake of science (testing).
+    MatrixCursor surprise =
+        new MatrixCursor(new String[] {"surprise!", "columns", "are different"});
+    surprise.addRow(new Object[] {1, 2, 3});
+    MergeCursor mergeCursor = new MergeCursor(new MatrixCursor[] {listItemCursor, surprise});
+
     final ListAdapter cursorAdapter = new SimpleCursorAdapter(getActivity(),
-        android.R.layout.simple_list_item_2, listItemCursor,
+        android.R.layout.simple_list_item_2, mergeCursor,
         new String[] {
           COLUMN_STR, COLUMN_LEN
         },

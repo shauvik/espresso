@@ -117,5 +117,3 @@ public class BasicTest extends ActivityInstrumentationTestCase2<SimpleActivity> 
          .check(isTopAlignedWith(withId(R.id.send_simple)));
   }
 }
-
-

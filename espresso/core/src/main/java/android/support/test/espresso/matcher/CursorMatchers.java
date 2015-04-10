@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.Matchers.is;
 
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.widget.AdapterView;
 
 import org.hamcrest.Description;
@@ -54,12 +55,16 @@ public final class CursorMatchers {
     // no instance
   }
 
-  private static class CursorMatcher extends BoundedMatcher<Object, Cursor> {
+  /**
+   * A {@link Matcher} that matches {@link Cursor}s based on values in their columns.
+   */
+  public static class CursorMatcher extends BoundedMatcher<Object, Cursor> {
 
     private final int columnIndex;
     private final Matcher<String> columnNameMatcher;
     private final Matcher<?> valueMatcher;
     private final MatcherApplier applier;
+    private boolean checkColumns = true;
 
     private CursorMatcher(int columnIndex, Matcher<?> valueMatcher, MatcherApplier applier) {
       super(Cursor.class);
@@ -88,8 +93,13 @@ public final class CursorMatchers {
           StringDescription description = new StringDescription();
           columnNameMatcher.describeTo(description);
           if (chosenColumn == COLUMN_NOT_FOUND) {
-            throw new IllegalArgumentException("Couldn't find column in "
-                + Arrays.asList(cursor.getColumnNames()) + " matching " + description.toString());
+            if (checkColumns) {
+              throw new IllegalArgumentException("Couldn't find column in "
+                  + Arrays.asList(cursor.getColumnNames()) + " matching " + description.toString());
+            }
+            // this cursor position doesn't have a column with this name, but other ones might
+            // (e.g. in case of MergeCursor), so if columnChecks are off continue the search.
+            return false;
           } else if (chosenColumn == MULTIPLE_COLUMNS_FOUND) {
             throw new IllegalArgumentException("Multiple columns in "
                 + Arrays.asList(cursor.getColumnNames()) + " match " + description.toString());
@@ -99,7 +109,16 @@ public final class CursorMatchers {
           }
         }
       }
-      return applier.apply(cursor, chosenColumn, valueMatcher);
+      try {
+        return applier.apply(cursor, chosenColumn, valueMatcher);
+      } catch (CursorIndexOutOfBoundsException e) {
+        if (checkColumns) {
+          throw new IllegalArgumentException("Column index is invalid", e);
+        }
+        // this cursor position doesn't have a column with this index, but other ones might
+        // (e.g. in case of MergeCursor), so if columnChecks are off continue the search.
+        return false;
+      }
     }
 
     @Override
@@ -115,6 +134,16 @@ public final class CursorMatchers {
       valueMatcher.describeTo(description);
     }
 
+    /**
+     * Allows test authors to override whether the the matcher should throw an
+     * {@link IllegaArgumentException} if the column name/count is not valid. This is useful in the
+     * case where a cursor may iterates over a data set with variable columns. By default, the
+     * checks are on.
+     */
+    public CursorMatcher withStrictColumnChecks(boolean checkColumns) {
+      this.checkColumns = checkColumns;
+      return this;
+    }
   }
 
   private static int findColumnIndex(Matcher<String> nameMatcher, Cursor cursor) {
@@ -223,20 +252,18 @@ public final class CursorMatchers {
   };
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Short} value at a given column index
+   * Returns a matcher that matches a {@link Short} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnIndex int column index
    * @param value a short value to match
    */
-  public static Matcher<Object> withRowShort(int columnIndex, short value) {
+  public static CursorMatcher withRowShort(int columnIndex, short value) {
     return withRowShort(columnIndex, is(value));
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Short} value at a given column index
+   * Returns a matcher that matches a {@link Short} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnIndex int column index
@@ -244,25 +271,23 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link Short} value
    */
-  public static Matcher<Object> withRowShort(int columnIndex, Matcher<Short> valueMatcher) {
+  public static CursorMatcher withRowShort(int columnIndex, Matcher<Short> valueMatcher) {
     return new CursorMatcher(columnIndex, valueMatcher, SHORT_MATCHER_APPLIER);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Short} value at a given column index
+   * Returns a matcher that matches a {@link Short} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnName as a {@link String}
    * @param value a short value to match
    */
-  public static Matcher<Object> withRowShort(String columnName, short value) {
+  public static CursorMatcher withRowShort(String columnName, short value) {
     return withRowShort(columnName, is(value));
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Short} value at a given column index
+   * Returns a matcher that matches a {@link Short} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnName as a {@link String}
@@ -270,14 +295,13 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link Short} value
    */
-  public static Matcher<Object> withRowShort(String columnName,
+  public static CursorMatcher withRowShort(String columnName,
       Matcher<Short> valueMatcher) {
     return withRowShort(is(columnName), valueMatcher);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Short} value at a given column index
+   * Returns a matcher that matches a {@link Short} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnNameMatcher as a
@@ -287,26 +311,24 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link Short} value
    */
-  public static Matcher<Object> withRowShort(Matcher<String> columnNameMatcher,
+  public static CursorMatcher withRowShort(Matcher<String> columnNameMatcher,
       Matcher<Short> valueMatcher) {
     return new CursorMatcher(columnNameMatcher, valueMatcher, SHORT_MATCHER_APPLIER);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Integer} value at a given column index
+   * Returns a matcher that matches a {@link Integer} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnIndex int column index
    * @param value a int value to match
    */
-  public static Matcher<Object> withRowInt(int columnIndex, int value) {
+  public static CursorMatcher withRowInt(int columnIndex, int value) {
     return withRowInt(columnIndex, is(value));
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Integer} value at a given column index
+   * Returns a matcher that matches a {@link Integer} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnIndex int column index
@@ -314,25 +336,23 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link Integer} value
    */
-  public static Matcher<Object> withRowInt(int columnIndex, Matcher<Integer> valueMatcher) {
+  public static CursorMatcher withRowInt(int columnIndex, Matcher<Integer> valueMatcher) {
     return new CursorMatcher(columnIndex, valueMatcher, INT_MATCHER_APPLIER);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Integer} value at a given column index
+   * Returns a matcher that matches a {@link Integer} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnName as a {@link String}
    * @param value a int value to match
    */
-  public static Matcher<Object> withRowInt(String columnName, int value) {
+  public static CursorMatcher withRowInt(String columnName, int value) {
     return withRowInt(columnName, is(value));
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Integer} value at a given column index
+   * Returns a matcher that matches a {@link Integer} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnName as a {@link String}
@@ -340,14 +360,13 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link Integer} value
    */
-  public static Matcher<Object> withRowInt(String columnName,
+  public static CursorMatcher withRowInt(String columnName,
       Matcher<Integer> valueMatcher) {
     return withRowInt(is(columnName), valueMatcher);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Integer} value at a given column index
+   * Returns a matcher that matches a {@link Integer} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnNameMatcher as a
@@ -357,26 +376,24 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link Integer} value
    */
-  public static Matcher<Object> withRowInt(Matcher<String> columnNameMatcher,
+  public static CursorMatcher withRowInt(Matcher<String> columnNameMatcher,
       final Matcher<Integer> valueMatcher) {
     return new CursorMatcher(columnNameMatcher, valueMatcher, INT_MATCHER_APPLIER);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Long} value at a given column index
+   * Returns a matcher that matches a {@link Long} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnIndex int column index
    * @param value a long value to match
    */
-  public static Matcher<Object> withRowLong(int columnIndex, long value) {
+  public static CursorMatcher withRowLong(int columnIndex, long value) {
     return withRowLong(columnIndex, is(value));
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Long} value at a given column index
+   * Returns a matcher that matches a {@link Long} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnIndex int column index
@@ -384,39 +401,36 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link Long} value
    */
-  public static Matcher<Object> withRowLong(int columnIndex, Matcher<Long> valueMatcher) {
+  public static CursorMatcher withRowLong(int columnIndex, Matcher<Long> valueMatcher) {
     return new CursorMatcher(columnIndex, valueMatcher, LONG_MATCHER_APPLIER);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Long} value at a given column index
+   * Returns a matcher that matches a {@link Long} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnName as a {@link String}
    * @param value a long value to match
    */
-  public static Matcher<Object> withRowLong(String columnName, long value) {
+  public static CursorMatcher withRowLong(String columnName, long value) {
     return withRowLong(columnName, is(value));
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Long} value at a given column index
-   * in a {@link Cursor}s data row.
+   * Returns a matcher that matches a {@link Long} value at a given column index in a
+   * {@link Cursor}s data row.
    * <br>
    * @param columnName as a {@link String}
    * @param valueMatcher a
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link Long} value
    */
-  public static Matcher<Object> withRowLong(String columnName, Matcher<Long> valueMatcher) {
+  public static CursorMatcher withRowLong(String columnName, Matcher<Long> valueMatcher) {
     return withRowLong(is(columnName), valueMatcher);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Long} value at a given column index
+   * Returns a matcher that matches a {@link Long} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnNameMatcher as a
@@ -426,26 +440,24 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link Long} value
    */
-  public static Matcher<Object> withRowLong(Matcher<String> columnNameMatcher,
+  public static CursorMatcher withRowLong(Matcher<String> columnNameMatcher,
       Matcher<Long> valueMatcher) {
     return new CursorMatcher(columnNameMatcher, valueMatcher, LONG_MATCHER_APPLIER);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Float} value at a given column index
+   * Returns a matcher that matches a {@link Float} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnIndex int column index
    * @param value a float value to match
    */
-  public static Matcher<Object> withRowFloat(int columnIndex, float value) {
+  public static CursorMatcher withRowFloat(int columnIndex, float value) {
     return withRowFloat(columnIndex, is(value));
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Float} value at a given column index
+   * Returns a matcher that matches a {@link Float} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnIndex int column index
@@ -453,25 +465,23 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link Float} value
    */
-  public static Matcher<Object> withRowFloat(int columnIndex, Matcher<Float> valueMatcher) {
+  public static CursorMatcher withRowFloat(int columnIndex, Matcher<Float> valueMatcher) {
     return new CursorMatcher(columnIndex, valueMatcher, FLOAT_MATCHER_APPLIER);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Float} value at a given column index
+   * Returns a matcher that matches a {@link Float} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnName as a {@link String}
    * @param value a float value to match
    */
-  public static Matcher<Object> withRowFloat(String columnName, float value) {
+  public static CursorMatcher withRowFloat(String columnName, float value) {
     return withRowFloat(columnName, is(value));
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Float} value at a given column index
+   * Returns a matcher that matches a {@link Float} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnName as a {@link String}
@@ -479,13 +489,12 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link Float} value
    */
-  public static Matcher<Object> withRowFloat(String columnName, Matcher<Float> valueMatcher) {
+  public static CursorMatcher withRowFloat(String columnName, Matcher<Float> valueMatcher) {
     return withRowFloat(is(columnName), valueMatcher);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Float} value at a given column index
+   * Returns a matcher that matches a {@link Float} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnNameMatcher as a
@@ -495,26 +504,24 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link Float} value
    */
-  public static Matcher<Object> withRowFloat(Matcher<String> columnNameMatcher,
+  public static CursorMatcher withRowFloat(Matcher<String> columnNameMatcher,
       Matcher<Float> valueMatcher) {
     return new CursorMatcher(columnNameMatcher, valueMatcher, FLOAT_MATCHER_APPLIER);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Double} value at a given column index
+   * Returns a matcher that matches a {@link Double} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnIndex int column index
    * @param value a double value to match
    */
-  public static Matcher<Object> withRowDouble(int columnIndex, double value) {
+  public static CursorMatcher withRowDouble(int columnIndex, double value) {
     return withRowDouble(columnIndex, is(value));
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Double} value at a given column index
+   * Returns a matcher that matches a {@link Double} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnIndex int column index
@@ -522,25 +529,23 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link Double} value
    */
-  public static Matcher<Object> withRowDouble(int columnIndex, Matcher<Double> valueMatcher) {
+  public static CursorMatcher withRowDouble(int columnIndex, Matcher<Double> valueMatcher) {
     return new CursorMatcher(columnIndex, valueMatcher, DOUBLE_MATCHER_APPLIER);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Double} value at a given column index
+   * Returns a matcher that matches a {@link Double} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnName as a {@link String}
    * @param value a double value to match
    */
-  public static Matcher<Object> withRowDouble(String columnName, double value) {
+  public static CursorMatcher withRowDouble(String columnName, double value) {
     return withRowDouble(columnName, is(value));
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Double} value at a given column index
+   * Returns a matcher that matches a {@link Double} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnName as a {@link String}
@@ -548,13 +553,12 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link Double} value
    */
-  public static Matcher<Object> withRowDouble(String columnName, Matcher<Double> valueMatcher) {
+  public static CursorMatcher withRowDouble(String columnName, Matcher<Double> valueMatcher) {
     return withRowDouble(is(columnName), valueMatcher);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link Double} value at a given column index
+   * Returns a matcher that matches a {@link Double} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnNameMatcher as a
@@ -564,26 +568,24 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link Double} value
    */
-  public static Matcher<Object> withRowDouble(Matcher<String> columnNameMatcher,
+  public static CursorMatcher withRowDouble(Matcher<String> columnNameMatcher,
       Matcher<Double> valueMatcher) {
     return new CursorMatcher(columnNameMatcher, valueMatcher, DOUBLE_MATCHER_APPLIER);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link String} value at a given column index
+   * Returns a matcher that matches a {@link String} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnIndex int column index
    * @param value a {@link String} value to match
    */
-  public static Matcher<Object> withRowString(int columnIndex, String value) {
+  public static CursorMatcher withRowString(int columnIndex, String value) {
     return withRowString(columnIndex, is(value));
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link String} value at a given column index
+   * Returns a matcher that matches a {@link String} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnIndex int column index
@@ -591,25 +593,23 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link String} value
    */
-  public static Matcher<Object> withRowString(int columnIndex, Matcher<String> valueMatcher) {
+  public static CursorMatcher withRowString(int columnIndex, Matcher<String> valueMatcher) {
     return new CursorMatcher(columnIndex, valueMatcher, STRING_MATCHER_APPLIER);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link String} value at a given column index
+   * Returns a matcher that matches a {@link String} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnName as a {@link String}
    * @param value a {@link String} value to match
    */
-  public static Matcher<Object> withRowString(String columnName, String value) {
+  public static CursorMatcher withRowString(String columnName, String value) {
     return withRowString(is(columnName), is(value));
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link String} value at a given column index
+   * Returns a matcher that matches a {@link String} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnName as a {@link String}
@@ -617,13 +617,12 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link String} value
    */
-  public static Matcher<Object> withRowString(String columnName, Matcher<String> valueMatcher) {
+  public static CursorMatcher withRowString(String columnName, Matcher<String> valueMatcher) {
     return withRowString(is(columnName), valueMatcher);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a {@link String} value at a given column index
+   * Returns a matcher that matches a {@link String} value at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnPicker as a
@@ -633,26 +632,24 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a {@link String} value
    */
-  public static Matcher<Object> withRowString(final Matcher<String> columnPicker,
+  public static CursorMatcher withRowString(final Matcher<String> columnPicker,
       final Matcher<String> valueMatcher) {
     return new CursorMatcher(columnPicker, valueMatcher, STRING_MATCHER_APPLIER);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a byte[] at a given column index
+   * Returns a matcher that matches a byte[] at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnIndex int column index
    * @param value byte[] to match
    */
-  public static Matcher<Object> withRowBlob(int columnIndex, byte[] value) {
+  public static CursorMatcher withRowBlob(int columnIndex, byte[] value) {
     return withRowBlob(columnIndex, is(value));
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a byte[] at a given column index
+   * Returns a matcher that matches a byte[] at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnIndex int column index
@@ -660,25 +657,23 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a byte[]
    */
-  public static Matcher<Object> withRowBlob(int columnIndex, Matcher<byte[]> valueMatcher) {
+  public static CursorMatcher withRowBlob(int columnIndex, Matcher<byte[]> valueMatcher) {
     return new CursorMatcher(columnIndex, valueMatcher, BLOB_MATCHER_APPLIER);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a byte[] at a given column index
+   * Returns a matcher that matches a byte[] at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnName as a {@link String}
    * @param value byte[] to match
    */
-  public static Matcher<Object> withRowBlob(String columnName, byte[] value) {
+  public static CursorMatcher withRowBlob(String columnName, byte[] value) {
     return withRowBlob(is(columnName), is(value));
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a byte[] at a given column index
+   * Returns a matcher that matches a byte[] at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnName as a {@link String}
@@ -686,13 +681,12 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a byte[]
    */
-  public static Matcher<Object> withRowBlob(String columnName, Matcher<byte[]> valueMatcher) {
+  public static CursorMatcher withRowBlob(String columnName, Matcher<byte[]> valueMatcher) {
     return withRowBlob(is(columnName), valueMatcher);
   }
 
   /**
-   * Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-   * <code>Matcher</code></a> that matches a byte[] at a given column index
+   * Returns a matcher that matches a byte[] at a given column index
    * in a {@link Cursor}s data row.
    * <br>
    * @param columnPicker as a
@@ -702,7 +696,7 @@ public final class CursorMatchers {
    *     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
    *     <code>Matcher</code></a> that matches a byte[]
    */
-  public static Matcher<Object> withRowBlob(Matcher<String> columnPicker,
+  public static CursorMatcher withRowBlob(Matcher<String> columnPicker,
       Matcher<byte[]> valueMatcher) {
     return new CursorMatcher(columnPicker, valueMatcher, BLOB_MATCHER_APPLIER);
   }

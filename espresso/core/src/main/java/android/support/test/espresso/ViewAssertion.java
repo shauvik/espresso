@@ -18,8 +18,6 @@ package android.support.test.espresso;
 
 import android.view.View;
 
-import javax.annotation.Nullable;
-
 /**
  * Responsible for performing assertions on a View element.<br>
  * <p>
@@ -48,5 +46,5 @@ public interface ViewAssertion {
    * @param noViewFoundException an exception detailing why the view could not be found or null if
    * the view was found
    */
-  void check(@Nullable View view, @Nullable NoMatchingViewException noViewFoundException);
+  void check(View view, NoMatchingViewException noViewFoundException);
 }

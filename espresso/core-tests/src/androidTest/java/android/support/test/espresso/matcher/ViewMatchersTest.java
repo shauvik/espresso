@@ -49,6 +49,7 @@ import android.support.test.espresso.matcher.ViewMatchers.Visibility;
 import android.support.test.testapp.test.R;
 import com.google.common.collect.Lists;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.test.InstrumentationTestCase;
 import android.test.UiThreadTest;
@@ -80,24 +81,33 @@ import java.util.List;
  * Unit tests for {@link ViewMatchers}.
  */
 public class ViewMatchersTest extends InstrumentationTestCase {
+
+  private Context context;
+
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+    context = getInstrumentation().getContext();
+  }
+
   public void testIsAssignableFrom_notAnInstance() {
-    View v = new View(getInstrumentation().getTargetContext());
+    View v = new View(context);
     assertFalse(isAssignableFrom(Spinner.class).matches(v));
   }
 
   public void testIsAssignableFrom_plainView() {
-    View v = new View(getInstrumentation().getTargetContext());
+    View v = new View(context);
     assertTrue(isAssignableFrom(View.class).matches(v));
   }
 
   public void testIsAssignableFrom_superclass() {
-    View v = new RadioButton(getInstrumentation().getTargetContext());
+    View v = new RadioButton(context);
     assertTrue(isAssignableFrom(Button.class).matches(v));
   }
 
   @SuppressWarnings("cast")
   public void testWithContentDescriptionCharSequence() {
-    View view = new View(getInstrumentation().getTargetContext());
+    View view = new View(context);
     view.setContentDescription(null);
     assertTrue(withContentDescription(Matchers.<CharSequence>nullValue()).matches(view));
     CharSequence testText = "test text!";
@@ -117,7 +127,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testHasContentDescription() {
-    View view = new View(getInstrumentation().getTargetContext());
+    View view = new View(context);
     view.setContentDescription(null);
     assertFalse(hasContentDescription().matches(view));
     CharSequence testText = "test text!";
@@ -126,7 +136,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testWithContentDescriptionString() {
-    View view = new View(getInstrumentation().getTargetContext());
+    View view = new View(context);
     view.setContentDescription(null);
     assertTrue(withContentDescription(Matchers.<String>nullValue()).matches(view));
     String testText = "test text!";
@@ -136,8 +146,15 @@ public class ViewMatchersTest extends InstrumentationTestCase {
     assertFalse(withContentDescription(is("")).matches(view));
   }
 
+  public void testWithContentDescriptionFromResourceId() {
+    View view = new View(context);
+    view.setContentDescription(context.getString(R.string.something));
+    assertFalse(withContentDescription(R.string.other_string).matches(view));
+    assertTrue(withContentDescription(R.string.something).matches(view));
+  }
+
   public void testWithId() {
-    View view = new View(getInstrumentation().getTargetContext());
+    View view = new View(context);
     view.setId(R.id.testId1);
     assertTrue(withId(is(R.id.testId1)).matches(view));
     assertFalse(withId(is(R.id.testId2)).matches(view));
@@ -149,7 +166,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testWithId_describeWithFailedResourceLookup() {
-    View view = new View(getInstrumentation().getContext());
+    View view = new View(context);
     Matcher<View> matcher = withId(5);
     // Running matches will allow withId to grab resources from view Context
     matcher.matches(view);
@@ -157,7 +174,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testWithId_describeWithResourceLookup() {
-    View view = new View(getInstrumentation().getContext());
+    View view = new View(context);
     Matcher<View> matcher = withId(R.id.testId1);
     // Running matches will allow withId to grab resources from view Context
     matcher.matches(view);
@@ -181,7 +198,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testWithTagObject() {
-    View view = new View(getInstrumentation().getTargetContext());
+    View view = new View(context);
     view.setTag(null);
     assertTrue(withTagValue(Matchers.<Object>nullValue()).matches(view));
     String testObjectText = "test text!";
@@ -193,7 +210,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testWithTagKey() {
-    View view = new View(getInstrumentation().getTargetContext());
+    View view = new View(context);
     assertFalse(withTagKey(R.id.testId1).matches(view));
     view.setTag(R.id.testId1, "blah");
     assertFalse(withTagValue(is((Object) "blah")).matches(view));
@@ -211,7 +228,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testWithTagKeyObject() {
-    View view = new View(getInstrumentation().getTargetContext());
+    View view = new View(context);
     String testObjectText1 = "test text1!";
     String testObjectText2 = "test text2!";
     assertFalse(withTagKey(R.id.testId1, is((Object) testObjectText1)).matches(view));
@@ -244,10 +261,10 @@ public class ViewMatchersTest extends InstrumentationTestCase {
 
   @UiThreadTest
   public void testCheckBoxMatchers() {
-    assertFalse(isChecked().matches(new Spinner(getInstrumentation().getTargetContext())));
-    assertFalse(isNotChecked().matches(new Spinner(getInstrumentation().getTargetContext())));
+    assertFalse(isChecked().matches(new Spinner(context)));
+    assertFalse(isNotChecked().matches(new Spinner(context)));
 
-    CheckBox checkBox = new CheckBox(getInstrumentation().getTargetContext());
+    CheckBox checkBox = new CheckBox(context);
     checkBox.setChecked(true);
     assertTrue(isChecked().matches(checkBox));
     assertFalse(isNotChecked().matches(checkBox));
@@ -256,7 +273,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
     assertFalse(isChecked().matches(checkBox));
     assertTrue(isNotChecked().matches(checkBox));
 
-    RadioButton radioButton = new RadioButton(getInstrumentation().getTargetContext());
+    RadioButton radioButton = new RadioButton(context);
     radioButton.setChecked(false);
     assertFalse(isChecked().matches(radioButton));
     assertTrue(isNotChecked().matches(radioButton));
@@ -265,7 +282,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
     assertTrue(isChecked().matches(radioButton));
     assertFalse(isNotChecked().matches(radioButton));
 
-    CheckedTextView checkedText = new CheckedTextView(getInstrumentation().getTargetContext());
+    CheckedTextView checkedText = new CheckedTextView(context);
     checkedText.setChecked(false);
     assertFalse(isChecked().matches(checkedText));
     assertTrue(isNotChecked().matches(checkedText));
@@ -288,7 +305,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testWithTextString() {
-    TextView textView = new TextView(getInstrumentation().getTargetContext());
+    TextView textView = new TextView(context);
     textView.setText(null);
     assertTrue(withText(is("")).matches(textView));
     String testText = "test text!";
@@ -299,9 +316,9 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testHasDescendant() {
-    View v = new TextView(getInstrumentation().getTargetContext());
-    ViewGroup parent = new RelativeLayout(getInstrumentation().getTargetContext());
-    ViewGroup grany = new ScrollView(getInstrumentation().getTargetContext());
+    View v = new TextView(context);
+    ViewGroup parent = new RelativeLayout(context);
+    ViewGroup grany = new ScrollView(context);
     grany.addView(parent);
     parent.addView(v);
     assertTrue(hasDescendant(isAssignableFrom(TextView.class)).matches(grany));
@@ -311,9 +328,9 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testIsDescendantOfA() {
-    View v = new TextView(getInstrumentation().getTargetContext());
-    ViewGroup parent = new RelativeLayout(getInstrumentation().getTargetContext());
-    ViewGroup grany = new ScrollView(getInstrumentation().getTargetContext());
+    View v = new TextView(context);
+    ViewGroup parent = new RelativeLayout(context);
+    ViewGroup grany = new ScrollView(context);
     grany.addView(parent);
     parent.addView(v);
     assertTrue(isDescendantOfA(isAssignableFrom(RelativeLayout.class)).matches(v));
@@ -322,96 +339,96 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testIsVisible() {
-    View visible = new View(getInstrumentation().getTargetContext());
+    View visible = new View(context);
     visible.setVisibility(View.VISIBLE);
-    View invisible = new View(getInstrumentation().getTargetContext());
+    View invisible = new View(context);
     invisible.setVisibility(View.INVISIBLE);
     assertTrue(withEffectiveVisibility(Visibility.VISIBLE).matches(visible));
     assertFalse(withEffectiveVisibility(Visibility.VISIBLE).matches(invisible));
 
     // Make the visible view invisible by giving it an invisible parent.
-    ViewGroup parent = new RelativeLayout(getInstrumentation().getTargetContext());
+    ViewGroup parent = new RelativeLayout(context);
     parent.addView(visible);
     parent.setVisibility(View.INVISIBLE);
     assertFalse(withEffectiveVisibility(Visibility.VISIBLE).matches(visible));
   }
 
   public void testIsInvisible() {
-    View visible = new View(getInstrumentation().getTargetContext());
+    View visible = new View(context);
     visible.setVisibility(View.VISIBLE);
-    View invisible = new View(getInstrumentation().getTargetContext());
+    View invisible = new View(context);
     invisible.setVisibility(View.INVISIBLE);
     assertFalse(withEffectiveVisibility(Visibility.INVISIBLE).matches(visible));
     assertTrue(withEffectiveVisibility(Visibility.INVISIBLE).matches(invisible));
 
     // Make the visible view invisible by giving it an invisible parent.
-    ViewGroup parent = new RelativeLayout(getInstrumentation().getTargetContext());
+    ViewGroup parent = new RelativeLayout(context);
     parent.addView(visible);
     parent.setVisibility(View.INVISIBLE);
     assertTrue(withEffectiveVisibility(Visibility.INVISIBLE).matches(visible));
   }
 
   public void testIsGone() {
-    View gone = new View(getInstrumentation().getTargetContext());
+    View gone = new View(context);
     gone.setVisibility(View.GONE);
-    View visible = new View(getInstrumentation().getTargetContext());
+    View visible = new View(context);
     visible.setVisibility(View.VISIBLE);
     assertFalse(withEffectiveVisibility(Visibility.GONE).matches(visible));
     assertTrue(withEffectiveVisibility(Visibility.GONE).matches(gone));
 
     // Make the gone view gone by giving it a gone parent.
-    ViewGroup parent = new RelativeLayout(getInstrumentation().getTargetContext());
+    ViewGroup parent = new RelativeLayout(context);
     parent.addView(visible);
     parent.setVisibility(View.GONE);
     assertTrue(withEffectiveVisibility(Visibility.GONE).matches(visible));
   }
 
   public void testIsClickable() {
-    View clickable = new View(getInstrumentation().getTargetContext());
+    View clickable = new View(context);
     clickable.setClickable(true);
-    View notClickable = new View(getInstrumentation().getTargetContext());
+    View notClickable = new View(context);
     notClickable.setClickable(false);
     assertTrue(isClickable().matches(clickable));
     assertFalse(isClickable().matches(notClickable));
   }
 
   public void testIsEnabled() {
-    View enabled = new View(getInstrumentation().getTargetContext());
+    View enabled = new View(context);
     enabled.setEnabled(true);
-    View notEnabled = new View(getInstrumentation().getTargetContext());
+    View notEnabled = new View(context);
     notEnabled.setEnabled(false);
     assertTrue(isEnabled().matches(enabled));
     assertFalse(isEnabled().matches(notEnabled));
   }
 
   public void testIsFocusable() {
-    View focusable = new View(getInstrumentation().getTargetContext());
+    View focusable = new View(context);
     focusable.setFocusable(true);
-    View notFocusable = new View(getInstrumentation().getTargetContext());
+    View notFocusable = new View(context);
     notFocusable.setFocusable(false);
     assertTrue(isFocusable().matches(focusable));
     assertFalse(isFocusable().matches(notFocusable));
   }
 
   public void testIsSelected() {
-    View selected = new View(getInstrumentation().getTargetContext());
+    View selected = new View(context);
     selected.setSelected(true);
-    View notSelected = new View(getInstrumentation().getTargetContext());
+    View notSelected = new View(context);
     notSelected.setSelected(false);
     assertTrue(isSelected().matches(selected));
     assertFalse(isSelected().matches(notSelected));
   }
 
   public void testWithTextResourceId() {
-    TextView textView = new TextView(getInstrumentation().getTargetContext());
+    TextView textView = new TextView(context);
     textView.setText(R.string.something);
     assertTrue(withText(R.string.something).matches(textView));
     assertFalse(withText(R.string.other_string).matches(textView));
   }
 
   public void testWithTextResourceId_charSequence() {
-    TextView textView = new TextView(getInstrumentation().getTargetContext());
-    String expectedText = getInstrumentation().getTargetContext()
+    TextView textView = new TextView(context);
+    String expectedText = context
         .getResources().getString(R.string.something);
     Spannable textSpan = Spannable.Factory.getInstance().newSpannable(expectedText);
     textSpan.setSpan(new ForegroundColorSpan(Color.RED), 0, expectedText.length() - 1, 0);
@@ -421,7 +438,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testWithHintString() {
-    TextView textView = new TextView(getInstrumentation().getTargetContext());
+    TextView textView = new TextView(context);
     textView.setHint(null);
     assertFalse(withHint(is("")).matches(textView));
     String testText = "test text!";
@@ -431,7 +448,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testWithHintResourceId() {
-    TextView textView = new TextView(getInstrumentation().getTargetContext());
+    TextView textView = new TextView(context);
     textView.setHint(R.string.something);
     assertTrue(withHint(R.string.something).matches(textView));
     assertFalse(withHint(R.string.other_string).matches(textView));
@@ -441,8 +458,8 @@ public class ViewMatchersTest extends InstrumentationTestCase {
 
 
   public void testWithHintResourceId_charSequence() {
-    TextView textView = new TextView(getInstrumentation().getTargetContext());
-    String expectedText = getInstrumentation().getTargetContext()
+    TextView textView = new TextView(context);
+    String expectedText = context
         .getResources().getString(R.string.something);
     Spannable textSpan = Spannable.Factory.getInstance().newSpannable(expectedText);
     textSpan.setSpan(new ForegroundColorSpan(Color.RED), 0, expectedText.length() - 1, 0);
@@ -452,11 +469,11 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testWithParent() {
-    View view1 = new TextView(getInstrumentation().getTargetContext());
-    View view2 = new TextView(getInstrumentation().getTargetContext());
-    View view3 = new TextView(getInstrumentation().getTargetContext());
-    ViewGroup tiptop = new RelativeLayout(getInstrumentation().getTargetContext());
-    ViewGroup secondLevel = new RelativeLayout(getInstrumentation().getTargetContext());
+    View view1 = new TextView(context);
+    View view2 = new TextView(context);
+    View view3 = new TextView(context);
+    ViewGroup tiptop = new RelativeLayout(context);
+    ViewGroup secondLevel = new RelativeLayout(context);
     secondLevel.addView(view2);
     secondLevel.addView(view3);
     tiptop.addView(secondLevel);
@@ -474,11 +491,11 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testWithChild() {
-    View view1 = new TextView(getInstrumentation().getTargetContext());
-    View view2 = new TextView(getInstrumentation().getTargetContext());
-    View view3 = new TextView(getInstrumentation().getTargetContext());
-    ViewGroup tiptop = new RelativeLayout(getInstrumentation().getTargetContext());
-    ViewGroup secondLevel = new RelativeLayout(getInstrumentation().getTargetContext());
+    View view1 = new TextView(context);
+    View view2 = new TextView(context);
+    View view3 = new TextView(context);
+    ViewGroup tiptop = new RelativeLayout(context);
+    ViewGroup secondLevel = new RelativeLayout(context);
     secondLevel.addView(view2);
     secondLevel.addView(view3);
     tiptop.addView(secondLevel);
@@ -495,13 +512,13 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testIsRootView() {
-    ViewGroup rootView = new ViewGroup(getInstrumentation().getTargetContext()) {
+    ViewGroup rootView = new ViewGroup(context) {
       @Override
       protected void onLayout(boolean changed, int l, int t, int r, int b) {
       }
     };
 
-    View view = new View(getInstrumentation().getTargetContext());
+    View view = new View(context);
     rootView.addView(view);
 
     assertTrue(isRoot().matches(rootView));
@@ -509,11 +526,11 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testHasSibling() {
-    TextView v1 = new TextView(getInstrumentation().getTargetContext());
+    TextView v1 = new TextView(context);
     v1.setText("Bill Odama");
-    Button v2 = new Button(getInstrumentation().getTargetContext());
-    View v3 = new View(getInstrumentation().getTargetContext());
-    ViewGroup parent = new LinearLayout(getInstrumentation().getTargetContext());
+    Button v2 = new Button(context);
+    View v3 = new View(context);
+    ViewGroup parent = new LinearLayout(context);
     parent.addView(v1);
     parent.addView(v2);
     parent.addView(v3);
@@ -522,7 +539,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testHasImeAction() {
-    EditText editText = new EditText(getInstrumentation().getTargetContext());
+    EditText editText = new EditText(context);
     assertFalse(hasImeAction(EditorInfo.IME_ACTION_GO).matches(editText));
     editText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
     assertFalse(hasImeAction(EditorInfo.IME_ACTION_GO).matches(editText));
@@ -530,36 +547,36 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   }
 
   public void testHasImeActionNoInputConnection() {
-    Button button = new Button(getInstrumentation().getTargetContext());
+    Button button = new Button(context);
     assertFalse(hasImeAction(0).matches(button));
   }
 
   public void testSupportsInputMethods() {
-    Button button = new Button(getInstrumentation().getTargetContext());
-    EditText editText = new EditText(getInstrumentation().getTargetContext());
+    Button button = new Button(context);
+    EditText editText = new EditText(context);
     assertFalse(supportsInputMethods().matches(button));
     assertTrue(supportsInputMethods().matches(editText));
   }
 
   public void testHasLinks() {
-    TextView viewWithLinks = new TextView(getInstrumentation().getTargetContext());
+    TextView viewWithLinks = new TextView(context);
     viewWithLinks.setText("Here is a www.google.com link");
     Linkify.addLinks(viewWithLinks, Linkify.ALL);
     assertTrue(hasLinks().matches(viewWithLinks));
 
-    TextView viewWithNoLinks = new TextView(getInstrumentation().getTargetContext());
+    TextView viewWithNoLinks = new TextView(context);
     viewWithNoLinks.setText("Here is an unlikified www.google.com");
     assertFalse(hasLinks().matches(viewWithNoLinks));
   }
 
   @UiThreadTest
   public void testWithSpinnerTextResourceId() {
-    Spinner spinner = new Spinner(this.getInstrumentation().getTargetContext());
+    Spinner spinner = new Spinner(this.context);
     List<String> values = Lists.newArrayList();
-    values.add(this.getInstrumentation().getTargetContext().getString(R.string.something));
-    values.add(this.getInstrumentation().getTargetContext().getString(R.string.other_string));
+    values.add(this.context.getString(R.string.something));
+    values.add(this.context.getString(R.string.other_string));
     ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-        this.getInstrumentation().getTargetContext(),
+        this.context,
         android.R.layout.simple_spinner_item,
         values);
     spinner.setAdapter(adapter);
@@ -570,12 +587,12 @@ public class ViewMatchersTest extends InstrumentationTestCase {
 
   @UiThreadTest
   public void testWithSpinnerTextString() {
-    Spinner spinner = new Spinner(this.getInstrumentation().getTargetContext());
+    Spinner spinner = new Spinner(this.context);
     List<String> values = Lists.newArrayList();
     values.add("Hello World");
     values.add("Goodbye!!");
     ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-        this.getInstrumentation().getTargetContext(),
+        this.context,
         android.R.layout.simple_spinner_item,
         values);
     spinner.setAdapter(adapter);

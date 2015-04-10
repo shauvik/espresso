@@ -26,6 +26,8 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
 
+import android.support.test.espresso.PerformException;
+
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 
@@ -52,8 +54,14 @@ public class CursorAdapterTest extends ActivityInstrumentationTestCase2<CursorAd
     final String expectedRowString = "item: 0";
 
     // Match and click on view with a row int item length of 7 and the row String "item: 0".
-    onData(allOf(withRowInt(CursorAdapterListFragment.COLUMN_LEN, 7),
-        withRowString(CursorAdapterListFragment.COLUMN_STR, expectedRowString))).perform(click());
+    // Strict column checks are turned off because this is a MergeCursor.
+    onData(
+        allOf(
+            withRowInt(CursorAdapterListFragment.COLUMN_LEN, 7)
+                .withStrictColumnChecks(false),
+            withRowString(CursorAdapterListFragment.COLUMN_STR, expectedRowString)
+                .withStrictColumnChecks(false)))
+        .perform(click());
 
     // Check if the correct test is displayed in the Ui.
     onView(withId(R.id.selected_item_value)).check(matches(withText(expectedRowString)));
@@ -61,17 +69,30 @@ public class CursorAdapterTest extends ActivityInstrumentationTestCase2<CursorAd
 
   public void testClickOnFirstAndLastItemWithLength7() {
     final String expectedFirstItemString = "item: 0";
-    onData(withRowInt(CursorAdapterListFragment.COLUMN_LEN, 7))
+    onData(withRowInt(CursorAdapterListFragment.COLUMN_LEN, 7).withStrictColumnChecks(false))
         .atPosition(0)
         .perform(click());
     onView(withId(R.id.selected_item_value)).check(matches(withText(expectedFirstItemString)));
 
     final String expectedLastItemString = "item: 9";
-    onData(withRowInt(CursorAdapterListFragment.COLUMN_LEN, 7))
+    onData(withRowInt(CursorAdapterListFragment.COLUMN_LEN, 7).withStrictColumnChecks(false))
         .atPosition(9)
         .perform(click());
 
     onView(withId(R.id.selected_item_value)).check(matches(withText(expectedLastItemString)));
+  }
+
+  public void testClickOnDifferentColumnName() {
+    // You can also refer to colums by name. Note, names in each row don't have to be the same.
+    onData(withRowInt("surprise!", 1).withStrictColumnChecks(false)).perform(click());
+    onView(withId(R.id.selected_item_value)).check(matches(withText("item: 20")));
+  }
+
+  public void testClickOnColumnNameNotFound() {
+    try {
+      onData(withRowInt("not_there", 1).withStrictColumnChecks(false)).perform(click());
+      fail("Should have thrown PerformException");
+    } catch (PerformException expected) {}
   }
 
 }

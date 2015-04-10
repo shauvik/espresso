@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.is;
 
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.database.MergeCursor;
 import android.os.Build;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
@@ -271,6 +272,27 @@ public class CursorMatchersTest extends TestCase {
     } catch (IllegalArgumentException iae) {
       // Exception expected
     }
+  }
+
+  public void testMergeCursor() {
+    Cursor c1 = makeCursor(new String[] {"one", "two"}, new Object[] {1, 2});
+    Cursor c2 = makeCursor(new String[] {"three"}, new Object[] {3});
+    MergeCursor mergeCursor = new MergeCursor(new Cursor[] {c1, c2});
+    mergeCursor.moveToFirst();
+    try {
+      withRowInt("three", 3).matches(mergeCursor);
+      fail("expected previous line to throw an exception.");
+    } catch (IllegalArgumentException expected) { }
+    // override the default behavior and now it should just return false
+    assertFalse(withRowInt("three", 3).withStrictColumnChecks(false).matches(mergeCursor));
+    mergeCursor.moveToLast();
+    assertTrue(withRowInt("three", 3).matches(mergeCursor));
+    try {
+      withRowInt(3, 3).matches(mergeCursor);
+      fail("expected previous line to throw an exception.");
+    } catch (IllegalArgumentException expected) { }
+    // Trying to match on an out of bounds column with checks off shouldn't throw an exception
+    assertFalse(withRowInt(3, 3).withStrictColumnChecks(false).matches(mergeCursor));
   }
 
   @Override
