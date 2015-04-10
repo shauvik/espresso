@@ -16,15 +16,18 @@
 
 package android.support.test.rule;
 
+import android.os.Looper;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.annotation.Beta;
 import android.support.test.internal.statement.UiThreadStatement;
+import android.util.Log;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
@@ -35,10 +38,11 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
  * Note, methods annotated with {@link org.junit.Before} and {@link org.junit.After} will also be
  * executed on the UI thread.
  *
- * @see android.support.test.api.annotation.UiThreadTest
+ * @see android.support.test.annotation.UiThreadTest
  */
 @Beta
 public class UiThreadTestRule implements TestRule {
+    private static final String LOG_TAG = "UiThreadTestRule";
 
     @Override
     public Statement apply(final Statement base, Description description) {
@@ -60,23 +64,22 @@ public class UiThreadTestRule implements TestRule {
      *
      * @param runnable runnable containing test code in the {@link Runnable#run()} method
      *
-     * @see android.support.test.api.annotation.UiThreadTest
+     * @see android.support.test.annotation.UiThreadTest
      */
-    public void runTestOnUiThread(final Runnable runnable) throws Throwable {
-        final AtomicReference<Throwable> exceptionRef = new AtomicReference<>();
-        getInstrumentation().runOnMainSync(new Runnable() {
-            public void run() {
-                try {
-                    runnable.run();
-                } catch (Throwable throwable) {
-                    exceptionRef.set(throwable);
-                }
+    public void runOnUiThread(final Runnable runnable) throws Throwable {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            Log.w(LOG_TAG, "Already on the UI thread, this method should not be called from the " +
+                    "main application thread");
+            runnable.run();
+        } else {
+            FutureTask<Void> task = new FutureTask<>(runnable, null);
+            getInstrumentation().runOnMainSync(task);
+            try {
+                task.get();
+            } catch (ExecutionException e) {
+                // Expose the original exception
+                throw e.getCause();
             }
-        });
-
-        Throwable throwable = exceptionRef.get();
-        if (throwable != null) {
-            throw throwable;
         }
     }
 }

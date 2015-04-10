@@ -17,6 +17,7 @@
 package android.support.test.rule;
 
 import android.os.Looper;
+import android.support.test.annotation.Beta;
 import android.support.test.annotation.UiThreadTest;
 
 import org.junit.After;
@@ -28,22 +29,24 @@ import org.junit.runner.Result;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.junit.runner.JUnitCore.runClasses;
 
+@Beta
 public class UiThreadTestRuleTest {
 
     @Rule
     public UiThreadTestRule mUiThreadRule = new UiThreadTestRule();
 
     private static void verifyRunsOnUiThread() {
-        assertTrue(Looper.getMainLooper().getThread() == Thread.currentThread());
-        assertTrue(Looper.myLooper() == Looper.getMainLooper());
+        assertTrue("Not running on the UI Thread", Looper.getMainLooper().getThread() == Thread
+                .currentThread());
+        assertTrue("Not running on the UI Thread", Looper.myLooper() == Looper.getMainLooper());
     }
 
     private static void verifyRunsNotOnUiThread() {
-        assertFalse(Looper.getMainLooper().getThread() == Thread.currentThread());
-        assertFalse(Looper.myLooper() == Looper.getMainLooper());
+        assertFalse("Running on the UI Thread", Looper.getMainLooper().getThread() == Thread
+                .currentThread());
+        assertFalse("Running on the UI Thread", Looper.myLooper() == Looper.getMainLooper());
     }
 
     @Test
@@ -61,7 +64,7 @@ public class UiThreadTestRuleTest {
     public void verifyRunTestOnUiThreadMethod() throws Throwable {
         // verify not on UI thread
         verifyRunsNotOnUiThread();
-        mUiThreadRule.runTestOnUiThread(new Runnable() {
+        mUiThreadRule.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 // verify on UI thread
@@ -72,21 +75,32 @@ public class UiThreadTestRuleTest {
 
     @Test
     @UiThreadTest
-    public void attemptingToRunOnUiThreadFromUiThreadShouldFail() throws Throwable {
+    public void attemptingToRunOnUiThreadFromUiThreadShouldNotFail() throws Throwable {
         // verify on UI thread
         verifyRunsOnUiThread();
 
+        mUiThreadRule.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // verify still on UI thread
+                verifyRunsOnUiThread();
+            }
+        });
+    }
+
+    @Test
+    public void verifyExceptionPropagate() throws Throwable {
+        final String exceptionMessage = "Don't try this at home";
         try {
-            mUiThreadRule.runTestOnUiThread(new Runnable() {
+            mUiThreadRule.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    fail("Should never reach here, RuntimeException is expected");
+                    throw new IllegalStateException(exceptionMessage);
                 }
             });
         } catch (Exception e) {
-            assertEquals(RuntimeException.class, e.getClass());
-            assertEquals("This method can not be called from the main application thread",
-                    e.getMessage());
+            assertEquals(IllegalStateException.class, e.getClass());
+            assertEquals(exceptionMessage, e.getMessage());
         }
     }
 
@@ -130,7 +144,7 @@ public class UiThreadTestRuleTest {
         public void verifyRunTestOnUiThreadMethod() throws Throwable {
             // verify not on UI thread
             verifyRunsNotOnUiThread();
-            mUiThreadRule.runTestOnUiThread(new Runnable() {
+            mUiThreadRule.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     // verify on UI thread

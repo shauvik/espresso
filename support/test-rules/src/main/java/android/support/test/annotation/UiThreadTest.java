@@ -28,10 +28,10 @@ import java.lang.annotation.Target;
  * <p/>
  * Note, due to current JUnit limitation, methods annotated with {@link org.junit.Before} and
  * {@link org.junit.After} will also be executed on the UI Thread. Consider using
- * {@link android.support.test.rule.UiThreadTestRule#runTestOnUiThread(Runnable)} if this is an
+ * {@link android.support.test.rule.UiThreadTestRule#runOnUiThread(Runnable)} if this is an
  * issue.
  *
- * @see android.support.test.rule.UiThreadTestRule#runTestOnUiThread(Runnable)
+ * @see android.support.test.rule.UiThreadTestRule#runOnUiThread(Runnable)
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
