@@ -58,7 +58,7 @@ dependencies {
     provided files('../libs/guava-14.0.1.jar')
 
     compile project(':espresso-idling-resource')
-    compile project(':testing-support-lib')
+    compile project(':test-runner')
     compile 'javax.annotation:javax.annotation-api:1.2'
     compile 'javax.inject:javax.inject:1'
     compile 'com.google.code.findbugs:jsr305:2.0.1'
