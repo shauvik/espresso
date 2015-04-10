@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package android.support.test.rules;
+package android.support.test.rule;
 
-import android.support.test.UiThreadTest;
+import android.support.test.annotation.UiThreadTest;
 import android.support.test.annotation.Beta;
-import android.support.test.internal.runner.junit4.statements.UiThreadStatement;
+import android.support.test.internal.statement.UiThreadStatement;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -35,7 +35,7 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
  * Note, methods annotated with {@link org.junit.Before} and {@link org.junit.After} will also be
  * executed on the UI thread.
  *
- * @see android.support.test.UiThreadTest
+ * @see android.support.test.api.annotation.UiThreadTest
  */
 @Beta
 public class UiThreadTestRule implements TestRule {
@@ -60,7 +60,7 @@ public class UiThreadTestRule implements TestRule {
      *
      * @param runnable runnable containing test code in the {@link Runnable#run()} method
      *
-     * @see android.support.test.UiThreadTest
+     * @see android.support.test.api.annotation.UiThreadTest
      */
     public void runTestOnUiThread(final Runnable runnable) throws Throwable {
         final AtomicReference<Throwable> exceptionRef = new AtomicReference<>();

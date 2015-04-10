@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package android.support.test.rules;
+package android.support.test.rule;
 
 import android.os.Looper;
-import android.support.test.UiThreadTest;
+import android.support.test.annotation.UiThreadTest;
 
 import org.junit.After;
 import org.junit.Before;

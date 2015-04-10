@@ -140,7 +140,7 @@ Set<Project> getProjectsToArchive() {
     }
     if (project.hasProperty("buildRunner") && project.buildRunner == "true") {
         projects.addAll(subprojects.findAll {
-            ['testing-support-lib', 'exposed-instrumentation-api-publish'].contains(it.name)
+            ['test-runner', 'test-rules', 'exposed-instrumentation-api-publish'].contains(it.name)
         })
     }
     if (project.hasProperty("buildUiAutomator") && project.buildUiAutomator == "true") {

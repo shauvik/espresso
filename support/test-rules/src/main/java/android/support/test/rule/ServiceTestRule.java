@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.support.test.rules;
+package android.support.test.rule;
 
 import android.content.ComponentName;
 import android.content.Context;

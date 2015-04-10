@@ -59,6 +59,7 @@ dependencies {
 
     compile project(':espresso-idling-resource')
     compile project(':test-runner')
+    compile project(':test-rules')
     compile 'javax.annotation:javax.annotation-api:1.2'
     compile 'javax.inject:javax.inject:1'
     compile 'com.google.code.findbugs:jsr305:2.0.1'

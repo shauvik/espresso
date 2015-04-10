@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package android.support.test.espresso.intent.rules;
+package android.support.test.espresso.intent.rule;
 
 import org.hamcrest.Matcher;
 
 import android.app.Activity;
 import android.support.test.annotation.Beta;
 import android.support.test.espresso.intent.Intents;
-import android.support.test.rules.ActivityTestRule;
+import android.support.test.rule.ActivityTestRule;
 
 /**
  * This rule makes it easy to use Espresso-Intents APIs in functional UI tests. This class is an

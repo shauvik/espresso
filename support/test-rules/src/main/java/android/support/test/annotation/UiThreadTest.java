@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.support.test;
+package android.support.test.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -22,16 +22,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation should be used along with {@link android.support.test.rules.UiThreadTestRule} or
- * with any rule that inherits from it. When the annotation is present, the test method is executed
- * on the application's UI thread (or main thread).
+ * This annotation should be used along with {@link android.support.test.rule.UiThreadTestRule}
+ * or with any rule that inherits from it. When the annotation is present, the test method is
+ * executed on the application's UI thread (or main thread).
  * <p/>
  * Note, due to current JUnit limitation, methods annotated with {@link org.junit.Before} and
  * {@link org.junit.After} will also be executed on the UI Thread. Consider using
- * {@link android.support.test.rules.UiThreadTestRule#runTestOnUiThread(Runnable)} if this is an
+ * {@link android.support.test.rule.UiThreadTestRule#runTestOnUiThread(Runnable)} if this is an
  * issue.
  *
- * @see android.support.test.rules.UiThreadTestRule#runTestOnUiThread(Runnable)
+ * @see android.support.test.rule.UiThreadTestRule#runTestOnUiThread(Runnable)
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

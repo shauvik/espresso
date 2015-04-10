@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.support.test.internal.runner.junit4.statements;
+package android.support.test.internal.statement;
 
 import org.junit.runners.model.Statement;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.support.test.rules;
+package android.support.test.rule;
 
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -22,7 +22,6 @@ import org.junit.runners.model.Statement;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.test.annotation.Beta;
-import android.support.test.internal.runner.junit4.statements.UiThreadStatement;
 import android.util.Log;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
@@ -162,7 +161,8 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
     }
 
     /**
-     * {@link UiThreadStatement} that finishes the activity after the test was executed
+     * {@link org.junit.runners.model.Statement} that finishes the activity after the test was
+     * executed
      */
     private class ActivityStatement extends Statement {
 

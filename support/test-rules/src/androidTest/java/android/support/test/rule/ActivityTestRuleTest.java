@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.support.test.rules;
+package android.support.test.rule;
 
 import android.app.Activity;
 import android.support.test.runner.AndroidJUnit4;
