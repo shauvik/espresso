@@ -16,21 +16,28 @@
 
 package android.support.test.rule;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import android.app.Activity;
+import android.app.Instrumentation;
 import android.content.Intent;
+import android.support.annotation.Nullable;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.Beta;
+import android.support.test.annotation.VisibleForTesting;
 import android.util.Log;
 
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import static android.support.test.internal.util.Checks.checkNotNull;
 
 /**
  * This rule provides functional testing of a single activity. The activity under test will be
- * launched before each test annotated with {@link org.junit.Test} and before method annotated with
- * {@link org.junit.Before}. It will be terminated after the test is completed and method annotated
- * with {@link org.junit.After} is finished. During the duration of the test you will be able to
+ * launched before each test annotated with {@link Test} and before methods annotated with
+ * {@link Before}. It will be terminated after the test is completed and methods annotated
+ * with {@link After} are finished. During the duration of the test you will be able to
  * manipulate your Activity directly.
  *
  * @param <T> The activity to test
@@ -38,34 +45,59 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
 @Beta
 public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
 
-    private static final String LOG_TAG = "ActivityInstrumentationRule";
+    private static final String TAG = "ActivityInstrumentationRule";
 
-    private Class<T> mActivityClass;
+    private final Class<T> mActivityClass;
+
+    private Instrumentation mInstrumentation;
 
     private boolean mInitialTouchMode = false;
+
+    private boolean mLaunchActivity = false;
 
     private T mActivity;
 
     /**
-     * Creates an {@link ActivityTestRule}
+     * Similar to {@link #ActivityTestRule(Class, boolean, boolean)} but with "touch mode" disabled.
      *
-     * @param activityClass The activity to test. This must be a class in the instrumentation
-     *                      targetPackage specified in the AndroidManifest.xml
+     * @param activityClass    The activity under test. This must be a class in the instrumentation
+     *                         targetPackage specified in the AndroidManifest.xml
+     * @see ActivityTestRule#ActivityTestRule(Class, boolean, boolean)
      */
     public ActivityTestRule(Class<T> activityClass) {
         this(activityClass, false);
     }
 
     /**
-     * Creates an {@link ActivityTestRule}
+     * Similar to {@link #ActivityTestRule(Class, boolean, boolean)} but defaults to launch the
+     * activity under test once per {@link Test} method. It is launched before the first
+     * {@link Before} method, and terminated after the last {@link After} method.
      *
-     * @param activityClass    The activity to test. This must be a class in the instrumentation
+     * @param activityClass    The activity under test. This must be a class in the instrumentation
      *                         targetPackage specified in the AndroidManifest.xml
      * @param initialTouchMode true if the Activity should be placed into "touch mode" when started
+     * @see ActivityTestRule#ActivityTestRule(Class, boolean, boolean)
      */
     public ActivityTestRule(Class<T> activityClass, boolean initialTouchMode) {
+        this(activityClass, initialTouchMode, true);
+    }
+
+    /**
+     * Creates an {@link ActivityTestRule} for the Activity under test.
+     *
+     * @param activityClass    The activity under test. This must be a class in the instrumentation
+     *                         targetPackage specified in the AndroidManifest.xml
+     * @param initialTouchMode true if the Activity should be placed into "touch mode" when started
+     * @param launchActivity   true if the Activity should be launched once per {@link Test} method.
+     *                         It will be launched before the first {@link Before} method, and
+     *                         terminated after the last {@link After} method.
+     */
+    public ActivityTestRule(Class<T> activityClass, boolean initialTouchMode,
+            boolean launchActivity) {
         mActivityClass = activityClass;
         mInitialTouchMode = initialTouchMode;
+        mLaunchActivity = launchActivity;
+        mInstrumentation = InstrumentationRegistry.getInstrumentation();
     }
 
     /**
@@ -84,7 +116,7 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
     }
 
     /**
-     * Overwrite this method to execute any code that should run before your {@link Activity} is
+     * Override this method to execute any code that should run before your {@link Activity} is
      * created and launched.
      * This method is called before each test method, including any method annotated with
      * {@link @Before}.
@@ -94,7 +126,7 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
     }
 
     /**
-     * Overwrite this method to execute any code that should run after your {@link Activity} is
+     * Override this method to execute any code that should run after your {@link Activity} is
      * launched, but before any test code is run including any method annotated with {@link @Before}.
      * <p>
      * Prefer @Before over this method. This method should usually not be overwritten directly in
@@ -106,7 +138,7 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
     }
 
     /**
-     * Overwrite this method to execute any code that should run after your {@link Activity} is
+     * Override this method to execute any code that should run after your {@link Activity} is
      * finished.
      * This method is called after each test method, including any method annotated with
      * {@link @After}.
@@ -120,7 +152,7 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
      */
     public T getActivity() {
         if (mActivity == null) {
-            Log.w(LOG_TAG, "Activity wasn't created yet");
+            Log.w(TAG, "Activity wasn't created yet");
         }
         return mActivity;
     }
@@ -130,27 +162,60 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
         return new ActivityStatement(super.apply(base, description));
     }
 
-    T launchActivity() {
+    /**
+     * Launches the Activity under test.
+     * <p>
+     * Don't call this method directly, unless you explicitly requested not to launch the Activity
+     * manually using the launchActivity flag in
+     * {@link ActivityTestRule#ActivityTestRule(Class, boolean, boolean)}.
+     * <p>
+     * Usage:
+     * <pre>
+     *    &#064;Test
+     *    public void customIntentToStartActivity() {
+     *        Intent intent = new Intent(Intent.ACTION_PICK);
+     *        mActivity = mActivityRule.launchActivity(intent);
+     *    }
+     * </pre>
+     * @param startIntent The Intent that will be used to start the Activity under test. If
+     *                    {@code startIntent} is null, the Intent returned by
+     *                    {@link ActivityTestRule#getActivityIntent()} is used.
+     * @return the Activity launched by this rule.
+     * @see ActivityTestRule#getActivityIntent()
+     */
+    public T launchActivity(@Nullable Intent startIntent) {
         // set initial touch mode
-        getInstrumentation().setInTouchMode(mInitialTouchMode);
+        mInstrumentation.setInTouchMode(mInitialTouchMode);
 
-        final String targetPackage = getInstrumentation().getTargetContext().getPackageName();
+        final String targetPackage = mInstrumentation.getTargetContext().getPackageName();
         // inject custom intent, if provided
-        Intent intent = getActivityIntent();
-        if (intent == null) {
-            intent = new Intent(Intent.ACTION_MAIN);
+        if (null == startIntent) {
+            startIntent = getActivityIntent();
+            if (null == startIntent) {
+                Log.w(TAG, "getActivityIntent() returned null using default: " +
+                        "Intent(Intent.ACTION_MAIN)");
+                startIntent = new Intent(Intent.ACTION_MAIN);
+            }
         }
-        intent.setClassName(targetPackage, mActivityClass.getName());
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        Log.d(LOG_TAG, String.format("Launching activity %s",
+        startIntent.setClassName(targetPackage, mActivityClass.getName());
+        startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Log.d(TAG, String.format("Launching activity %s",
                 mActivityClass.getName()));
+
+        beforeActivityLaunched();
         // The following cast is correct because the activity we're creating is of the same type as
         // the one passed in
-        @SuppressWarnings("unchecked")
-        T activity = (T) getInstrumentation().startActivitySync(intent);
+        mActivity = mActivityClass.cast(mInstrumentation.startActivitySync(startIntent));
 
-        getInstrumentation().waitForIdleSync();
-        return activity;
+        mInstrumentation.waitForIdleSync();
+
+        afterActivityLaunched();
+        return mActivity;
+    }
+
+    @VisibleForTesting
+    void setInstrumentation(Instrumentation instrumentation) {
+        mInstrumentation = checkNotNull(instrumentation, "instrumentation cannot be null!");
     }
 
     void finishActivity() {
@@ -175,9 +240,9 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
         @Override
         public void evaluate() throws Throwable {
             try {
-                beforeActivityLaunched();
-                mActivity = launchActivity();
-                afterActivityLaunched();
+                if (mLaunchActivity) {
+                    mActivity = launchActivity(getActivityIntent());
+                }
                 mBase.evaluate();
             } finally {
                 finishActivity();
