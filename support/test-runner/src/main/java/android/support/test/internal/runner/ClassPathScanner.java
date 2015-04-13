@@ -16,6 +16,8 @@
 
 package android.support.test.internal.runner;
 
+import android.support.test.annotation.VisibleForTesting;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -189,12 +191,11 @@ class ClassPathScanner {
 
     /**
      * Retrieves the entry names from given {@link DexFile}.
-     * <p/>
-     * Exposed for unit testing.
      *
      * @param dexFile
      * @return {@link Enumeration} of {@link String}s
      */
+    @VisibleForTesting
     Enumeration<String> getDexEntries(DexFile dexFile) {
         return dexFile.entries();
     }
