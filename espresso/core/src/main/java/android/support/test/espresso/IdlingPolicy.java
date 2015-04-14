@@ -43,7 +43,7 @@ public final class IdlingPolicy {
   }
 
   /**
-   * The unit for {@linkgetIdleTimeout}.
+   * The unit for {@link #getIdleTimeout}.
    */
   public TimeUnit getIdleTimeoutUnit() {
     return unit;

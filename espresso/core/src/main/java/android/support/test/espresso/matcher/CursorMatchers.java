@@ -136,7 +136,7 @@ public final class CursorMatchers {
 
     /**
      * Allows test authors to override whether the the matcher should throw an
-     * {@link IllegaArgumentException} if the column name/count is not valid. This is useful in the
+     * {@link IllegalArgumentException} if the column name/count is not valid. This is useful in the
      * case where a cursor may iterates over a data set with variable columns. By default, the
      * checks are on.
      */

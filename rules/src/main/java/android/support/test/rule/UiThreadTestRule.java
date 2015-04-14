@@ -35,8 +35,10 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
  * This rule allows the test method annotated with {@link UiThreadTest} to execute on the
  * application's main thread (or UI thread).
  * <p/>
- * Note, methods annotated with {@link org.junit.Before} and {@link org.junit.After} will also be
- * executed on the UI thread.
+ * Note, methods annotated with
+ * <a href="http://junit.sourceforge.net/javadoc/org/junit/Before.html"><code>Before</code></a> and
+ * <a href="http://junit.sourceforge.net/javadoc/org/junit/After.html"><code>After</code></a> will
+ * also be executed on the UI thread.
  *
  * @see android.support.test.annotation.UiThreadTest
  */
@@ -58,7 +60,9 @@ public class UiThreadTestRule implements TestRule {
      * <p/>
      * Note, in most cases it is simpler to annotate the test method with
      * {@link UiThreadTest}, which will run the entire test method including methods annotated with
-     * {@link org.junit.Before} and {@link org.junit.After} on the UI thread.
+     * <a href="http://junit.sourceforge.net/javadoc/org/junit/Before.html"><code>Before</code></a>
+     * and <a href="http://junit.sourceforge.net/javadoc/org/junit/After.html">
+     * <code>After</code></a> on the UI thread.
      * <p/>
      * Use this method if you need to switch in and out of the UI thread to perform your test.
      *

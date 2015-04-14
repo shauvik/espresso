@@ -26,8 +26,10 @@ import java.lang.annotation.Target;
  * or with any rule that inherits from it. When the annotation is present, the test method is
  * executed on the application's UI thread (or main thread).
  * <p/>
- * Note, due to current JUnit limitation, methods annotated with {@link org.junit.Before} and
- * {@link org.junit.After} will also be executed on the UI Thread. Consider using
+ * Note, due to current JUnit limitation, methods annotated with
+ * <a href="http://junit.sourceforge.net/javadoc/org/junit/Before.html"><code>Before</code></a> and
+ * <a href="http://junit.sourceforge.net/javadoc/org/junit/After.html"><code>After</code></a> will
+ * also be executed on the UI Thread. Consider using
  * {@link android.support.test.rule.UiThreadTestRule#runOnUiThread(Runnable)} if this is an
  * issue.
  *

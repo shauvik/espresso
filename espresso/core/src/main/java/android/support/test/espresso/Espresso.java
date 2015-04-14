@@ -114,7 +114,7 @@ public final class Espresso {
    * with the application under test. When registering more than one resource, ensure that each has
    * a unique name. If any of the given resources is already registered, a warning is logged.
    *
-   * @return @{code true} if all resources were successfully registered
+   * @return {@code true} if all resources were successfully registered
    */
   public static boolean registerIdlingResources(IdlingResource... resources) {
     checkNotNull(resources);
@@ -126,7 +126,7 @@ public final class Espresso {
    * Unregisters one or more {@link IdlingResource}s. If any of the given resources are not already
    * registered, a warning is logged.
    *
-   * @return @{code true} if all resources were successfully unregistered
+   * @return {@code true} if all resources were successfully unregistered
    */
   public static boolean unregisterIdlingResources(IdlingResource... resources) {
     checkNotNull(resources);

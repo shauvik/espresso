@@ -25,7 +25,8 @@ import org.hamcrest.Matcher;
 
 /**
  * A sneaky singleton object used to respond to intents with fake responses.
- * This interface is not meant for public consumption. Test authors should use {@Intents} instead.
+ * This interface is not meant for public consumption. Test authors should use {@link Intents}
+ * instead.
  */
 public interface ResettingStubber extends IntentStubber {
 

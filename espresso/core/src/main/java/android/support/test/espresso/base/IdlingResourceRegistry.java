@@ -87,7 +87,7 @@ public final class IdlingResourceRegistry {
    * Registers the given resources. If any of the given resources are already
    * registered, a warning is logged.
    *
-   * @return @{code true} if all resources were successfully registered
+   * @return {@code true} if all resources were successfully registered
    */
   public boolean registerResources(final List<? extends IdlingResource> resourceList) {
     if (Looper.myLooper() != looper) {
@@ -133,7 +133,7 @@ public final class IdlingResourceRegistry {
    * Unregisters the given resources. If any of the given resources are not already
    * registered, a warning is logged.
    *
-   * @return @{code true} if all resources were successfully unregistered
+   * @return {@code true} if all resources were successfully unregistered
    */
   public boolean unregisterResources(final List<? extends IdlingResource> resourceList) {
     if (Looper.myLooper() != looper) {
