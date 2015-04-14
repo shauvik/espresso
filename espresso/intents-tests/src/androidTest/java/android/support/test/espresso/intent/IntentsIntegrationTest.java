@@ -51,6 +51,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.hasItem;
 
+import android.os.Build;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.filters.SdkSuppress;
 import android.support.test.runner.AndroidJUnit4;
@@ -147,13 +148,20 @@ public class IntentsIntegrationTest {
   @Test
   @SuppressWarnings("unchecked")
   public void intentScheme() {
+    String dialerPackage = "com.android.phone";
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      // Starting with Android Lollipop the dialer package has changed.
+      dialerPackage = "com.android.server.telecom";
+    }
+
     // Testing Scheme "tel:xxx-xxx-xxxx"
     onView(withId(R.id.send_data_to_call_edit_text))
         .perform(scrollTo(), typeText("123-345-6789"), closeSoftKeyboard());
     onView(withId(R.id.send_to_call_button)).perform(scrollTo(), click());
     intended(allOf(
                 hasAction(Intent.ACTION_CALL),
-                toPackage("com.android.phone"),
+                toPackage(dialerPackage),
                 hasData(allOf(hasSchemeSpecificPart("tel", "123-345-6789")))));
 
     // Testing Scheme "market://details?id=x"
