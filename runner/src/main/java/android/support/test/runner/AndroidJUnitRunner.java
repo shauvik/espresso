@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.app.Instrumentation;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.test.annotation.VisibleForTesting;
 import android.support.test.internal.runner.RunnerArgs;
 import android.support.test.internal.runner.TestExecutor;
 import android.support.test.internal.runner.TestRequest;
@@ -206,7 +205,7 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
         return mArguments;
     }
 
-    @VisibleForTesting
+    // Visible for testing
     InstrumentationResultPrinter getInstrumentationResultPrinter() {
         return mInstrumentationResultPrinter;
     }
@@ -304,7 +303,7 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
      * Builds a {@link TestRequest} based on given input arguments.
      * <p/>
      */
-    @VisibleForTesting
+    // Visible for testing
     TestRequest buildRequest(RunnerArgs runnerArgs, Bundle bundleArgs) {
 
         TestRequestBuilder builder = createTestRequestBuilder(this, bundleArgs);
@@ -333,7 +332,7 @@ public class AndroidJUnitRunner extends MonitoringInstrumentation {
     /**
      * Factory method for {@link TestRequestBuilder}.
      */
-    @VisibleForTesting
+    // Visible for testing
     TestRequestBuilder createTestRequestBuilder(Instrumentation instr, Bundle arguments) {
         return new TestRequestBuilder(instr, arguments);
     }

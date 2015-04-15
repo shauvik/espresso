@@ -16,8 +16,6 @@
 
 package android.support.test.internal.runner;
 
-import android.support.test.annotation.VisibleForTesting;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -195,7 +193,7 @@ class ClassPathScanner {
      * @param dexFile
      * @return {@link Enumeration} of {@link String}s
      */
-    @VisibleForTesting
+    // Visible for testing
     Enumeration<String> getDexEntries(DexFile dexFile) {
         return dexFile.entries();
     }

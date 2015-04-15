@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.Beta;
-import android.support.test.annotation.VisibleForTesting;
 import android.util.Log;
 
 import static android.support.test.internal.util.Checks.checkNotNull;
@@ -225,7 +224,7 @@ public class ActivityTestRule<T extends Activity> extends UiThreadTestRule {
         return mActivity;
     }
 
-    @VisibleForTesting
+    // Visible for testing
     void setInstrumentation(Instrumentation instrumentation) {
         mInstrumentation = checkNotNull(instrumentation, "instrumentation cannot be null!");
     }

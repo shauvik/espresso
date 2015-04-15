@@ -24,7 +24,6 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.Beta;
-import android.support.test.annotation.VisibleForTesting;
 import android.support.test.internal.util.Checks;
 import android.util.Log;
 
@@ -194,7 +193,7 @@ public class ServiceTestRule implements TestRule {
         return mIBinder;
     }
 
-    @VisibleForTesting
+    // Visible for testing
     boolean bindServiceAndWait(Intent intent, final ServiceConnection conn,
                                int flags) throws TimeoutException {
 
@@ -252,7 +251,7 @@ public class ServiceTestRule implements TestRule {
     /**
      * Helper method to block on a given latch for the duration of the set timeout
      */
-    @VisibleForTesting
+    // Visible for testing
     void waitOnLatch(CountDownLatch latch, String actionName) throws TimeoutException {
         try {
             if (!latch.await(mTimeout, mTimeUnit)) {
@@ -271,7 +270,7 @@ public class ServiceTestRule implements TestRule {
      * automatically called after test execution. This is not a blocking call since there is no
      * reliable way to guarantee successful disconnect without access to service lifecycle.
      */
-    @VisibleForTesting
+    // Visible for testing
     void shutdownService() throws TimeoutException {
         if (mServiceStarted) {
             InstrumentationRegistry.getTargetContext().stopService(mServiceIntent);

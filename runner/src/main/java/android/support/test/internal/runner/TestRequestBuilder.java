@@ -482,9 +482,8 @@ public class TestRequestBuilder {
 
     /**
      * Alternate TestRequestBuilder constructor that accepts a custom DeviceBuild
-     *
-     * VisibleForTesting
      */
+    // Visible For Testing
     TestRequestBuilder(DeviceBuild deviceBuildAccessor,Instrumentation instr, Bundle bundle) {
         mDeviceBuild = Checks.checkNotNull(deviceBuildAccessor);
         mTestLoader = new TestLoader();
