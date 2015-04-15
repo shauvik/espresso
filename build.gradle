@@ -28,7 +28,7 @@ repositories {
     maven { url "$rootDir/prebuilts/maven_repo/android" }
 }
 
-ext.extraVersion = 14
+ext.extraVersion = 13
 ext.supportRepoOut = ''
 ext.buildToolsVersion = '21.1.2'
 
