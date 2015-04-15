@@ -89,7 +89,7 @@ esac
 
 if [[ -z "$NUM_THREADS" ]]
 then
-    ( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ./gradlew --parallel $TASKS )
+    ( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ./gradlew --parallel --stacktrace $TASKS )
 else
-    ( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ./gradlew --parallel-threads $NUM_THREADS $TASKS )
+    ( set -x ; OUT_DIR="$OUT_DIR" DIST_DIR="$DIST_DIR" ./gradlew --parallel-threads $NUM_THREADS --stacktrace $TASKS )
 fi

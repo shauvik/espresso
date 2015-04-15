@@ -85,7 +85,7 @@ afterEvaluate {
                     description "Copies the release Jar to $project.distDir"
                     from packageReleaseJar.archivePath
                     into project.distDir
-                    rename(packageReleaseJar.archiveName, "${project.name}-${variant.name}-${project.version}.jar")
+                    rename(packageReleaseJar.archiveName, "${project.name}-${project.version}-${variant.name}.jar")
                 }
             }
         }
@@ -100,7 +100,7 @@ afterEvaluate {
                     description "Copies the release Apk to $project.distDir"
                     from variant.outputs[0].outputFile
                     into project.distDir
-                    rename(variant.outputs[0].outputFile.name, "${project.name}-${variant.name}-${project.version}.apk")
+                    rename(variant.outputs[0].outputFile.name, "${project.name}-${project.version}-${variant.name}.apk")
                 }
             }
         }
