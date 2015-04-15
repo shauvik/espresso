@@ -179,7 +179,7 @@ Set<Project> getProjectsToArchive() {
     }
     if (project.hasProperty("buildUiAutomator") && project.buildUiAutomator == "true") {
         projects.addAll(subprojects.findAll {
-            ['uiautomator-v18', 'uiautomator-testapp'].contains(it.name)
+            ['uiautomator-v18'].contains(it.name)
         })
     }
     return projects
