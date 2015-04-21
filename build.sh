@@ -54,6 +54,7 @@ support_test_all)
     --project-prop buildEspresso=true \
     --project-prop buildRunner=true \
     --project-prop buildUiAutomator=true \
+    --project-prop buildJankTestHelper=true \
     createArchive"
     ;;
 support_uiautomator)
@@ -72,6 +73,12 @@ support_test_lib)
     TASKS=" \
     --project-prop buildFromServer=true \
     --project-prop buildRunner=true \
+    createArchive"
+    ;;
+support_janktesthelper)
+    TASKS=" \
+    --project-prop buildFromServer=true \
+    --project-prop buildJankTestHelper=true \
     createArchive"
     ;;
 *)
