@@ -28,9 +28,9 @@ repositories {
     maven { url "$rootDir/prebuilts/maven_repo/android" }
 }
 
-ext.extraVersion = 13
+ext.extraVersion = 14
 ext.supportRepoOut = ''
-ext.buildToolsVersion = '21.1.2'
+ext.buildToolsVersion = '22.0.1'
 
 // define extra property to enforce the use of prebuilt dependencies in all sub-projects.
 project.ext.usePrebuilts = "true"

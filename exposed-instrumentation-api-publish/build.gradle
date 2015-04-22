@@ -16,7 +16,7 @@
 
 apply plugin: 'com.android.library'
 
-version = '0.2'
+version = '0.3'
 group = 'com.android.support.test'
 
 apply from: '../androidJar.gradle'
