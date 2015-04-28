@@ -722,6 +722,8 @@ public class TestRequestBuilder {
             filter.addAll(new ExcludePackageNameFilter("junit"),
                     new ExcludePackageNameFilter("org.junit"),
                     new ExcludePackageNameFilter("org.hamcrest"),
+                    // exclude Mockito to prevent JVM related errors and to improve performance
+                    new ExcludePackageNameFilter("org.mockito"),
                     // always skip AndroidTestSuite
                     new ExcludePackageNameFilter("android.support.test.internal.runner.junit3"));
         }

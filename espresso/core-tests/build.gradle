@@ -54,8 +54,6 @@ dependencies {
         androidTestCompile project(path: ':espresso-core', configuration: 'debug')
     }
 
-
-    androidTestCompile 'org.mockito:mockito-core:1.9.5'
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
 }
 
