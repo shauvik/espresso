@@ -30,6 +30,11 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
+    // temp workaround for gradle bug
+    aaptOptions {
+        useNewCruncher false
+    }
+
     sourceSets {
         // Setting espresso-sample as the main root of this project to avoid source code duplication.
         // Temporary workaround until Android Gradle plugin supports settings custom target package
@@ -50,3 +55,4 @@ dependencies {
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
 }
 
+apply from: "../../contTest.gradle"

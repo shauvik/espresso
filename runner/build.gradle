@@ -51,3 +51,4 @@ android {
 }
 
 apply from: "../publish.gradle"
+apply from: "../contTest.gradle"

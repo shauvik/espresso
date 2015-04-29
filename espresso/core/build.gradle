@@ -32,14 +32,6 @@ android {
         exclude 'LICENSE.txt'
     }
 
-    // to overwrite debug variant
-    if (project.hasProperty("buildFromServer") && project.buildFromServer == "true") {
-        println "Server build, publishing defaults only"
-        publishNonDefault false
-    } else {
-        publishNonDefault true
-    }
-
     // Required due to a conflict due to easy and jmock required for doclava
     packagingOptions {
         exclude 'META-INF/INDEX.LIST'
@@ -76,12 +68,6 @@ dependencies {
 }
 
 android.libraryVariants.all { variant ->
-
-    // To run unit tests against un-jarjar version of the lib.
-    if (variant.buildType.name.equals("debug")) {
-        println "Skipping debug build type."
-        return;
-    }
 
     // Get the original classes.jar output folder to place the final jarjar'd file in for the
     // aar generation to pick up.

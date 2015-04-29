@@ -29,6 +29,11 @@ android {
     defaultConfig {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
+    // temp workaround for gradle bug
+    aaptOptions {
+        useNewCruncher false
+    }
 }
 
 dependencies {
@@ -41,3 +46,4 @@ dependencies {
     androidTestCompile project(':espresso-intents')
 }
 
+apply from: "../../contTest.gradle"

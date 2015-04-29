@@ -81,15 +81,14 @@ afterEvaluate {
 
 
             Task copyLibBinaries =
-                project.tasks.create(name: "copy${variant.name.capitalize()}Binaries", type: Copy, dependsOn: variant.assemble) {
-                if (project.hasProperty("buildFromServer") &&
-                        rootProject.getProjectsToArchive().contains(project)) {
-                    description "Copies the release Jar to $project.distDir"
-                    from packageReleaseJar.archivePath
-                    into project.distDir
-                    rename(packageReleaseJar.archiveName, "${project.name}-${project.version}-${variant.name}-no-dep.jar")
-                }
-            }
+                    project.tasks.create(name: "copy${variant.name.capitalize()}Binaries", type: Copy, dependsOn: variant.assemble) {
+                        if (project.hasProperty("buildFromServer") && rootProject.getProjectsToArchive().contains(project)) {
+                            description "Copies the release Jar to $project.distDir"
+                            from packageReleaseJar.archivePath
+                            into project.distDir
+                            rename(packageReleaseJar.archiveName, "${project.name}-${project.version}-${variant.name}-no-dep.jar")
+                        }
+                    }
 
             Task uberJarTask =
                     project.tasks.create(name: "create${variant.name.capitalize()}JarWithDeps", type: Jar) {
@@ -141,8 +140,7 @@ afterEvaluate {
 
             Task copyApkBinaries =
                 project.tasks.create(name: "copy${variant.name.capitalize()}Binaries", type: Copy, dependsOn: variant.assemble) {
-                if (project.hasProperty("buildFromServer") &&
-                        rootProject.getProjectsToArchive().contains(project)) {
+                if (project.hasProperty("buildFromServer") && rootProject.getProjectsToArchive().contains(project)) {
                     description "Copies the release Apk to $project.distDir"
                     from variant.outputs[0].outputFile
                     into project.distDir
