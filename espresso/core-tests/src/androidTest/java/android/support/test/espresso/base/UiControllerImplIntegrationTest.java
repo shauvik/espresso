@@ -21,7 +21,6 @@ import android.support.test.espresso.UiController;
 import android.support.test.espresso.util.HumanReadables;
 import android.support.test.testapp.R;
 import android.support.test.testapp.SendActivity;
-import com.google.common.base.Optional;
 
 import android.app.Activity;
 import android.app.Instrumentation;
@@ -79,7 +78,7 @@ public class UiControllerImplIntegrationTest
         injector,
         new AsyncTaskPoolMonitor(new ThreadPoolExecutorExtractor(
             Looper.getMainLooper()).getAsyncTaskThreadPool()),
-        Optional.<AsyncTaskPoolMonitor>absent(),
+        null,
         new IdlingResourceRegistry(Looper.getMainLooper()),
         Looper.getMainLooper(),
         recycler);

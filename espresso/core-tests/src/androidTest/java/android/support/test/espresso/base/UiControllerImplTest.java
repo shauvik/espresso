@@ -17,7 +17,6 @@
 package android.support.test.espresso.base;
 
 import android.support.test.espresso.IdlingResourceTimeoutException;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import android.os.Build;
@@ -117,7 +116,7 @@ public class UiControllerImplTest extends TestCase {
     uiController.set(new UiControllerImpl(
         injector,
         new AsyncTaskPoolMonitor(asyncPool),
-        Optional.<AsyncTaskPoolMonitor>absent(),
+        null,
         idlingResourceRegistry,
         testThread.getLooper(),
         recycler

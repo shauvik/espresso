@@ -28,7 +28,6 @@ import android.support.test.espresso.UiController;
 import android.support.test.espresso.base.IdlingResourceRegistry.IdleNotificationCallback;
 import android.support.test.espresso.base.QueueInterrogator.QueueState;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import android.annotation.SuppressLint;
@@ -138,7 +137,7 @@ final class UiControllerImpl implements UiController, Handler.Callback {
   private final EventInjector eventInjector;
   private final BitSet conditionSet;
   private final AsyncTaskPoolMonitor asyncTaskMonitor;
-  private final Optional<AsyncTaskPoolMonitor> compatTaskMonitor;
+  private final AsyncTaskPoolMonitor compatTaskMonitor;
   private final IdlingResourceRegistry idlingResourceRegistry;
   private final ExecutorService keyEventExecutor = Executors.newSingleThreadExecutor();
   private final QueueInterrogator queueInterrogator;
@@ -154,13 +153,13 @@ final class UiControllerImpl implements UiController, Handler.Callback {
   @Inject
   UiControllerImpl(EventInjector eventInjector,
       @SdkAsyncTask AsyncTaskPoolMonitor asyncTaskMonitor,
-      @CompatAsyncTask Optional<AsyncTaskPoolMonitor> compatTaskMonitor,
+      @CompatAsyncTask AsyncTaskPoolMonitor compatTaskMonitor,
       IdlingResourceRegistry registry,
       Looper mainLooper,
       Recycler recycler) {
     this.eventInjector = checkNotNull(eventInjector);
     this.asyncTaskMonitor = checkNotNull(asyncTaskMonitor);
-    this.compatTaskMonitor = checkNotNull(compatTaskMonitor);
+    this.compatTaskMonitor = compatTaskMonitor;
     this.conditionSet = IdleCondition.createConditionSet();
     this.idlingResourceRegistry = checkNotNull(registry);
     this.mainLooper = checkNotNull(mainLooper);
@@ -327,8 +326,8 @@ final class UiControllerImpl implements UiController, Handler.Callback {
         condChecks.add(IdleCondition.ASYNC_TASKS_HAVE_IDLED);
       }
 
-      if (!compatIdle()) {
-        compatTaskMonitor.get().notifyWhenIdle(new SignalingTask<Void>(NO_OP,
+        if (!compatIdle()) {
+        compatTaskMonitor.notifyWhenIdle(new SignalingTask<Void>(NO_OP,
             IdleCondition.COMPAT_TASKS_HAVE_IDLED, generation));
         condChecks.add(IdleCondition.COMPAT_TASKS_HAVE_IDLED);
       }
@@ -362,8 +361,8 @@ final class UiControllerImpl implements UiController, Handler.Callback {
         loopUntil(condChecks);
       } finally {
         asyncTaskMonitor.cancelIdleMonitor();
-        if (compatTaskMonitor.isPresent()) {
-          compatTaskMonitor.get().cancelIdleMonitor();
+        if (null != compatTaskMonitor) {
+          compatTaskMonitor.cancelIdleMonitor();
         }
         idlingResourceRegistry.cancelIdleMonitor();
       }
@@ -373,8 +372,8 @@ final class UiControllerImpl implements UiController, Handler.Callback {
   }
 
   private boolean compatIdle() {
-    if (compatTaskMonitor.isPresent()) {
-      return compatTaskMonitor.get().isIdleNow();
+    if (null != compatTaskMonitor) {
+      return compatTaskMonitor.isIdleNow();
     } else {
       return true;
     }

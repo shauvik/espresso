@@ -70,13 +70,13 @@ public class BaseLayerModule {
   }
 
   @Provides @Singleton @CompatAsyncTask
-  public Optional<AsyncTaskPoolMonitor> provideCompatAsyncTaskMonitor(
+  public AsyncTaskPoolMonitor provideCompatAsyncTaskMonitor(
       ThreadPoolExecutorExtractor extractor) {
     Optional<ThreadPoolExecutor> compatThreadPool = extractor.getCompatAsyncTaskThreadPool();
     if (compatThreadPool.isPresent()) {
-      return Optional.of(new AsyncTaskPoolMonitor(compatThreadPool.get()));
+      return new AsyncTaskPoolMonitor(compatThreadPool.get());
     } else {
-      return Optional.<AsyncTaskPoolMonitor>absent();
+      return null;
     }
   }
 
