@@ -31,7 +31,7 @@ dependencies {
     compile 'com.android.support:support-annotations:22.0.0'
     androidTestCompile 'org.hamcrest:hamcrest-library:1.1'
     androidTestCompile 'org.hamcrest:hamcrest-integration:1.1'
-    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
+    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.2'
 }
 
 android {

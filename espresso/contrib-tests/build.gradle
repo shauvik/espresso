@@ -52,7 +52,7 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:22.0.0'
 
     androidTestCompile project(':espresso-contrib')
-    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
+    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.2'
 }
 
 apply from: "../../contTest.gradle"
