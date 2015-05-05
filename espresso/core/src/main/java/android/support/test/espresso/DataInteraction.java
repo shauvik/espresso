@@ -64,14 +64,14 @@ import org.hamcrest.TypeSafeMatcher;
  */
 public class DataInteraction {
 
-  private final Matcher<Object> dataMatcher;
+  private final Matcher<? extends Object> dataMatcher;
   private Matcher<View> adapterMatcher = isAssignableFrom(AdapterView.class);
   private Optional<Matcher<View>> childViewMatcher = Optional.absent();
   private Optional<Integer> atPosition = Optional.absent();
   private AdapterViewProtocol adapterViewProtocol = AdapterViewProtocols.standardProtocol();
   private Matcher<Root> rootMatcher = RootMatchers.DEFAULT;
 
-  DataInteraction(Matcher<Object> dataMatcher) {
+  DataInteraction(Matcher<? extends Object> dataMatcher) {
     this.dataMatcher = checkNotNull(dataMatcher);
   }
 
@@ -166,7 +166,7 @@ public class DataInteraction {
 
   private Matcher<View> displayingData(
       final Matcher<View> adapterMatcher,
-      final Matcher<Object> dataMatcher,
+      final Matcher<? extends Object> dataMatcher,
       final AdapterViewProtocol adapterViewProtocol,
       final AdapterDataLoaderAction adapterDataLoaderAction) {
     checkNotNull(adapterMatcher);

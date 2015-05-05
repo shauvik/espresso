@@ -33,6 +33,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.startsWith;
 
 import android.support.test.espresso.PerformException;
@@ -47,7 +48,6 @@ import android.view.View;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
 
 public abstract class RecyclerViewIntegrationTest extends
@@ -150,6 +150,7 @@ public abstract class RecyclerViewIntegrationTest extends
     try {
       onView(withId(R.id.rv_view_pager))
           .perform(scrollTo(hasDescendant(withText(targetViewText))));
+      fail("PerformException expected!");
     } catch (PerformException expected) {}
   }
 
@@ -378,7 +379,7 @@ public abstract class RecyclerViewIntegrationTest extends
   }
 
   private static class CustomViewHolderMatcher extends TypeSafeMatcher<RecyclerView.ViewHolder> {
-    private Matcher<View> itemMatcher = Matchers.anything();
+    private Matcher<View> itemMatcher = any(View.class);
 
     public CustomViewHolderMatcher() { }
 

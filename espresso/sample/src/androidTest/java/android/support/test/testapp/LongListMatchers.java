@@ -18,10 +18,8 @@ package android.support.test.testapp;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
 import android.support.test.espresso.matcher.BoundedMatcher;
@@ -121,9 +119,9 @@ public final class LongListMatchers {
    * Creates a matcher against the footer of this list view.
    */
   @SuppressWarnings("unchecked")
-  public static Matcher<Object> isFooter() {
+  public static Matcher<? extends Object> isFooter() {
     // This depends on LongListActivity.FOOTER being passed as data in the addFooterView method.
-    return allOf(is(instanceOf(String.class)), is(LongListActivity.FOOTER));
+    return is(LongListActivity.FOOTER);
   }
 
 }

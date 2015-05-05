@@ -18,7 +18,7 @@ package android.support.test.espresso.action;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getOnlyElement;
-import static org.hamcrest.Matchers.anything;
+import static org.hamcrest.Matchers.any;
 
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.runner.lifecycle.Stage;
@@ -54,7 +54,7 @@ public final class CloseKeyboardAction implements ViewAction {
   @SuppressWarnings("unchecked")
   @Override
   public Matcher<View> getConstraints() {
-    return anything();
+    return any(View.class);
   }
 
   @Override

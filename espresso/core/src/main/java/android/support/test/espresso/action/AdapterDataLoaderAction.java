@@ -44,15 +44,15 @@ import java.util.List;
  *
  */
 public final class AdapterDataLoaderAction implements ViewAction {
-  private final Matcher<Object> dataToLoadMatcher;
+  private final Matcher<? extends Object> dataToLoadMatcher;
   private final AdapterViewProtocol adapterViewProtocol;
   private final Optional<Integer> atPosition;
   private AdapterViewProtocol.AdaptedData adaptedData;
   private boolean performed = false;
   private final Object dataLock = new Object();
 
-  public AdapterDataLoaderAction(Matcher<Object> dataToLoadMatcher, Optional<Integer> atPosition,
-      AdapterViewProtocol adapterViewProtocol) {
+  public AdapterDataLoaderAction(Matcher<? extends Object> dataToLoadMatcher,
+      Optional<Integer> atPosition, AdapterViewProtocol adapterViewProtocol) {
     this.dataToLoadMatcher = checkNotNull(dataToLoadMatcher);
     this.atPosition = checkNotNull(atPosition);
     this.adapterViewProtocol = checkNotNull(adapterViewProtocol);

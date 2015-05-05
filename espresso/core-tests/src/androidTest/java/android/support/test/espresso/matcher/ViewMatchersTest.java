@@ -44,6 +44,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withTagValue;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 import android.support.test.espresso.matcher.ViewMatchers.Visibility;
 import android.support.test.testapp.test.R;
@@ -109,7 +110,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   public void testWithContentDescriptionCharSequence() {
     View view = new View(context);
     view.setContentDescription(null);
-    assertTrue(withContentDescription(Matchers.<CharSequence>nullValue()).matches(view));
+    assertTrue(withContentDescription(nullValue(CharSequence.class)).matches(view));
     CharSequence testText = "test text!";
     view.setContentDescription(testText);
     assertTrue(withContentDescription(is(testText)).matches(view));
@@ -138,7 +139,7 @@ public class ViewMatchersTest extends InstrumentationTestCase {
   public void testWithContentDescriptionString() {
     View view = new View(context);
     view.setContentDescription(null);
-    assertTrue(withContentDescription(Matchers.<String>nullValue()).matches(view));
+    assertTrue(withContentDescription(nullValue(String.class)).matches(view));
     String testText = "test text!";
     view.setContentDescription(testText);
     assertTrue(withContentDescription(is(testText)).matches(view));

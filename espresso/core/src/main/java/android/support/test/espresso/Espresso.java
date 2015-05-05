@@ -67,6 +67,7 @@ public final class Espresso {
    *
    * @see #onData(org.hamcrest.Matcher)
    */
+  // TODO change parameter to type to Matcher<? extends View> which currently causes Dagger issues
   public static ViewInteraction onView(final Matcher<View> viewMatcher) {
     return espressoGraph().plus(new ViewInteractionModule(viewMatcher)).get(ViewInteraction.class);
   }
@@ -79,7 +80,7 @@ public final class Espresso {
    *
    * @param dataMatcher a matcher used to find the data object.
    */
-  public static DataInteraction onData(Matcher<Object> dataMatcher) {
+  public static DataInteraction onData(Matcher<? extends Object> dataMatcher) {
     return new DataInteraction(dataMatcher);
   }
 

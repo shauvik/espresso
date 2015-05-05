@@ -20,6 +20,7 @@ import static com.google.common.base.Throwables.propagate;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -35,7 +36,6 @@ import android.test.AndroidTestCase;
 import android.view.View;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -53,7 +53,7 @@ public class ViewInteractionTest extends AndroidTestCase {
   @Mock
   private UiController mockUiController;
 
-  
+
   private FailureHandler failureHandler;
   private Executor testExecutor = MoreExecutors.sameThreadExecutor();
 
@@ -73,8 +73,8 @@ public class ViewInteractionTest extends AndroidTestCase {
     rootView = new View(getContext());
     targetView = new View(getContext());
     viewMatcher = is(targetView);
-    actionConstraint = Matchers.<View>notNullValue();
-    rootMatcherRef = new AtomicReference<Matcher<Root>>(RootMatchers.DEFAULT);
+    actionConstraint = notNullValue(View.class);
+    rootMatcherRef = new AtomicReference<>(RootMatchers.DEFAULT);
     when(mockAction.getDescription()).thenReturn("A Mock!");
     failureHandler = new FailureHandler() {
       @Override
@@ -173,7 +173,7 @@ public class ViewInteractionTest extends AndroidTestCase {
 
   public void testInRootUpdatesRef() {
     initInteraction();
-    Matcher<Root> testMatcher = nullValue();
+    Matcher<Root> testMatcher = nullValue(Root.class);
     testInteraction.inRoot(testMatcher);
     assertEquals(testMatcher, rootMatcherRef.get());
   }

@@ -17,6 +17,8 @@
 package android.support.test.espresso.base;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 
 import android.support.test.espresso.AmbiguousViewMatcherException;
@@ -28,8 +30,6 @@ import android.test.UiThreadTest;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import org.hamcrest.Matchers;
 
 import javax.inject.Provider;
 
@@ -85,7 +85,7 @@ public class ViewFinderImplTest extends InstrumentationTestCase {
 
   @UiThreadTest
   public void testGetView_missing() {
-    ViewFinder finder = new ViewFinderImpl(Matchers.<View>nullValue(), testViewProvider);
+    ViewFinder finder = new ViewFinderImpl(nullValue(View.class), testViewProvider);
     try {
       finder.getView();
       fail("No children should pass that matcher!");
@@ -94,7 +94,7 @@ public class ViewFinderImplTest extends InstrumentationTestCase {
 
   @UiThreadTest
   public void testGetView_multiple() {
-    ViewFinder finder = new ViewFinderImpl(Matchers.<View>notNullValue(), testViewProvider);
+    ViewFinder finder = new ViewFinderImpl(notNullValue(View.class), testViewProvider);
     try {
       finder.getView();
       fail("All nodes hit that matcher!");

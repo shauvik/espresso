@@ -19,12 +19,12 @@ package android.support.test.espresso;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 
 import android.test.AndroidTestCase;
 import android.view.View;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.hamcrest.StringDescription;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -40,7 +40,7 @@ public class NoMatchingViewExceptionTest extends AndroidTestCase {
   public void setUp() throws Exception {
     super.setUp();
     MockitoAnnotations.initMocks(this);
-    alwaysFailingMatcher = Matchers.<View>nullValue();
+    alwaysFailingMatcher = nullValue(View.class);
   }
 
   public void testExceptionContainsMatcherDescription() {

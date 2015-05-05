@@ -33,10 +33,6 @@ android {
 
 dependencies {
     compile project(':espresso-core')
-
-    compile 'org.hamcrest:hamcrest-library:1.1'
-    compile 'org.hamcrest:hamcrest-integration:1.1'
-    compile 'org.hamcrest:hamcrest-core:1.1'
 }
 
 apply from: "../../publish.gradle"
