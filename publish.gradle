@@ -84,7 +84,12 @@ afterEvaluate {
                     project.tasks.create(name: "copy${variant.name.capitalize()}Binaries", type: Copy, dependsOn: variant.assemble) {
                         if (project.hasProperty("buildFromServer") && rootProject.getProjectsToArchive().contains(project)) {
                             description "Copies the release Jar to $project.distDir"
-                            from packageReleaseJar.archivePath
+                            def classesJarLocation = packageReleaseJar.archivePath
+                            if (project.getName() == 'espresso-core' && variant.hasProperty("pathToFinalOutputJarDir")) {
+                                // Workaround to pick up the final classes.jar that includes jarjar'd libs
+                                classesJarLocation = "$variant.pathToFinalOutputJarDir/classes.jar"
+                            }
+                            from classesJarLocation
                             into project.distDir
                             rename(packageReleaseJar.archiveName, "${project.name}-${project.version}-${variant.name}-no-dep.jar")
                         }
@@ -99,8 +104,13 @@ afterEvaluate {
 
             Task collectClassPaths =
                     project.tasks.create(name: "collect${variant.name.capitalize()}ClassPaths", dependsOn: variant.assemble) << {
-
-                        uberJarTask.from(variant.javaCompile.destinationDir)
+                        printf "**copBin task: ${variant.javaCompile.destinationDir}\n"
+                        if (project.getName() == 'espresso-core' && variant.hasProperty("pathToFinalOutputJarDir")) {
+                            // Workaround to pick up the final classes.jar that includes jarjar'd libs
+                            uberJarTask.from(zipTree("$variant.pathToFinalOutputJarDir/classes.jar"))
+                        } else {
+                            uberJarTask.from(variant.javaCompile.destinationDir)
+                        }
 
                         // Add all dependencies except for android.jar to the fat jar
                         variant.variantData.variantDependency.packageConfiguration.collect { dep ->

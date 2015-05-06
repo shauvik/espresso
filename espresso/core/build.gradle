@@ -73,6 +73,7 @@ android.libraryVariants.all { variant ->
     // aar generation to pick up.
     Jar classesJarTask = (Jar) project.tasks.getByName("package${variant.name.capitalize()}Jar")
     def finalOutputJarDir = classesJarTask.destinationDir
+    variant.ext.pathToFinalOutputJarDir = finalOutputJarDir
 
     // Place the original classes.jar in a different folder to run jarjar on it.
     def tmpClassesJarDir = "$project.buildDir/pre-jarjar/$variant.dirName"
@@ -98,6 +99,8 @@ android.libraryVariants.all { variant ->
                         rule pattern: it[1], result: it[2]
                     }
                 }
+                // Set the destination dir of the packageJar task to it's original location
+                classesJarTask.destinationDir = finalOutputJarDir
             }
         }
     }
