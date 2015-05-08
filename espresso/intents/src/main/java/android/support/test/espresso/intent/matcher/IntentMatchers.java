@@ -85,7 +85,8 @@ public final class IntentMatchers {
     return hasCategories(equalTo((Iterable<String>) categories));
   }
 
-  public static Matcher<Intent> hasCategories(final Matcher<Iterable<String>> categoriesMatcher) {
+  public static Matcher<Intent> hasCategories(
+          final Matcher<? extends Iterable<? super String>> categoriesMatcher) {
     checkNotNull(categoriesMatcher);
     return new TypeSafeMatcher<Intent>() {
       @Override

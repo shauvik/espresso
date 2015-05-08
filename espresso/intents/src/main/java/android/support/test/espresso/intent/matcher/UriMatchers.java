@@ -18,8 +18,8 @@ package android.support.test.espresso.intent.matcher;
 
 import static android.support.test.espresso.intent.Checks.checkNotNull;
 import static android.support.test.espresso.intent.Checks.checkArgument;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
 
 import android.net.Uri;
 
@@ -76,7 +76,7 @@ public final class UriMatchers {
    * Returns a set of the unique names of all query parameters. Iterating over the set will return
    * the names in order of their first occurrence.
    *
-   * This method was added to Uri class in android api 11. So, for working with API level less
+   * <p>This method was added to Uri class in android api 11. So, for working with API level less
    * then that we had to re-implement it.
    *
    * @throws UnsupportedOperationException if this isn't a hierarchical URI
@@ -187,7 +187,7 @@ public final class UriMatchers {
     checkNotNull(paramName);
     checkNotNull(paramVal);
     final Matcher<QueryParamEntry> qpe = queryParamEntry(paramName, paramVal);
-    final Matcher<Iterable<QueryParamEntry>> matcherImpl = hasItem(qpe);
+    final Matcher<Iterable<? super QueryParamEntry>> matcherImpl = hasItem(qpe);
 
     return new TypeSafeMatcher<Uri>() {
 
@@ -212,7 +212,7 @@ public final class UriMatchers {
 
   private static Matcher<QueryParamEntry> queryParamEntry(
       final Matcher<String> paramName, final Matcher<String> paramVal) {
-    final Matcher<Iterable<String>> valMatcher = hasItem(paramVal);
+    final Matcher<Iterable<? super String>> valMatcher = hasItem(paramVal);
 
     return new TypeSafeMatcher<QueryParamEntry>(QueryParamEntry.class) {
 

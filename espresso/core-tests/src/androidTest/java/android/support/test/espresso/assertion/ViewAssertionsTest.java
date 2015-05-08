@@ -59,7 +59,7 @@ public class ViewAssertionsTest extends InstrumentationTestCase {
     absentException = null;
     alwaysAccepts = is(presentView);
     alwaysFails = not(is(presentView));
-    nullViewMatcher = nullValue();
+    nullViewMatcher = nullValue(View.class);
 
     presentException = new NoMatchingViewException.Builder()
         .withViewMatcher(alwaysFails)

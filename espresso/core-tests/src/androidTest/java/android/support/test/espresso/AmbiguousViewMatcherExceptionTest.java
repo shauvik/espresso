@@ -19,6 +19,7 @@ package android.support.test.espresso;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.notNullValue;
 
 import android.test.AndroidTestCase;
 import android.view.View;
@@ -26,7 +27,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.hamcrest.StringDescription;
 
 /** Unit tests for {@link AmbiguousViewMatcherException}. */
@@ -42,7 +42,7 @@ public class AmbiguousViewMatcherExceptionTest extends AndroidTestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    alwaysTrueMatcher = Matchers.<View>notNullValue();
+    alwaysTrueMatcher = notNullValue(View.class);
     testView = new RelativeLayout(getContext());
     child1 = new TextView(getContext());
     child1.setId(1);
