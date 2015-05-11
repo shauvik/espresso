@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,28 @@
  * limitations under the License.
  */
 
-apply plugin: 'com.android.library'
+package android.support.test.espresso.web.webdriver;
 
-sourceCompatibility = JavaVersion.VERSION_1_5
-targetCompatibility = JavaVersion.VERSION_1_5
+/**
+ * Valid WebDriver locator types.
+ */
+public enum Locator {
+    CLASS_NAME("className"),
+    CSS_SELECTOR("css"),
+    ID("id"),
+    LINK_TEXT("linkText"),
+    NAME("name"),
+    PARTIAL_LINK_TEXT("partialLinkText"),
+    TAG_NAME("tagName"),
+    XPATH("xpath");
 
-version = '2.2'
-group = 'com.android.support.test.espresso'
+    private final String type;
 
-android {
-
-    packagingOptions {
-        exclude 'LICENSE.txt'
+    Locator(String type) {
+      this.type = type;
     }
 
-    lintOptions {
-        abortOnError false
+    public String getType() {
+      return type;
     }
 }
-
-dependencies {
-    compile project(':espresso-core')
-    compile 'com.android.support:support-v4:'+supportLibVersion
-    compile 'com.android.support:recyclerview-v7:'+supportLibVersion
-}
-
-apply from: "../../publish.gradle"

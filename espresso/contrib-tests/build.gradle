@@ -47,9 +47,10 @@ android {
 
 dependencies {
     compile files('../libs/guava-14.0.1.jar')
-    compile 'com.android.support:support-v4:22.0.0'
-    compile 'com.android.support:appcompat-v7:22.0.0'
-    compile 'com.android.support:recyclerview-v7:22.0.0'
+    compile files('../libs/libnanohttpd.jar')
+    compile 'com.android.support:support-v4:'+supportLibVersion
+    compile 'com.android.support:appcompat-v7:'+supportLibVersion
+    compile 'com.android.support:recyclerview-v7:'+supportLibVersion
 
     androidTestCompile project(':espresso-contrib')
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.2'

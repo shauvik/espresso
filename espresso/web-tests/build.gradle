@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,22 +39,21 @@ android {
         // Setting espresso-sample as the main root of this project to avoid source code duplication.
         // Temporary workaround until Android Gradle plugin supports settings custom target package
         // for Android Tests (Bug: https://code.google.com/p/android/issues/detail?id=69211).
-        main.manifest.srcFile file("../sample/src/main/AndroidManifest.xml")
-        main.java.srcDirs = ['../sample/src/main/java']
-        main.res.srcDirs = ['../sample/src/main/res']
+        main.manifest.srcFile file('../../espresso/sample/src/main/AndroidManifest.xml')
+        main.java.srcDirs = ['../../espresso/sample/src/main/java']
+        main.res.srcDirs = ['../../espresso/sample/src/main/res']
+        main.assets.srcDirs = ['../../espresso/sample/src/main/assets']
     }
 }
 
 dependencies {
     compile files('../libs/guava-14.0.1.jar')
-    compile files('../libs/dagger-1.2.1.jar')
-    compile files('../libs/libnanohttpd.jar')
+    compile files('../libs/libnanohttpd.jar') // TODO Pull this into prebuilds
     compile 'com.android.support:support-v4:'+supportLibVersion
     compile 'com.android.support:appcompat-v7:'+supportLibVersion
     compile 'com.android.support:recyclerview-v7:'+supportLibVersion
 
-    androidTestCompile project(path: ':espresso-core')
-    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.2'
+    androidTestCompile project(':espresso-web')
 }
 
 apply from: "../../contTest.gradle"

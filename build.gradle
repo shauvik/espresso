@@ -31,6 +31,7 @@ repositories {
 ext.extraVersion = 14
 ext.supportRepoOut = ''
 ext.buildToolsVersion = '22.0.1'
+ext.supportLibVersion = '22.1.0'
 
 // define extra property to enforce the use of prebuilt dependencies in all sub-projects.
 project.ext.usePrebuilts = "true"
@@ -169,7 +170,8 @@ Set<Project> getProjectsToArchive() {
     def projects = [] as Set
     if (project.hasProperty("buildEspresso") && project.buildEspresso == "true") {
         projects.addAll(subprojects.findAll {
-            ['espresso-core', 'espresso-contrib', 'espresso-idling-resource', 'espresso-intents'].contains(it.name)
+            ['espresso-core', 'espresso-contrib', 'espresso-idling-resource', 'espresso-intents',
+             'espresso-web'].contains(it.name)
         })
     }
     if (project.hasProperty("buildRunner") && project.buildRunner == "true") {

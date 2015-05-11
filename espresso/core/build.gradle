@@ -66,47 +66,9 @@ dependencies {
     provided files("../libs/jmock-1.1.0.jar") // TODO add to prebuilts
 }
 
-android.libraryVariants.all { variant ->
-
-    // Get the original classes.jar output folder to place the final jarjar'd file in for the
-    // aar generation to pick up.
-    Jar classesJarTask = (Jar) project.tasks.getByName("package${variant.name.capitalize()}Jar")
-    def finalOutputJarDir = classesJarTask.destinationDir
-    variant.ext.pathToFinalOutputJarDir = finalOutputJarDir
-
-    // Place the original classes.jar in a different folder to run jarjar on it.
-    def tmpClassesJarDir = "$project.buildDir/pre-jarjar/$variant.dirName"
-    classesJarTask.destinationDir = project.file("$tmpClassesJarDir")
-
-    def classesJar = "$finalOutputJarDir/classes.jar"
-    def tmpClassesJar = "$tmpClassesJarDir/classes.jar"
-
-    def depDaggerJar = "../libs/dagger-1.2.1.jar"
-    def depGuavaJar = "../libs/guava-14.0.1.jar"
-    def jarJarTaskName = "jarJar${variant.name.capitalize()}"
-
-    task "$jarJarTaskName" << {
-        project.ant {
-            taskdef name: "jarjar", classname: "com.tonicsystems.jarjar.JarJarTask",
-                    classpath: configurations.jarjar.asPath
-            jarjar(jarfile: "$classesJar", filesetmanifest: "merge") {
-                zipfileset(src: "$depGuavaJar")
-                zipfileset(src: "$depDaggerJar")
-                zipfileset(src: "$tmpClassesJar")
-                file('jarjar-rules.txt').splitEachLine('\\s+') {
-                    if (it[0] == 'rule') {
-                        rule pattern: it[1], result: it[2]
-                    }
-                }
-                // Set the destination dir of the packageJar task to it's original location
-                classesJarTask.destinationDir = finalOutputJarDir
-            }
-        }
-    }
-
-    // Fix the dependency chain so the output jars will be available at the right time.
-    project.tasks.getByName("$jarJarTaskName").dependsOn classesJarTask, configurations.provided
-    variant.outputs.get(0).packageLibrary.dependsOn "$jarJarTaskName"
-}
+// Run JarJar to hide Dagger and Guava deps
+ext.jarjarDeps = ["../libs/dagger-1.2.1.jar", "../libs/guava-14.0.1.jar"] as Set
+ext.jarjarRulesFile = file('jarjar-rules.txt')
+apply from: "../../jarjar.gradle" // TODO run this through pro-guard first!
 
 apply from: "../../publish.gradle"

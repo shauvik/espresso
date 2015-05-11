@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,38 @@
 
 apply plugin: 'com.android.library'
 
-sourceCompatibility = JavaVersion.VERSION_1_5
-targetCompatibility = JavaVersion.VERSION_1_5
-
 version = '2.2'
 group = 'com.android.support.test.espresso'
 
 android {
 
+    lintOptions {
+        abortOnError false
+    }
+
     packagingOptions {
         exclude 'LICENSE.txt'
     }
 
-    lintOptions {
-        abortOnError false
-    }
+}
+
+// Create separate scope for jarjar
+configurations {
+    jarjar
 }
 
 dependencies {
     compile project(':espresso-core')
-    compile 'com.android.support:support-v4:'+supportLibVersion
-    compile 'com.android.support:recyclerview-v7:'+supportLibVersion
+    compile files ('../libs/tagsoup-1.2.jar') // TODO Pull this into prebuilds
+    provided files('../libs/guava-14.0.1.jar')
+    compile 'com.android.support:support-annotations:'+supportLibVersion
+
+    jarjar files('../libs/jarjar-1.4.jar')
 }
+
+// Run JarJar to hide and Guava deps
+ext.jarjarDeps = ["../libs/guava-14.0.1.jar"] as Set
+ext.jarjarRulesFile = file('jarjar-rules.txt')
+apply from: "../../jarjar.gradle" // TODO run this through pro-guard first!
 
 apply from: "../../publish.gradle"

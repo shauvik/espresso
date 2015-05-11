@@ -59,7 +59,9 @@
         <activity android:name="LayoutIssuesActivity" android:label="layout issues activity"/>
         <activity android:name="ToolbarActivity" android:label="tool bar activity" android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity android:name="TaskStackActivity" android:label="task stack activity"/>
+        <activity android:name="DynamicWebViewActivity" android:label="browse the assets" android:windowSoftInputMode="adjustPan"/>
     </application>
 
     <uses-permission android:name="android.permission.CALL_PHONE"></uses-permission>
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
 </manifest>

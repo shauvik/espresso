@@ -34,16 +34,24 @@ android {
     aaptOptions {
         useNewCruncher false
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_5
+        targetCompatibility JavaVersion.VERSION_1_5
+    }
 }
 
 dependencies {
     compile files('../libs/guava-14.0.1.jar')
-    compile 'com.android.support:support-v4:22.0.0'
-    compile 'com.android.support:appcompat-v7:22.0.0'
-    compile 'com.android.support:recyclerview-v7:22.0.0'
+    compile files('../libs/libnanohttpd.jar') // TODO Pull this into prebuilds
+    compile 'com.android.support:support-v4:'+supportLibVersion
+    compile 'com.android.support:appcompat-v7:'+supportLibVersion
+    compile 'com.android.support:recyclerview-v7:'+supportLibVersion
+
     compile project(':espresso-idling-resource')
     androidTestCompile project(':espresso-contrib')
     androidTestCompile project(':espresso-intents')
+    androidTestCompile project(':espresso-web')
 }
 
 apply from: "../../contTest.gradle"

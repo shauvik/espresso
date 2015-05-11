@@ -27,6 +27,11 @@ project(':espresso-sample').projectDir = new File(rootDir, 'frameworks/testing/e
 include(':espresso-idling-resource')
 project(':espresso-idling-resource').projectDir = new File(rootDir, 'frameworks/testing/espresso/idling-resource')
 
+include(':espresso-web')
+project(':espresso-web').projectDir = new File(rootDir, 'frameworks/testing/espresso/web')
+include(':espresso-web-tests')
+project(':espresso-web-tests').projectDir = new File(rootDir, 'frameworks/testing/espresso/web-tests')
+
 include(':espresso-intents')
 project(':espresso-intents').projectDir = new File(rootDir, 'frameworks/testing/espresso/intents')
 include(':espresso-intents-tests')
