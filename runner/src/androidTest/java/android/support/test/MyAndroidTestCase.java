@@ -17,11 +17,13 @@ package android.support.test;
 
 import android.content.Context;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 /**
  * Placeholder test to verify {@link Context} gets injected to {@link AndroidTestCase}.
  */
+@SmallTest
 public class MyAndroidTestCase extends AndroidTestCase {
 
     // rely on testCaseSetupProperly to test for context

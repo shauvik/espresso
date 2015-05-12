@@ -17,12 +17,14 @@ package android.support.test;
 
 import android.app.Instrumentation;
 import android.test.InstrumentationTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 /**
  * Placeholder test to verify {@link Instrumentation} gets injected to
  * {@link InstrumentationTestCase}.
  */
+@SmallTest
 public class MyInstrumentationTestCase extends InstrumentationTestCase {
 
     public MyInstrumentationTestCase() {

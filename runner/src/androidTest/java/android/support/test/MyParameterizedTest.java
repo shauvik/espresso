@@ -16,6 +16,7 @@
 package android.support.test;
 
 import android.app.Instrumentation;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,26 +31,35 @@ import java.util.Collection;
  * Placeholder to verify {@link Instrumentation} can be injected into {@link Parameterized} tests
  */
 @RunWith(Parameterized.class)
+@SmallTest
 public class MyParameterizedTest {
 
-    @Parameters
+    @Parameters(name = "{index}: fib({0})={1}")
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-                { 0, 0 }, { 1, 1 }
+        return Arrays.asList(new Object[][]{
+                {0, 0}, {1, 1}, {2, 1}, {3, 2}, {4, 3}, {5, 5}, {6, 8}
         });
     }
 
     private final int mInput;
     private final int mExpected;
 
-    public MyParameterizedTest(int i, int b) {
-        mInput = i;
-        mExpected = b;
+    public MyParameterizedTest(int input, int expected) {
+        mInput = input;
+        mExpected = expected;
     }
 
     @Test
-    public void testFoo() {
-        Assert.assertEquals(mInput, mExpected);
+    public void testFib() {
+        Assert.assertEquals(mExpected, fibonacci(mInput));
+        // verify Instrumentation was injected in a Parameterized test
         Assert.assertNotNull(InstrumentationRegistry.getInstrumentation());
+    }
+
+    private int fibonacci(int n) {
+        if (n == 0 || n == 1)
+            return n;
+        else
+            return fibonacci(n - 1) + fibonacci(n - 2);
     }
 }

@@ -19,12 +19,14 @@ package android.support.test.runner.listener;
 
 import android.os.Bundle;
 import android.support.test.internal.runner.listener.InstrumentationResultPrinter;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
 import org.junit.runner.Description;
 
+@SmallTest
 public class InstrumentationResultPrinterTest {
 
     /**

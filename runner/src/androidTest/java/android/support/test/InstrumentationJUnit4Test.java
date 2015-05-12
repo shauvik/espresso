@@ -15,6 +15,7 @@
  */
 package android.support.test;
 
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import junit.framework.Assert;
@@ -24,6 +25,7 @@ import org.junit.Test;
 /**
  * Placeholder test to verify {@link InstrumentationRegistry#getInstrumentation()}.
  */
+@SmallTest
 public class InstrumentationJUnit4Test {
 
     public InstrumentationJUnit4Test() {

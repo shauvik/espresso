@@ -16,6 +16,8 @@ package android.support.test;
  */
 
 
+import android.test.suitebuilder.annotation.SmallTest;
+
 import junit.framework.TestCase;
 
 /**
@@ -24,6 +26,7 @@ import junit.framework.TestCase;
  * Intended to ensure test objects references are not retained by runner (unlike upstream junit3),
  * and can get garbage collected.
  */
+@SmallTest
 public class JUnit3HogTest extends TestCase {
 
     @SuppressWarnings("unused")

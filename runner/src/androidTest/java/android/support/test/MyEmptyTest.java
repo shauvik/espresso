@@ -15,6 +15,7 @@
  */
 package android.support.test;
 
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import junit.framework.TestCase;
@@ -22,6 +23,7 @@ import junit.framework.TestCase;
 /**
  * Placeholder test to verify empty TestCase's are skipped
  */
+@SmallTest
 public class MyEmptyTest extends TestCase {
 
     public MyEmptyTest() {
