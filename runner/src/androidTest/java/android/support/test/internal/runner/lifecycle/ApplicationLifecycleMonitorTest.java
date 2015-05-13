@@ -1,6 +1,7 @@
 package android.support.test.internal.runner.lifecycle;
 
 import android.support.test.runner.lifecycle.ApplicationStage;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Pair;
 
 import org.junit.Test;
@@ -10,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Simple test to check that registered ApplicationLifecycleCallbacks are performed
  */
+@SmallTest
 public class ApplicationLifecycleMonitorTest {
 
     @Test

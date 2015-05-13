@@ -15,6 +15,8 @@
  */
 package android.support.test.internal.runner.listener;
 
+import android.test.suitebuilder.annotation.SmallTest;
+
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunListener;
 
@@ -23,6 +25,7 @@ import org.junit.runner.notification.RunListener;
  * <code>RunListener</code></a> fixture used to ensure listener classes specified via meta-data
  * tags in AndroidManifest are loaded and used properly.
  */
+@SmallTest
 public class ManifestListener extends RunListener {
 
     private static boolean sRunStarted = false;

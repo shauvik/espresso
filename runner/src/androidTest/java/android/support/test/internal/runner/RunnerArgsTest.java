@@ -16,16 +16,11 @@
 package android.support.test.internal.runner;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.support.test.runner.AndroidJUnitRunner;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.junit.runner.Runner;
-import org.mockito.Mockito;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -33,13 +28,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 /**
  * Unit tests for {@link android.support.test.internal.runner.RunnerArgs}.
  */
+@SmallTest
 public class RunnerArgsTest {
 
     /**
@@ -83,7 +79,7 @@ public class RunnerArgsTest {
     }
 
     /**
-     * Test {@link android.support.test.runner.AndroidJUnitRunner#buildRequest(android.os.Bundle, java.io.PrintStream)} when
+     * Test {@link android.support.test.internal.runner.RunnerArgs.Builder#fromBundle(Bundle)} when
      * class name and method name is provided along with an additional class name.
      */
     @Test

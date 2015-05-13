@@ -2,6 +2,7 @@ package android.support.test.internal.runner;
 
 import android.os.Bundle;
 import android.support.test.internal.runner.listener.InstrumentationRunListener;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +18,7 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
 /**
  * Unit tests for TestExecutor
  */
+@SmallTest
 public class TestExecutorTest {
 
     @Mock

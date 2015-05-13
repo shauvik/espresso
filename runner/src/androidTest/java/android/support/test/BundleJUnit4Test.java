@@ -16,6 +16,7 @@
 package android.support.test;
 
 import android.support.test.runner.AndroidJUnit4;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import junit.framework.Assert;
@@ -27,6 +28,7 @@ import org.junit.runner.RunWith;
  * Placeholder test to verify {@link InstrumentationRegistry#getArguments()}.
  */
 @RunWith(AndroidJUnit4.class)
+@SmallTest
 public class BundleJUnit4Test {
 
     public BundleJUnit4Test() {

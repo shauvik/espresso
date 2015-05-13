@@ -4,6 +4,7 @@ import android.app.Application;
 import android.support.test.MyApplication;
 import android.support.test.runner.lifecycle.ApplicationLifecycleCallback;
 import android.support.test.runner.lifecycle.ApplicationStage;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Pair;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.List;
  * A {@link ApplicationLifecycleCallback} fixture used to ensure ApplicationLifecycleCallback
  * callbacks happen appropriately
  */
+@SmallTest
 public class AppLifecycleListener implements ApplicationLifecycleCallback {
 
     /**

@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.test.internal.runner.listener.InstrumentationResultPrinter;
+import android.test.suitebuilder.annotation.MediumTest;
 
 import junit.framework.Assert;
 
@@ -35,6 +36,7 @@ import java.io.PrintStream;
 /**
  * Unit tests for {@link AndroidJUnitRunner}.
  */
+@MediumTest
 public class AndroidJUnitRunnerTest {
     public static final int SLEEP_TIME = 300;
 
