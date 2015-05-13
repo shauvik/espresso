@@ -86,7 +86,7 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
     /**
      * The test completed with an error.
      *
-     * @deprecated  not supported in JUnit4, use REPORT_VALUE_RESULT_FAILURE instead
+     * @deprecated not supported in JUnit4, use REPORT_VALUE_RESULT_FAILURE instead
      */
     @Deprecated
     public static final int REPORT_VALUE_RESULT_ERROR = -1;
@@ -114,7 +114,7 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
     private Result mJUnitResult = null;
     Bundle mTestResult;
     int mTestNum = 0;
-    int mTestResultCode = 0;
+    int mTestResultCode = -999;
     String mTestClass = null;
     private Description mDescription = Description.EMPTY;
 
@@ -130,7 +130,7 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
 
     @Override
     public void testRunFinished(Result result) throws Exception {
-       mJUnitResult = result;
+        mJUnitResult = result;
     }
 
     /**
@@ -176,7 +176,7 @@ public class InstrumentationResultPrinter extends InstrumentationRunListener {
     @Override
     public void testAssumptionFailure(Failure failure) {
         mTestResultCode = REPORT_VALUE_RESULT_ASSUMPTION_FAILURE;
-        reportFailure(failure);
+        mTestResult.putString(REPORT_KEY_STACK, failure.getTrace());
     }
 
     private void reportFailure(Failure failure) {
