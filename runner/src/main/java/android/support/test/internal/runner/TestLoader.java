@@ -38,6 +38,17 @@ public final class TestLoader {
     private Map<String, Class<?>> mLoadedClassesMap = new LinkedHashMap<String, Class<?>>();
     private Map<String, Failure> mLoadFailuresMap = new LinkedHashMap<String, Failure>();
 
+    private ClassLoader mClassLoader;
+
+    /**
+     * Set the {@link ClassLoader} to be used to load test cases.
+     *
+     * @param loader {@link ClassLoader} to load test cases with.
+     */
+    public void setClassLoader(ClassLoader loader) {
+        mClassLoader = loader;
+    }
+
     /**
      * Loads the test class from a given class name if its not already loaded.
      * <p/>
@@ -50,9 +61,23 @@ public final class TestLoader {
     public Class<?> loadClass(String className) {
         Class<?> loadedClass = doLoadClass(className);
         if (loadedClass != null) {
+            ClassLoader loader = loadedClass.getClassLoader();
+            Method[] methods = loadedClass.getDeclaredMethods();
             mLoadedClassesMap.put(className, loadedClass);
         }
         return loadedClass;
+    }
+
+    protected ClassLoader getClassLoader() {
+        if (mClassLoader != null) {
+            return mClassLoader;
+        }
+
+        // TODO: InstrumentationTestRunner uses
+        // Class.forName(className, false, getTargetContext().getClassLoader());
+        // Evaluate if that is needed. Initial testing indicates
+        // getTargetContext().getClassLoader() == this.getClass().getClassLoader()
+        return this.getClass().getClassLoader();
     }
 
     private Class<?> doLoadClass(String className) {
@@ -65,11 +90,7 @@ public final class TestLoader {
         }
 
         try {
-            // TODO: InstrumentationTestRunner uses
-            // Class.forName(className, false, getTargetContext().getClassLoader());
-            // Evaluate if that is needed. Initial testing indicates
-            // getTargetContext().getClassLoader() == this.getClass().getClassLoader()
-            ClassLoader myClassLoader = this.getClass().getClassLoader();
+            ClassLoader myClassLoader = getClassLoader();
             return Class.forName(className, false, myClassLoader);
         } catch (ClassNotFoundException e) {
             String errMsg = String.format("Could not find class: %s", className);

@@ -503,6 +503,16 @@ public class TestRequestBuilder {
     }
 
     /**
+     * Set the {@link ClassLoader} to be used to load test cases.
+     *
+     * @param loader {@link ClassLoader} to load test cases with.
+     */
+    public TestRequestBuilder setClassLoader(ClassLoader loader) {
+        mTestLoader.setClassLoader(loader);
+        return this;
+    }
+
+    /**
      * Add a test class to be executed. All test methods in this class will be executed.
      *
      * @param className
