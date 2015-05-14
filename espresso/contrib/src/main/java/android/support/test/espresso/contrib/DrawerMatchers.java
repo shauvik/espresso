@@ -35,40 +35,54 @@ public final class DrawerMatchers {
   }
 
   /**
-   * Returns a matcher that verifies that the drawer is open. Matches only when the drawer is fully
-   * open. Use {@link #isClosed()} instead of {@code not(isOpen())} when you wish to check that the
-   * drawer is fully closed.
+   * Returns a matcher that verifies that the drawer with the specified gravity is open. Matches
+   * only when the drawer is fully open. Use {@link #isClosed(int)} instead of {@code
+   * not(isOpen())} when you wish to check that the drawer is fully closed.
    */
-  public static Matcher<View> isOpen() {
+  public static Matcher<View> isOpen(final int gravity) {
     return new BoundedMatcher<View, DrawerLayout>(DrawerLayout.class) {
-      @Override
-      public void describeTo(Description description) {
+      @Override public void describeTo(Description description) {
         description.appendText("is drawer open");
       }
 
-      @Override
-      public boolean matchesSafely(DrawerLayout drawer) {
-        return drawer.isDrawerOpen(GravityCompat.START);
+      @Override public boolean matchesSafely(DrawerLayout drawer) {
+        return drawer.isDrawerOpen(gravity);
       }
     };
   }
 
   /**
-   * Returns a matcher that verifies that the drawer is closed. Matches only when the drawer is
-   * fully closed. Use {@link #isOpen()} instead of {@code not(isClosed()))} when you wish to check
-   * that the drawer is fully open.
+   * Returns a matcher that verifies that the drawer (with gravity START) is open. Matches only
+   * when the drawer is fully open. Use {@link #isClosed()} instead of {@code not(isOpen())} when
+   * you wish to check that the drawer is fully closed.
    */
-  public static Matcher<View> isClosed() {
+  public static Matcher<View> isOpen() {
+    return isOpen(GravityCompat.START);
+  }
+
+  /**
+   * Returns a matcher that verifies that the drawer with the specified gravity is closed. Matches
+   * only when the drawer is fully closed. Use {@link #isOpen(int)} instead of {@code
+   * not(isClosed()))} when you wish to check that the drawer is fully open.
+   */
+  public static Matcher<View> isClosed(final int gravity) {
     return new BoundedMatcher<View, DrawerLayout>(DrawerLayout.class) {
-      @Override
-      public void describeTo(Description description) {
+      @Override public void describeTo(Description description) {
         description.appendText("is drawer closed");
       }
 
-      @Override
-      public boolean matchesSafely(DrawerLayout drawer) {
-        return !drawer.isDrawerVisible(GravityCompat.START);
+      @Override public boolean matchesSafely(DrawerLayout drawer) {
+        return !drawer.isDrawerVisible(gravity);
       }
     };
+  }
+
+  /**
+   * Returns a matcher that verifies that the drawer (with gravity START) is closed. Matches only
+   * when the drawer is fully closed. Use {@link #isOpen()} instead of {@code not(isClosed()))}
+   * when you wish to check that the drawer is fully open.
+   */
+  public static Matcher<View> isClosed() {
+    return isClosed(GravityCompat.START);
   }
 }
