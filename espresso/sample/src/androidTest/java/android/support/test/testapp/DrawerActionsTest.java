@@ -39,7 +39,7 @@ import android.test.suitebuilder.annotation.LargeTest;
  * Demonstrates use of {@link DrawerActions}.
  */
 @LargeTest
-public class DrawerActionsTest  extends ActivityInstrumentationTestCase2<DrawerActivity> {
+public class DrawerActionsTest extends ActivityInstrumentationTestCase2<DrawerActivity> {
 
   public DrawerActionsTest() {
     super(DrawerActivity.class);
@@ -66,7 +66,6 @@ public class DrawerActionsTest  extends ActivityInstrumentationTestCase2<DrawerA
     onView(withId(R.id.drawer_layout)).check(matches(isClosed()));
   }
 
-  @SuppressWarnings("unchecked")
   public void testDrawerOpenAndClick() {
     openDrawer(R.id.drawer_layout);
 
