@@ -19,5 +19,11 @@ apply plugin: 'com.android.library'
 version = '0.2'
 group = 'com.android.support.test'
 
+android {
+  lintOptions {
+    abortOnError false
+  }
+}
+
 apply from: '../androidJar.gradle'
 apply from: '../publish.gradle'
