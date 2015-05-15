@@ -55,31 +55,50 @@ public final class DrawerActions {
   private static Field listenerField;
 
   /**
-   * Opens the {@link DrawerLayout} with the given id. This method blocks until the drawer is fully
-   * open. No operation if the drawer is already open.
+   * Opens the {@link DrawerLayout} with the given id and gravity START. This method blocks until
+   * the drawer is fully open. No operation if the drawer is already open.
    */
   public static void openDrawer(int drawerLayoutId) {
+    openDrawer(drawerLayoutId, GravityCompat.START);
+  }
+
+  /**
+   * Opens the {@link DrawerLayout} with the given id and gravity. This method blocks until the
+   * drawer is fully open. No operation if the drawer is already open.
+   */
+  public static void openDrawer(int drawerLayoutId, int gravity) {
     //if the drawer is already open, return.
     if (checkDrawer(drawerLayoutId, isOpen())) {
       return;
     }
-    onView(withId(drawerLayoutId)).perform(registerListener());
-    onView(withId(drawerLayoutId)).perform(actionOpenDrawer());
-    onView(withId(drawerLayoutId)).perform(unregisterListener());
+    onView(withId(drawerLayoutId))
+        .perform(registerListener())
+        .perform(actionOpenDrawer(gravity))
+        .perform(unregisterListener());
   }
 
   /**
-   * Closes the {@link DrawerLayout} with the given id. This method blocks until the drawer is fully
-   * closed. No operation if the drawer is already closed.
+   * Closes the {@link DrawerLayout} with the given id and gravity START. This method blocks until
+   * the drawer is fully closed. This method will throw an exception if the drawer is already
+   * closed.
    */
   public static void closeDrawer(int drawerLayoutId) {
+    closeDrawer(drawerLayoutId, GravityCompat.START);
+  }
+
+  /**
+   * Closes the {@link DrawerLayout} with the given id and gravity. This method blocks until the
+   * drawer is fully closed. This method will throw an exception if the drawer is already closed.
+   */
+  public static void closeDrawer(int drawerLayoutId, int gravity) {
     //if the drawer is already closed, return.
     if (checkDrawer(drawerLayoutId, isClosed())) {
       return;
     }
-    onView(withId(drawerLayoutId)).perform(registerListener());
-    onView(withId(drawerLayoutId)).perform(actionCloseDrawer());
-    onView(withId(drawerLayoutId)).perform(unregisterListener());
+    onView(withId(drawerLayoutId))
+        .perform(registerListener())
+        .perform(actionCloseDrawer(gravity))
+        .perform(unregisterListener());
   }
 
   /**
@@ -107,7 +126,7 @@ public final class DrawerActions {
     return matches.get();
   }
 
-  private static ViewAction actionOpenDrawer() {
+  private static ViewAction actionOpenDrawer(final int gravity) {
     return new ViewAction() {
       @Override
       public Matcher<View> getConstraints() {
@@ -116,17 +135,17 @@ public final class DrawerActions {
 
       @Override
       public String getDescription() {
-        return "open drawer";
+        return "open drawer with gravity " + gravity;
       }
 
       @Override
       public void perform(UiController uiController, View view) {
-        ((DrawerLayout) view).openDrawer(GravityCompat.START);
+        ((DrawerLayout) view).openDrawer(gravity);
       }
     };
   }
 
-  private static ViewAction actionCloseDrawer() {
+  private static ViewAction actionCloseDrawer(final int gravity) {
     return new ViewAction() {
       @Override
       public Matcher<View> getConstraints() {
@@ -135,12 +154,12 @@ public final class DrawerActions {
 
       @Override
       public String getDescription() {
-        return "close drawer";
+        return "close drawer with gravity " + gravity;
       }
 
       @Override
       public void perform(UiController uiController, View view) {
-        ((DrawerLayout) view).closeDrawer(GravityCompat.START);
+        ((DrawerLayout) view).closeDrawer(gravity);
       }
     };
   }
