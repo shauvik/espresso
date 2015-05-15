@@ -38,7 +38,7 @@ import org.hamcrest.Matcher;
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * Espresso actions for using a {@link DrawerLayout}.

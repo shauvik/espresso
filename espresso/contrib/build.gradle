@@ -37,6 +37,7 @@ dependencies {
     compile project(':espresso-core')
     compile 'com.android.support:support-v4:'+supportLibVersion
     compile 'com.android.support:recyclerview-v7:'+supportLibVersion
+    compile 'com.google.android.apps.common.testing.accessibility.framework:accessibility-test-framework:2.0'
 }
 
 apply from: "../../publish.gradle"
