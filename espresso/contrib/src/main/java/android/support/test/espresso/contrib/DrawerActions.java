@@ -217,9 +217,10 @@ public final class DrawerActions {
         DrawerLayout drawer = (DrawerLayout) view;
         DrawerListener existingListener = getDrawerListener(drawer);
         if (existingListener instanceof IdlingDrawerListener) {
-          Espresso.unregisterIdlingResources((IdlingResource) existingListener);
-          drawer.setDrawerListener(((IdlingDrawerListener) existingListener).parentListener);
-        }
+          IdlingDrawerListener idleDrawerListener = (IdlingDrawerListener) existingListener;
+          Espresso.unregisterIdlingResources(idleDrawerListener);
+          drawer.setDrawerListener(idleDrawerListener.parentListener);
+          idleDrawerListener.parentListener = null;        }
       }
     };
   }
