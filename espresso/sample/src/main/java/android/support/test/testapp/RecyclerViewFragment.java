@@ -155,6 +155,11 @@ public class RecyclerViewFragment extends Fragment implements OnItemTouchListene
     // nothing to do
   }
 
+  @Override
+  public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+    // nothing to do
+  }
+
   public void addItem(String newItem) {
     if (adapter != null) {
       adapter.addItem(newItem);

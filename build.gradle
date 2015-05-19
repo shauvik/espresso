@@ -31,7 +31,7 @@ repositories {
 ext.extraVersion = 15
 ext.supportRepoOut = ''
 ext.buildToolsVersion = '22.0.1'
-ext.supportLibVersion = '22.1.0'
+ext.supportLibVersion = '22.2.0'
 
 // define extra property to enforce the use of prebuilt dependencies in all sub-projects.
 project.ext.usePrebuilts = "true"
