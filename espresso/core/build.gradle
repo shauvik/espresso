@@ -45,9 +45,12 @@ configurations {
 
 dependencies {
     // set to provided since we're manually adding the JarJar'd version
-    provided files('../libs/dagger-1.2.1.jar')
-    provided files('../libs/dagger-compiler-1.2.1.jar')
-    provided files('../libs/guava-14.0.1.jar')
+    provided files('../libs/dagger-2.1-20150513.195741-5.jar')
+    provided files('../libs/guava-18.0.jar')
+    // TODO: the following 2 dagger deps are required at compile time only
+    // and should be taken from maven repo once dagger 2.1 is released
+    provided files('../libs/dagger-compiler-2.1-20150513.195817-5.jar')
+    provided files('../libs/dagger-producers-2.1-20150513.195750-5.jar')
 
     compile project(':espresso-idling-resource')
     compile project(':runner')
@@ -67,7 +70,7 @@ dependencies {
 }
 
 // Run JarJar to hide Dagger and Guava deps
-ext.jarjarDeps = ["../libs/dagger-1.2.1.jar", "../libs/guava-14.0.1.jar"] as Set
+ext.jarjarDeps = ["../libs/guava-18.0.jar", "../libs/dagger-2.1-20150513.195741-5.jar"] as Set
 ext.jarjarRulesFile = file('jarjar-rules.txt')
 apply from: "../../jarjar.gradle" // TODO run this through pro-guard first!
 

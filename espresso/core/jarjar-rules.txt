@@ -1,2 +1,3 @@
 rule com.google.common.** android.support.test.espresso.core.deps.guava.@1
 rule dagger.** android.support.test.espresso.core.deps.dagger.@1
+rule com.google.thirdparty.publicsuffix.** android.support.test.espresso.core.deps.publicsuffix.@1

@@ -35,14 +35,15 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicReference;
 
+import android.support.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
  * Dagger module for creating the implementation classes within the base package.
  */
-@Module(library = true, injects = {
-    BaseLayerModule.FailureHandlerHolder.class, FailureHandler.class, ActiveRootLister.class})
+@Module
+@Singleton
 public class BaseLayerModule {
 
   @Provides @Singleton
@@ -69,7 +70,7 @@ public class BaseLayerModule {
     return uiControllerImpl;
   }
 
-  @Provides @Singleton @CompatAsyncTask
+  @Provides @Singleton @CompatAsyncTask @Nullable
   public AsyncTaskPoolMonitor provideCompatAsyncTaskMonitor(
       ThreadPoolExecutorExtractor extractor) {
     Optional<ThreadPoolExecutor> compatThreadPool = extractor.getCompatAsyncTaskThreadPool();

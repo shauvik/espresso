@@ -17,70 +17,36 @@
 package android.support.test.espresso;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import android.support.test.internal.runner.tracker.UsageTrackerRegistry;
-import android.support.test.espresso.base.BaseLayerModule;
-import android.support.test.espresso.base.IdlingResourceRegistry;
-
-import dagger.Module;
-import dagger.ObjectGraph;
-
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Holds Espresso's ObjectGraph.
+ * Holds Espresso's object graph.
  */
 public final class GraphHolder {
 
   private static final AtomicReference<GraphHolder> instance =
       new AtomicReference<GraphHolder>(null);
 
-  private final ObjectGraph graph;
+  private final BaseLayerComponent component;
 
-  private GraphHolder(ObjectGraph graph) {
-    this.graph = checkNotNull(graph);
+  private GraphHolder(BaseLayerComponent component) {
+    this.component = checkNotNull(component);
   }
 
-  static ObjectGraph graph() {
+  static BaseLayerComponent baseLayer() {
     GraphHolder instanceRef = instance.get();
     if (null == instanceRef) {
-      instanceRef = new GraphHolder(ObjectGraph.create(EspressoModule.class));
+      instanceRef = new GraphHolder(DaggerBaseLayerComponent.create());
       if (instance.compareAndSet(null, instanceRef)) {
         UsageTrackerRegistry.getInstance().trackUsage("Espresso");
-        return instanceRef.graph;
+        return instanceRef.component;
       } else {
-        return instance.get().graph;
+        return instance.get().component;
       }
     } else {
-      return instanceRef.graph;
+      return instanceRef.component;
     }
   }
-
-  // moe:begin_strip
-  public static void initialize(Object... modules) {
-    checkNotNull(modules);
-    Object[] allModules = new Object[modules.length + 1];
-    allModules[0] = EspressoModule.class;
-    System.arraycopy(modules, 0, allModules, 1, modules.length);
-    GraphHolder holder = new GraphHolder(ObjectGraph.create(modules));
-    checkState(instance.compareAndSet(null, holder), "Espresso already initialized.");
-  }
-
-  public static <T> T espressoGet(Class<T> type) {
-    return graph().get(type);
-  }
-
-  public static <T> T espressoInject(T instance) {
-    return graph().inject(instance);
-  }
-  // moe:end_strip
-
-  @Module(
-    includes = BaseLayerModule.class,
-    injects = IdlingResourceRegistry.class
-  )
-  static class EspressoModule {
-  }
-
 }

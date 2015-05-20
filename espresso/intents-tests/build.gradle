@@ -46,7 +46,7 @@ android {
 }
 
 dependencies {
-    compile files('../libs/guava-14.0.1.jar')
+    compile files('../libs/guava-18.0.jar')
     compile files('../libs/libnanohttpd.jar')
     compile 'com.android.support:support-v4:'+supportLibVersion
     compile 'com.android.support:appcompat-v7:'+supportLibVersion
