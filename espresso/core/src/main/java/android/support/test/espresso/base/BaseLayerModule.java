@@ -20,7 +20,6 @@ import android.support.test.runner.lifecycle.ActivityLifecycleMonitor;
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.FailureHandler;
-import android.support.test.espresso.UiController;
 import com.google.common.base.Optional;
 
 import android.content.Context;
@@ -63,11 +62,6 @@ public class BaseLayerModule {
   @Provides @Singleton
   public Looper provideMainLooper() {
     return Looper.getMainLooper();
-  }
-
-  @Provides
-  public UiController provideUiController(UiControllerImpl uiControllerImpl) {
-    return uiControllerImpl;
   }
 
   @Provides @Singleton @CompatAsyncTask @Nullable
