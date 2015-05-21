@@ -39,14 +39,14 @@ configurations {
 dependencies {
     compile project(':espresso-core')
     compile files ('../libs/tagsoup-1.2.jar') // TODO Pull this into prebuilds
-    provided files('../libs/guava-14.0.1.jar')
+    provided files('../libs/guava-18.0.jar')
     compile 'com.android.support:support-annotations:'+supportLibVersion
 
     jarjar files('../libs/jarjar-1.4.jar')
 }
 
 // Run JarJar to hide and Guava deps
-ext.jarjarDeps = ["../libs/guava-14.0.1.jar"] as Set
+ext.jarjarDeps = ["../libs/guava-18.0.jar"] as Set
 ext.jarjarRulesFile = file('jarjar-rules.txt')
 apply from: "../../jarjar.gradle" // TODO run this through pro-guard first!
 

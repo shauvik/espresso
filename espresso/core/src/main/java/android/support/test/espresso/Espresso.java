@@ -28,7 +28,6 @@ import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.endsWith;
 
 import android.support.test.espresso.action.ViewActions;
-import android.support.test.espresso.base.BaseLayerModule;
 import android.support.test.espresso.base.IdlingResourceRegistry;
 import android.support.test.espresso.util.TreeIterables;
 import com.google.common.collect.ImmutableList;
@@ -38,8 +37,6 @@ import android.os.Build;
 import android.os.Looper;
 import android.view.View;
 import android.view.ViewConfiguration;
-
-import dagger.ObjectGraph;
 
 import org.hamcrest.Matcher;
 
@@ -51,9 +48,8 @@ import java.util.List;
  */
 public final class Espresso {
 
-  static ObjectGraph espressoGraph() {
-    return GraphHolder.graph();
-  }
+  private static final BaseLayerComponent BASE = GraphHolder.baseLayer();
+  private static final IdlingResourceRegistry REGISTRY = BASE.idlingResourceRegistry();
 
   private Espresso() {}
 
@@ -69,7 +65,7 @@ public final class Espresso {
    */
   // TODO change parameter to type to Matcher<? extends View> which currently causes Dagger issues
   public static ViewInteraction onView(final Matcher<View> viewMatcher) {
-    return espressoGraph().plus(new ViewInteractionModule(viewMatcher)).get(ViewInteraction.class);
+    return BASE.plus(new ViewInteractionModule(viewMatcher)).viewInteraction();
   }
 
 
@@ -106,7 +102,7 @@ public final class Espresso {
    * @throws IllegalArgumentException if looper is the main looper.
    */
   public static void registerLooperAsIdlingResource(Looper looper, boolean considerWaitIdle) {
-    espressoGraph().get(IdlingResourceRegistry.class).registerLooper(looper, considerWaitIdle);
+    REGISTRY.registerLooper(looper, considerWaitIdle);
   }
 
   /**
@@ -118,9 +114,7 @@ public final class Espresso {
    * @return {@code true} if all resources were successfully registered
    */
   public static boolean registerIdlingResources(IdlingResource... resources) {
-    checkNotNull(resources);
-    IdlingResourceRegistry registry = espressoGraph().get(IdlingResourceRegistry.class);
-    return registry.registerResources(ImmutableList.copyOf(resources));
+    return REGISTRY.registerResources(ImmutableList.copyOf(checkNotNull(resources)));
   }
 
   /**
@@ -130,24 +124,21 @@ public final class Espresso {
    * @return {@code true} if all resources were successfully unregistered
    */
   public static boolean unregisterIdlingResources(IdlingResource... resources) {
-    checkNotNull(resources);
-    IdlingResourceRegistry registry = espressoGraph().get(IdlingResourceRegistry.class);
-    return registry.unregisterResources(ImmutableList.copyOf(resources));
+    return REGISTRY.unregisterResources(ImmutableList.copyOf(checkNotNull(resources)));
   }
 
   /**
    * Returns a list of all currently registered {@link IdlingResource}s.
    */
   public static List<IdlingResource> getIdlingResources() {
-    return espressoGraph().get(IdlingResourceRegistry.class).getResources();
+    return REGISTRY.getResources();
   }
 
   /**
    * Changes the default {@link FailureHandler} to the given one.
    */
   public static void setFailureHandler(FailureHandler failureHandler) {
-    espressoGraph().get(BaseLayerModule.FailureHandlerHolder.class)
-        .update(checkNotNull(failureHandler));
+    BASE.failureHolder().update(checkNotNull(failureHandler));
   }
 
   /********************************** Top Level Actions ******************************************/
@@ -157,7 +148,7 @@ public final class Espresso {
   // we add the class name matcher as another option to find the view.
   @SuppressWarnings("unchecked")
   private static final Matcher<View> OVERFLOW_BUTTON_MATCHER = anyOf(
-    allOf(isDisplayed(), withContentDescription("More options")), 
+    allOf(isDisplayed(), withContentDescription("More options")),
     allOf(isDisplayed(), withClassName(endsWith("OverflowMenuButton"))));
 
 

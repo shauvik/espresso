@@ -31,13 +31,14 @@ import org.hamcrest.Matcher;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.inject.Singleton;
+
 /**
  * Adds the user interaction scope to the Espresso graph.
  */
-@Module(
-    addsTo = GraphHolder.EspressoModule.class,
-    injects = {ViewInteraction.class})
-class ViewInteractionModule {
+@Module
+@Singleton
+public class ViewInteractionModule {
 
   private final Matcher<View> viewMatcher;
   private final AtomicReference<Matcher<Root>> rootMatcher =

@@ -50,6 +50,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
+import android.support.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -153,7 +154,7 @@ final class UiControllerImpl implements UiController, Handler.Callback {
   @Inject
   UiControllerImpl(EventInjector eventInjector,
       @SdkAsyncTask AsyncTaskPoolMonitor asyncTaskMonitor,
-      @CompatAsyncTask AsyncTaskPoolMonitor compatTaskMonitor,
+      @CompatAsyncTask @Nullable AsyncTaskPoolMonitor compatTaskMonitor,
       IdlingResourceRegistry registry,
       Looper mainLooper,
       Recycler recycler) {
@@ -326,7 +327,7 @@ final class UiControllerImpl implements UiController, Handler.Callback {
         condChecks.add(IdleCondition.ASYNC_TASKS_HAVE_IDLED);
       }
 
-        if (!compatIdle()) {
+      if (!compatIdle()) {
         compatTaskMonitor.notifyWhenIdle(new SignalingTask<Void>(NO_OP,
             IdleCondition.COMPAT_TASKS_HAVE_IDLED, generation));
         condChecks.add(IdleCondition.COMPAT_TASKS_HAVE_IDLED);
