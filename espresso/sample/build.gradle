@@ -43,7 +43,7 @@ android {
 
 dependencies {
     compile files('../libs/guava-18.0.jar')
-    compile files('../libs/libnanohttpd.jar') // TODO Pull this into prebuilds
+    compile files('../libs/libnanohttpd.jar')
     compile 'com.android.support:support-v4:'+supportLibVersion
     compile 'com.android.support:appcompat-v7:'+supportLibVersion
     compile 'com.android.support:recyclerview-v7:'+supportLibVersion
