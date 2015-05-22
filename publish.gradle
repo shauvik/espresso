@@ -104,7 +104,6 @@ afterEvaluate {
 
             Task collectClassPaths =
                     project.tasks.create(name: "collect${variant.name.capitalize()}ClassPaths", dependsOn: variant.assemble) << {
-                        printf "**copBin task: ${variant.javaCompile.destinationDir}\n"
                         if (project.getName() == 'espresso-core' && variant.hasProperty("pathToFinalOutputJarDir")) {
                             // Workaround to pick up the final classes.jar that includes jarjar'd libs
                             uberJarTask.from(zipTree("$variant.pathToFinalOutputJarDir/classes.jar"))
