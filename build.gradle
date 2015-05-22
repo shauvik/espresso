@@ -184,11 +184,6 @@ Set<Project> getProjectsToArchive() {
             ['uiautomator-v18'].contains(it.name)
         })
     }
-    if (project.hasProperty("buildJankTestHelper") && project.buildJankTestHelper == "true") {
-        projects.addAll(subprojects.findAll {
-            ['janktesthelper-v21'].contains(it.name)
-        })
-    }
     return projects
 }
 

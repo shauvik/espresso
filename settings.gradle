@@ -48,9 +48,6 @@ project(':uiautomator-v18').projectDir = new File(rootDir, 'frameworks/uiautomat
 include(':uiautomator-testapp')
 project(':uiautomator-testapp').projectDir = new File(rootDir, 'frameworks/uiautomator/tests')
 
-include(':janktesthelper-v21')
-project(':janktesthelper-v21').projectDir = new File(rootDir, 'frameworks/janktesthelper')
-
 // For internal use only, please do not depend on any of these artifacts directly!
 include(':exposed-instrumentation-api-provided')
 project(':exposed-instrumentation-api-provided').projectDir = new File(rootDir, 'frameworks/testing/exposed-instrumentation-api-provided')
