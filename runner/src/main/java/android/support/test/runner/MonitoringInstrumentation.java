@@ -53,6 +53,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -127,7 +129,10 @@ public class MonitoringInstrumentation extends ExposedInstrumentationApi {
 
         mHandlerForMainLooper = new Handler(Looper.getMainLooper());
         mMainThread = Thread.currentThread();
-        mExecutorService = Executors.newCachedThreadPool();
+        final int corePoolSize = 0;
+        final long keepAliveTime = 0L;
+        mExecutorService = new ThreadPoolExecutor(corePoolSize, Integer.MAX_VALUE, keepAliveTime,
+                TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
         Looper.myQueue().addIdleHandler(mIdleHandler);
         super.onCreate(arguments);
         specifyDexMakerCacheProperty();
