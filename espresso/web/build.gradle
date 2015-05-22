@@ -37,9 +37,9 @@ configurations {
 }
 
 dependencies {
-    compile project(':espresso-core')
-    compile files ('../libs/tagsoup-1.2.jar') // TODO Pull this into prebuilds
     provided files('../libs/guava-18.0.jar')
+    compile project(':espresso-core')
+    compile 'org.ccil.cowan.tagsoup:tagsoup:1.2'
     compile 'com.android.support:support-annotations:'+supportLibVersion
 
     jarjar files('../libs/jarjar-1.4.jar')
