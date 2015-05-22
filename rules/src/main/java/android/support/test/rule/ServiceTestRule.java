@@ -89,7 +89,7 @@ public class ServiceTestRule implements TestRule {
     boolean mServiceBound = false;
 
     /**
-     * Creates a {@link ServiceTestRule} with a default timeout of {@value #DEFAULT_TIMEOUT} seconds
+     * Creates a {@link ServiceTestRule} with a default timeout of 5 seconds
      */
     public ServiceTestRule() {
         this(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
