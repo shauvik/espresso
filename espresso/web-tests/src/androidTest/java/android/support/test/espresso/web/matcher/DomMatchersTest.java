@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 import android.support.test.espresso.web.assertion.TagSoupDocumentParser;
+
 import android.test.suitebuilder.annotation.SmallTest;
 
 import junit.framework.TestCase;

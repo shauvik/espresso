@@ -36,12 +36,11 @@ import static android.support.test.espresso.web.webdriver.DriverAtoms.getText;
 import static android.support.test.espresso.web.webdriver.DriverAtoms.selectFrameByIdOrName;
 import static android.support.test.espresso.web.webdriver.DriverAtoms.webClick;
 import static android.support.test.espresso.web.webdriver.DriverAtoms.webKeys;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
 
+import android.support.test.espresso.web.model.Atom;
 import android.support.test.espresso.web.model.JSONAble;
 import android.support.test.espresso.web.model.ModelCodec;
 import android.support.test.espresso.web.webdriver.Locator;
@@ -54,9 +53,6 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.webkit.WebView;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.json.JSONException;
 import org.json.JSONStringer;
 
@@ -221,9 +217,9 @@ public class WebViewTest extends ActivityInstrumentationTestCase2<DynamicWebView
 
     onWebView()
         .check(webMatches(transform(scriptWithArgs(accumulateFn,
-                                Lists.newArrayList(1, 2, 42, 7)),
-                        castOrDie(Integer.class)),
-                is(52)));
+                Lists.newArrayList(1, 2, 42, 7)),
+              castOrDie(Integer.class)),
+            is(52)));
 
     // you can also omit the function wrapper for one-off evaluations.
     onWebView()
@@ -237,10 +233,9 @@ public class WebViewTest extends ActivityInstrumentationTestCase2<DynamicWebView
     goTo("samples/js.html");
 
     // onWebView() allows you to retrieve the result of your last check/perform call.
-    Map oceans = onWebView()
-            .check(webMatches(script("return document.oceans;", castOrDie(Map.class)),
-                    hasOcean(equalTo("Pacific"), equalTo("Pretty Big"))))
-    .get();
+    Atom script = script("return document.oceans;", castOrDie(Map.class));
+    Map oceans = (Map) onWebView()
+        .check(webMatches(script, hasEntry(is("Pacific"), is("Pretty Big")))).get();
 
     // You probably should keep your assertions in webMatches.
     assertEquals(oceans.get("Antarctic"), "It's cold");
@@ -362,23 +357,6 @@ public class WebViewTest extends ActivityInstrumentationTestCase2<DynamicWebView
           return null;
         }
       };
-  }
-
-  private static Matcher<Map> hasOcean(final Matcher<String> key, final Matcher<String> value){
-    checkNotNull(key);
-    checkNotNull(value);
-    return new TypeSafeMatcher<Map>(Map.class) {
-      @Override
-      public boolean matchesSafely(Map map) {
-        return hasEntry(key, value).matches(map);
-      }
-
-      @Override
-      public void describeTo(Description description) {
-        description.appendText("with key: " + key);
-        description.appendText("with key: " + value);
-      }
-    };
   }
 
 }

@@ -27,7 +27,7 @@ import android.view.View;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * A sadly necessary layer of indirection to interact with AdapterViews.

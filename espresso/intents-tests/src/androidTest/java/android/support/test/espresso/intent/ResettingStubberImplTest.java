@@ -34,7 +34,7 @@ import org.hamcrest.Matcher;
 /**
  * Unit tests for {@link ResettingStubberImpl}.
  */
-public class RessetingStubberImplTest extends InstrumentationTestCase {
+public class ResettingStubberImplTest extends InstrumentationTestCase {
 
   private ResettingStubber resettingStubber;
 

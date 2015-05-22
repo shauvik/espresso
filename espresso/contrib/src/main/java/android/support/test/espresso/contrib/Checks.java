@@ -16,7 +16,7 @@
 
 package android.support.test.espresso.contrib;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * Substitute for Guava Preconditions to avoid pulling in guava as a dep to the contrib project.
