@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.support.test.espresso.web.bridge;;
+package android.support.test.espresso.web.bridge;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -41,7 +41,7 @@ public final class JavaScriptBridge {
    * Creates a Conduit object which allows Java to wrap Javascript code within a
    * handler that will foward evaluation results back to the Java process.
    *
-   * Conduits can be used for only 1 evaluation. Creating new ones is relatively cheap.
+   * <p>Conduits can be used for only 1 evaluation. Creating new ones is relatively cheap.
    */
   public static Conduit makeConduit() {
     checkState(initialized, "Install bridge not called!");
@@ -60,10 +60,10 @@ public final class JavaScriptBridge {
   /**
    * Sets up Java / Javascript bridging on every WebView in the app.
    *
-   * This method must be called very early (eg: before webviews are loaded in your app).
+   * <p>This method must be called very early (eg: before webviews are loaded in your app).
    * GoogleInstrumentation invokes this method if this library is present on your classpath.
    *
-   * This method must be called from the main thread. It'll return immediately if the bridge
+   * <p>This method must be called from the main thread. It'll return immedately if the bridge
    * is already installed.
    */
   public static void installBridge() {

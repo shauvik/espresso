@@ -220,7 +220,8 @@ public final class DrawerActions {
           IdlingDrawerListener idleDrawerListener = (IdlingDrawerListener) existingListener;
           Espresso.unregisterIdlingResources(idleDrawerListener);
           drawer.setDrawerListener(idleDrawerListener.parentListener);
-          idleDrawerListener.parentListener = null;        }
+          idleDrawerListener.parentListener = null;
+        }
       }
     };
   }

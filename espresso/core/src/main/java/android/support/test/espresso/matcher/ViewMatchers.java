@@ -443,7 +443,7 @@ public final class ViewMatchers {
    * @param key to match
    */
   public static Matcher<View> withTagKey(final int key) {
-    return withTagKey(key, Matchers.<Object>notNullValue());
+    return withTagKey(key, Matchers.notNullValue());
   }
 
   /**

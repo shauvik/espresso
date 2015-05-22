@@ -38,7 +38,7 @@ import javax.inject.Singleton;
  */
 @Module
 @Singleton
-public class ViewInteractionModule {
+class ViewInteractionModule {
 
   private final Matcher<View> viewMatcher;
   private final AtomicReference<Matcher<Root>> rootMatcher =

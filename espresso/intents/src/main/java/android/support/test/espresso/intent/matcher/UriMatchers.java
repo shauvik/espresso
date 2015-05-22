@@ -16,8 +16,8 @@
 
 package android.support.test.espresso.intent.matcher;
 
-import static android.support.test.espresso.intent.Checks.checkNotNull;
 import static android.support.test.espresso.intent.Checks.checkArgument;
+import static android.support.test.espresso.intent.Checks.checkNotNull;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 
@@ -83,7 +83,7 @@ public final class UriMatchers {
    *
    * @return a set of decoded names
    */
-  //VisibleForTesting
+  // VisibleForTesting
   static Set<String> getQueryParameterNames(Uri uri) {
     checkArgument(!uri.isOpaque(), "This isn't a hierarchical URI.");
     String query = uri.getEncodedQuery();

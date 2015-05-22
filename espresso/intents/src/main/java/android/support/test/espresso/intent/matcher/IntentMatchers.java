@@ -16,11 +16,11 @@
 
 package android.support.test.espresso.intent.matcher;
 
+import static android.support.test.espresso.intent.Checks.checkNotNull;
 import static android.support.test.espresso.intent.matcher.BundleMatchers.hasEntry;
 import static android.support.test.espresso.intent.matcher.BundleMatchers.hasKey;
 import static android.support.test.espresso.intent.matcher.ComponentNameMatchers.hasClassName;
 import static android.support.test.espresso.intent.matcher.ComponentNameMatchers.hasMyPackageName;
-import static android.support.test.espresso.intent.Checks.checkNotNull;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 

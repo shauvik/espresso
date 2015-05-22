@@ -44,6 +44,8 @@ public final class AppNotIdleException extends RuntimeException implements Espre
    * @param seconds number of seconds that was tried before giving up.
    *
    * @return a AppNotIdleException suitable to be thrown on the instrumentation thread.
+   *
+   * @deprecated use {@link #create(List, String)} instead
    */
   @Deprecated
   public static AppNotIdleException create(List<String> idleConditions, int loopCount,
