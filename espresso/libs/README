@@ -1,18 +1,30 @@
 The following outlines the license and the download location of the binary files
 present in this "libs" folder.
 
-dagger-1.2.1:
-jar: http://mvnrepository.com/artifact/com.squareup.dagger/dagger/1.2.1
+dagger-2.1:
+jar: https://oss.sonatype.org/content/repositories/snapshots/com/google/dagger/dagger/2.1-SNAPSHOT/
 license: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-dagger-compiler-1.2.1:
-jar: http://mvnrepository.com/artifact/com.squareup.dagger/dagger-compiler/1.2.1
+dagger-compiler-2.1:
+jar: https://oss.sonatype.org/content/repositories/snapshots/com/google/dagger/dagger-compiler/2.1-SNAPSHOT/
 license: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-guava-14.0.1
-jar: http://mvnrepository.com/artifact/com.google.guava/guava/14.0.1
+dagger-producers-2.1:
+jar: https://oss.sonatype.org/content/repositories/snapshots/com/google/dagger/dagger-producers/2.1-SNAPSHOT/
+license: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+guava-18.0
+jar: http://mvnrepository.com/artifact/com.google.guava/guava/18.0
 license: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 jarjar-1.4
 jar: https://code.google.com/p/jarjar
 license: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+tagsoup-1.2
+jar: http://mvnrepository.com/artifact/org.ccil.cowan.tagsoup/tagsoup/1.2
+license: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+nanohttpd
+source: https://github.com/NanoHttpd/nanohttpd/tree/Release-2.1.0
+license: Modified BSD
